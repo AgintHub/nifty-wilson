@@ -1,0 +1,67 @@
+dag_type: plain_text
+description: Workflow to detect and respond to fire incidents
+name: fire_response_workflow
+nodes:
+  assess_fire_risk:
+    agent: false
+    description: Assess the risk of the detected fire
+    name: assess_fire_risk
+    nodes_depended_on:
+    - detect_fire
+    nodes_dependent_on: []
+    prompt: Evaluate the severity of the fire incident and report the findings.
+  detect_fire:
+    agent: false
+    description: Detect fire incidents
+    name: detect_fire
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Identify potential fire hazards and report any incidents.
+  end_test:
+    agent: false
+    description: Complete the test workflow
+    name: end_test
+    nodes_depended_on:
+    - verify_test_results
+    nodes_dependent_on: []
+    prompt: Finish the test workflow. Report any final results or conclusions.
+  extinguish_fire:
+    agent: false
+    description: Extinguish the fire if necessary
+    name: extinguish_fire
+    nodes_depended_on:
+    - assess_fire_risk
+    nodes_dependent_on: []
+    prompt: Take necessary actions to extinguish the fire and ensure safety.
+  report_fire_incident:
+    agent: false
+    description: Report the fire incident
+    name: report_fire_incident
+    nodes_depended_on:
+    - extinguish_fire
+    nodes_dependent_on: []
+    prompt: Document and report the fire incident, including any actions taken.
+  run_test:
+    agent: false
+    description: Execute the test
+    name: run_test
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Perform the test. Report any issues or results.
+  start_test:
+    agent: false
+    description: Initiate the test workflow
+    name: start_test
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Begin the test workflow. Verify that all dependencies are met.
+  verify_test_results:
+    agent: false
+    description: Verify the test results
+    name: verify_test_results
+    nodes_depended_on:
+    - run_test
+    nodes_dependent_on: []
+    prompt: Check the test results. Ensure they meet the expected criteria.

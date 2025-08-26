@@ -1,0 +1,268 @@
+dag_type: plain_text
+description: A comprehensive step-by-step plan to design, construct, staff, and prepare
+  a restaurant for its first day of operation.
+name: build_a_restaurant
+nodes:
+  apply_for_licenses_and_permits:
+    agent: false
+    description: Prepare a summary of license/permit application requirements and
+      required documents.
+    name: apply_for_licenses_and_permits
+    nodes_depended_on:
+    - list_required_licenses_and_permits
+    - choose_restaurant_location_criteria
+    nodes_dependent_on: []
+    prompt: For each required permit or license, specify the basic information needed
+      to apply, and any typical documentation or pre-conditions required.
+  choose_final_restaurant_location:
+    agent: false
+    description: Make a site selection for the restaurant property.
+    name: choose_final_restaurant_location
+    nodes_depended_on:
+    - choose_restaurant_location_criteria
+    - set_restaurant_budget
+    nodes_dependent_on: []
+    prompt: Select a final location for the restaurant by evaluating at least three
+      candidate sites against the previously defined criteria and budget limits. Provide
+      justification.
+  choose_restaurant_location_criteria:
+    agent: false
+    description: Identify the location requirements and constraints for the restaurant.
+    name: choose_restaurant_location_criteria
+    nodes_depended_on:
+    - define_restaurant_concept
+    nodes_dependent_on: []
+    prompt: Define clear criteria for choosing a restaurant location based on the
+      chosen concept and target customers, such as foot traffic, nearby businesses,
+      parking, and size requirements.
+  conduct_staff_training:
+    agent: false
+    description: Prepare and deliver staff training in menu, service, and health/safety
+      procedures.
+    name: conduct_staff_training
+    nodes_depended_on:
+    - recruit_staff
+    - design_menu
+    - develop_health_and_safety_protocols
+    - draft_employee_handbook_outline
+    nodes_dependent_on: []
+    prompt: Outline a training program covering menu knowledge, service procedures,
+      and mandatory safety practices for all restaurant staff.
+  create_staffing_plan:
+    agent: false
+    description: Develop a human resources plan detailing staff roles and numbers.
+    name: create_staffing_plan
+    nodes_depended_on:
+    - define_restaurant_concept
+    - design_restaurant_floorplan
+    nodes_dependent_on: []
+    prompt: List all required staff positions (e.g., chefs, servers, manager, janitorial)
+      for running the restaurant, with brief role descriptions and number of positions
+      needed.
+  define_restaurant_concept:
+    agent: false
+    description: Determine the core concept, target audience, and cuisine for the
+      restaurant.
+    name: define_restaurant_concept
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Describe the concept for a new restaurant. Specify cuisine, service style
+      (e.g., casual, fine dining), target customer profile, and overall theme.
+  design_menu:
+    agent: false
+    description: Create the restaurant's food and beverage menu.
+    name: design_menu
+    nodes_depended_on:
+    - define_restaurant_concept
+    nodes_dependent_on: []
+    prompt: Draft a complete menu for the restaurant based on the concept and cuisine.
+      Include appetizers, mains, desserts, drinks, and indicate dietary options.
+  design_restaurant_floorplan:
+    agent: false
+    description: Generate a spatial plan for the restaurant's physical layout.
+    name: design_restaurant_floorplan
+    nodes_depended_on:
+    - define_restaurant_concept
+    - choose_restaurant_location_criteria
+    nodes_dependent_on: []
+    prompt: Create a detailed outline of the restaurant's floor plan, allocating space
+      for kitchen, dining, storage, bathrooms, and bar if applicable, considering
+      the chosen concept and size requirements.
+  develop_construction_plan:
+    agent: false
+    description: Define the sequence of construction and fit-out activities.
+    name: develop_construction_plan
+    nodes_depended_on:
+    - design_restaurant_floorplan
+    - choose_final_restaurant_location
+    - set_restaurant_budget
+    nodes_dependent_on: []
+    prompt: Draft a phased plan for restaurant construction and renovation, listing
+      each major step (e.g., demolition, buildout, finishing) and estimated timeline.
+  develop_health_and_safety_protocols:
+    agent: false
+    description: Enumerate mandatory health and safety routines and standards.
+    name: develop_health_and_safety_protocols
+    nodes_depended_on:
+    - list_required_licenses_and_permits
+    nodes_dependent_on: []
+    prompt: Compile a checklist of daily and weekly health and safety tasks required
+      to comply with public health regulations for a restaurant. Include food safety,
+      cleanliness, and emergency procedures.
+  draft_employee_handbook_outline:
+    agent: false
+    description: Outline the major sections to be included in the staff handbook.
+    name: draft_employee_handbook_outline
+    nodes_depended_on:
+    - create_staffing_plan
+    nodes_dependent_on: []
+    prompt: Draft a table of contents for an employee handbook, covering code of conduct,
+      shift policies, food safety, customer service, benefits, and discipline.
+  execute_marketing_and_outreach:
+    agent: false
+    description: Carry out the launch marketing and publicity efforts.
+    name: execute_marketing_and_outreach
+    nodes_depended_on:
+    - plan_marketing_launch_strategy
+    - set_restaurant_budget
+    nodes_dependent_on: []
+    prompt: Implement the restaurant's marketing launch plan, sending out announcements,
+      posting to social media, contacting press, and preparing for the opening event.
+  identify_food_and_beverage_suppliers:
+    agent: false
+    description: Determine primary sources for food and beverage supplies.
+    name: identify_food_and_beverage_suppliers
+    nodes_depended_on:
+    - design_menu
+    nodes_dependent_on: []
+    prompt: 'For each major menu item, identify at least one potential supplier for
+      ingredients (e.g., produce, meats, beverages). Present as a table: Ingredient
+      | Supplier Type.'
+  launch_grand_opening:
+    agent: false
+    description: Open the restaurant to the public with a launch event.
+    name: launch_grand_opening
+    nodes_depended_on:
+    - perform_soft_opening
+    - execute_marketing_and_outreach
+    nodes_dependent_on: []
+    prompt: Outline the key steps and timeline for the grand opening event. Ensure
+      readiness in staff, operations, supplies, and publicity. Summarize milestones
+      leading up to open doors to the public.
+  list_kitchen_equipment:
+    agent: false
+    description: Enumerate all essential kitchen hardware and equipment.
+    name: list_kitchen_equipment
+    nodes_depended_on:
+    - define_restaurant_concept
+    - design_restaurant_floorplan
+    nodes_dependent_on: []
+    prompt: List all major kitchen equipment required to operate the restaurant, matching
+      the selected cuisine and menu style. Include appliances, prep stations, and
+      storage units.
+  list_required_licenses_and_permits:
+    agent: false
+    description: Enumerate the permits and licenses legally needed for opening a restaurant.
+    name: list_required_licenses_and_permits
+    nodes_depended_on:
+    - define_restaurant_concept
+    nodes_dependent_on: []
+    prompt: List all required licenses and permits for a new restaurant in a typical
+      city (e.g., food service, alcohol, fire, health). State only the license/permit
+      names, not the process.
+  obtain_final_inspections_and_approvals:
+    agent: false
+    description: Ensure all inspections and approvals are completed for opening.
+    name: obtain_final_inspections_and_approvals
+    nodes_depended_on:
+    - apply_for_licenses_and_permits
+    - oversee_construction_and_interiors
+    - develop_health_and_safety_protocols
+    nodes_dependent_on: []
+    prompt: List all final inspection steps required (e.g., building, fire, health)
+      and required documents for occupancy and operational approval.
+  oversee_construction_and_interiors:
+    agent: false
+    description: Coordinate the implementation of construction, equipment, and interiors.
+    name: oversee_construction_and_interiors
+    nodes_depended_on:
+    - develop_construction_plan
+    - procure_kitchen_and_dining_equipment
+    nodes_dependent_on: []
+    prompt: Manage and supervise the construction and interior installations according
+      to the plan, ensuring equipment and furnishings are installed in the correct
+      phases.
+  perform_soft_opening:
+    agent: false
+    description: Run a soft-opening for process testing and feedback.
+    name: perform_soft_opening
+    nodes_depended_on:
+    - conduct_staff_training
+    - obtain_final_inspections_and_approvals
+    - receive_initial_supply_orders
+    nodes_dependent_on: []
+    prompt: 'Describe the plan for a soft opening: invite a limited audience, monitor
+      kitchen and service operations, and collect feedback for adjustments before
+      grand opening.'
+  plan_marketing_launch_strategy:
+    agent: false
+    description: Develop a marketing and launch communications strategy.
+    name: plan_marketing_launch_strategy
+    nodes_depended_on:
+    - define_restaurant_concept
+    nodes_dependent_on: []
+    prompt: Describe a multi-channel marketing plan for the restaurant's opening.
+      Specify approaches (e.g., social media, local outreach, launch event, PR) and
+      a brief timeline.
+  procure_kitchen_and_dining_equipment:
+    agent: false
+    description: Create a procurement list for kitchen and dining equipment within
+      budget.
+    name: procure_kitchen_and_dining_equipment
+    nodes_depended_on:
+    - list_kitchen_equipment
+    - set_restaurant_budget
+    nodes_dependent_on: []
+    prompt: Produce a prioritized purchasing list for all kitchen and dining area
+      equipment, with estimated costs and quantities, ensuring the total stays within
+      budget.
+  receive_initial_supply_orders:
+    agent: false
+    description: Accept initial inventory orders for food, beverages, and supplies.
+    name: receive_initial_supply_orders
+    nodes_depended_on:
+    - sign_supplier_contracts
+    - oversee_construction_and_interiors
+    nodes_dependent_on: []
+    prompt: Receive and inventory the first deliveries of food, beverages, and consumables.
+      Confirm all orders match specifications and are stored appropriately.
+  recruit_staff:
+    agent: false
+    description: Start the process of sourcing, interviewing, and onboarding new hires.
+    name: recruit_staff
+    nodes_depended_on:
+    - create_staffing_plan
+    - draft_employee_handbook_outline
+    nodes_dependent_on: []
+    prompt: Outline a hiring process for all staff positions, including job postings
+      content, interview criteria, and orientation/training requirements.
+  set_restaurant_budget:
+    agent: false
+    description: Set an initial budget breakdown for launching the restaurant.
+    name: set_restaurant_budget
+    nodes_depended_on:
+    - define_restaurant_concept
+    nodes_dependent_on: []
+    prompt: Based on the restaurant concept, list the key budget categories (e.g.,
+      construction, equipment, staff, marketing) and propose an initial budget allocation
+      for each.
+  sign_supplier_contracts:
+    agent: false
+    description: Prepare agreements with supplier partners.
+    name: sign_supplier_contracts
+    nodes_depended_on:
+    - identify_food_and_beverage_suppliers
+    - set_restaurant_budget
+    nodes_dependent_on: []
+    prompt: Draft sample contract points or checklist to secure deals with food and
+      beverage suppliers. Include pricing terms, delivery schedules, and payment clauses.

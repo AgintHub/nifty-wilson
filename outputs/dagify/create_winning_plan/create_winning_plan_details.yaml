@@ -1,0 +1,76 @@
+dag_type: plain_text
+description: A workflow for creating a plan to win, decomposed into fundamental steps.
+name: create_winning_plan
+nodes:
+  assess_current_state:
+    agent: false
+    description: Evaluate the current situation or status.
+    name: assess_current_state
+    nodes_depended_on:
+    - define_winning_objective
+    nodes_dependent_on: []
+    prompt: Describe the current state or situation. Focus on relevant factors that
+      impact achieving the winning objective.
+  brainstorm_strategies:
+    agent: false
+    description: Generate a list of potential strategies to overcome obstacles and
+      achieve the winning objective.
+    name: brainstorm_strategies
+    nodes_depended_on:
+    - identify_obstacles
+    nodes_dependent_on: []
+    prompt: Develop a list of potential strategies to overcome identified obstacles
+      and achieve the winning objective. Focus on generating ideas.
+  create_action_plan:
+    agent: false
+    description: Develop a detailed action plan for the selected strategy.
+    name: create_action_plan
+    nodes_depended_on:
+    - evaluate_strategies
+    nodes_dependent_on: []
+    prompt: Create a step-by-step action plan for implementing the chosen strategy.
+      Include specific tasks, timelines, and responsible parties.
+  define_winning_objective:
+    agent: false
+    description: Clearly define what 'winning' means in this context.
+    name: define_winning_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Specify the exact outcome or goal that constitutes 'winning'. Provide
+      a concise definition.
+  evaluate_strategies:
+    agent: false
+    description: Assess and prioritize the generated strategies.
+    name: evaluate_strategies
+    nodes_depended_on:
+    - brainstorm_strategies
+    nodes_dependent_on: []
+    prompt: Evaluate each strategy based on feasibility, impact, and resources required.
+      Prioritize strategies and select the top approach.
+  finalize_winning_plan:
+    agent: false
+    description: Finalize and confirm the winning plan.
+    name: finalize_winning_plan
+    nodes_depended_on:
+    - review_and_refine_plan
+    nodes_dependent_on: []
+    prompt: Confirm the final winning plan. Ensure it is complete, actionable, and
+      aligned with the defined objective.
+  identify_obstacles:
+    agent: false
+    description: List potential obstacles or challenges to achieving the winning objective.
+    name: identify_obstacles
+    nodes_depended_on:
+    - assess_current_state
+    nodes_dependent_on: []
+    prompt: Based on the current state, identify potential obstacles or challenges
+      that could prevent achieving the winning objective. List each obstacle.
+  review_and_refine_plan:
+    agent: false
+    description: Review and refine the action plan.
+    name: review_and_refine_plan
+    nodes_depended_on:
+    - create_action_plan
+    nodes_dependent_on: []
+    prompt: Review the action plan for completeness, feasibility, and alignment with
+      the winning objective. Refine the plan as needed.

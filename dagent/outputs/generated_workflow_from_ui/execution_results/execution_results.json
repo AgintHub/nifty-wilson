@@ -1,0 +1,26 @@
+{
+  "test_init": {
+    "output": {
+      "output": "Test process started successfully"
+    },
+    "description": "Initialize the test"
+  },
+  "test_report": {
+    "output": {
+      "output": "Test report generated successfully. Test output verified successfully."
+    },
+    "description": "Generate a test report"
+  },
+  "test_run": {
+    "output": {
+      "output": "Test executed successfully"
+    },
+    "description": "Run the test"
+  },
+  "test_verify": {
+    "output": {
+      "output": "Test output verified successfully"
+    },
+    "description": "Verify the test results"
+  }
+}

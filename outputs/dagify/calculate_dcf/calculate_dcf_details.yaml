@@ -1,0 +1,241 @@
+dag_type: plain_text
+description: A workflow to compute a Discounted Cash Flow (DCF) valuation for a business,
+  including forecasting revenues, operating profit, free cash flows, terminal value,
+  discounting, and final equity value.
+name: calculate_dcf
+nodes:
+  calculate_equity_value:
+    agent: false
+    description: Derives the equity value from enterprise value and net debt.
+    name: calculate_equity_value
+    nodes_depended_on:
+    - sum_discounts
+    - collect_net_debt
+    nodes_dependent_on: []
+    prompt: Subtract net debt from enterprise value to obtain equity value. Output
+      the equity value as a single number.
+  collect_base_revenue:
+    agent: false
+    description: Collects the base revenue to start the forecast.
+    name: collect_base_revenue
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide the current year revenue figure in dollars.
+  collect_capex_schedule:
+    agent: false
+    description: Collects a constant CapEx amount for each forecast year.
+    name: collect_capex_schedule
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide the expected capital expenditure per year as a single number (in
+      dollars).
+  collect_net_debt:
+    agent: false
+    description: Collects the net debt used to convert enterprise value to equity
+      value.
+    name: collect_net_debt
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide the net debt figure (total debt minus cash) in dollars.
+  collect_operating_margin:
+    agent: false
+    description: Collects the operating margin used to compute operating profit.
+    name: collect_operating_margin
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Enter the operating margin as a decimal (e.g., 0.25 for 25%).
+  collect_revenue_growth_rate:
+    agent: false
+    description: Collects the revenue growth assumption for the forecast period.
+    name: collect_revenue_growth_rate
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Enter the expected annual revenue growth rate as a decimal (e.g., 0.08
+      for 8%).
+  collect_terminal_growth_rate:
+    agent: false
+    description: Collects the terminal growth assumption for the terminal value calculation.
+    name: collect_terminal_growth_rate
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide the terminal growth rate for the perpetuity as a decimal (e.g.,
+      0.03 for 3%).
+  collect_wacc:
+    agent: false
+    description: Collects the discount rate used for all present value calculations.
+    name: collect_wacc
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Enter the weighted average cost of capital (WACC) as a decimal (e.g.,
+      0.10 for 10%).
+  collect_working_capital_change:
+    agent: false
+    description: Collects the working capital change assumption.
+    name: collect_working_capital_change
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Enter the percentage change in working capital relative to revenue per
+      year as a decimal (e.g., 0.02 for 2%).
+  compute_capex_forecast:
+    agent: false
+    description: Generates a constant CapEx schedule for the forecast period.
+    name: compute_capex_forecast
+    nodes_depended_on:
+    - compute_revenue_forecast
+    - collect_capex_schedule
+    nodes_dependent_on: []
+    prompt: Create a CapEx list containing the same CapEx value repeated five times.
+      Output a JSON array of five numbers.
+  compute_free_cash_flow_forecast:
+    agent: false
+    description: Produces the free cash flow forecast for each year.
+    name: compute_free_cash_flow_forecast
+    nodes_depended_on:
+    - compute_operating_profit_forecast
+    - compute_capex_forecast
+    - compute_working_capital_forecast
+    nodes_dependent_on: []
+    prompt: Subtract CapEx and working capital change from operating profit for each
+      year to get free cash flow. Output a JSON array of five numbers.
+  compute_operating_profit_forecast:
+    agent: false
+    description: Computes operating profit for each forecast year.
+    name: compute_operating_profit_forecast
+    nodes_depended_on:
+    - compute_revenue_forecast
+    - collect_operating_margin
+    nodes_dependent_on: []
+    prompt: Multiply each revenue forecast by the operating margin to produce the
+      operating profit forecast. Output a JSON array of five numbers.
+  compute_revenue_forecast:
+    agent: false
+    description: Generates a five‑year revenue forecast series.
+    name: compute_revenue_forecast
+    nodes_depended_on:
+    - collect_base_revenue
+    - collect_revenue_growth_rate
+    nodes_dependent_on: []
+    prompt: Calculate a list of projected revenues for five years. Start with the
+      base revenue and apply the revenue growth rate each subsequent year. Output
+      a JSON array of five numbers.
+  compute_terminal_value:
+    agent: false
+    description: Calculates the terminal value using the perpetuity growth model.
+    name: compute_terminal_value
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_terminal_growth_rate
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Take the last year’s free cash flow, apply the terminal growth rate, then
+      divide by (WACC - terminal growth rate) to compute the terminal value. Output
+      the terminal value as a single number.
+  compute_working_capital_forecast:
+    agent: false
+    description: Computes the change in working capital for each year.
+    name: compute_working_capital_forecast
+    nodes_depended_on:
+    - compute_revenue_forecast
+    - collect_working_capital_change
+    nodes_dependent_on: []
+    prompt: For each forecast year, calculate working capital change as revenue *
+      change percentage. Output a JSON array of five numbers.
+  discount_fcf_year_1:
+    agent: false
+    description: Discounts year‑1 free cash flow to present value.
+    name: discount_fcf_year_1
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the free cash flow for year 1 using the formula PV = FCF / (1
+      + WACC). Output the present value as a single number.
+  discount_fcf_year_2:
+    agent: false
+    description: Discounts year‑2 free cash flow to present value.
+    name: discount_fcf_year_2
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the free cash flow for year 2 using the formula PV = FCF / (1
+      + WACC)^2. Output the present value as a single number.
+  discount_fcf_year_3:
+    agent: false
+    description: Discounts year‑3 free cash flow to present value.
+    name: discount_fcf_year_3
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the free cash flow for year 3 using the formula PV = FCF / (1
+      + WACC)^3. Output the present value as a single number.
+  discount_fcf_year_4:
+    agent: false
+    description: Discounts year‑4 free cash flow to present value.
+    name: discount_fcf_year_4
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the free cash flow for year 4 using the formula PV = FCF / (1
+      + WACC)^4. Output the present value as a single number.
+  discount_fcf_year_5:
+    agent: false
+    description: Discounts year‑5 free cash flow to present value.
+    name: discount_fcf_year_5
+    nodes_depended_on:
+    - compute_free_cash_flow_forecast
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the free cash flow for year 5 using the formula PV = FCF / (1
+      + WACC)^5. Output the present value as a single number.
+  discount_terminal_value:
+    agent: false
+    description: Discounts the terminal value to present value.
+    name: discount_terminal_value
+    nodes_depended_on:
+    - compute_terminal_value
+    - collect_wacc
+    nodes_dependent_on: []
+    prompt: Discount the terminal value back to present value using the formula PV
+      = TV / (1 + WACC)^5. Output the present value as a single number.
+  generate_dcf_summary:
+    agent: false
+    description: Produces a human‑readable summary of the DCF analysis.
+    name: generate_dcf_summary
+    nodes_depended_on:
+    - compute_revenue_forecast
+    - compute_operating_profit_forecast
+    - compute_capex_forecast
+    - compute_working_capital_forecast
+    - compute_free_cash_flow_forecast
+    - discount_fcf_year_1
+    - discount_fcf_year_2
+    - discount_fcf_year_3
+    - discount_fcf_year_4
+    - discount_fcf_year_5
+    - compute_terminal_value
+    - discount_terminal_value
+    - sum_discounts
+    - calculate_equity_value
+    - collect_wacc
+    - collect_net_debt
+    nodes_dependent_on: []
+    prompt: 'Create a concise paragraph summarizing the DCF results: revenue forecast,
+      operating profit, free cash flows, terminal value, enterprise value, and equity
+      value. Include key numbers formatted to two decimal places.'
+  sum_discounts:
+    agent: false
+    description: Calculates enterprise value by summing all discounted cash flows.
+    name: sum_discounts
+    nodes_depended_on:
+    - discount_fcf_year_1
+    - discount_fcf_year_2
+    - discount_fcf_year_3
+    - discount_fcf_year_4
+    - discount_fcf_year_5
+    - discount_terminal_value
+    nodes_dependent_on: []
+    prompt: Add all discounted free cash flows and discounted terminal value to get
+      the enterprise value. Output the enterprise value as a single number.

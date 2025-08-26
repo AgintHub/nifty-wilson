@@ -1,0 +1,131 @@
+dag_type: plain_text
+description: Modified workflow to split nodes, make them concurrent, and join into
+  next nodes
+name: test_workflow_modified
+nodes:
+  analyze_results_1:
+    agent: false
+    description: Analyze results
+    name: analyze_results_1
+    nodes_depended_on:
+    - collect_test_data_1
+    nodes_dependent_on: []
+    prompt: Identify issues.
+  analyze_results_2:
+    agent: false
+    description: Summarize results
+    name: analyze_results_2
+    nodes_depended_on:
+    - collect_test_data_2
+    nodes_dependent_on: []
+    prompt: Summarize findings.
+  check_prerequisites_1:
+    agent: false
+    description: Check prerequisites
+    name: check_prerequisites_1
+    nodes_depended_on:
+    - prepare_test_environment_1
+    nodes_dependent_on: []
+    prompt: Verify prerequisites.
+  check_prerequisites_2:
+    agent: false
+    description: Confirm prerequisites
+    name: check_prerequisites_2
+    nodes_depended_on:
+    - prepare_test_environment_2
+    nodes_dependent_on: []
+    prompt: Confirm prerequisites are met.
+  collect_test_data_1:
+    agent: false
+    description: Collect data
+    name: collect_test_data_1
+    nodes_depended_on:
+    - run_test_1
+    nodes_dependent_on: []
+    prompt: Gather test data.
+  collect_test_data_2:
+    agent: false
+    description: Analyze data
+    name: collect_test_data_2
+    nodes_depended_on:
+    - run_test_2
+    nodes_dependent_on: []
+    prompt: Analyze collected data.
+  prepare_test_environment_1:
+    agent: false
+    description: Setup test environment
+    name: prepare_test_environment_1
+    nodes_depended_on:
+    - start_test_1
+    nodes_dependent_on: []
+    prompt: Prepare environment for testing.
+  prepare_test_environment_2:
+    agent: false
+    description: Configure test environment
+    name: prepare_test_environment_2
+    nodes_depended_on:
+    - start_test_2
+    nodes_dependent_on: []
+    prompt: Finalize environment preparation.
+  report_results_1:
+    agent: false
+    description: Report test results
+    name: report_results_1
+    nodes_depended_on:
+    - review_test_summary_1
+    nodes_dependent_on: []
+    prompt: Report results.
+  report_results_2:
+    agent: false
+    description: Finalize test report
+    name: report_results_2
+    nodes_depended_on:
+    - review_test_summary_2
+    nodes_dependent_on: []
+    prompt: Finalize report.
+  review_test_summary_1:
+    agent: false
+    description: Review test summary
+    name: review_test_summary_1
+    nodes_depended_on:
+    - analyze_results_1
+    nodes_dependent_on: []
+    prompt: Review summary.
+  review_test_summary_2:
+    agent: false
+    description: Compile recommendations
+    name: review_test_summary_2
+    nodes_depended_on:
+    - analyze_results_2
+    nodes_dependent_on: []
+    prompt: Compile recommendations.
+  run_test_1:
+    agent: false
+    description: Run the test
+    name: run_test_1
+    nodes_depended_on:
+    - check_prerequisites_1
+    nodes_dependent_on: []
+    prompt: Execute test.
+  run_test_2:
+    agent: false
+    description: Collect test data
+    name: run_test_2
+    nodes_depended_on:
+    - check_prerequisites_2
+    nodes_dependent_on: []
+    prompt: Collect test results.
+  start_test_1:
+    agent: false
+    description: Start the test process
+    name: start_test_1
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Initiate the test process. Verify prerequisites are met.
+  start_test_2:
+    agent: false
+    description: Initialize test
+    name: start_test_2
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Begin test initialization.

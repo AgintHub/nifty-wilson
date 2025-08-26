@@ -1,0 +1,121 @@
+dag_type: plain_text
+description: A workflow for assembling a diversified stock portfolio through research,
+  selection, and allocation.
+name: assemble_stock_portfolio
+nodes:
+  analyze_stock_financials:
+    agent: false
+    description: Analyze the financial health and performance of potential stocks.
+    name: analyze_stock_financials
+    nodes_depended_on:
+    - identify_potential_stocks
+    nodes_dependent_on: []
+    prompt: Analyze the financial statements, ratios, and performance metrics of the
+      identified stocks.
+  assess_stock_risk:
+    agent: false
+    description: Evaluate the risk profile of potential stocks.
+    name: assess_stock_risk
+    nodes_depended_on:
+    - identify_potential_stocks
+    nodes_dependent_on: []
+    prompt: Assess the risk factors associated with the identified stocks, including
+      volatility and beta.
+  compile_portfolio_summary:
+    agent: false
+    description: Compile a summary of the assembled portfolio, including its composition
+      and allocation.
+    name: compile_portfolio_summary
+    nodes_depended_on:
+    - execute_trades
+    nodes_dependent_on: []
+    prompt: Create a summary report detailing the portfolio's composition, allocation,
+      and key characteristics.
+  define_investment_objectives:
+    agent: false
+    description: Identify the investment goals, risk tolerance, and time horizon for
+      the portfolio.
+    name: define_investment_objectives
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Specify the primary investment objectives, risk tolerance, and time horizon
+      for the portfolio. Provide a concise statement.
+  determine_asset_allocation:
+    agent: false
+    description: Decide on the proportion of the portfolio to allocate to each selected
+      stock.
+    name: determine_asset_allocation
+    nodes_depended_on:
+    - select_stocks_for_portfolio
+    nodes_dependent_on: []
+    prompt: Determine the optimal asset allocation for the selected stocks to achieve
+      the desired portfolio diversification and risk profile.
+  evaluate_stock_valuation:
+    agent: false
+    description: Assess the valuation of potential stocks.
+    name: evaluate_stock_valuation
+    nodes_depended_on:
+    - identify_potential_stocks
+    nodes_dependent_on: []
+    prompt: Evaluate the valuation metrics (e.g., P/E ratio, dividend yield) of the
+      identified stocks.
+  execute_trades:
+    agent: false
+    description: Execute trades to implement the selected stocks and allocation.
+    name: execute_trades
+    nodes_depended_on:
+    - determine_asset_allocation
+    nodes_dependent_on: []
+    prompt: Execute the necessary trades to establish the portfolio with the chosen
+      stocks and allocation.
+  identify_potential_stocks:
+    agent: false
+    description: Screen for potential stocks within the selected asset classes.
+    name: identify_potential_stocks
+    nodes_depended_on:
+    - select_asset_classes
+    nodes_dependent_on: []
+    prompt: Identify a list of potential stocks within the chosen asset classes that
+      meet the investment criteria.
+  monitor_portfolio_performance:
+    agent: false
+    description: Continuously monitor the portfolio's performance and rebalance as
+      necessary.
+    name: monitor_portfolio_performance
+    nodes_depended_on:
+    - execute_trades
+    nodes_dependent_on: []
+    prompt: Monitor the portfolio's performance regularly and rebalance the allocation
+      as needed to maintain alignment with the investment objectives.
+  research_market_trends:
+    agent: false
+    description: Analyze current market trends and economic indicators.
+    name: research_market_trends
+    nodes_depended_on:
+    - define_investment_objectives
+    nodes_dependent_on: []
+    prompt: Research and summarize current market trends, economic indicators, and
+      potential impacts on the portfolio.
+  select_asset_classes:
+    agent: false
+    description: Choose the asset classes to include in the portfolio based on objectives
+      and market research.
+    name: select_asset_classes
+    nodes_depended_on:
+    - define_investment_objectives
+    - research_market_trends
+    nodes_dependent_on: []
+    prompt: Select the asset classes (e.g., stocks, bonds, ETFs) that align with the
+      investment objectives and market trends.
+  select_stocks_for_portfolio:
+    agent: false
+    description: Choose the specific stocks to include in the portfolio based on financial
+      analysis, valuation, and risk assessment.
+    name: select_stocks_for_portfolio
+    nodes_depended_on:
+    - analyze_stock_financials
+    - evaluate_stock_valuation
+    - assess_stock_risk
+    nodes_dependent_on: []
+    prompt: Select the stocks that best meet the investment objectives and criteria
+      based on the analysis.

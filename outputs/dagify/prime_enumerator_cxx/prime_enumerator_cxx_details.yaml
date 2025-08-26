@@ -1,0 +1,196 @@
+dag_type: plain_text
+description: A workflow that builds, tests, benchmarks, and packages a C++ program
+  which efficiently enumerates prime numbers.
+name: prime_enumerator_cxx
+nodes:
+  benchmark_runtime:
+    agent: false
+    description: Benchmarks performance.
+    name: benchmark_runtime
+    nodes_depended_on:
+    - run_test_harness
+    nodes_dependent_on:
+    - optimize_performance
+    prompt: Measure runtime of program for a large N (e.g., 1e8). Output timing results
+      in seconds.
+  choose_data_structure:
+    agent: false
+    description: Selects the data container for the sieve.
+    name: choose_data_structure
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - implement_simple_sieve
+    - implement_segmented_sieve
+    - code_skeleton
+    prompt: Decide on the underlying data structure for storing prime markers in the
+      sieve (e.g., vector<bool>, vector<uint8_t>, bitset). Output only the chosen
+      data structure.
+  code_skeleton:
+    agent: false
+    description: Creates the base C++ program with all function definitions.
+    name: code_skeleton
+    nodes_depended_on:
+    - select_algorithm
+    - choose_data_structure
+    - design_output_format
+    - implement_simple_sieve
+    - implement_segmented_sieve
+    nodes_dependent_on:
+    - main_loop
+    prompt: Produce a full C++ program skeleton that includes headers, the main function,
+      and placeholders for the sieve functions and output logic. Integrate the code
+      fragments from previous steps. Output the entire program code.
+  compile_program:
+    agent: false
+    description: Creates the compile command.
+    name: compile_program
+    nodes_depended_on:
+    - code_skeleton
+    nodes_dependent_on:
+    - write_test_harness
+    prompt: Generate the command line to compile the program with g++ using optimization
+      flags. Output the compile command.
+  design_output_format:
+    agent: false
+    description: Determines how primes are presented to the user.
+    name: design_output_format
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - output_primes
+    - code_skeleton
+    prompt: 'Decide how primes will be output: print to stdout with newline separation,
+      write to file, or return as vector. Output only the chosen format.'
+  finalize_documentation:
+    agent: false
+    description: Creates project documentation.
+    name: finalize_documentation
+    nodes_depended_on:
+    - select_algorithm
+    - choose_data_structure
+    - design_output_format
+    - implement_simple_sieve
+    - implement_segmented_sieve
+    - main_loop
+    - output_primes
+    - compile_program
+    - benchmark_runtime
+    - optimize_performance
+    nodes_dependent_on:
+    - package_release
+    prompt: Write a README with description of algorithm, usage, performance results.
+      Output only the README text.
+  implement_segmented_sieve:
+    agent: false
+    description: Implements the segmented sieve function.
+    name: implement_segmented_sieve
+    nodes_depended_on:
+    - select_algorithm
+    - choose_data_structure
+    - implement_simple_sieve
+    nodes_dependent_on:
+    - code_skeleton
+    - main_loop
+    prompt: Write a C++ function that performs segmented sieve up to a given limit
+      using the simple sieve function for primes up to sqrt(limit). Include necessary
+      headers and use the algorithm selected earlier. Output only the function code.
+  implement_simple_sieve:
+    agent: false
+    description: Implements the simple sieve function.
+    name: implement_simple_sieve
+    nodes_depended_on:
+    - select_algorithm
+    - choose_data_structure
+    nodes_dependent_on:
+    - code_skeleton
+    - main_loop
+    prompt: Write a C++ function that generates all primes up to a given limit using
+      the selected data structure. Include necessary headers and use the algorithm
+      selected earlier. Output only the function code.
+  main_loop:
+    agent: false
+    description: Builds the runtime logic for prime enumeration.
+    name: main_loop
+    nodes_depended_on:
+    - code_skeleton
+    - implement_simple_sieve
+    - implement_segmented_sieve
+    nodes_dependent_on:
+    - output_primes
+    prompt: Implement the main loop inside main that reads an upper bound N from stdin
+      or argument, chooses algorithm, calls the appropriate sieve, and collects primes.
+      Output only the main loop body code.
+  optimize_performance:
+    agent: false
+    description: Applies performance tuning.
+    name: optimize_performance
+    nodes_depended_on:
+    - benchmark_runtime
+    nodes_dependent_on:
+    - finalize_documentation
+    prompt: Based on benchmark, apply optimizations (e.g., wheel factorization, bit
+      operations). Output only the optimized code fragment.
+  output_primes:
+    agent: false
+    description: Prints or writes the prime list.
+    name: output_primes
+    nodes_depended_on:
+    - design_output_format
+    - main_loop
+    nodes_dependent_on:
+    - compile_program
+    prompt: Implement the function to output primes according to chosen format. Output
+      only the function code.
+  package_release:
+    agent: false
+    description: Produces the final distributable bundle.
+    name: package_release
+    nodes_depended_on:
+    - finalize_documentation
+    - compile_program
+    nodes_dependent_on: []
+    prompt: Package source code, README, and compiled binary into a ZIP archive. Output
+      the command used to create the archive.
+  run_test_harness:
+    agent: false
+    description: Runs the tests and records results.
+    name: run_test_harness
+    nodes_depended_on:
+    - write_test_harness
+    nodes_dependent_on:
+    - validate_test_output
+    prompt: Execute the test harness and capture its output. Output the result summary
+      (pass/fail).
+  select_algorithm:
+    agent: false
+    description: Decides which sieve algorithm to implement.
+    name: select_algorithm
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - implement_simple_sieve
+    - implement_segmented_sieve
+    - code_skeleton
+    - main_loop
+    prompt: 'Choose the prime enumeration algorithm: either simple Sieve of Eratosthenes
+      for small ranges or segmented Sieve of Eratosthenes for large ranges. Output
+      only the chosen algorithm name.'
+  validate_test_output:
+    agent: false
+    description: Confirms correctness of the program.
+    name: validate_test_output
+    nodes_depended_on:
+    - run_test_harness
+    nodes_dependent_on:
+    - benchmark_runtime
+    prompt: Verify that the output from test harness matches expected primes. Output
+      only a validation report.
+  write_test_harness:
+    agent: false
+    description: Sets up automated correctness tests.
+    name: write_test_harness
+    nodes_depended_on:
+    - compile_program
+    nodes_dependent_on:
+    - run_test_harness
+    prompt: Write a simple test harness that runs the program with small inputs (e.g.,
+      10, 100) and checks the output against expected prime lists. Output only the
+      test harness code.

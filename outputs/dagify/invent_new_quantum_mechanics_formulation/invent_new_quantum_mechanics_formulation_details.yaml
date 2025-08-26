@@ -1,0 +1,238 @@
+dag_type: plain_text
+description: A workflow to invent a new formulation of quantum mechanics by exploring
+  foundational concepts, proposing new postulates, developing mathematical frameworks,
+  and validating against experimental evidence.
+name: invent_new_quantum_mechanics_formulation
+nodes:
+  contrast_predictions_with_experimental_data_1:
+    agent: false
+    description: Compare predictions from formalism 1 with experimental results.
+    name: contrast_predictions_with_experimental_data_1
+    nodes_depended_on:
+    - derive_predictions_from_formalism_1
+    - identify_relevant_experimental_data
+    nodes_dependent_on: []
+    prompt: Compare the testable predictions derived from mathematical formalism 1
+      against the relevant experimental data. Highlight areas of agreement, disagreement,
+      and where the new formulation offers a potentially different explanation or
+      prediction than standard quantum mechanics.
+  contrast_predictions_with_experimental_data_2:
+    agent: false
+    description: Compare predictions from formalism 2 with experimental results.
+    name: contrast_predictions_with_experimental_data_2
+    nodes_depended_on:
+    - derive_predictions_from_formalism_2
+    - identify_relevant_experimental_data
+    nodes_dependent_on: []
+    prompt: Compare the testable predictions derived from mathematical formalism 2
+      against the relevant experimental data. Highlight areas of agreement, disagreement,
+      and where the new formulation offers a potentially different explanation or
+      prediction than standard quantum mechanics.
+  contrast_predictions_with_experimental_data_3:
+    agent: false
+    description: Compare predictions from formalism 3 (if applicable) with experimental
+      results.
+    name: contrast_predictions_with_experimental_data_3
+    nodes_depended_on:
+    - derive_predictions_from_formalism_3
+    - identify_relevant_experimental_data
+    nodes_dependent_on: []
+    prompt: Compare the testable predictions derived from mathematical formalism 3
+      (if applicable) against the relevant experimental data. Highlight areas of agreement,
+      disagreement, and where the new formulation offers a potentially different explanation
+      or prediction than standard quantum mechanics.
+  derive_predictions_from_formalism_1:
+    agent: false
+    description: Derive testable predictions from the first mathematical formalism.
+    name: derive_predictions_from_formalism_1
+    nodes_depended_on:
+    - develop_mathematical_formalism_for_postulates_1
+    nodes_dependent_on: []
+    prompt: Using the developed mathematical formalism for postulate set 1, derive
+      concrete, testable predictions. These should be distinct from the predictions
+      of standard quantum mechanics and amenable to experimental verification. Focus
+      on core phenomena like particle behavior, energy quantization, or entanglement.
+  derive_predictions_from_formalism_2:
+    agent: false
+    description: Derive testable predictions from the second mathematical formalism.
+    name: derive_predictions_from_formalism_2
+    nodes_depended_on:
+    - develop_mathematical_formalism_for_postulates_2
+    nodes_dependent_on: []
+    prompt: Using the developed mathematical formalism for postulate set 2, derive
+      concrete, testable predictions. These should be distinct from the predictions
+      of standard quantum mechanics and amenable to experimental verification. Focus
+      on core phenomena like particle behavior, energy quantization, or entanglement.
+  derive_predictions_from_formalism_3:
+    agent: false
+    description: Derive testable predictions from the third mathematical formalism
+      (if applicable).
+    name: derive_predictions_from_formalism_3
+    nodes_depended_on:
+    - develop_mathematical_formalism_for_postulates_3
+    nodes_dependent_on: []
+    prompt: Using the developed mathematical formalism for postulate set 3 (if applicable),
+      derive concrete, testable predictions. These should be distinct from the predictions
+      of standard quantum mechanics and amenable to experimental verification. Focus
+      on core phenomena like particle behavior, energy quantization, or entanglement.
+  develop_mathematical_formalism_for_postulates_1:
+    agent: false
+    description: Develop the mathematical formalism for the first promising set of
+      postulates.
+    name: develop_mathematical_formalism_for_postulates_1
+    nodes_depended_on:
+    - select_promising_postulate_sets
+    - explore_alternative_mathematical_structures
+    nodes_dependent_on: []
+    prompt: For the first selected postulate set, develop a preliminary mathematical
+      formalism. This may involve defining new mathematical objects, operators, or
+      algebraic structures. Leverage insights from explored mathematical structures.
+      Aim for consistency with the postulates.
+  develop_mathematical_formalism_for_postulates_2:
+    agent: false
+    description: Develop the mathematical formalism for the second promising set of
+      postulates.
+    name: develop_mathematical_formalism_for_postulates_2
+    nodes_depended_on:
+    - select_promising_postulate_sets
+    - explore_alternative_mathematical_structures
+    nodes_dependent_on: []
+    prompt: For the second selected postulate set, develop a preliminary mathematical
+      formalism. This may involve defining new mathematical objects, operators, or
+      algebraic structures. Leverage insights from explored mathematical structures.
+      Aim for consistency with the postulates.
+  develop_mathematical_formalism_for_postulates_3:
+    agent: false
+    description: Develop the mathematical formalism for the third promising set of
+      postulates (if applicable).
+    name: develop_mathematical_formalism_for_postulates_3
+    nodes_depended_on:
+    - select_promising_postulate_sets
+    - explore_alternative_mathematical_structures
+    nodes_dependent_on: []
+    prompt: For the third selected postulate set (if applicable), develop a preliminary
+      mathematical formalism. This may involve defining new mathematical objects,
+      operators, or algebraic structures. Leverage insights from explored mathematical
+      structures. Aim for consistency with the postulates.
+  document_new_quantum_mechanics_formulation:
+    agent: false
+    description: Document the complete new formulation of quantum mechanics.
+    name: document_new_quantum_mechanics_formulation
+    nodes_depended_on:
+    - refine_selected_formulation_and_predictions
+    nodes_dependent_on: []
+    prompt: 'Provide a comprehensive documentation of the new quantum mechanics formulation.
+      This should include: the fundamental postulates, the developed mathematical
+      formalism, key derived equations, testable predictions with associated experimental
+      contexts, and a discussion of its conceptual advantages over existing theories.'
+  evaluate_formalism_consistency_and_elegance:
+    agent: false
+    description: Assess the internal consistency, simplicity, and explanatory power
+      of each developed formalism.
+    name: evaluate_formalism_consistency_and_elegance
+    nodes_depended_on:
+    - develop_mathematical_formalism_for_postulates_1
+    - develop_mathematical_formalism_for_postulates_2
+    - develop_mathematical_formalism_for_postulates_3
+    nodes_dependent_on: []
+    prompt: Evaluate the internal mathematical consistency, conceptual elegance, and
+      overall explanatory power for each of the developed formalisms. Consider aspects
+      like parsimony of postulates, unification of phenomena, and freedom from internal
+      contradictions.
+  explore_alternative_mathematical_structures:
+    agent: false
+    description: Investigate mathematical frameworks that could underpin a new quantum
+      theory.
+    name: explore_alternative_mathematical_structures
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Research and summarize advanced mathematical structures relevant to physics,
+      such as non-commutative geometry, category theory, higher-dimensional algebras,
+      topological quantum field theory, and geometric algebra. For each, briefly describe
+      its potential application to foundational physics.
+  identify_conceptual_limitations_and_paradoxes:
+    agent: false
+    description: Detail conceptual issues, paradoxes, and unresolved questions in
+      current quantum mechanics.
+    name: identify_conceptual_limitations_and_paradoxes
+    nodes_depended_on:
+    - review_historical_quantum_mechanics
+    nodes_dependent_on: []
+    prompt: Based on the review of historical quantum mechanics, list and explain
+      specific conceptual limitations, paradoxes (e.g., measurement problem, EPR paradox,
+      Schrödinger's cat), and interpretations that present challenges or opportunities
+      for new formulations.
+  identify_relevant_experimental_data:
+    agent: false
+    description: Compile experimental data and observations relevant to testing quantum
+      mechanics formulations.
+    name: identify_relevant_experimental_data
+    nodes_depended_on:
+    - review_historical_quantum_mechanics
+    nodes_dependent_on: []
+    prompt: List significant experiments and observational data that have confirmed
+      or challenged existing quantum mechanics (e.g., double-slit experiment, Bell
+      tests, Planck's blackbody radiation, hydrogen spectrum). For each, describe
+      the observed phenomenon and its implication for quantum theory.
+  propose_new_fundamental_postulates_initial:
+    agent: false
+    description: Generate initial sets of hypothetical fundamental postulates for
+      a new quantum theory.
+    name: propose_new_fundamental_postulates_initial
+    nodes_depended_on:
+    - identify_conceptual_limitations_and_paradoxes
+    nodes_dependent_on: []
+    prompt: Propose several distinct sets of fundamental postulates that aim to address
+      the identified limitations and paradoxes of current quantum mechanics. Each
+      set should be concise and conceptually novel. Focus on the conceptual basis,
+      not mathematical rigor at this stage.
+  refine_selected_formulation_and_predictions:
+    agent: false
+    description: Refine the chosen formulation and its predictions for greater precision.
+    name: refine_selected_formulation_and_predictions
+    nodes_depended_on:
+    - select_most_viable_new_formulation
+    - identify_relevant_experimental_data
+    nodes_dependent_on: []
+    prompt: Take the selected most viable new formulation and its associated predictions.
+      Refine the mathematical details and prediction quantities to achieve higher
+      precision. Identify specific new experiments that would best discriminate this
+      formulation from standard quantum mechanics.
+  review_historical_quantum_mechanics:
+    agent: false
+    description: Synthesize key concepts, postulates, and historical developments
+      of existing quantum mechanics formulations.
+    name: review_historical_quantum_mechanics
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Provide a comprehensive summary of the core principles, postulates, mathematical
+      formalism, and historical timeline of established quantum mechanics (e.g., Bohr
+      model, Schrödinger equation, Heisenberg uncertainty principle, Dirac notation).
+      Focus on identifying areas of conceptual tension or potential for alternative
+      formulations.
+  select_most_viable_new_formulation:
+    agent: false
+    description: Select the most promising new formulation based on all preceding
+      evaluations.
+    name: select_most_viable_new_formulation
+    nodes_depended_on:
+    - contrast_predictions_with_experimental_data_1
+    - contrast_predictions_with_experimental_data_2
+    - contrast_predictions_with_experimental_data_3
+    - evaluate_formalism_consistency_and_elegance
+    nodes_dependent_on: []
+    prompt: Synthesize the results from experimental comparison, consistency evaluation,
+      and elegance assessment to select the single most viable candidate for a new
+      quantum mechanics formulation. Justify this selection with a brief summary of
+      its strengths.
+  select_promising_postulate_sets:
+    agent: false
+    description: Evaluate and select the most promising sets of postulates for further
+      development.
+    name: select_promising_postulate_sets
+    nodes_depended_on:
+    - propose_new_fundamental_postulates_initial
+    nodes_dependent_on: []
+    prompt: Review the proposed postulate sets and select the top 2-3 most promising
+      ones for further development. Justify the selection based on conceptual novelty,
+      potential to resolve paradoxes, and mathematical tractability.

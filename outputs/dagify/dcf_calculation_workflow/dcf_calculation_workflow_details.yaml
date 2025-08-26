@@ -1,0 +1,521 @@
+dag_type: plain_text
+description: A granular, highly concurrent DAG to calculate a 5-year discounted cash
+  flow (DCF) model, deriving enterprise and equity value from user-provided inputs,
+  and producing a final summary.
+name: dcf_calculation_workflow
+nodes:
+  capex_y1:
+    agent: false
+    description: Assign Year 1 capex from input schedule.
+    name: capex_y1
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set capex_y1 to the provided capex_year1 value. Output capex_y1.
+  capex_y2:
+    agent: false
+    description: Assign Year 2 capex from input schedule.
+    name: capex_y2
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set capex_y2 to the provided capex_year2 value. Output capex_y2.
+  capex_y3:
+    agent: false
+    description: Assign Year 3 capex from input schedule.
+    name: capex_y3
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set capex_y3 to the provided capex_year3 value. Output capex_y3.
+  capex_y4:
+    agent: false
+    description: Assign Year 4 capex from input schedule.
+    name: capex_y4
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set capex_y4 to the provided capex_year4 value. Output capex_y4.
+  capex_y5:
+    agent: false
+    description: Assign Year 5 capex from input schedule.
+    name: capex_y5
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set capex_y5 to the provided capex_year5 value. Output capex_y5.
+  compute_ebit_y1:
+    agent: false
+    description: Compute Year 1 EBIT ( Earnings Before Interest and Taxes ) using
+      revenue, operating expenses, and depreciation.
+    name: compute_ebit_y1
+    nodes_depended_on:
+    - forecast_revenue_y1
+    - forecast_op_exp_y1
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 1 EBIT: EBIT_y1 = revenue_y1 - op_exp_y1 - depreciation_y1.
+      Output EBIT_y1 as a numeric value.'
+  compute_ebit_y2:
+    agent: false
+    description: Compute Year 2 EBIT.
+    name: compute_ebit_y2
+    nodes_depended_on:
+    - forecast_revenue_y2
+    - forecast_op_exp_y2
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 2 EBIT: EBIT_y2 = revenue_y2 - op_exp_y2 - depreciation_y2.
+      Output EBIT_y2 as a numeric value.'
+  compute_ebit_y3:
+    agent: false
+    description: Compute Year 3 EBIT.
+    name: compute_ebit_y3
+    nodes_depended_on:
+    - forecast_revenue_y3
+    - forecast_op_exp_y3
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 3 EBIT: EBIT_y3 = revenue_y3 - op_exp_y3 - depreciation_y3.
+      Output EBIT_y3 as a numeric value.'
+  compute_ebit_y4:
+    agent: false
+    description: Compute Year 4 EBIT.
+    name: compute_ebit_y4
+    nodes_depended_on:
+    - forecast_revenue_y4
+    - forecast_op_exp_y4
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 4 EBIT: EBIT_y4 = revenue_y4 - op_exp_y4 - depreciation_y4.
+      Output EBIT_y4 as a numeric value.'
+  compute_ebit_y5:
+    agent: false
+    description: Compute Year 5 EBIT.
+    name: compute_ebit_y5
+    nodes_depended_on:
+    - forecast_revenue_y5
+    - forecast_op_exp_y5
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 5 EBIT: EBIT_y5 = revenue_y5 - op_exp_y5 - depreciation_y5.
+      Output EBIT_y5 as a numeric value.'
+  compute_fcf_y1:
+    agent: false
+    description: 'Compute Year 1 free cash flow: FCF_y1 = NOPAT_y1 + depreciation_y1
+      - capex_y1 - wc_change_y1.'
+    name: compute_fcf_y1
+    nodes_depended_on:
+    - compute_nopat_y1
+    - depreciation_y1
+    - capex_y1
+    - wc_change_y1
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 1 Free Cash Flow: FCF_y1 = NOPAT_y1 + depreciation_y1
+      - capex_y1 - wc_change_y1. Output FCF_y1.'
+  compute_fcf_y2:
+    agent: false
+    description: Compute Year 2 free cash flow.
+    name: compute_fcf_y2
+    nodes_depended_on:
+    - compute_nopat_y2
+    - depreciation_y2
+    - capex_y2
+    - wc_change_y2
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 2 Free Cash Flow: FCF_y2 = NOPAT_y2 + depreciation_y2
+      - capex_y2 - wc_change_y2. Output FCF_y2.'
+  compute_fcf_y3:
+    agent: false
+    description: Compute Year 3 free cash flow.
+    name: compute_fcf_y3
+    nodes_depended_on:
+    - compute_nopat_y3
+    - depreciation_y3
+    - capex_y3
+    - wc_change_y3
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 3 Free Cash Flow: FCF_y3 = NOPAT_y3 + depreciation_y3
+      - capex_y3 - wc_change_y3. Output FCF_y3.'
+  compute_fcf_y4:
+    agent: false
+    description: Compute Year 4 free cash flow.
+    name: compute_fcf_y4
+    nodes_depended_on:
+    - compute_nopat_y4
+    - depreciation_y4
+    - capex_y4
+    - wc_change_y4
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 4 Free Cash Flow: FCF_y4 = NOPAT_y4 + depreciation_y4
+      - capex_y4 - wc_change_y4. Output FCF_y4.'
+  compute_fcf_y5:
+    agent: false
+    description: Compute Year 5 free cash flow.
+    name: compute_fcf_y5
+    nodes_depended_on:
+    - compute_nopat_y5
+    - depreciation_y5
+    - capex_y5
+    - wc_change_y5
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 5 Free Cash Flow: FCF_y5 = NOPAT_y5 + depreciation_y5
+      - capex_y5 - wc_change_y5. Output FCF_y5.'
+  compute_nopat_y1:
+    agent: false
+    description: Compute Year 1 NOPAT = EBIT * (1 - tax_rate).
+    name: compute_nopat_y1
+    nodes_depended_on:
+    - compute_ebit_y1
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 1 NOPAT: NOPAT_y1 = EBIT_y1 * (1 - tax_rate). Output NOPAT_y1
+      as a numeric value.'
+  compute_nopat_y2:
+    agent: false
+    description: Compute Year 2 NOPAT.
+    name: compute_nopat_y2
+    nodes_depended_on:
+    - compute_ebit_y2
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 2 NOPAT: NOPAT_y2 = EBIT_y2 * (1 - tax_rate). Output NOPAT_y2
+      as a numeric value.'
+  compute_nopat_y3:
+    agent: false
+    description: Compute Year 3 NOPAT.
+    name: compute_nopat_y3
+    nodes_depended_on:
+    - compute_ebit_y3
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 3 NOPAT: NOPAT_y3 = EBIT_y3 * (1 - tax_rate). Output NOPAT_y3
+      as a numeric value.'
+  compute_nopat_y4:
+    agent: false
+    description: Compute Year 4 NOPAT.
+    name: compute_nopat_y4
+    nodes_depended_on:
+    - compute_ebit_y4
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 4 NOPAT: NOPAT_y4 = EBIT_y4 * (1 - tax_rate). Output NOPAT_y4
+      as a numeric value.'
+  compute_nopat_y5:
+    agent: false
+    description: Compute Year 5 NOPAT.
+    name: compute_nopat_y5
+    nodes_depended_on:
+    - compute_ebit_y5
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 5 NOPAT: NOPAT_y5 = EBIT_y5 * (1 - tax_rate). Output NOPAT_y5
+      as a numeric value.'
+  compute_tv:
+    agent: false
+    description: Compute terminal value using Year 5 FCF, discount rate, and terminal
+      growth rate.
+    name: compute_tv
+    nodes_depended_on:
+    - compute_fcf_y5
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Terminal Value: TV = FCF_y5 * (1 + terminal_growth_rate) /
+      (discount_rate - terminal_growth_rate). Output TV.'
+  depreciation_y1:
+    agent: false
+    description: Assign Year 1 depreciation from input schedule.
+    name: depreciation_y1
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set depreciation_y1 to the provided depreciation_year1 value. Output depreciation_y1.
+  depreciation_y2:
+    agent: false
+    description: Assign Year 2 depreciation from input schedule.
+    name: depreciation_y2
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set depreciation_y2 to the provided depreciation_year2 value. Output depreciation_y2.
+  depreciation_y3:
+    agent: false
+    description: Assign Year 3 depreciation from input schedule.
+    name: depreciation_y3
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set depreciation_y3 to the provided depreciation_year3 value. Output depreciation_y3.
+  depreciation_y4:
+    agent: false
+    description: Assign Year 4 depreciation from input schedule.
+    name: depreciation_y4
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set depreciation_y4 to the provided depreciation_year4 value. Output depreciation_y4.
+  depreciation_y5:
+    agent: false
+    description: Assign Year 5 depreciation from input schedule.
+    name: depreciation_y5
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set depreciation_y5 to the provided depreciation_year5 value. Output depreciation_y5.
+  discount_fcf_y1:
+    agent: false
+    description: Discount Year 1 FCF to present value.
+    name: discount_fcf_y1
+    nodes_depended_on:
+    - compute_fcf_y1
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Year 1 FCF: PV_FCF_y1 = FCF_y1 / (1 + discount_rate)^1.
+      Output PV_FCF_y1.'
+  discount_fcf_y2:
+    agent: false
+    description: Discount Year 2 FCF to present value.
+    name: discount_fcf_y2
+    nodes_depended_on:
+    - compute_fcf_y2
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Year 2 FCF: PV_FCF_y2 = FCF_y2 / (1 + discount_rate)^2.
+      Output PV_FCF_y2.'
+  discount_fcf_y3:
+    agent: false
+    description: Discount Year 3 FCF to present value.
+    name: discount_fcf_y3
+    nodes_depended_on:
+    - compute_fcf_y3
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Year 3 FCF: PV_FCF_y3 = FCF_y3 / (1 + discount_rate)^3.
+      Output PV_FCF_y3.'
+  discount_fcf_y4:
+    agent: false
+    description: Discount Year 4 FCF to present value.
+    name: discount_fcf_y4
+    nodes_depended_on:
+    - compute_fcf_y4
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Year 4 FCF: PV_FCF_y4 = FCF_y4 / (1 + discount_rate)^4.
+      Output PV_FCF_y4.'
+  discount_fcf_y5:
+    agent: false
+    description: Discount Year 5 FCF to present value.
+    name: discount_fcf_y5
+    nodes_depended_on:
+    - compute_fcf_y5
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Year 5 FCF: PV_FCF_y5 = FCF_y5 / (1 + discount_rate)^5.
+      Output PV_FCF_y5.'
+  discount_tv:
+    agent: false
+    description: Discount terminal value to present value (at year 5).
+    name: discount_tv
+    nodes_depended_on:
+    - compute_tv
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute PV of Terminal Value: PV_TV = TV / (1 + discount_rate)^5. Output
+      PV_TV.'
+  enterprise_value:
+    agent: false
+    description: Sum all discounted cash flows and discounted terminal value to obtain
+      Enterprise Value (EV).
+    name: enterprise_value
+    nodes_depended_on:
+    - discount_fcf_y1
+    - discount_fcf_y2
+    - discount_fcf_y3
+    - discount_fcf_y4
+    - discount_fcf_y5
+    - discount_tv
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute Enterprise Value: EV = PV_FCF_y1 + PV_FCF_y2 + PV_FCF_y3 + PV_FCF_y4
+      + PV_FCF_y5 + PV_TV. Output EV.'
+  equity_value:
+    agent: false
+    description: Convert EV to equity value by subtracting net debt.
+    name: equity_value
+    nodes_depended_on:
+    - enterprise_value
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Compute Equity Value: EquityValue = EV - net_debt. Output EquityValue.'
+  final_dcf_summary:
+    agent: false
+    description: Produce a concise summary of the DCF results, including EV and Equity
+      Value, plus key assumptions.
+    name: final_dcf_summary
+    nodes_depended_on:
+    - enterprise_value
+    - equity_value
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Generate a concise DCF summary: provide EV, EquityValue, discount_rate,
+      terminal_growth_rate, horizon_years, and a brief note on assumptions. Present
+      as a short report with bullet points.'
+  forecast_op_exp_y1:
+    agent: false
+    description: Compute Year 1 forecasted operating expenses using baseline and growth
+      rate.
+    name: forecast_op_exp_y1
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 1 operating expenses: op_exp_y1 = baseline_op_exp_year1
+      * (1 + op_exp_growth_rate)^(0). Output op_exp_y1 as a numeric value.'
+  forecast_op_exp_y2:
+    agent: false
+    description: Compute Year 2 forecasted operating expenses using baseline and growth
+      rate.
+    name: forecast_op_exp_y2
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 2 operating expenses: op_exp_y2 = baseline_op_exp_year1
+      * (1 + op_exp_growth_rate)^(1). Output op_exp_y2 as a numeric value.'
+  forecast_op_exp_y3:
+    agent: false
+    description: Compute Year 3 forecasted operating expenses using baseline and growth
+      rate.
+    name: forecast_op_exp_y3
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 3 operating expenses: op_exp_y3 = baseline_op_exp_year1
+      * (1 + op_exp_growth_rate)^(2). Output op_exp_y3 as a numeric value.'
+  forecast_op_exp_y4:
+    agent: false
+    description: Compute Year 4 forecasted operating expenses using baseline and growth
+      rate.
+    name: forecast_op_exp_y4
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 4 operating expenses: op_exp_y4 = baseline_op_exp_year1
+      * (1 + op_exp_growth_rate)^(3). Output op_exp_y4 as a numeric value.'
+  forecast_op_exp_y5:
+    agent: false
+    description: Compute Year 5 forecasted operating expenses using baseline and growth
+      rate.
+    name: forecast_op_exp_y5
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 5 operating expenses: op_exp_y5 = baseline_op_exp_year1
+      * (1 + op_exp_growth_rate)^(4). Output op_exp_y5 as a numeric value.'
+  forecast_revenue_y1:
+    agent: false
+    description: Compute Year 1 forecasted revenue using baseline revenue and growth
+      rate.
+    name: forecast_revenue_y1
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 1 revenue: revenue_y1 = baseline_revenue_year1 * (1 +
+      revenue_growth_rate)^(0). Output revenue_y1 as a numeric value.'
+  forecast_revenue_y2:
+    agent: false
+    description: Compute Year 2 forecasted revenue using baseline revenue and growth
+      rate.
+    name: forecast_revenue_y2
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 2 revenue: revenue_y2 = baseline_revenue_year1 * (1 +
+      revenue_growth_rate)^(1). Output revenue_y2 as a numeric value.'
+  forecast_revenue_y3:
+    agent: false
+    description: Compute Year 3 forecasted revenue using baseline revenue and growth
+      rate.
+    name: forecast_revenue_y3
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 3 revenue: revenue_y3 = baseline_revenue_year1 * (1 +
+      revenue_growth_rate)^(2). Output revenue_y3 as a numeric value.'
+  forecast_revenue_y4:
+    agent: false
+    description: Compute Year 4 forecasted revenue using baseline revenue and growth
+      rate.
+    name: forecast_revenue_y4
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 4 revenue: revenue_y4 = baseline_revenue_year1 * (1 +
+      revenue_growth_rate)^(3). Output revenue_y4 as a numeric value.'
+  forecast_revenue_y5:
+    agent: false
+    description: Compute Year 5 forecasted revenue using baseline revenue and growth
+      rate.
+    name: forecast_revenue_y5
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: 'Calculate Year 5 revenue: revenue_y5 = baseline_revenue_year1 * (1 +
+      revenue_growth_rate)^(4). Output revenue_y5 as a numeric value.'
+  input_dcf_parameters:
+    agent: false
+    description: 'Gather all required inputs for the 5-year DCF: horizon, baseline
+      revenues/expenses, growth rates, per-year depreciation/capex/working capital
+      changes, tax rate, discount rate, terminal growth, and net debt.'
+    name: input_dcf_parameters
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: 'Collect the following inputs for a 5-year DCF model and return a structured
+      dataset: horizon_years (default 5), baseline_revenue_year1, revenue_growth_rate,
+      baseline_op_exp_year1, op_exp_growth_rate, tax_rate, depreciation_year1..5,
+      capex_year1..5, wc_change_year1..5, discount_rate, terminal_growth_rate, net_debt.
+      All values should be numeric. If any input is optional, provide a placeholder
+      value (e.g., 0).'
+  wc_change_y1:
+    agent: false
+    description: Assign Year 1 working capital change from input schedule.
+    name: wc_change_y1
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set wc_change_y1 to the provided wc_change_year1 value. Output wc_change_y1.
+  wc_change_y2:
+    agent: false
+    description: Assign Year 2 working capital change from input schedule.
+    name: wc_change_y2
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set wc_change_y2 to the provided wc_change_year2 value. Output wc_change_y2.
+  wc_change_y3:
+    agent: false
+    description: Assign Year 3 working capital change from input schedule.
+    name: wc_change_y3
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set wc_change_y3 to the provided wc_change_year3 value. Output wc_change_y3.
+  wc_change_y4:
+    agent: false
+    description: Assign Year 4 working capital change from input schedule.
+    name: wc_change_y4
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set wc_change_y4 to the provided wc_change_year4 value. Output wc_change_y4.
+  wc_change_y5:
+    agent: false
+    description: Assign Year 5 working capital change from input schedule.
+    name: wc_change_y5
+    nodes_depended_on:
+    - input_dcf_parameters
+    nodes_dependent_on: []
+    prompt: Set wc_change_y5 to the provided wc_change_year5 value. Output wc_change_y5.

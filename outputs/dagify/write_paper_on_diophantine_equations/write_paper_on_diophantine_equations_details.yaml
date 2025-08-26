@@ -1,0 +1,104 @@
+dag_type: plain_text
+description: A workflow for writing a paper on the history of Diophantine equations,
+  from researching key topics to compiling the final draft.
+name: write_paper_on_diophantine_equations
+nodes:
+  compile_final_draft:
+    agent: false
+    description: Compile the final draft of the paper
+    name: compile_final_draft
+    nodes_depended_on:
+    - write_introduction
+    - write_conclusion
+    - write_section_on_diophantus
+    - write_section_on_historical_developments
+    - write_section_on_modern_applications
+    nodes_dependent_on: []
+    prompt: Compile the sections into a cohesive final draft, ensuring a logical flow
+      and consistency in style and formatting.
+  edit_and_proofread:
+    agent: false
+    description: Edit and proofread the final draft
+    name: edit_and_proofread
+    nodes_depended_on:
+    - compile_final_draft
+    nodes_dependent_on: []
+    prompt: Edit the paper for clarity, coherence, and grammar, and proofread for
+      any remaining errors in formatting, citations, or content.
+  identify_key_mathematicians:
+    agent: false
+    description: Identify influential mathematicians in the history of Diophantine
+      equations
+    name: identify_key_mathematicians
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on: []
+    prompt: List key mathematicians who contributed to the development of Diophantine
+      equations, including their major contributions and impact.
+  outline_major_breakthroughs:
+    agent: false
+    description: Outline significant breakthroughs in the history of Diophantine equations
+    name: outline_major_breakthroughs
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on: []
+    prompt: Detail major breakthroughs and advancements in Diophantine equations,
+      including the mathematicians involved and the significance of each breakthrough.
+  research_diophantine_equations_history:
+    agent: false
+    description: Conduct research on the historical development of Diophantine equations
+    name: research_diophantine_equations_history
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Research the history of Diophantine equations, focusing on key mathematicians,
+      major breakthroughs, and significant milestones. Compile findings into a detailed
+      outline.
+  write_conclusion:
+    agent: false
+    description: Write the conclusion to the paper
+    name: write_conclusion
+    nodes_depended_on:
+    - write_section_on_diophantus
+    - write_section_on_historical_developments
+    - write_section_on_modern_applications
+    nodes_dependent_on: []
+    prompt: Summarize the key findings and contributions of the paper, highlighting
+      the importance and ongoing relevance of Diophantine equations.
+  write_introduction:
+    agent: false
+    description: Write the introduction to the paper on Diophantine equations
+    name: write_introduction
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on: []
+    prompt: Write a comprehensive introduction to the paper, covering the significance
+      of Diophantine equations, their historical context, and the scope of the paper.
+  write_section_on_diophantus:
+    agent: false
+    description: Write a section on Diophantus and his contributions
+    name: write_section_on_diophantus
+    nodes_depended_on:
+    - identify_key_mathematicians
+    - outline_major_breakthroughs
+    nodes_dependent_on: []
+    prompt: Write a detailed section on Diophantus, his work on Diophantine equations,
+      and his impact on the field.
+  write_section_on_historical_developments:
+    agent: false
+    description: Write a section on historical developments in Diophantine equations
+    name: write_section_on_historical_developments
+    nodes_depended_on:
+    - outline_major_breakthroughs
+    nodes_dependent_on: []
+    prompt: Write a section detailing the historical developments and major advancements
+      in Diophantine equations after Diophantus, covering key mathematicians and their
+      contributions.
+  write_section_on_modern_applications:
+    agent: false
+    description: Write a section on modern applications of Diophantine equations
+    name: write_section_on_modern_applications
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on: []
+    prompt: Discuss the modern applications and relevance of Diophantine equations,
+      including their use in cryptography, coding theory, and other areas.

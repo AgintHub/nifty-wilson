@@ -1,0 +1,118 @@
+dag_type: plain_text
+description: A workflow with parallelized steps
+name: parallelized_workflow
+nodes:
+  define_test_objective:
+    agent: false
+    description: Determine the test objective
+    name: define_test_objective
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - run_test_setup
+    prompt: What do you want to test?
+  interpret_test_results:
+    agent: false
+    description: Analyze the test results
+    name: interpret_test_results
+    nodes_depended_on:
+    - run_test_case
+    nodes_dependent_on:
+    - take_corrective_action
+    prompt: What conclusions do you want to draw from the test results?
+  parallezzed_test_configuration_setup:
+    agent: false
+    description: Configure the tests based on the setup
+    name: parallezzed_test_configuration_setup
+    nodes_depended_on:
+    - run_test_setup
+    nodes_dependent_on:
+    - parallezzed_test_environment_configuration
+    prompt: What test configuration setup do you want to use?
+  parallezzed_test_data_selection:
+    agent: false
+    description: Select the data to be used for testing
+    name: parallezzed_test_data_selection
+    nodes_depended_on:
+    - setup_test_configuration
+    nodes_dependent_on:
+    - select_and_load_test_data
+    prompt: What data do you want to use for testing?
+  parallezzed_test_environment_configuration:
+    agent: false
+    description: Configure the test environment
+    name: parallezzed_test_environment_configuration
+    nodes_depended_on:
+    - parallezzed_test_configuration_setup
+    nodes_dependent_on:
+    - select_and_load_test_data
+    prompt: What test environment do you want to use, for example, production or dev?
+  run_test_case:
+    agent: false
+    description: Execute the test case
+    name: run_test_case
+    nodes_depended_on:
+    - run_test_setup
+    nodes_dependent_on:
+    - interpret_test_results
+    prompt: What steps do you want to take to run the test case?
+  run_test_setup:
+    agent: false
+    description: Execute the test setup
+    name: run_test_setup
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - run_test_case
+    prompt: What steps do you want to take to run the test setup?
+  select_and_load_test_data:
+    agent: false
+    description: Select and load test data
+    name: select_and_load_test_data
+    nodes_depended_on:
+    - parallezzed_test_data_selection
+    nodes_dependent_on:
+    - parallezzed_test_environment_configuration
+    prompt: What test data do you want to select, for example, prod or dev?
+  select_test_data:
+    agent: false
+    description: Choose the data to be used for testing
+    name: select_test_data
+    nodes_depended_on:
+    - set_test_scope
+    nodes_dependent_on:
+    - take_corrective_action
+    prompt: What data do you want to use for testing?
+  set_test_environment:
+    agent: false
+    description: Determine the test environment
+    name: set_test_environment
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on:
+    - parallezzed_test_configuration_setup
+    prompt: What environment do you want to use for testing?
+  set_test_scope:
+    agent: false
+    description: Define the test scope
+    name: set_test_scope
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on:
+    - interpret_test_results
+    prompt: What aspects of the test do you want to cover?
+  setup_test_configuration:
+    agent: false
+    description: Configure the test settings
+    name: setup_test_configuration
+    nodes_depended_on:
+    - set_test_environment
+    nodes_dependent_on:
+    - parallezzed_test_data_selection
+    prompt: What configuration do you want to use for testing?
+  take_corrective_action:
+    agent: false
+    description: Take corrective action based on test results
+    name: take_corrective_action
+    nodes_depended_on:
+    - interpret_test_results
+    nodes_dependent_on: []
+    prompt: What action do you want to take based on the test results?

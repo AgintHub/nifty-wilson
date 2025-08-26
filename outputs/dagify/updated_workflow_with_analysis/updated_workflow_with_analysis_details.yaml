@@ -1,0 +1,43 @@
+dag_type: plain_text
+description: Updated workflow to include analysis of test results.
+name: updated_workflow_with_analysis
+nodes:
+  test_analysis:
+    agent: false
+    description: Analyze the test results
+    name: test_analysis
+    nodes_depended_on:
+    - test_verify
+    nodes_dependent_on: []
+    prompt: Perform analysis on the test output
+  test_init:
+    agent: false
+    description: Initialize the test
+    name: test_init
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Start the test process
+  test_report:
+    agent: false
+    description: Generate a test report
+    name: test_report
+    nodes_depended_on:
+    - test_analysis
+    nodes_dependent_on: []
+    prompt: Create a report based on the test results and analysis
+  test_run:
+    agent: false
+    description: Run the test
+    name: test_run
+    nodes_depended_on:
+    - test_init
+    nodes_dependent_on: []
+    prompt: Execute the test
+  test_verify:
+    agent: false
+    description: Verify the test results
+    name: test_verify
+    nodes_depended_on:
+    - test_run
+    nodes_dependent_on: []
+    prompt: Check the test output

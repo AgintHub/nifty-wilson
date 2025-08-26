@@ -1,0 +1,78 @@
+dag_type: plain_text
+description: Calculate the DCF value of the business by breaking down the calculate
+  into substeps.
+name: calculate_dcf_substeps_workflow
+nodes:
+  calculate_dcf:
+    agent: false
+    description: Calculate the DCF value using the present value and terminal value.
+    name: calculate_dcf
+    nodes_depended_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    nodes_dependent_on: []
+    prompt: Using the present value of the cash flows and the terminal value, calculate
+      the DCF value of the business. Provide a detailed breakdown of the calculations.
+  calculate_present_value:
+    agent: false
+    description: Calculate the present value of the forecasted cash flows.
+    name: calculate_present_value
+    nodes_depended_on:
+    - forecast_cash_flows
+    - estimate_cost_of_capital
+    nodes_dependent_on: []
+    prompt: Using the forecasted cash flows and estimated cost of capital, calculate
+      the present value of the cash flows. Provide a detailed breakdown of the calculations.
+  calculate_terminal_value:
+    agent: false
+    description: Calculate the terminal value of the business.
+    name: calculate_terminal_value
+    nodes_depended_on:
+    - forecast_cash_flows
+    - estimate_cost_of_capital
+    nodes_dependent_on: []
+    prompt: Using the forecasted cash flows and estimated cost of capital, calculate
+      the terminal value of the business. Provide a detailed breakdown of the calculations.
+  estimate_cost_of_capital:
+    agent: false
+    description: Estimate the cost of capital for the business.
+    name: estimate_cost_of_capital
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    prompt: Estimate the cost of capital for the business, including the cost of debt
+      and equity. Provide a weighted average cost of capital (WACC) percentage.
+  estimate_revenue_growth_rate:
+    agent: false
+    description: Estimate the revenue growth rate for the business.
+    name: estimate_revenue_growth_rate
+    nodes_depended_on:
+    - gather_financial_statements
+    nodes_dependent_on:
+    - forecast_cash_flows
+    prompt: Analyze the historical financial statements to estimate the revenue growth
+      rate for the business. Provide a percentage growth rate.
+  forecast_cash_flows:
+    agent: false
+    description: Forecast the future cash flows for the business.
+    name: forecast_cash_flows
+    nodes_depended_on:
+    - estimate_revenue_growth_rate
+    - gather_financial_statements
+    nodes_dependent_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    prompt: Using the estimated revenue growth rate and historical financial statements,
+      forecast the future cash flows for the business. Provide a detailed breakdown
+      of the forecasted cash flows.
+  gather_financial_statements:
+    agent: false
+    description: Collect the necessary financial statements and data for the business.
+    name: gather_financial_statements
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - estimate_revenue_growth_rate
+    prompt: Gather the historical financial statements (income statements, balance
+      sheets, and cash flow statements) for the business. Provide the statements in
+      a format that can be easily read and analyzed.

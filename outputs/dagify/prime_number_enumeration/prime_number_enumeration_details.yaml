@@ -1,0 +1,77 @@
+dag_type: plain_text
+description: A workflow for writing a C++ program to efficiently enumerate prime numbers.
+name: prime_number_enumeration
+nodes:
+  choose_algorithm:
+    agent: false
+    description: Choose an algorithm for prime number enumeration.
+    name: choose_algorithm
+    nodes_depended_on:
+    - define_prime_number
+    nodes_dependent_on: []
+    prompt: Choose an algorithm (e.g., trial division, Sieve of Eratosthenes) for
+      prime number enumeration and explain its basic principles.
+  compare_algorithms:
+    agent: false
+    description: Compare the efficiency of the chosen algorithms.
+    name: compare_algorithms
+    nodes_depended_on:
+    - write_sieve_of_eratosthenes
+    - write_trial_division
+    nodes_dependent_on: []
+    prompt: Compare the time and space complexity of the implemented algorithms and
+      discuss their trade-offs.
+  define_prime_number:
+    agent: false
+    description: Define what a prime number is.
+    name: define_prime_number
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define a prime number and provide an example.
+  document_prime_number_enumeration:
+    agent: false
+    description: Document the prime number enumeration program.
+    name: document_prime_number_enumeration
+    nodes_depended_on:
+    - optimize_prime_number_enumeration
+    nodes_dependent_on: []
+    prompt: Document the prime number enumeration program, including its algorithm,
+      implementation, and optimization techniques.
+  optimize_prime_number_enumeration:
+    agent: false
+    description: Optimize the prime number enumeration program.
+    name: optimize_prime_number_enumeration
+    nodes_depended_on:
+    - compare_algorithms
+    - test_prime_number_enumeration
+    nodes_dependent_on: []
+    prompt: Optimize the prime number enumeration program by improving its time and
+      space complexity, if possible.
+  test_prime_number_enumeration:
+    agent: false
+    description: Test the prime number enumeration program.
+    name: test_prime_number_enumeration
+    nodes_depended_on:
+    - write_sieve_of_eratosthenes
+    - write_trial_division
+    nodes_dependent_on: []
+    prompt: Write test cases to verify the correctness of the prime number enumeration
+      program.
+  write_sieve_of_eratosthenes:
+    agent: false
+    description: Implement the Sieve of Eratosthenes algorithm in C++.
+    name: write_sieve_of_eratosthenes
+    nodes_depended_on:
+    - choose_algorithm
+    nodes_dependent_on: []
+    prompt: Write a C++ function that implements the Sieve of Eratosthenes algorithm
+      to find all prime numbers up to a given limit.
+  write_trial_division:
+    agent: false
+    description: Implement the trial division algorithm in C++.
+    name: write_trial_division
+    nodes_depended_on:
+    - choose_algorithm
+    nodes_dependent_on: []
+    prompt: Write a C++ function that implements the trial division algorithm to find
+      all prime numbers up to a given limit.

@@ -1,0 +1,68 @@
+dag_type: plain_text
+description: A workflow to interpret and provide meaningful context for the symbol
+  '*' across multiple domains including mathematics, programming, linguistics, and
+  general usage.
+name: interpret_asterisk_symbol
+nodes:
+  compile_comprehensive_definition:
+    agent: false
+    description: Combine all domain-specific meanings into a unified explanation of
+      the asterisk.
+    name: compile_comprehensive_definition
+    nodes_depended_on:
+    - define_mathematical_meaning
+    - define_programming_usage
+    - define_linguistic_usage
+    - define_general_textual_usage
+    nodes_dependent_on: []
+    prompt: Synthesize the definitions from mathematics, programming, linguistics,
+      and general usage into a single, coherent summary of the asterisk's roles across
+      disciplines. Organize by domain with a brief explanation and one example each.
+  define_general_textual_usage:
+    agent: false
+    description: Explain common non-technical uses of the asterisk in written language.
+    name: define_general_textual_usage
+    nodes_depended_on:
+    - identify_symbol_input
+    nodes_dependent_on: []
+    prompt: Describe how the asterisk (*) is used in everyday writing — such as denoting
+      footnotes, masking characters, or emphasizing text in informal messages. Include
+      three typical applications with context.
+  define_linguistic_usage:
+    agent: false
+    description: Explain the use of the asterisk in linguistics and text annotation.
+    name: define_linguistic_usage
+    nodes_depended_on:
+    - identify_symbol_input
+    nodes_dependent_on: []
+    prompt: Describe how the asterisk (*) is used in linguistics to mark ungrammatical
+      sentences, or in textual commentary to denote footnotes or reconstructed forms.
+      Provide two distinct examples.
+  define_mathematical_meaning:
+    agent: false
+    description: Explain the use of the asterisk in mathematics.
+    name: define_mathematical_meaning
+    nodes_depended_on:
+    - identify_symbol_input
+    nodes_dependent_on: []
+    prompt: Describe the meaning and usage of the asterisk (*) in mathematical contexts,
+      such as representing multiplication, convolution, or dual spaces. Provide one
+      concise explanation with up to three examples.
+  define_programming_usage:
+    agent: false
+    description: Explain the use of the asterisk in programming languages.
+    name: define_programming_usage
+    nodes_depended_on:
+    - identify_symbol_input
+    nodes_dependent_on: []
+    prompt: Describe how the asterisk (*) is used in programming, including roles
+      like pointer declaration (C/C++), dereferencing, wildcard in imports, or argument
+      expansion in Python. List three common uses with short examples.
+  identify_symbol_input:
+    agent: false
+    description: Confirm the input symbol is an asterisk (*).
+    name: identify_symbol_input
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: 'Confirm that the input symbol provided is the asterisk character (*).
+      Respond only with ''Confirmed: *'' if correct, or ''Invalid input'' otherwise.'

@@ -1,0 +1,104 @@
+dag_type: plain_text
+description: Generate a commencement speech for Caltech, incorporating research on
+  the institution's history, quotes from alumni, and a clear structure.
+name: draft_a_commencement_speech_for_caltech
+nodes:
+  conduct_research_on_caltech_history:
+    agent: false
+    description: Conduct thorough research on Caltech's history and achievements
+    name: conduct_research_on_caltech_history
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - gather_quotes_from_caltech_alumni
+    - determine_commencement_speech_tone_and_technique
+    - draft_commencement_speech_content
+    prompt: Research Caltech's origins, notable milestones, and contributions to science
+      and technology. Note key events, accomplishments, and influential figures.
+  determine_commencement_speech_tone_and_technique:
+    agent: false
+    description: Define the tone and technique for the commencement speech
+    name: determine_commencement_speech_tone_and_technique
+    nodes_depended_on:
+    - conduct_research_on_caltech_history
+    - gather_quotes_from_caltech_alumni
+    nodes_dependent_on:
+    - draft_commencement_speech_content
+    prompt: Determine the tone and technique for the commencement speech. Will it
+      be inspirational, motivational, or humorous? How will you engage the audience
+      and make it meaningful?
+  draft_commencement_speech_content:
+    agent: false
+    description: Compose the content of the commencement speech
+    name: draft_commencement_speech_content
+    nodes_depended_on:
+    - conduct_research_on_caltech_history
+    - gather_quotes_from_caltech_alumni
+    - determine_commencement_speech_tone_and_technique
+    nodes_dependent_on:
+    - organize_commencement_speech_structure
+    prompt: Use the gathered information to craft the commencement speech content.
+      Incorporate inspiring quotes, highlight Caltech's achievements, and emphasize
+      the importance of education and innovation.
+  edit_and_refine_commencement_speech:
+    agent: false
+    description: Edit and refine the commencement speech content
+    name: edit_and_refine_commencement_speech
+    nodes_depended_on:
+    - organize_commencement_speech_structure
+    nodes_dependent_on:
+    - finalize_commencement_speech_for_distribution
+    - obtain_feedback_on_commencement_speech
+    prompt: Review and revise the commencement speech content for clarity, coherence,
+      and emotional impact. Ensure it resonates with the Caltech community.
+  finalize_commencement_speech_for_distribution:
+    agent: false
+    description: Finalize the commencement speech for distribution
+    name: finalize_commencement_speech_for_distribution
+    nodes_depended_on:
+    - edit_and_refine_commencement_speech
+    - revise_commencement_speech_based_on_feedback
+    nodes_dependent_on: []
+    prompt: Finalize the commencement speech for distribution. Ensure it's polished,
+      error-free, and ready for the Caltech commencement ceremony.
+  gather_quotes_from_caltech_alumni:
+    agent: false
+    description: Collect inspiring quotes from Caltech alumni
+    name: gather_quotes_from_caltech_alumni
+    nodes_depended_on:
+    - conduct_research_on_caltech_history
+    nodes_dependent_on:
+    - determine_commencement_speech_tone_and_technique
+    - draft_commencement_speech_content
+    prompt: Gather quotes from influential Caltech alumni across various fields, highlighting
+      their experiences, advice, and thoughts on the importance of education and innovation.
+  obtain_feedback_on_commencement_speech:
+    agent: false
+    description: Obtain feedback on the commencement speech from the Caltech community
+    name: obtain_feedback_on_commencement_speech
+    nodes_depended_on:
+    - edit_and_refine_commencement_speech
+    nodes_dependent_on:
+    - revise_commencement_speech_based_on_feedback
+    prompt: Share the commencement speech with a small group of Caltech community
+      members and gather feedback on its content, tone, and overall impact.
+  organize_commencement_speech_structure:
+    agent: false
+    description: Organize the structure of the commencement speech
+    name: organize_commencement_speech_structure
+    nodes_depended_on:
+    - draft_commencement_speech_content
+    nodes_dependent_on:
+    - edit_and_refine_commencement_speech
+    prompt: Organize the commencement speech into an introduction, body, and conclusion.
+      Ensure a logical flow and clarity throughout.
+  revise_commencement_speech_based_on_feedback:
+    agent: false
+    description: Revise the commencement speech based on feedback from the Caltech
+      community
+    name: revise_commencement_speech_based_on_feedback
+    nodes_depended_on:
+    - obtain_feedback_on_commencement_speech
+    nodes_dependent_on:
+    - finalize_commencement_speech_for_distribution
+    prompt: Incorporate the feedback received into the commencement speech, making
+      revisions as necessary to improve its clarity, coherence, and emotional impact.

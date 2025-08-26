@@ -1,0 +1,121 @@
+dag_type: plain_text
+description: A workflow to calculate the Discounted Cash Flow (DCF) for a business,
+  including gathering financial data, projecting future cash flows, determining the
+  discount rate, and calculating the present value of future cash flows.
+name: calculate_dcf_for_business
+nodes:
+  calculate_present_value_of_free_cash_flow:
+    agent: false
+    description: Calculates the present value of projected free cash flows.
+    name: calculate_present_value_of_free_cash_flow
+    nodes_depended_on:
+    - project_future_free_cash_flow
+    - determine_discount_rate
+    nodes_dependent_on:
+    - calculate_terminal_value
+    - sum_present_values
+    prompt: Calculate the present value of each year's projected free cash flow using
+      the determined discount rate. Provide the present values in a tabular format
+      with columns for Year and Present Value of Free Cash Flow.
+  calculate_terminal_value:
+    agent: false
+    description: Calculates the terminal value of the business.
+    name: calculate_terminal_value
+    nodes_depended_on:
+    - project_future_free_cash_flow
+    nodes_dependent_on:
+    - sum_present_values
+    prompt: Calculate the terminal value of the business at the end of the projection
+      period using an appropriate method such as the perpetuity growth model or exit
+      multiple approach. Provide the terminal value as a single number.
+  calculate_total_dcf:
+    agent: false
+    description: Calculates the final DCF value.
+    name: calculate_total_dcf
+    nodes_depended_on:
+    - sum_present_values
+    nodes_dependent_on: []
+    prompt: The total present value of the business is the Discounted Cash Flow (DCF).
+      Provide the DCF as a single number.
+  determine_discount_rate:
+    agent: false
+    description: Determines the discount rate used in the DCF calculation.
+    name: determine_discount_rate
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - calculate_present_value_of_free_cash_flow
+    prompt: Determine the appropriate discount rate for the business based on its
+      risk profile and the cost of capital. Provide the discount rate as a percentage.
+  gather_historical_financial_data:
+    agent: false
+    description: Collects historical financial data necessary for DCF calculation.
+    name: gather_historical_financial_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - project_future_cash_flows
+    prompt: Gather historical financial data for the business, including revenue,
+      expenses, net income, and free cash flow for the past 5 years. Provide this
+      data in a tabular format with columns for Year, Revenue, Expenses, Net Income,
+      and Free Cash Flow.
+  project_future_expenses:
+    agent: false
+    description: Projects future expenses based on historical data and expected changes.
+    name: project_future_expenses
+    nodes_depended_on:
+    - gather_historical_financial_data
+    nodes_dependent_on:
+    - project_future_free_cash_flow
+    prompt: Project the future expenses for the next 10 years based on historical
+      expense patterns and expected changes in cost structure. Provide the projected
+      expenses in a tabular format with columns for Year and Projected Expenses.
+  project_future_free_cash_flow:
+    agent: false
+    description: Calculates projected future free cash flow based on net income and
+      capital expenditures.
+    name: project_future_free_cash_flow
+    nodes_depended_on:
+    - project_future_net_income
+    - project_future_expenses
+    nodes_dependent_on:
+    - calculate_present_value_of_free_cash_flow
+    prompt: Calculate the projected future free cash flow for the next 10 years by
+      adjusting the projected net income for non-cash items and capital expenditures.
+      Provide the projected free cash flow in a tabular format with columns for Year
+      and Projected Free Cash Flow.
+  project_future_net_income:
+    agent: false
+    description: Calculates projected future net income based on revenue and expense
+      projections.
+    name: project_future_net_income
+    nodes_depended_on:
+    - project_future_revenue
+    - project_future_expenses
+    nodes_dependent_on:
+    - project_future_free_cash_flow
+    prompt: Calculate the projected future net income for the next 10 years by subtracting
+      projected expenses from projected revenue. Provide the projected net income
+      in a tabular format with columns for Year and Projected Net Income.
+  project_future_revenue:
+    agent: false
+    description: Projects future revenue based on historical data and market analysis.
+    name: project_future_revenue
+    nodes_depended_on:
+    - gather_historical_financial_data
+    nodes_dependent_on:
+    - project_future_expenses
+    - project_future_net_income
+    prompt: Project the future revenue for the next 10 years based on historical growth
+      rates and market trends. Provide the projected revenue in a tabular format with
+      columns for Year and Projected Revenue.
+  sum_present_values:
+    agent: false
+    description: Sums the present values of free cash flows and terminal value.
+    name: sum_present_values
+    nodes_depended_on:
+    - calculate_present_value_of_free_cash_flow
+    - calculate_terminal_value
+    nodes_dependent_on:
+    - calculate_total_dcf
+    prompt: Sum the present values of the projected free cash flows and the terminal
+      value to obtain the total present value of the business. Provide the sum as
+      a single number.

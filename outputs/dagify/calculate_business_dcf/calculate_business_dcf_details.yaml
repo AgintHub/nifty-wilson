@@ -1,0 +1,219 @@
+dag_type: plain_text
+description: A detailed workflow to calculate a discounted cash flow (DCF) valuation
+  for a business by systematically gathering inputs, forecasting cash flows, determining
+  discount rate, and computing present values.
+name: calculate_business_dcf
+nodes:
+  adjust_for_cash_and_debt:
+    agent: false
+    description: Adjust enterprise value for net cash or debt positions to approach
+      equity value.
+    name: adjust_for_cash_and_debt
+    nodes_depended_on:
+    - aggregate_present_values
+    - collect_historical_financials
+    nodes_dependent_on:
+    - calculate_equity_value
+    prompt: Identify the latest net debt or cash position from the financials and
+      adjust the enterprise value accordingly (Enterprise Value - Debt + Cash). Provide
+      the net adjustment amount and adjusted value.
+  aggregate_present_values:
+    agent: false
+    description: Sum all discounted cash flows and discounted terminal value to produce
+      the total enterprise value.
+    name: aggregate_present_values
+    nodes_depended_on:
+    - discount_free_cash_flows
+    - discount_terminal_value
+    nodes_dependent_on:
+    - adjust_for_cash_and_debt
+    - calculate_equity_value
+    prompt: Sum the present values of forecasted free cash flows and the discounted
+      terminal value to compute the total enterprise value of the business.
+  assess_historical_costs_and_expenses:
+    agent: false
+    description: Analyze historical costs and operating expenses for trend and margin
+      analysis.
+    name: assess_historical_costs_and_expenses
+    nodes_depended_on:
+    - collect_historical_financials
+    nodes_dependent_on:
+    - forecast_operating_expenses
+    prompt: Review historical operating expenses including cost of goods sold, selling/general/admin
+      expenses. Compute average margins and identify trends to support expense forecasting.
+  assess_historical_revenue_growth:
+    agent: false
+    description: Analyze historical revenue growth rates to inform forecasting assumptions.
+    name: assess_historical_revenue_growth
+    nodes_depended_on:
+    - collect_historical_financials
+    nodes_dependent_on:
+    - forecast_revenue_growth_rate
+    prompt: Analyze the historical revenues over the collected years and compute annual
+      revenue growth rates along with an average growth rate to guide future projections.
+  calculate_equity_value:
+    agent: false
+    description: Calculate final equity value of the business after adjustments.
+    name: calculate_equity_value
+    nodes_depended_on:
+    - aggregate_present_values
+    - adjust_for_cash_and_debt
+    nodes_dependent_on: []
+    prompt: Calculate the final equity value of the business by applying net debt/cash
+      adjustments to the enterprise value. Provide the final equity valuation number.
+  calculate_historical_free_cash_flow:
+    agent: false
+    description: Calculate historical free cash flows (FCF) from the gathered financial
+      statements.
+    name: calculate_historical_free_cash_flow
+    nodes_depended_on:
+    - collect_historical_financials
+    nodes_dependent_on:
+    - forecast_free_cash_flows
+    prompt: 'Using the historical financial data, calculate the free cash flow for
+      each year defined as: Operating Cash Flow minus Capital Expenditures. Provide
+      yearly FCF values for the historical period.'
+  calculate_terminal_value:
+    agent: false
+    description: Estimate the terminal value at the end of the forecast period using
+      a perpetuity growth model or exit multiple.
+    name: calculate_terminal_value
+    nodes_depended_on:
+    - forecast_free_cash_flows
+    nodes_dependent_on:
+    - discount_terminal_value
+    prompt: Using the final year free cash flow forecast, calculate the terminal value
+      of the business applying a chosen perpetual growth rate or exit multiple. Provide
+      formula and resulting terminal value.
+  collect_historical_financials:
+    agent: false
+    description: Gather and organize the business's historical financial statements
+      including income statements, balance sheets, and cash flow statements.
+    name: collect_historical_financials
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - calculate_historical_free_cash_flow
+    - assess_historical_revenue_growth
+    - assess_historical_costs_and_expenses
+    prompt: 'Collect the last 3-5 years of the company''s audited financial statements
+      specifically: income statement, balance sheet, and cash flow statement. Summarize
+      key line items necessary for DCF (revenues, operating expenses, capital expenditures,
+      working capital changes, tax expenses).'
+  determine_discount_rate:
+    agent: false
+    description: Calculate the discount rate (WACC) to use for present value calculations.
+    name: determine_discount_rate
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - discount_free_cash_flows
+    - discount_terminal_value
+    prompt: Calculate the weighted average cost of capital (WACC) for the business
+      incorporating cost of equity, cost of debt, capital structure, and tax rate.
+      Provide the discount rate as an annual percentage.
+  discount_free_cash_flows:
+    agent: false
+    description: Calculate present values of the forecasted free cash flows using
+      the discount rate.
+    name: discount_free_cash_flows
+    nodes_depended_on:
+    - forecast_free_cash_flows
+    - determine_discount_rate
+    nodes_dependent_on:
+    - aggregate_present_values
+    prompt: Discount each year's forecasted free cash flow back to present value using
+      the calculated discount rate. Provide a list of present values per year.
+  discount_terminal_value:
+    agent: false
+    description: Calculate present value of the terminal value using the discount
+      rate.
+    name: discount_terminal_value
+    nodes_depended_on:
+    - calculate_terminal_value
+    - determine_discount_rate
+    nodes_dependent_on:
+    - aggregate_present_values
+    prompt: Discount the computed terminal value back to present value at the discount
+      rate. Provide the discounted terminal value amount.
+  forecast_capital_expenditures:
+    agent: false
+    description: Forecast future capital expenditures for each forecast year.
+    name: forecast_capital_expenditures
+    nodes_depended_on:
+    - gather_capital_expenditure_and_working_capital_assumptions
+    nodes_dependent_on:
+    - forecast_free_cash_flows
+    prompt: Using provided assumptions, forecast the annual capital expenditures required
+      in the forecast period.
+  forecast_free_cash_flows:
+    agent: false
+    description: Calculate forecasted free cash flows for each future year based on
+      revenue, expenses, capital spending, and working capital.
+    name: forecast_free_cash_flows
+    nodes_depended_on:
+    - forecast_revenue
+    - forecast_operating_expenses
+    - forecast_capital_expenditures
+    - forecast_working_capital_changes
+    nodes_dependent_on:
+    - determine_discount_rate
+    - calculate_terminal_value
+    prompt: Compute free cash flow for each forecast year by deducting operating expenses,
+      capital expenditures, and working capital changes from forecasted revenue (after
+      tax adjustments). Output annual free cash flow projections.
+  forecast_operating_expenses:
+    agent: false
+    description: Project future operating expenses based on historical margins and
+      forecasted revenues.
+    name: forecast_operating_expenses
+    nodes_depended_on:
+    - assess_historical_costs_and_expenses
+    - forecast_revenue
+    nodes_dependent_on:
+    - forecast_free_cash_flows
+    prompt: Forecast annual operating expenses for each forecast year by applying
+      expected margin percentages to forecasted revenues or directly estimating expense
+      growth.
+  forecast_revenue:
+    agent: false
+    description: Generate the forecasted revenue values for each year in the projection
+      period.
+    name: forecast_revenue
+    nodes_depended_on:
+    - forecast_revenue_growth_rate
+    nodes_dependent_on:
+    - forecast_free_cash_flows
+    prompt: Calculate the annual forecasted revenue for the next 5-10 years by applying
+      the forecasted growth rates to the last known revenue figure.
+  forecast_revenue_growth_rate:
+    agent: false
+    description: Project future revenue growth rates based on historical data and
+      qualitative inputs.
+    name: forecast_revenue_growth_rate
+    nodes_depended_on:
+    - assess_historical_revenue_growth
+    nodes_dependent_on:
+    - forecast_revenue
+    prompt: Using the historical revenue growth analysis and any relevant future business
+      assumptions, define the annual revenue growth rate for each forecast year.
+  forecast_working_capital_changes:
+    agent: false
+    description: Forecast changes in working capital for each forecast year.
+    name: forecast_working_capital_changes
+    nodes_depended_on:
+    - gather_capital_expenditure_and_working_capital_assumptions
+    nodes_dependent_on:
+    - forecast_free_cash_flows
+    prompt: Using provided assumptions, forecast the net working capital changes expected
+      each year in the forecast period.
+  gather_capital_expenditure_and_working_capital_assumptions:
+    agent: false
+    description: Define or collect assumptions about future capital expenditures and
+      working capital changes.
+    name: gather_capital_expenditure_and_working_capital_assumptions
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - forecast_capital_expenditures
+    - forecast_working_capital_changes
+    prompt: Provide or collect the expected annual capital expenditure and working
+      capital changes for the forecast period, based on company plans or industry
+      norms. Document numeric forecasts or assumptions.

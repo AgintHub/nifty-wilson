@@ -1,0 +1,104 @@
+dag_type: plain_text
+description: A workflow for gaining a thorough comprehension of the principles and
+  concepts behind quantum mechanics.
+name: understand_quantum_mechanics
+nodes:
+  calculate_quantum_mechanics_formulas:
+    agent: false
+    description: Calculate and apply key formulas and equations in quantum mechanics,
+      including the energy eigenvalue equation and the matrix representations of operators.
+    name: calculate_quantum_mechanics_formulas
+    nodes_depended_on:
+    - evaluate_theory_vs_experiment
+    nodes_dependent_on: []
+    prompt: 'Calculate and derive the following formulas in quantum mechanics: the
+      energy eigenvalue equation and the matrix representations of operators. Explain
+      their significance and provide examples.'
+  define_key_concepts:
+    agent: false
+    description: Define fundamental terms and concepts in quantum mechanics, including
+      wave-particle duality, superposition, entanglement, and the Heisenberg Uncertainty
+      Principle.
+    name: define_key_concepts
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: 'Explain the following quantum mechanics concepts: wave-particle duality,
+      superposition, entanglement, and the Heisenberg Uncertainty Principle. Provide
+      examples for each. '
+  discuss_applications_of_quantum_mechanics:
+    agent: false
+    description: Discuss real-world applications and implications of quantum mechanics,
+      including quantum computing, cryptography, and materials science.
+    name: discuss_applications_of_quantum_mechanics
+    nodes_depended_on:
+    - research_quantum_measuring_processes
+    nodes_dependent_on: []
+    prompt: Discuss real-world applications and implications of quantum mechanics.
+      Explain the role of quantum mechanics in quantum computing, cryptography, and
+      materials science. Provide examples.
+  evaluate_theory_vs_experiment:
+    agent: false
+    description: Evaluate the relationship between theory and experiment in quantum
+      mechanics, including the principles of quantum field theory and the concept
+      of renormalization.
+    name: evaluate_theory_vs_experiment
+    nodes_depended_on:
+    - discuss_applications_of_quantum_mechanics
+    nodes_dependent_on: []
+    prompt: Discuss the relationship between theory and experiment in quantum mechanics.
+      Evaluate the principles of quantum field theory and the concept of renormalization.
+      Provide evidence and examples.
+  examine_wave_functions:
+    agent: false
+    description: Examine wave functions in quantum mechanics, including the square-integrable
+      wave function, wave function collapse, and the concept of orbitals.
+    name: examine_wave_functions
+    nodes_depended_on:
+    - explore_schr{"o}dinger_equation
+    - investigate_particle_properties
+    nodes_dependent_on: []
+    prompt: Discuss wave functions in quantum mechanics. Explain the concept of a
+      square-integrable wave function, wave function collapse, and the significance
+      of orbitals. Provide examples.
+  explore_schr{"o}dinger_equation:
+    agent: false
+    description: Explore the mathematical formulation of the Schr{"o}dinger equation,
+      its significance, and applications.
+    name: explore_schr{"o}dinger_equation
+    nodes_depended_on:
+    - define_key_concepts
+    nodes_dependent_on: []
+    prompt: Derive and illustrate the Schr{"o}dinger equation. Discuss its role in
+      solving quantum problems, and provide examples of its applications.
+  investigate_particle_properties:
+    agent: false
+    description: Investigate the properties of particles in quantum mechanics, including
+      spin, momentum, and energy.
+    name: investigate_particle_properties
+    nodes_depended_on:
+    - define_key_concepts
+    nodes_dependent_on: []
+    prompt: 'Discuss the following particle properties in quantum mechanics: spin,
+      momentum, and energy. Explain their significance and provide examples.'
+  research_quantum_measuring_processes:
+    agent: false
+    description: Research quantum measuring processes, including wave function collapse
+      and the Heisenberg Uncertainty Principle.
+    name: research_quantum_measuring_processes
+    nodes_depended_on:
+    - examine_wave_functions
+    nodes_dependent_on: []
+    prompt: Discuss quantum measuring processes, including wave function collapse
+      and the Heisenberg Uncertainty Principle. Explain their significance and provide
+      examples.
+  review_quantum_mechanics_fundamentals:
+    agent: false
+    description: Review and summarize the key concepts and principles of quantum mechanics,
+      including wave functions, particle properties, and quantum measuring processes.
+    name: review_quantum_mechanics_fundamentals
+    nodes_depended_on:
+    - calculate_quantum_mechanics_formulas
+    nodes_dependent_on: []
+    prompt: Summarize and review the key concepts and principles of quantum mechanics.
+      Discuss the significance of wave functions, particle properties, and quantum
+      measuring processes. Provide a final evaluation of the discipline.

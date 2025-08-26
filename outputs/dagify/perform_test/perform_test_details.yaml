@@ -1,0 +1,85 @@
+dag_type: plain_text
+description: A workflow to execute a basic test operation, ensuring setup, execution,
+  validation, and reporting are handled in a concurrent, atomic manner.
+name: perform_test
+nodes:
+  clean_test_environment:
+    agent: false
+    description: Tear down and reset the test environment after execution.
+    name: clean_test_environment
+    nodes_depended_on:
+    - validate_test_results
+    nodes_dependent_on: []
+    prompt: Safely shut down and clean the test environment. Remove temporary files,
+      reset configurations, and confirm the environment has been restored to its initial
+      state.
+  define_test_cases:
+    agent: false
+    description: Specify the individual test cases to be executed.
+    name: define_test_cases
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List out specific, atomic test cases to be run. Each test case must have
+      a clear input, expected behavior, and expected output. Format as a numbered
+      list with one sentence per case.
+  execute_test_case_1:
+    agent: false
+    description: Run the first defined test case in the environment.
+    name: execute_test_case_1
+    nodes_depended_on:
+    - prepare_test_environment
+    - define_test_cases
+    nodes_dependent_on: []
+    prompt: Execute the first test case from the defined list within the prepared
+      environment. Provide raw output or result status (pass/fail) without interpretation.
+  execute_test_case_2:
+    agent: false
+    description: Run the second defined test case in the environment.
+    name: execute_test_case_2
+    nodes_depended_on:
+    - prepare_test_environment
+    - define_test_cases
+    nodes_dependent_on: []
+    prompt: Execute the second test case from the defined list within the prepared
+      environment. Provide raw output or result status (pass/fail) without interpretation.
+  execute_test_case_3:
+    agent: false
+    description: Run the third defined test case in the environment.
+    name: execute_test_case_3
+    nodes_depended_on:
+    - prepare_test_environment
+    - define_test_cases
+    nodes_dependent_on: []
+    prompt: Execute the third test case from the defined list within the prepared
+      environment. Provide raw output or result status (pass/fail) without interpretation.
+  generate_test_report:
+    agent: false
+    description: Compile a final summary of test execution and validation.
+    name: generate_test_report
+    nodes_depended_on:
+    - validate_test_results
+    nodes_dependent_on: []
+    prompt: Create a concise report summarizing all test cases, their execution results,
+      and validation status. Include total pass/fail count and any detected anomalies.
+      Format as bullet points.
+  prepare_test_environment:
+    agent: false
+    description: Set up the necessary environment for test execution.
+    name: prepare_test_environment
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Initialize a clean, isolated environment suitable for running tests. Include
+      necessary dependencies, configurations, and simulation conditions if applicable.
+      Return confirmation of environment readiness.
+  validate_test_results:
+    agent: false
+    description: Compare actual test outputs against expected outcomes.
+    name: validate_test_results
+    nodes_depended_on:
+    - execute_test_case_1
+    - execute_test_case_2
+    - execute_test_case_3
+    nodes_dependent_on: []
+    prompt: For each executed test case, compare the actual result with the expected
+      outcome. Report pass/fail for each case based solely on this comparison. Do
+      not modify or reinterpret results.

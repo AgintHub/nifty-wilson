@@ -1,0 +1,70 @@
+dag_type: plain_text
+description: A workflow for constructing a bear from raw materials through a series
+  of steps.
+name: build_a_bear
+nodes:
+  add_features:
+    agent: false
+    description: Add features like eyes, nose, and mouth to the bear.
+    name: add_features
+    nodes_depended_on:
+    - add_stuffing
+    nodes_dependent_on: []
+    prompt: Add features like eyes, nose, and mouth to the bear. Choose materials
+      that match the design concept.
+  add_stuffing:
+    agent: false
+    description: Add stuffing to the bear to give it a plush texture.
+    name: add_stuffing
+    nodes_depended_on:
+    - sew_together_body_parts
+    nodes_dependent_on: []
+    prompt: Add the selected stuffing material to the bear, ensuring it is evenly
+      distributed and the bear is plush.
+  cut_out_body_parts:
+    agent: false
+    description: Cut out the body parts of the bear from the selected materials.
+    name: cut_out_body_parts
+    nodes_depended_on:
+    - select_materials
+    nodes_dependent_on: []
+    prompt: Cut out the body parts (e.g., head, body, ears, paws) from the materials
+      selected. Provide a list of the cut-out parts.
+  design_bear_concept:
+    agent: false
+    description: Create a conceptual design for the bear, including its type, size,
+      and features.
+    name: design_bear_concept
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Design a concept for a bear. Consider its type (e.g., teddy, polar, panda),
+      size, and features (e.g., material, color, pose). Provide a detailed description.
+  finalize_bear:
+    agent: false
+    description: Finalize the bear by ensuring all parts are secure and it matches
+      the design concept.
+    name: finalize_bear
+    nodes_depended_on:
+    - add_features
+    nodes_dependent_on: []
+    prompt: Inspect the bear to ensure all parts are secure and it matches the initial
+      design concept. Make any necessary adjustments.
+  select_materials:
+    agent: false
+    description: Choose the materials needed for the bear based on the design concept.
+    name: select_materials
+    nodes_depended_on:
+    - design_bear_concept
+    nodes_dependent_on: []
+    prompt: Based on the bear concept, select the necessary materials. Consider fabric,
+      stuffing, thread, and any additional features like eyes or a nose. List the
+      materials with quantities.
+  sew_together_body_parts:
+    agent: false
+    description: Sew the body parts together to form the bear's structure.
+    name: sew_together_body_parts
+    nodes_depended_on:
+    - cut_out_body_parts
+    nodes_dependent_on: []
+    prompt: Sew the body parts together using the chosen thread. Ensure the bear's
+      structure is secure and well-formed.

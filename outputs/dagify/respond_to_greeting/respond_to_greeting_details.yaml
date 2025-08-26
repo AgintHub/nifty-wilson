@@ -1,0 +1,51 @@
+dag_type: plain_text
+description: A workflow for responding to the greeting 'how are you doing?'
+name: respond_to_greeting
+nodes:
+  acknowledge_greeting:
+    agent: false
+    description: Acknowledge the greeting
+    name: acknowledge_greeting
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - respond_with_feeling
+    - ask_about_counterpart
+    prompt: Acknowledge the greeting 'how are you doing?' with a simple response,
+      such as 'I'm doing well, thank you.'
+  ask_about_counterpart:
+    agent: false
+    description: Ask about the counterpart's well-being
+    name: ask_about_counterpart
+    nodes_depended_on:
+    - acknowledge_greeting
+    nodes_dependent_on:
+    - listen_to_response
+    prompt: Ask the counterpart how they are doing, such as 'How about you?'
+  elaborate_on_feeling:
+    agent: false
+    description: Elaborate on the feeling or emotion
+    name: elaborate_on_feeling
+    nodes_depended_on:
+    - respond_with_feeling
+    nodes_dependent_on: []
+    prompt: Elaborate on the feeling or emotion, such as 'I'm feeling happy today
+      because I had a great conversation with a friend.'
+  listen_to_response:
+    agent: false
+    description: Listen to the counterpart's response
+    name: listen_to_response
+    nodes_depended_on:
+    - ask_about_counterpart
+    nodes_dependent_on: []
+    prompt: Listen to the counterpart's response to the question 'How about you?'
+      and respond accordingly.
+  respond_with_feeling:
+    agent: false
+    description: Respond with a feeling or emotion
+    name: respond_with_feeling
+    nodes_depended_on:
+    - acknowledge_greeting
+    nodes_dependent_on:
+    - elaborate_on_feeling
+    prompt: Respond to the greeting with a feeling or emotion, such as 'I'm feeling
+      happy today.'

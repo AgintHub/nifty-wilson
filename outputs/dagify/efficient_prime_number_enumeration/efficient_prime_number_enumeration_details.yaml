@@ -1,0 +1,86 @@
+dag_type: plain_text
+description: A workflow for enumerating prime numbers via the Sieve of Eratosthenes
+  algorithm.
+name: efficient_prime_number_enumeration
+nodes:
+  delete_marked_multiples:
+    agent: false
+    description: Remove marked multiples.
+    name: delete_marked_multiples
+    nodes_depended_on:
+    - mark_multiples
+    nodes_dependent_on: []
+    prompt: Delete marked multiples from the grid.
+  determine_sieve_size:
+    agent: false
+    description: Calculate the upper bound of the Sieve of Eratosthenes.
+    name: determine_sieve_size
+    nodes_depended_on:
+    - generate_numerical_inputs
+    nodes_dependent_on: []
+    prompt: Determine the optimal upper bound `n` for the Sieve of Eratosthenes based
+      on initial inputs. n should be an even number close to the given input.
+  display_output:
+    agent: false
+    description: Display the final list of prime numbers.
+    name: display_output
+    nodes_depended_on:
+    - finalize_primes_and_non_primes
+    nodes_dependent_on: []
+    prompt: Print the list of prime numbers extracted from the Sieve of Eratosthenes
+      algorithm in order of appearance and sorted in ascending order.
+  finalize_primes_and_non_primes:
+    agent: false
+    description: Extract prime numbers from the grid.
+    name: finalize_primes_and_non_primes
+    nodes_depended_on:
+    - delete_marked_multiples
+    nodes_dependent_on: []
+    prompt: Extract the prime numbers from the grid where no multiples have been marked.
+  generate_numerical_inputs:
+    agent: false
+    description: Get the upper limit for the Sieve.
+    name: generate_numerical_inputs
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Get an upper limit for the Sieve of Eratosthenes from the user.
+  initialize_grid:
+    agent: false
+    description: Create a grid of numbers from 2 to n.
+    name: initialize_grid
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - determine_sieve_size
+    - generate_numerical_inputs
+    prompt: Create a one-dimensional list of numbers from 2 to n (size `n+1`) where
+      `n` will be the maximum value in the Sieve of Eratosthenes.
+  iterate_to_n:
+    agent: false
+    description: Perform a loop from 2 to n to identify primes.
+    name: iterate_to_n
+    nodes_depended_on:
+    - initialize_grid
+    nodes_dependent_on:
+    - mark_multiples
+    prompt: Perform a loop from 2 to n to identify prime numbers, taking into account
+      the marked multiples.
+  mark_first_prime:
+    agent: false
+    description: Identify the first prime and mark its multiples.
+    name: mark_first_prime
+    nodes_depended_on:
+    - determine_sieve_size
+    nodes_dependent_on:
+    - iterate_to_n
+    prompt: Identify the first prime and mark its multiples as False.
+  mark_multiples:
+    agent: false
+    description: Mark multiples of each prime number to be deleted.
+    name: mark_multiples
+    nodes_depended_on:
+    - iterate_to_n
+    - mark_first_prime
+    nodes_dependent_on:
+    - delete_marked_multiples
+    prompt: In the grid, mark multiples of each prime number. Assume that a marked
+      multiple should be set to False.

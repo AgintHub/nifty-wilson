@@ -1,0 +1,307 @@
+dag_type: plain_text
+description: Optimized steps to replace the brakes on a Toyota Tercel with Brembo
+  brakes.
+name: replace_toyota_tercel_brembo_brakes
+nodes:
+  bed_in_new_brakes:
+    agent: false
+    description: Perform the break-in procedure for the new Brembo brakes.
+    name: bed_in_new_brakes
+    nodes_depended_on:
+    - lower_vehicle
+    - inspect_for_leaks
+    nodes_dependent_on: []
+    prompt: Conduct a brake bedding-in procedure to ensure optimal performance and
+      longevity of the new Brembo brakes. This typically involves a series of moderate
+      stops from increasing speeds, followed by periods of cooling. Follow the specific
+      bedding-in instructions provided by Brembo for these pads and rotors. Avoid
+      hard braking immediately after installation.
+  detach_front_brake_calipers:
+    agent: false
+    description: Remove the front brake calipers from their mounts.
+    name: detach_front_brake_calipers
+    nodes_depended_on:
+    - inspect_front_calipers_and_rotors
+    nodes_dependent_on: []
+    prompt: Locate and remove the caliper mounting bolts on both front wheels of the
+      Toyota Tercel. Once loose, carefully detach the calipers and suspend them to
+      avoid stressing the brake hoses. If the Brembo calipers are direct replacements,
+      note any differences in mounting hardware.
+  detach_rear_brake_calipers:
+    agent: false
+    description: Remove the rear brake calipers from their mounts.
+    name: detach_rear_brake_calipers
+    nodes_depended_on:
+    - inspect_rear_calipers_and_rotors
+    nodes_dependent_on: []
+    prompt: Locate and remove the caliper mounting bolts on both rear wheels of the
+      Toyota Tercel. Once loose, carefully detach the calipers and suspend them to
+      avoid stressing the brake hoses. If the Brembo calipers are direct replacements,
+      note any differences in mounting hardware.
+  drain_old_brake_fluid:
+    agent: false
+    description: Drain the old brake fluid from the system.
+    name: drain_old_brake_fluid
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Locate the brake fluid reservoir and the bleed screws on each caliper.
+      Using a brake bleeding kit or appropriate tool, drain the old brake fluid from
+      the entire system into a designated waste container. Be careful not to spill
+      fluid on painted surfaces.
+  final_safety_check:
+    agent: false
+    description: Conduct a final comprehensive safety check of the braking system.
+    name: final_safety_check
+    nodes_depended_on:
+    - bed_in_new_brakes
+    nodes_dependent_on: []
+    prompt: Perform a final high-level safety check. Ensure the parking brake functions
+      correctly. Test brake pedal feel and responsiveness. Confirm no abnormal noises
+      are present during this final check.
+  flush_brake_lines_and_bleed_system:
+    agent: false
+    description: Flush the brake lines and bleed the new braking system.
+    name: flush_brake_lines_and_bleed_system
+    nodes_depended_on:
+    - reinstall_front_brake_calipers
+    - reinstall_rear_brake_calipers
+    - drain_old_brake_fluid
+    nodes_dependent_on: []
+    prompt: Fill the brake fluid reservoir with fresh, high-quality brake fluid (DOT
+      3 or recommended equivalent). Systematically bleed the brakes at each caliper,
+      starting from the furthest from the master cylinder and working closer. Ensure
+      a firm pedal is achieved and all air is purged from the lines. Monitor fluid
+      levels constantly.
+  gather_brembo_parts:
+    agent: false
+    description: Procure necessary Brembo brake components for the Toyota Tercel.
+    name: gather_brembo_parts
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Identify and list all required Brembo brake parts (e.g., rotors, pads,
+      calipers, fluid) specifically for a Toyota Tercel model year. Ensure these are
+      genuine Brembo parts or direct fitment equivalents. Record part numbers and
+      quantities.
+  gather_tools_and_supplies:
+    agent: false
+    description: Assemble all specialized tools and consumable supplies needed for
+      the brake replacement.
+    name: gather_tools_and_supplies
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Compile a comprehensive list of all tools and consumable supplies required
+      for a complete brake replacement on a Toyota Tercel. Include items such as jack,
+      jack stands, lug wrench, torque wrench, brake cleaner, rags, gloves, and a brake
+      bleeding kit. Also, list any necessary safety equipment.
+  inspect_for_leaks:
+    agent: false
+    description: Perform a final inspection for any brake fluid leaks.
+    name: inspect_for_leaks
+    nodes_depended_on:
+    - flush_brake_lines_and_bleed_system
+    nodes_dependent_on: []
+    prompt: Carefully inspect all brake lines, hoses, caliper fittings, and the master
+      cylinder reservoir for any signs of brake fluid leakage after bleeding the system.
+      Wipe down all connections and check for moisture.
+  inspect_front_calipers_and_rotors:
+    agent: false
+    description: Visually inspect the current front brake calipers and rotors.
+    name: inspect_front_calipers_and_rotors
+    nodes_depended_on:
+    - remove_front_wheels
+    nodes_dependent_on: []
+    prompt: Examine the existing front brake calipers for any signs of leaks or damage.
+      Inspect the front rotors for wear, scoring, or heat spots. Document any observed
+      issues.
+  inspect_rear_calipers_and_rotors:
+    agent: false
+    description: Visually inspect the current rear brake calipers and rotors.
+    name: inspect_rear_calipers_and_rotors
+    nodes_depended_on:
+    - remove_rear_wheels
+    nodes_dependent_on: []
+    prompt: Examine the existing rear brake calipers for any signs of leaks or damage.
+      Inspect the rear rotors for wear, scoring, or heat spots. Document any observed
+      issues.
+  install_new_brembo_front_pads_and_hardware:
+    agent: false
+    description: Install the new Brembo front brake pads and associated hardware.
+    name: install_new_brembo_front_pads_and_hardware
+    nodes_depended_on:
+    - detach_front_brake_calipers
+    - install_new_brembo_front_rotors
+    nodes_dependent_on: []
+    prompt: Install the new Brembo front brake pads into the caliper brackets. Ensure
+      any new hardware, shims, or anti-rattle clips are correctly in place. Lubricate
+      contact points as per Brembo recommendations.
+  install_new_brembo_front_rotors:
+    agent: false
+    description: Mount the new Brembo front brake rotors onto the wheel hubs.
+    name: install_new_brembo_front_rotors
+    nodes_depended_on:
+    - prepare_wheel_hubs
+    nodes_dependent_on: []
+    prompt: Place the new Brembo front brake rotors onto the prepared wheel hubs.
+      Secure them temporarily with the appropriate lug nuts or rotor retention screws
+      if applicable.
+  install_new_brembo_rear_pads_and_hardware:
+    agent: false
+    description: Install the new Brembo rear brake pads and associated hardware.
+    name: install_new_brembo_rear_pads_and_hardware
+    nodes_depended_on:
+    - detach_rear_brake_calipers
+    - install_new_brembo_rear_rotors
+    nodes_dependent_on: []
+    prompt: Install the new Brembo rear brake pads into the caliper brackets. Ensure
+      any new hardware, shims, or anti-rattle clips are correctly in place. Lubricate
+      contact points as per Brembo recommendations.
+  install_new_brembo_rear_rotors:
+    agent: false
+    description: Mount the new Brembo rear brake rotors onto the wheel hubs.
+    name: install_new_brembo_rear_rotors
+    nodes_depended_on:
+    - prepare_wheel_hubs
+    nodes_dependent_on: []
+    prompt: Place the new Brembo rear brake rotors onto the prepared wheel hubs. Secure
+      them temporarily with the appropriate lug nuts or rotor retention screws if
+      applicable.
+  lift_and_secure_vehicle:
+    agent: false
+    description: Safely lift the Toyota Tercel to the appropriate height and secure
+      it with jack stands.
+    name: lift_and_secure_vehicle
+    nodes_depended_on:
+    - gather_tools_and_supplies
+    nodes_dependent_on: []
+    prompt: Using a hydraulic jack, lift the front and rear of the Toyota Tercel to
+      a safe working height. Ensure the vehicle is properly supported on four calibrated
+      jack stands placed at designated chassis points. Confirm vehicle stability.
+  lower_vehicle:
+    agent: false
+    description: Safely lower the vehicle back to the ground.
+    name: lower_vehicle
+    nodes_depended_on:
+    - torque_front_lug_nuts
+    - torque_rear_lug_nuts
+    nodes_dependent_on: []
+    prompt: Carefully remove the jack stands and use the hydraulic jack to slowly
+      lower the Toyota Tercel back onto its wheels. Ensure all safety procedures are
+      followed during lowering.
+  preliminary_vehicle_inspection:
+    agent: false
+    description: Conduct a visual inspection of the entire braking system before disassembly.
+    name: preliminary_vehicle_inspection
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Perform a thorough visual inspection of the entire braking system on the
+      Toyota Tercel. Check for any visible leaks, damage to brake lines, or other
+      pre-existing conditions that might affect the replacement process. Document
+      any findings.
+  prepare_wheel_hubs:
+    agent: false
+    description: Clean and prepare the wheel hubs for new rotors.
+    name: prepare_wheel_hubs
+    nodes_depended_on:
+    - remove_front_brake_rotors
+    - remove_rear_brake_rotors
+    nodes_dependent_on: []
+    prompt: Thoroughly clean the wheel hubs on all four corners of the Toyota Tercel
+      to remove any rust, dirt, or old lubricant. Ensure the mounting surface is clean
+      and smooth for proper rotor seating. Apply a thin layer of anti-seize compound
+      to the hubcentric bore.
+  reinstall_front_brake_calipers:
+    agent: false
+    description: Reattach the front brake calipers over the new rotors and pads.
+    name: reinstall_front_brake_calipers
+    nodes_depended_on:
+    - install_new_brembo_front_pads_and_hardware
+    nodes_dependent_on: []
+    prompt: Carefully place the Brembo front brake calipers back over the new rotors
+      and pads. Reinstall and tighten the caliper mounting bolts to the specified
+      torque. Ensure the brake hoses are not twisted or kinked.
+  reinstall_front_wheels:
+    agent: false
+    description: Reattach the front wheels to the Toyota Tercel.
+    name: reinstall_front_wheels
+    nodes_depended_on:
+    - reinstall_front_brake_calipers
+    nodes_dependent_on: []
+    prompt: Mount the front wheels back onto the Toyota Tercel. Hand-tighten the lug
+      nuts in a star pattern. Do not fully tighten at this stage.
+  reinstall_rear_brake_calipers:
+    agent: false
+    description: Reattach the rear brake calipers over the new rotors and pads.
+    name: reinstall_rear_brake_calipers
+    nodes_depended_on:
+    - install_new_brembo_rear_pads_and_hardware
+    nodes_dependent_on: []
+    prompt: Carefully place the Brembo rear brake calipers back over the new rotors
+      and pads. Reinstall and tighten the caliper mounting bolts to the specified
+      torque. Ensure the brake hoses are not twisted or kinked.
+  reinstall_rear_wheels:
+    agent: false
+    description: Reattach the rear wheels to the Toyota Tercel.
+    name: reinstall_rear_wheels
+    nodes_depended_on:
+    - reinstall_rear_brake_calipers
+    nodes_dependent_on: []
+    prompt: Mount the rear wheels back onto the Toyota Tercel. Hand-tighten the lug
+      nuts in a star pattern. Do not fully tighten at this stage.
+  remove_front_brake_rotors:
+    agent: false
+    description: Remove the existing front brake rotors.
+    name: remove_front_brake_rotors
+    nodes_depended_on:
+    - detach_front_brake_calipers
+    nodes_dependent_on: []
+    prompt: Remove any caliper bracket bolts that secure the front brake rotors. If
+      heavily corroded, a few gentle taps with a mallet may be necessary. Remove the
+      old front rotors from the wheel hub.
+  remove_front_wheels:
+    agent: false
+    description: Safely remove both front wheels from the Toyota Tercel.
+    name: remove_front_wheels
+    nodes_depended_on:
+    - lift_and_secure_vehicle
+    nodes_dependent_on: []
+    prompt: Unscrew the lug nuts on both front wheels of the Toyota Tercel and carefully
+      remove the wheels. Place them aside in a safe location.
+  remove_rear_brake_rotors:
+    agent: false
+    description: Remove the existing rear brake rotors.
+    name: remove_rear_brake_rotors
+    nodes_depended_on:
+    - detach_rear_brake_calipers
+    nodes_dependent_on: []
+    prompt: Remove any caliper bracket bolts that secure the rear brake rotors. If
+      heavily corroded, a few gentle taps with a mallet may be necessary. Remove the
+      old rear rotors from the wheel hub.
+  remove_rear_wheels:
+    agent: false
+    description: Safely remove both rear wheels from the Toyota Tercel.
+    name: remove_rear_wheels
+    nodes_depended_on:
+    - lift_and_secure_vehicle
+    nodes_dependent_on: []
+    prompt: Unscrew the lug nuts on both rear wheels of the Toyota Tercel and carefully
+      remove the wheels. Place them aside in a safe location.
+  torque_front_lug_nuts:
+    agent: false
+    description: Torque the front wheel lug nuts to the manufacturer's specification.
+    name: torque_front_lug_nuts
+    nodes_depended_on:
+    - reinstall_front_wheels
+    nodes_dependent_on: []
+    prompt: Using a torque wrench, tighten the front wheel lug nuts to the specified
+      torque setting for the Toyota Tercel, following a star pattern. Ensure all nuts
+      are evenly tightened.
+  torque_rear_lug_nuts:
+    agent: false
+    description: Torque the rear wheel lug nuts to the manufacturer's specification.
+    name: torque_rear_lug_nuts
+    nodes_depended_on:
+    - reinstall_rear_wheels
+    nodes_dependent_on: []
+    prompt: Using a torque wrench, tighten the rear wheel lug nuts to the specified
+      torque setting for the Toyota Tercel, following a star pattern. Ensure all nuts
+      are evenly tightened.

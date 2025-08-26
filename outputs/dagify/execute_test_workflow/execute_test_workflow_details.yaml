@@ -1,0 +1,79 @@
+dag_type: plain_text
+description: A minimal, concurrent, and acyclic workflow designed to test the structure
+  and execution of a fundamental task-based DAG with atomic, independent steps.
+name: execute_test_workflow
+nodes:
+  construct_test_execution_plan:
+    agent: false
+    description: Define the sequence of actions to be performed during test execution
+    name: construct_test_execution_plan
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on: []
+    prompt: Based on the test objective, outline the exact sequence of actions needed
+      to perform the test. List only the steps as numbered actions.
+  define_test_objective:
+    agent: false
+    description: State the specific purpose or goal of the test in unambiguous terms
+    name: define_test_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Clearly define the objective of this test. Output only a single sentence
+      stating the purpose using precise, non-ambiguous language.
+  evaluate_test_outcome:
+    agent: false
+    description: Assess the result of the test simulation against expected criteria
+    name: evaluate_test_outcome
+    nodes_depended_on:
+    - simulate_test_execution
+    nodes_dependent_on: []
+    prompt: Compare the simulated test result to the expected outcome derived from
+      the test objective. Return only 'successful' or 'unsuccessful'.
+  generate_test_report:
+    agent: false
+    description: Produce a summary report of the test process and outcome
+    name: generate_test_report
+    nodes_depended_on:
+    - initialize_test_context
+    - define_test_objective
+    - validate_test_input_format
+    - evaluate_test_outcome
+    nodes_dependent_on: []
+    prompt: 'Compile a concise test report including objective, input validation status,
+      and outcome evaluation. Format as four key-value pairs: Objective, InputValid,
+      OutcomeEvaluated, FinalStatus.'
+  initialize_test_context:
+    agent: false
+    description: Establish the initial environment or context required for test execution
+    name: initialize_test_context
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Initialize the baseline test context by setting up a neutral environment.
+      Report only confirmation that initialization is complete.
+  prepare_test_input_data:
+    agent: false
+    description: Generate or assemble the input data required for test validation
+    name: prepare_test_input_data
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Create a minimal set of sample input data that conforms to the defined
+      test objective. Output only structured data with no explanation.
+  simulate_test_execution:
+    agent: false
+    description: Run a simulation of the test using input data and execution plan
+    name: simulate_test_execution
+    nodes_depended_on:
+    - prepare_test_input_data
+    - construct_test_execution_plan
+    nodes_dependent_on: []
+    prompt: Using the input data and execution plan, simulate the test process. Output
+      only the simulated result as either 'pass' or 'fail'.
+  validate_test_input_format:
+    agent: false
+    description: Verify that the input data conforms to expected schema or structure
+    name: validate_test_input_format
+    nodes_depended_on:
+    - prepare_test_input_data
+    nodes_dependent_on: []
+    prompt: Check if the provided input data follows the expected format. Return only
+      'valid' or 'invalid'.

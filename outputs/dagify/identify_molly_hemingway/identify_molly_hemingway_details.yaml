@@ -1,0 +1,31 @@
+dag_type: plain_text
+description: A workflow to identify and provide information about Molly Hemingway
+name: identify_molly_hemingway
+nodes:
+  extract_biographical_info:
+    agent: false
+    description: Extract biographical information about Molly Hemingway from search
+      results
+    name: extract_biographical_info
+    nodes_depended_on:
+    - search_for_molly_hemingway
+    nodes_dependent_on: []
+    prompt: From the search results, extract biographical information about Molly
+      Hemingway, including her profession, notable works, and any relevant background.
+  search_for_molly_hemingway:
+    agent: false
+    description: Perform a search to find information about Molly Hemingway
+    name: search_for_molly_hemingway
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Search for information about Molly Hemingway. Provide a list of relevant
+      sources and key facts.
+  summarize_molly_hemingway_info:
+    agent: false
+    description: Summarize the information about Molly Hemingway
+    name: summarize_molly_hemingway_info
+    nodes_depended_on:
+    - extract_biographical_info
+    nodes_dependent_on: []
+    prompt: Summarize the information about Molly Hemingway in a concise paragraph,
+      focusing on her key characteristics and achievements.

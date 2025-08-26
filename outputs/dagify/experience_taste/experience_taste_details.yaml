@@ -1,0 +1,48 @@
+dag_type: plain_text
+description: A workflow for simulating the experience of taste
+name: experience_taste
+nodes:
+  associate_flavor_profiles:
+    agent: false
+    description: Associate flavor profiles with the taste components
+    name: associate_flavor_profiles
+    nodes_depended_on:
+    - identify_taste_components
+    nodes_dependent_on: []
+    prompt: For each identified taste component, associate a specific flavor profile
+      (e.g., fruity, floral, savory). Provide a brief description.
+  identify_taste_components:
+    agent: false
+    description: Determine the basic taste components of the selected food
+    name: identify_taste_components
+    nodes_depended_on:
+    - select_food
+    nodes_dependent_on: []
+    prompt: Identify the basic taste components (sweet, sour, salty, bitter, umami)
+      of the selected food. List all that apply.
+  reflect_on_taste_experience:
+    agent: false
+    description: Reflect on the simulated taste experience
+    name: reflect_on_taste_experience
+    nodes_depended_on:
+    - simulate_taste_experience
+    nodes_dependent_on: []
+    prompt: Reflect on the simulated taste experience. What did you 'taste'? What
+      were the dominant flavors and sensations?
+  select_food:
+    agent: false
+    description: Choose a food item to taste
+    name: select_food
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Select a specific food item you want to experience the taste of. Provide
+      the name of the food.
+  simulate_taste_experience:
+    agent: false
+    description: Simulate the experience of tasting the food
+    name: simulate_taste_experience
+    nodes_depended_on:
+    - associate_flavor_profiles
+    nodes_dependent_on: []
+    prompt: Using the identified taste components and associated flavor profiles,
+      simulate the experience of tasting the food. Describe the sensation.

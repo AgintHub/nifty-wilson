@@ -1,0 +1,51 @@
+dag_type: plain_text
+description: Generated workflow from UI with an added node for trees.
+name: test_workflow_with_trees
+nodes:
+  analyze_results:
+    agent: false
+    description: Analyze the test results
+    name: analyze_results
+    nodes_depended_on:
+    - run_test
+    nodes_dependent_on: []
+    prompt: Analyze the test results. Determine if the test was successful.
+  check_prerequisites:
+    agent: false
+    description: Verify that all prerequisites are met
+    name: check_prerequisites
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Check that all necessary prerequisites are met. Report any issues.
+  process_trees:
+    agent: false
+    description: Process information related to trees
+    name: process_trees
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Analyze and report on tree-related data.
+  report_results:
+    agent: false
+    description: Report the test results
+    name: report_results
+    nodes_depended_on:
+    - analyze_results
+    nodes_dependent_on: []
+    prompt: Report the test results. Include any recommendations.
+  run_test:
+    agent: false
+    description: Execute the test
+    name: run_test
+    nodes_depended_on:
+    - check_prerequisites
+    nodes_dependent_on: []
+    prompt: Run the test. Collect and report results.
+  start_test:
+    agent: false
+    description: Initiate the test process
+    name: start_test
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Begin the test process. Verify that all prerequisites are met.

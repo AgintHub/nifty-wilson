@@ -1,0 +1,43 @@
+dag_type: plain_text
+description: A workflow to provide more information based on the user's prompt.
+name: tell_me_more
+nodes:
+  gather_relevant_info:
+    agent: false
+    description: Gather relevant information about the topic the user wants to know
+      more about.
+    name: gather_relevant_info
+    nodes_depended_on:
+    - interpret_user_prompt
+    nodes_dependent_on: []
+    prompt: Based on the user's prompt, gather relevant information about the topic.
+      Provide a list of key points.
+  interpret_user_prompt:
+    agent: false
+    description: Interpret the user's prompt to understand what they are asking for
+      more information about.
+    name: interpret_user_prompt
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: What does the user want to know more about? Provide a concise summary
+      of their prompt.
+  organize_info:
+    agent: false
+    description: Organize the gathered information into a coherent and structured
+      format.
+    name: organize_info
+    nodes_depended_on:
+    - gather_relevant_info
+    nodes_dependent_on: []
+    prompt: Organize the gathered information into a clear and concise format. Use
+      bullet points or short paragraphs.
+  provide_additional_info:
+    agent: false
+    description: Provide the organized information to the user in a clear and concise
+      manner.
+    name: provide_additional_info
+    nodes_depended_on:
+    - organize_info
+    nodes_dependent_on: []
+    prompt: Use the organized information to provide a detailed response to the user's
+      prompt. Focus on providing additional information.

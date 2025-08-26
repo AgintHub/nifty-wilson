@@ -1,0 +1,107 @@
+dag_type: plain_text
+description: Generated workflow with parallelized tasks from UI.
+name: test_workflow_parallelized
+nodes:
+  analyze_test_results_1:
+    agent: false
+    description: Analyze the first part of the test results
+    name: analyze_test_results_1
+    nodes_depended_on:
+    - verify_test_results_1
+    - verify_test_results_2
+    nodes_dependent_on: []
+    prompt: Analyze the first part of the test results to identify any issues or trends
+  analyze_test_results_2:
+    agent: false
+    description: Analyze the second part of the test results
+    name: analyze_test_results_2
+    nodes_depended_on:
+    - verify_test_results_1
+    - verify_test_results_2
+    nodes_dependent_on: []
+    prompt: Analyze the second part of the test results to identify any issues or
+      trends
+  archive_test_results:
+    agent: false
+    description: Archive the test results for future reference
+    name: archive_test_results
+    nodes_depended_on:
+    - report_test_results
+    nodes_dependent_on: []
+    prompt: Archive the test results for future reference
+  prepare_test_data_1:
+    agent: false
+    description: Prepare part of the data for testing
+    name: prepare_test_data_1
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Prepare necessary part 1 data for the test
+  prepare_test_data_2:
+    agent: false
+    description: Prepare another part of the data for testing
+    name: prepare_test_data_2
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Prepare necessary part 2 data for the test
+  report_test_results:
+    agent: false
+    description: Generate a report summarizing the test results
+    name: report_test_results
+    nodes_depended_on:
+    - review_test_results
+    nodes_dependent_on: []
+    prompt: Generate a report summarizing the test results
+  review_test_results:
+    agent: false
+    description: Review the test results for quality and accuracy
+    name: review_test_results
+    nodes_depended_on:
+    - analyze_test_results_1
+    - analyze_test_results_2
+    nodes_dependent_on: []
+    prompt: Review the test results for quality and accuracy
+  run_test_1:
+    agent: false
+    description: Execute the first part of the test
+    name: run_test_1
+    nodes_depended_on:
+    - prepare_test_data_1
+    - prepare_test_data_2
+    nodes_dependent_on: []
+    prompt: Run the first part of the test with default parameters
+  run_test_2:
+    agent: false
+    description: Execute the second part of the test
+    name: run_test_2
+    nodes_depended_on:
+    - prepare_test_data_1
+    - prepare_test_data_2
+    nodes_dependent_on: []
+    prompt: Run the second part of the test with default parameters
+  start_test:
+    agent: false
+    description: Initiate the testing process
+    name: start_test
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Begin testing
+  verify_test_results_1:
+    agent: false
+    description: Validate the first part of the test results
+    name: verify_test_results_1
+    nodes_depended_on:
+    - run_test_1
+    - run_test_2
+    nodes_dependent_on: []
+    prompt: Verify that the first part of the test results match the expected output
+  verify_test_results_2:
+    agent: false
+    description: Validate the second part of the test results
+    name: verify_test_results_2
+    nodes_depended_on:
+    - run_test_1
+    - run_test_2
+    nodes_dependent_on: []
+    prompt: Verify that the second part of the test results match the expected output

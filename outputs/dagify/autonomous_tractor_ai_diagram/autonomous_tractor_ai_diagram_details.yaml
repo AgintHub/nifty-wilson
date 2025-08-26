@@ -1,0 +1,539 @@
+dag_type: typed
+description: Generated workflow from UI.
+name: autonomous_tractor_ai_diagram
+nodes:
+  clarify_tractor_use_cases:
+    agent: false
+    description: Articulates and details the prioritized operational scenarios for
+      which an advanced autonomous tractor is designed, incorporating technical, environmental,
+      and efficiency considerations alongside the agricultural task context. Focuses
+      on delivering actionable insights into how autonomous tractors could transform
+      and optimize core agricultural operations.
+    name: clarify_tractor_use_cases
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of primary agricultural use cases for an advanced autonomous
+        tractor
+      key: use_cases
+      type: List[str]
+    - description: List of expected outcomes for each scenario, such as resource savings,
+        increased yield, labor reduction, or minimized environmental impact
+      key: expected_outcomes
+      type: List[str]
+    prompt: Identify and prioritize the primary agricultural use cases for an advanced
+      autonomous tractor. For each of the 5 use cases, provide a detailed operational
+      scenario, including specific tasks the tractor will perform (e.g., precision
+      planting, variable-rate spraying, autonomous harvesting), the environmental
+      and crop conditions in which these tasks are optimized, and the potential efficiencies
+      gained. Clearly define the expected outcomes for each scenario, such as resource
+      savings, increased yield, labor reduction, or minimized environmental impact.
+  configure_safety_protocols:
+    agent: false
+    description: Develop comprehensive safety and fail-safe procedural frameworks
+      to ensure optimal handling of emergency situations in automated agricultural
+      tractor operations. Leverage outputs from object detection, obstacle avoidance,
+      and environmental mapping to formulate robust, contextually-aware AI safety
+      strategies. Cater to all potential use cases including equipment malfunctions
+      and environmental hazards, ensuring operational continuity, risk mitigation,
+      and compliance with safety standards.
+    name: configure_safety_protocols
+    nodes_depended_on:
+    - generate_object_detection_pipeline
+    - generate_map_context_interpretation
+    - implement_obstacle_avoidance_decisions
+    nodes_dependent_on: []
+    output_structure:
+    - description: Name of the safety policy
+      key: safety_policy_name
+      type: str
+    - description: List of scenarios that could lead to equipment malfunctions
+      key: equipment_malfunction_scenarios
+      type: List[str]
+    - description: List of strategies used to avoid obstacles detected by sensors
+      key: obstacle_avoidance_strategies
+      type: List[str]
+    - description: Procedure in case of sensor failure
+      key: sensor_failure_handling
+      type: str
+    - description: List of response strategies for critical scenarios
+      key: multi_tiered_response_strategies
+      type: List[str]
+    - description: Whether self-assessment routines are performed
+      key: diagnostic_self_assessment
+      type: bool
+    - description: Protocol for real-time risk scoring
+      key: risk_scoring_protocol
+      type: str
+    - description: Protocol for recovery in case of emergency
+      key: recovery_protocol
+      type: str
+    - description: Details of the failover mechanism
+      key: failover_mechanism_details
+      type: str
+    - description: Level of granularity in sensor-level decision making
+      key: sensor_level_decision_making_granularity
+      type: str
+    prompt: Design an advanced and exhaustive set of AI safety policies specifically
+      tailored for automated agricultural tractor operations. Integrate insights from
+      object detection outputs, real-time map context interpretation, and obstacle
+      avoidance mechanisms to craft fail-safe procedures. Address critical scenarios
+      across five specific use cases involving equipment malfunctions, including sensor
+      failure, power interruptions, misaligned path planning, collision risks, and
+      environmental anomalies such as extreme weather or soil instability. Outline
+      multi-tiered response strategies, such as automated shutoffs, controlled system
+      degradation, emergency reroutes, and operator alert protocols. Incorporate diagnostic
+      self-assessment routines, real-time risk scoring, and recovery protocols that
+      maintain alignment with industry safety standards and regulatory compliance.
+      Specify granularity for sensor-level decision-making and prioritize failover
+      mechanisms to ensure uninterrupted operational safety under all conditions.
+  create_overall_system_diagram:
+    agent: false
+    description: Systematically generate a sophisticated visual architecture diagram
+      that encapsulates the complete autonomous tractor system, illustrating key algorithm
+      components, seamless information flow across sensor inputs, AI-driven decision
+      nodes, and actuator interfaces, while accommodating real-world interalgorithm
+      interactions, latency constraints, and fault tolerance.
+    name: create_overall_system_diagram
+    nodes_depended_on:
+    - define_integration_flow
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of system components, including algorithmic and hardware components
+      key: system_components
+      type: str
+    - description: Description of the flow of information across sensor inputs, AI-driven
+        decision nodes, and actuator interfaces
+      key: data_flow
+      type: str
+    - description: List of key algorithmic components
+      key: algorithm_components
+      type: str
+    - description: Description of real-world interalgorithm interactions
+      key: interalgorithm_interaction
+      type: str
+    - description: List of real-time communication protocols
+      key: communication_protocols
+      type: str
+    - description: List of metadata, including data types, communication frequencies,
+        and prioritized paths
+      key: metadata
+      type: str
+    prompt: Construct a detailed, professional-grade architecture diagram that integrates
+      all algorithmic and hardware components of the autonomous tractor system. Highlight
+      the flow of information starting from real-time sensor data ingestion across
+      a multi-modal array (e.g., LiDAR, cameras, GPS, IMUs), through AI-powered decision-making
+      nodes that include perception, path planning, control, and safety subsystems,
+      and culminating at multi-interface actuators (e.g., steering, throttle, braking).
+      Ensure that the design explicitly incorporates data pipelines, API interfaces,
+      and real-time communication protocols as structured in the interalgorithm communication
+      architecture. Account for synchronization methods, bandwidth requirements, error
+      propagation, and fail-safe mechanisms to reflect a high-fidelity, operationally
+      viable system. Annotate interconnections with metadata such as data types, communication
+      frequencies, and prioritized paths for emergency override signals or degraded
+      mode operation.
+  define_actuator_interfaces:
+    agent: false
+    description: Establish a comprehensive specification of physical and electronic
+      actuator systems required for precise, autonomous tractor control. This includes
+      defining the mechanical, electrical, and protocol-level characteristics of actuator
+      interfaces to ensure robust integration with the control architecture. These
+      systems should cover diverse operations such as powertrain control, hydraulic
+      actuation, steering, braking, and beyond—tailored to the tractor's defined use
+      cases.
+    name: define_actuator_interfaces
+    nodes_depended_on:
+    - clarify_tractor_use_cases
+    nodes_dependent_on: []
+    output_structure:
+    - description: Functional domain of the actuator interface (e.g., powertrain,
+        hydraulic systems, electro-mechanical components)
+      key: functional_domain
+      type: str
+    - description: Specific physical mechanism of the actuator interface (e.g., 8-speed
+        transmission, proportional solenoid valves, electric steering motor)
+      key: mechanism
+      type: str
+    - description: Operational parameters of the actuator interface (e.g., torque,
+        flow rate, actuation force)
+      key: operational_parameters
+      type: str
+    - description: Electrical connectivity requirements of the actuator interface
+        (e.g., voltage, current, wiring specifications, connector types)
+      key: electrical_connectivity
+      type: str
+    - description: Corresponding control protocols or communication standards of the
+        actuator interface (e.g., CAN bus, RS-485, Modbus)
+      key: control_protocols
+      type: str
+    prompt: Develop an exhaustive list of actuator interfaces necessary for the autonomous
+      tractor, categorized by functional domain (e.g., powertrain, hydraulic systems,
+      electro-mechanical components). For each interface, detail the specific physical
+      mechanism (e.g., 8-speed transmission, proportional solenoid valves, electric
+      steering motor), operational parameters (e.g., torque, flow rate, actuation
+      force), electrical connectivity requirements (e.g., voltage, current, wiring
+      specifications, connector types), and the corresponding control protocols or
+      communication standards (e.g., CAN bus, RS-485, Modbus). Describe how these
+      actuator interfaces align with the defined use cases, prioritizing compatibility,
+      durability, and real-time operational precision.
+  define_integration_flow:
+    agent: false
+    description: Develop a robust, scalable inter-algorithm communication and coordination
+      framework that ensures seamless data flow and interaction between perception,
+      decision-making, and control subsystems within an advanced tractor automation
+      environment.
+    name: define_integration_flow
+    nodes_depended_on:
+    - implement_path_planning
+    - implement_steering_adjustment
+    - implement_speed_adjustment
+    - configure_safety_protocols
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of API interfaces and data routing protocols
+      key: api_interfaces
+      type: str
+    - description: List of data serialization formats (e.g., JSON, Protobuf)
+      key: data_serialization_formats
+      type: List[str]
+    - description: List of fault tolerance mechanisms (e.g., message retries, priority
+        queues, circuit breakers)
+      key: fault_tolerance_mechanisms
+      type: str
+    - description: List of real-time communication standards (e.g., MQTT, ZeroMQ,
+        WebSockets)
+      key: real_time_communication_standards
+      type: List[str]
+    - description: Whether the architecture optimizes for network load balance
+      key: network_load_balance_capabilities
+      type: bool
+    - description: Whether the architecture optimizes for scalability
+      key: scalability
+      type: bool
+    - description: Whether the architecture optimizes for robust failover capabilities
+      key: robust_failover_capabilities
+      type: bool
+    - description: Whether the architecture ensures high availability
+      key: high_availability
+      type: bool
+    - description: Implementation hooks to integrate safety protocol workflows for
+        emergency response scenarios
+      key: safety_protocol_workflows
+      type: str
+    prompt: Design a highly modular and extensible set of API interfaces and data
+      routing protocols to enable real-time communication among AI components, including
+      perception systems (e.g., object detection, mapping), decision-making algorithms
+      (e.g., path planning, obstacle avoidance), and control systems (e.g., steering,
+      speed adjustment). Ensure support for asynchronous and synchronous messaging
+      to manage interdependencies and critical timing requirements. Specify data serialization
+      formats (e.g., JSON, Protobuf) for efficiency and interoperability. Introduce
+      fault tolerance mechanisms such as message retries, priority queues, and circuit
+      breakers to maintain system resilience under varying conditions. Include real-time
+      communication standards (e.g., MQTT, ZeroMQ, or WebSockets) and middleware solutions
+      tailored to low-latency use cases. Outline detailed requirements for message
+      structure, API versioning, and extensibility to accommodate evolving use cases.
+      Optimize the architecture for network load balance, scalability, and robust
+      failover capabilities to ensure high availability. Provide implementation hooks
+      to integrate safety protocol workflows for emergency response scenarios.
+  generate_lane_detection_algorithm:
+    agent: false
+    description: Develop a sophisticated lane detection algorithm tailored for agricultural
+      environments, enabling precise identification of field borders, rows, and operational
+      boundaries using multi-modal sensor data. The solution should integrate advanced
+      techniques for edge detection, vegetation differentiation, and data fusion to
+      optimize performance under varying field conditions.
+    name: generate_lane_detection_algorithm
+    nodes_depended_on:
+    - identify_input_sensors
+    nodes_dependent_on: []
+    output_structure:
+    - description: Edge detection techniques used
+      key: edge_detection_techniques
+      type: str
+    - description: Vegetation isolation/differentiation criteria used
+      key: vegetation_isolation_criteria
+      type: str
+    - description: Data fusion strategies used
+      key: data_fusion_strategies
+      type: str
+    - description: Noise reduction mechanisms implemented
+      key: noise_reduction_mechanisms
+      type: str
+    - description: Adaptive parameter tuning strategy
+      key: adaptive_parameter_tuning
+      type: bool
+    - description: Real-time processing capabilities
+      key: real_time_processing_capabilities
+      type: bool
+    - description: List of input sensors used
+      key: input_sensors
+      type: str
+    - description: Edge detection accuracy
+      key: edge_detection_accuracy
+      type: float
+    prompt: Design an advanced lane detection algorithm for agricultural scenarios
+      utilizing input from multi-modal sensors, such as LiDAR, RGB cameras, multispectral
+      imaging, and ultrasonic sensors as cataloged in the 'identify_input_sensors'
+      analysis. Define precise edge detection techniques, vegetation isolation/differentiation
+      criteria, and data fusion strategies to handle changing environmental conditions
+      such as lighting, soil types, and dense vegetation. Ensure scalability and robustness
+      by incorporating noise reduction mechanisms, adaptive parameter tuning, and
+      real-time processing capabilities. Provide detailed pseudocode or a high-level
+      technical workflow to demonstrate integration of input sensors and algorithmic
+      logic.
+  generate_map_context_interpretation:
+    agent: false
+    description: Develop an advanced environmental mapping architecture that synthesizes
+      diverse agricultural sensor data streams and translates this information into
+      an intelligent, dynamically contextualized 3D farm model for enhanced decision-making.
+    name: generate_map_context_interpretation
+    nodes_depended_on:
+    - identify_input_sensors
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of key-value pairs representing sensor data, where each key
+        is a sensor type and the corresponding value is a numerical data point
+      key: sensor_data
+      type: List[float]
+    - description: String describing the contents of the 3D farm model
+      key: farm_model_description
+      type: str
+    - description: Boolean value indicating whether the system has successfully handled
+        missing data
+      key: error_handling_status
+      type: bool
+    prompt: Design an advanced environmental mapping system that integrates and processes
+      multi-source agricultural data, including high-precision GPS coordinates, soil
+      moisture levels, crop health indices, and additional sensor inputs identified
+      in the sensor catalog. Specify the architecture and algorithmic approach for
+      combining geospatial, hydrological, and biological datasets to generate a dynamically
+      contextualized 3D farm model.
+  generate_object_detection_pipeline:
+    agent: false
+    description: Architect an advanced, modular, and robust real-time object detection
+      pipeline tailored for agricultural machinery. This system will leverage state-of-the-art
+      deep learning models, sensor fusion, and hardware acceleration to ensure optimal
+      performance under diverse environmental conditions. Core components include
+      integration of LiDAR and camera data, preprocessing, model selection, inference
+      optimization, and interpretation utilities.
+    name: generate_object_detection_pipeline
+    nodes_depended_on:
+    - identify_input_sensors
+    nodes_dependent_on: []
+    output_structure:
+    - description: Model architecture type (e.g., YOLOv8, Faster R-CNN, or SSD)
+      key: model_type
+      type: str
+    - description: Whether LiDAR and camera data are successfully fused
+      key: sensor_fusion_status
+      type: bool
+    - description: Whether anomalies are detected during inference
+      key: anomaly_detection_status
+      type: bool
+    - description: Time taken for inference (in milliseconds)
+      key: inference_latency
+      type: float
+    prompt: Design an advanced, modular pipeline to enable real-time object detection
+      for agricultural equipment operations. Incorporate cutting-edge techniques such
+      as sensor fusion between LiDAR and RGB cameras for enhanced depth and spatial
+      accuracy. Specify model architecture options (e.g., YOLOv8, Faster R-CNN, or
+      SSD), preprocessing techniques, and data augmentation strategies to handle challenging
+      agricultural environments (e.g., dust, low visibility, or occlusions). Outline
+      layer-specific model tuning, such as activation functions, kernel sizes, and
+      regularization techniques. Define hyperparameters (e.g., learning rate, batch
+      size, and optimizer selection) and describe optimization strategies for inference
+      latency (e.g., TensorRT or ONNX optimization). Include mechanisms for anomaly
+      detection during inference and provide a high-level implementation plan for
+      hardware acceleration using GPUs or TPUs. Ensure adaptability and scalability
+      to accommodate future use cases or sensor upgrades.
+  identify_input_sensors:
+    agent: false
+    description: Construct a comprehensive inventory of sensor systems required for
+      achieving advanced situational awareness and operational mastery by the autonomous
+      tractor. This includes cataloging and characterizing all relevant sensor types,
+      technical specifications, and precision measurement functionalities, tailored
+      to the prioritized agricultural use cases.
+    name: identify_input_sensors
+    nodes_depended_on:
+    - clarify_tractor_use_cases
+    nodes_dependent_on: []
+    output_structure:
+    - description: Sensor technology (e.g., LiDAR, IMU, multispectral cameras, or
+        ultrasonic sensors)
+      key: sensor_technology
+      type: str
+    - description: Primary purpose (e.g., obstacle detection, crop health monitoring,
+        or soil texture analysis)
+      key: primary_purpose
+      type: str
+    - description: Key technical specifications (e.g., resolution, range, field of
+        view, accuracy, sampling rate, environmental constraints)
+      key: technical_specifications
+      type: str
+    - description: Integration requirements (e.g., electromagnetic compatibility or
+        communication protocols)
+      key: integration_requirements
+      type: str
+    - description: Specific real-world scenarios where the sensor will be applied
+      key: real_world_scenarios
+      type: List[str]
+    - description: Brief explanation of how each sensor contributes to the tractor’s
+        operational effectiveness
+      key: contribution_to_operational_effectiveness
+      type: str
+    prompt: 'Based on the prioritized agricultural use cases for the autonomous tractor,
+      create a detailed inventory of all necessary sensor types required for optimal
+      perception and environmental understanding. For each sensor type, specify the
+      following: 1) sensor technology (e.g., LiDAR, IMU, multispectral cameras, or
+      ultrasonic sensors), 2) primary purpose (e.g., obstacle detection, crop health
+      monitoring, or soil texture analysis), 3) key technical specifications (e.g.,
+      resolution, range, field of view, accuracy, sampling rate, environmental constraints),
+      4) integration requirements (e.g., electromagnetic compatibility or communication
+      protocols), and 5) specific real-world scenarios where it will be applied. Provide
+      a rigorously detailed table summarizing this information, and include a brief
+      explanation of how each sensor contributes to the tractor’s operational effectiveness.'
+  implement_obstacle_avoidance_decisions:
+    agent: false
+    description: Develop an advanced, real-time obstacle avoidance decision-making
+      framework that integrates dynamic sensor data, object detection, and 3D environmental
+      context mapping. This framework ensures seamless navigation and operational
+      efficiency across agricultural environments while incorporating robust fail-safes
+      for unexpected hazards and emergency conditions.
+    name: implement_obstacle_avoidance_decisions
+    nodes_depended_on:
+    - generate_object_detection_pipeline
+    - generate_map_context_interpretation
+    - implement_path_planning
+    nodes_dependent_on: []
+    prompt: Design an advanced, real-time obstacle response decision-making system
+      tailored for agricultural environments. Integrate dynamic object detection data
+      derived from LiDAR-camera sensor fusion with 3D contextual farm mapping, including
+      GPS, soil moisture, and crop health parameters. Leverage path planning predictions
+      to dynamically adjust routes in response to moving or static obstacles. Ensure
+      the system includes a hierarchy of response levels that distinguish between
+      ordinary navigation adjustments (e.g., bypassing structured lanes) and critical
+      emergencies through a dedicated fail-safe layer. Specify conditions and thresholds
+      that trigger emergency stops or overrides, such as detecting human presence,
+      large livestock, equipment malfunctions, or high-risk structural impediments.
+      The system should prioritize minimal disruption to planned task schedules while
+      maintaining operator and field safety. Employ heuristic, algorithmic, or machine
+      learning techniques to optimize real-time decision-making under environmental
+      and temporal constraints. Provide detailed pseudocode and technical specifications
+      for model parameters, component integrations, and runtime behaviors.
+  implement_path_planning:
+    agent: false
+    description: Develops an advanced path planning system for precision agriculture,
+      integrating dynamic route generation, real-time optimization, and task scheduling
+      based on environmental mapping, lane detection, and use-case logic. Incorporates
+      robust obstacle avoidance mechanisms and scalable interaction points for agricultural
+      operations.
+    name: implement_path_planning
+    nodes_depended_on:
+    - generate_lane_detection_algorithm
+    - generate_map_context_interpretation
+    - implement_task_scheduling_logic
+    nodes_dependent_on: []
+    prompt: Design a sophisticated path planning algorithm tailored for precision
+      agriculture. Leverage high-resolution lane data, 3D environmental farm mapping,
+      and prioritized task scheduling. Ensure the algorithm dynamically adapts routes
+      in real-time, addressing environmental variability such as terrain, crop conditions,
+      and weather. Integrate multi-layered obstacle avoidance leveraging sensor fusion
+      (e.g., LIDAR, cameras, and GPS), and optimize vehicle efficiency metrics such
+      as fuel use and operational time. Embed modular, scalable interaction points
+      to accommodate diverse agricultural use cases—such as planting, fertilizing,
+      and harvesting—while ensuring compliance with safety and accessibility standards.
+      Provide a detailed technical breakdown of the algorithm’s architecture, including
+      flow diagrams, decision nodes, and optimization logic.
+  implement_speed_adjustment:
+    agent: false
+    description: Develop a comprehensive, context-aware velocity adjustment system
+      that dynamically optimizes operational speed for varying field conditions. The
+      system must intelligently account for terrain irregularities, crop density variations,
+      obstacle proximity, and operational constraints while ensuring safety, efficiency,
+      and adherence to task objectives.
+    name: implement_speed_adjustment
+    nodes_depended_on:
+    - implement_path_planning
+    - implement_obstacle_avoidance_decisions
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of configurable speed thresholds in meters per second
+      key: configurable_speed_thresholds
+      type: List[int]
+    - description: List of adaptive gain values for acceleration and deceleration
+        rates
+      key: adaptive_gain_values
+      type: List[float]
+    - description: List of diagnostic outputs for feedback monitoring, anomaly detection,
+        and predictive maintenance
+      key: diagnostic_outputs
+      type: List[str]
+    prompt: Design an advanced speed control logic framework capable of real-time
+      modulation based on multifactor field conditions. Incorporate terrain analysis
+      (e.g., slope, traction variability), crop density mapping (low-density to high-density
+      gradient impacts), and obstacle proximity adjustments, tightly integrating inputs
+      from path planning and obstacle avoidance systems.
+  implement_steering_adjustment:
+    agent: false
+    description: Develops an advanced vehicle orientation and steering control mechanism
+      that dynamically integrates path planning directives, real-time obstacle avoidance
+      strategies, and specific crop-related operational tolerances. Ensures precise
+      heading correction while navigating varying terrain and agricultural environments,
+      optimizing for operational accuracy and safety across distinct crop types.
+    name: implement_steering_adjustment
+    nodes_depended_on:
+    - implement_path_planning
+    - implement_obstacle_avoidance_decisions
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of steering commands, ranging from -1 to 1, to ensure precise
+        heading correction
+      key: steering_commands
+      type: List[float]
+    - description: List of actuator commands, ranging from 0 to 1, to implement precise
+        heading correction
+      key: actuator_commands
+      type: List[float]
+    - description: Whether the vehicle's heading has been corrected successfully
+      key: heading_correction_status
+      type: bool
+    prompt: Design an advanced steering control algorithm that seamlessly integrates
+      inputs from the path planning module and real-time obstacle avoidance outputs.
+      Incorporate precise heading correction mechanisms tailored to specific crop
+      types, accounting for variations in turning radii, soil resistance, and permissible
+      deviation tolerances.
+  implement_task_scheduling_logic:
+    agent: false
+    description: Develop an advanced and efficient task scheduling algorithm to operationally
+      manage transitions between diverse and prioritized agricultural use cases of
+      an autonomous tractor. This includes designing a dynamic routing framework that
+      incorporates real-time adaptability, resource constraints, environmental conditions,
+      and predefined prioritization rules for tasks such as soil preparation, planting,
+      and harvesting, ensuring optimal efficiency and precision in execution.
+    name: implement_task_scheduling_logic
+    nodes_depended_on:
+    - clarify_tractor_use_cases
+    nodes_dependent_on: []
+    output_structure:
+    - description: Status of the task scheduling algorithm (e.g., active, paused,
+        completed)
+      key: task_scheduling_status
+      type: str
+    - description: List of dynamic routing paths computed by the algorithm
+      key: dynamic_routing_paths
+      type: List[str]
+    - description: Status of resource allocation (e.g., sufficient, insufficient,
+        optimal)
+      key: resource_allocation_status
+      type: str
+    prompt: Design and implement an advanced task scheduling algorithm to seamlessly
+      manage and transition between agricultural use cases of an autonomous tractor.
+      Consider complex interaction scenarios, resource optimization, and dynamic task
+      prioritization under varying conditions. Incorporate dependencies such as soil
+      preparation, planting, and harvesting phases while accounting for factors like
+      environmental conditions (e.g., moisture levels, weather), resource availability
+      (e.g., fuel, seed inventory), and efficiency objectives. Use algorithmic techniques
+      such as heuristic optimization, real-time scheduling adjustments, and priority-dependent
+      routing. Describe the logic in detailed pseudocode, including clear rules and
+      parameters for decision-making, and provide justifications for the prioritization
+      strategy applied to these phases.

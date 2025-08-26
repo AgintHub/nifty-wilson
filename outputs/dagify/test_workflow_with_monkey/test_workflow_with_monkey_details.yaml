@@ -1,0 +1,43 @@
+dag_type: plain_text
+description: Generated workflow from UI with a monkey added.
+name: test_workflow_with_monkey
+nodes:
+  monkey_interaction_test:
+    agent: false
+    description: Perform a test with monkey interaction
+    name: monkey_interaction_test
+    nodes_depended_on:
+    - run_test
+    nodes_dependent_on: []
+    prompt: Have the monkey perform an action in the test environment
+  report_test_result:
+    agent: false
+    description: Report the test result
+    name: report_test_result
+    nodes_depended_on:
+    - verify_test_result
+    nodes_dependent_on: []
+    prompt: Report the test result
+  run_test:
+    agent: false
+    description: Execute the test
+    name: run_test
+    nodes_depended_on:
+    - start_test
+    nodes_dependent_on: []
+    prompt: Perform the test
+  start_test:
+    agent: false
+    description: Initiate the testing process
+    name: start_test
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Begin testing
+  verify_test_result:
+    agent: false
+    description: Verify the test result
+    name: verify_test_result
+    nodes_depended_on:
+    - monkey_interaction_test
+    nodes_dependent_on: []
+    prompt: Check the test result

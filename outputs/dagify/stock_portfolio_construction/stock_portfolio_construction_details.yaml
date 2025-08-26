@@ -1,0 +1,171 @@
+dag_type: plain_text
+description: A step‑by‑step plan to design, structure, and prepare a stock portfolio
+  for investment.
+name: stock_portfolio_construction
+nodes:
+  apply_diversification_constraints:
+    agent: false
+    description: Enforce diversification limits on the candidate list.
+    name: apply_diversification_constraints
+    nodes_depended_on:
+    - generate_security_pool_per_asset
+    nodes_dependent_on: []
+    prompt: Apply diversification constraints to the candidate security list to ensure
+      no single security or sector dominates. Exclude any securities that violate
+      the constraints. Output the refined list.
+  assemble_final_portfolio_document:
+    agent: false
+    description: Produce a complete, ready‑to‑use portfolio blueprint.
+    name: assemble_final_portfolio_document
+    nodes_depended_on:
+    - calculate_portfolio_weights
+    - define_rebalancing_strategy
+    - compile_tax_optimization_plan
+    - select_brokerage_and_execution_method
+    - draft_implementation_schedule
+    - generate_portfolio_report_template
+    - calculate_performance_metrics
+    - review_compliance_and_regulatory_requirements
+    nodes_dependent_on: []
+    prompt: 'Compile all outputs into a final portfolio document. Organize sections:
+      objectives, risk, universe, allocation, holdings, rebalancing, tax plan, broker,
+      schedule, report template, performance metrics, compliance.'
+  assess_risk_tolerance:
+    agent: false
+    description: Determine how much risk the investor is willing to accept.
+    name: assess_risk_tolerance
+    nodes_depended_on:
+    - define_investment_goals
+    nodes_dependent_on: []
+    prompt: Based on the defined investment objectives, assess the investor's risk
+      tolerance. Output a risk tolerance level (e.g., conservative, moderate, aggressive)
+      and brief justification.
+  calculate_performance_metrics:
+    agent: false
+    description: Estimate key performance indicators for the constructed portfolio.
+    name: calculate_performance_metrics
+    nodes_depended_on:
+    - calculate_portfolio_weights
+    nodes_dependent_on: []
+    prompt: Calculate performance metrics for the portfolio. Provide expected annual
+      return, volatility, Sharpe ratio, and maximum drawdown based on the weight distribution.
+  calculate_portfolio_weights:
+    agent: false
+    description: Determine the precise weight for each security in the portfolio.
+    name: calculate_portfolio_weights
+    nodes_depended_on:
+    - establish_asset_class_allocation_template
+    - apply_diversification_constraints
+    nodes_dependent_on: []
+    prompt: Using the refined list and allocation template, calculate optimal portfolio
+      weights. Provide a table of securities with target weights summing to 100%.
+  compile_tax_optimization_plan:
+    agent: false
+    description: Outline strategies to minimize tax liabilities.
+    name: compile_tax_optimization_plan
+    nodes_depended_on:
+    - define_investment_goals
+    - assess_risk_tolerance
+    - determine_time_horizon
+    nodes_dependent_on: []
+    prompt: Create a tax optimization plan for the portfolio. Suggest holding periods,
+      dividend strategies, and tax‑efficient asset placements.
+  define_investment_goals:
+    agent: false
+    description: Specify the key financial goals that the portfolio must support.
+    name: define_investment_goals
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the investor's primary investment objectives. Provide a concise
+      list of goals (e.g., capital appreciation, income generation, preservation of
+      capital).
+  define_rebalancing_strategy:
+    agent: false
+    description: Set guidelines for keeping the portfolio aligned with its targets.
+    name: define_rebalancing_strategy
+    nodes_depended_on:
+    - define_investment_goals
+    - assess_risk_tolerance
+    - determine_time_horizon
+    nodes_dependent_on: []
+    prompt: Define a rebalancing strategy for the portfolio. Specify frequency, thresholds,
+      and any rules for adjusting weights.
+  determine_time_horizon:
+    agent: false
+    description: Establish the expected duration of the investment period.
+    name: determine_time_horizon
+    nodes_depended_on:
+    - define_investment_goals
+    nodes_dependent_on: []
+    prompt: Based on the investment objectives, determine the investor's time horizon
+      in years. Provide the time horizon and reasoning.
+  draft_implementation_schedule:
+    agent: false
+    description: Plan the timing of trades and events.
+    name: draft_implementation_schedule
+    nodes_depended_on:
+    - calculate_portfolio_weights
+    - define_rebalancing_strategy
+    - compile_tax_optimization_plan
+    - select_brokerage_and_execution_method
+    nodes_dependent_on: []
+    prompt: Draft an implementation schedule that maps trade execution dates, rebalancing
+      actions, and tax events. Provide a timeline in days.
+  establish_asset_class_allocation_template:
+    agent: false
+    description: Define target allocation ranges for each asset class.
+    name: establish_asset_class_allocation_template
+    nodes_depended_on:
+    - assess_risk_tolerance
+    - determine_time_horizon
+    nodes_dependent_on: []
+    prompt: Create a high-level asset class allocation template based on risk tolerance
+      and time horizon. Provide percentage ranges for major asset classes (equity,
+      fixed income, cash, alternatives).
+  generate_portfolio_report_template:
+    agent: false
+    description: Create a reporting framework for ongoing portfolio tracking.
+    name: generate_portfolio_report_template
+    nodes_depended_on:
+    - calculate_portfolio_weights
+    nodes_dependent_on: []
+    prompt: Generate a portfolio report template that will display holdings, weights,
+      performance, and risk metrics. List the sections and fields.
+  generate_security_pool_per_asset:
+    agent: false
+    description: Compile a list of potential holdings for each asset class.
+    name: generate_security_pool_per_asset
+    nodes_depended_on:
+    - select_investment_universe
+    - establish_asset_class_allocation_template
+    nodes_dependent_on: []
+    prompt: From the investment universe, generate a list of candidate securities
+      for each asset class. Provide ticker symbols and short descriptions.
+  review_compliance_and_regulatory_requirements:
+    agent: false
+    description: Identify regulatory steps needed to launch the portfolio.
+    name: review_compliance_and_regulatory_requirements
+    nodes_depended_on:
+    - define_investment_goals
+    nodes_dependent_on: []
+    prompt: Review compliance and regulatory requirements for the chosen investment
+      strategy. List any necessary filings or disclosures.
+  select_brokerage_and_execution_method:
+    agent: false
+    description: Choose the trading platform and execution style.
+    name: select_brokerage_and_execution_method
+    nodes_depended_on:
+    - calculate_portfolio_weights
+    nodes_dependent_on: []
+    prompt: Select a brokerage and execution method suitable for the portfolio. Provide
+      the broker name and whether trades will be executed manually or algorithmically.
+  select_investment_universe:
+    agent: false
+    description: Identify the markets and sectors from which securities will be drawn.
+    name: select_investment_universe
+    nodes_depended_on:
+    - define_investment_goals
+    nodes_dependent_on: []
+    prompt: Select an appropriate investment universe that aligns with the objectives.
+      List the markets or sectors to be considered (e.g., US equities, emerging markets,
+      bonds).

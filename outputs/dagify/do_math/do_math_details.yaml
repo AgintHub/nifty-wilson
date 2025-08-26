@@ -1,0 +1,11 @@
+dag_type: plain_text
+description: A minimal workflow to perform a mathematical calculation
+name: do_math
+nodes:
+  perform_calculation:
+    agent: false
+    description: Execute a basic arithmetic operation
+    name: perform_calculation
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Compute the result of 12 multiplied by 5, then subtract 18.

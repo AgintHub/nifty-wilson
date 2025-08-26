@@ -1,0 +1,40 @@
+dag_type: plain_text
+description: A workflow to evaluate and report on the current state of being
+name: assess_current_state
+nodes:
+  define_current_state:
+    agent: false
+    description: Determine the current state of being
+    name: define_current_state
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define what 'how are you doing today?' means in terms of emotional and
+      physical state. Consider factors like mood, energy level, and overall well-being.
+  evaluate_emotional_state:
+    agent: false
+    description: Assess the current emotional state
+    name: evaluate_emotional_state
+    nodes_depended_on:
+    - define_current_state
+    nodes_dependent_on: []
+    prompt: Evaluate your current emotional state, including factors like mood, stress
+      level, and any emotional sensations.
+  evaluate_physical_state:
+    agent: false
+    description: Assess the current physical state
+    name: evaluate_physical_state
+    nodes_depended_on:
+    - define_current_state
+    nodes_dependent_on: []
+    prompt: Evaluate your current physical state, including factors like fatigue,
+      hunger, and any physical sensations.
+  report_current_state:
+    agent: false
+    description: Generate a report on the current state of being
+    name: report_current_state
+    nodes_depended_on:
+    - evaluate_physical_state
+    - evaluate_emotional_state
+    nodes_dependent_on: []
+    prompt: Based on your evaluations of physical and emotional state, generate a
+      report on how you are doing today.

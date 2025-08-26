@@ -1,0 +1,182 @@
+dag_type: plain_text
+description: A detailed, concurrent workflow for planning an invasion campaign, covering
+  intelligence, objectives, force allocation, logistics, operations, risk assessment,
+  and approval.
+name: plan_military_invasion_campaign
+nodes:
+  assess_risk_and_mitigation:
+    agent: false
+    description: Evaluates risks and suggests mitigation.
+    name: assess_risk_and_mitigation
+    nodes_depended_on:
+    - create_maneuver_and_assault_sequence
+    - draft_tactical_operations_plan
+    nodes_dependent_on:
+    - finalize_campaign_timeline
+    prompt: Identify risks (enemy counter‑attacks, logistical delays, political fallout)
+      and propose mitigation measures. Present a risk matrix with likelihood, impact,
+      and actions. Output as JSON.
+  assess_target_defenses:
+    agent: false
+    description: Evaluates the enemy's defensive capabilities.
+    name: assess_target_defenses
+    nodes_depended_on:
+    - gather_initial_geopolitical_data
+    nodes_dependent_on:
+    - design_force_allocation
+    prompt: Analyze the target region's defensive posture, including troop deployments,
+      fortifications, air defense, and intelligence capabilities. Summarize strengths,
+      weaknesses, and key defensive lines. Output as JSON.
+  compile_campaign_briefing:
+    agent: false
+    description: Creates the final briefing document.
+    name: compile_campaign_briefing
+    nodes_depended_on:
+    - finalize_campaign_timeline
+    nodes_dependent_on:
+    - review_and_approve_campaign
+    prompt: Summarize the entire campaign plan into a brief, executive‑level briefing.
+      Include objectives, force allocation, logistics, operations, timeline, and risk
+      assessment. Output as a structured briefing document.
+  create_maneuver_and_assault_sequence:
+    agent: false
+    description: Plans the physical movement and assault operations.
+    name: create_maneuver_and_assault_sequence
+    nodes_depended_on:
+    - draft_tactical_operations_plan
+    - outline_support_and_resupply
+    nodes_dependent_on:
+    - assess_risk_and_mitigation
+    prompt: Map out the maneuver and assault sequence, highlighting entry points,
+      force concentrations, and fallback positions. Include timing for each phase.
+      Output as a flow diagram description.
+  define_campaign_goals:
+    agent: false
+    description: Establishes the campaign's objectives.
+    name: define_campaign_goals
+    nodes_depended_on:
+    - gather_initial_geopolitical_data
+    nodes_dependent_on:
+    - design_force_allocation
+    prompt: Based on the geopolitical data, state the primary objectives of the invasion
+      campaign. Include strategic, operational, and tactical goals in a concise bullet
+      list. Output as plain text.
+  design_force_allocation:
+    agent: false
+    description: Determines how forces are assigned to the campaign.
+    name: design_force_allocation
+    nodes_depended_on:
+    - define_campaign_goals
+    - assess_target_defenses
+    - evaluate_force_capabilities
+    nodes_dependent_on:
+    - develop_logistics_plan
+    - establish_command_and_control_structure
+    - draft_tactical_operations_plan
+    - create_maneuver_and_assault_sequence
+    prompt: Allocate forces to campaign objectives, balancing combat power, speed,
+      and sustainability. Provide a high‑level distribution table with unit types,
+      assigned missions, and deployment zones. Output as JSON.
+  develop_logistics_plan:
+    agent: false
+    description: Plans the logistical support structure.
+    name: develop_logistics_plan
+    nodes_depended_on:
+    - design_force_allocation
+    nodes_dependent_on:
+    - outline_support_and_resupply
+    prompt: Create a logistics framework covering supply lines, transport routes,
+      fuel, ammunition, medical support, and command communication. Present key nodes
+      and contingency paths in a diagrammatic list. Output as JSON.
+  draft_tactical_operations_plan:
+    agent: false
+    description: Creates the detailed tactical operations schedule.
+    name: draft_tactical_operations_plan
+    nodes_depended_on:
+    - design_force_allocation
+    - plan_intelligence_and_surveillance
+    - establish_command_and_control_structure
+    nodes_dependent_on:
+    - create_maneuver_and_assault_sequence
+    - assess_risk_and_mitigation
+    - finalize_campaign_timeline
+    prompt: 'Outline the day‑to‑day tactical plan: force deployment, movement schedules,
+      engagement rules, and coordination points. Include timing for key actions. Output
+      as a timeline in plain text.'
+  establish_command_and_control_structure:
+    agent: false
+    description: Sets up the command and control framework.
+    name: establish_command_and_control_structure
+    nodes_depended_on:
+    - design_force_allocation
+    nodes_dependent_on:
+    - draft_tactical_operations_plan
+    prompt: Define the command hierarchy, reporting lines, and decision‑making protocols
+      for the invasion. Include roles for theater commander, sector commanders, and
+      liaison teams. Output as a structured table.
+  evaluate_force_capabilities:
+    agent: false
+    description: Catalogs the forces at disposal for the campaign.
+    name: evaluate_force_capabilities
+    nodes_depended_on:
+    - gather_initial_geopolitical_data
+    nodes_dependent_on:
+    - design_force_allocation
+    prompt: List available friendly forces with unit types, numbers, capabilities,
+      and readiness levels. Include ground, air, naval, cyber, and special operations
+      assets. Output as JSON.
+  finalize_campaign_timeline:
+    agent: false
+    description: Produces the final campaign schedule.
+    name: finalize_campaign_timeline
+    nodes_depended_on:
+    - assess_risk_and_mitigation
+    nodes_dependent_on:
+    - compile_campaign_briefing
+    prompt: Compile a comprehensive campaign timeline from staging to final objectives,
+      including key milestones, contingencies, and force rotations. Output as a chronological
+      list.
+  gather_initial_geopolitical_data:
+    agent: false
+    description: Collects foundational geopolitical data for the campaign.
+    name: gather_initial_geopolitical_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - define_campaign_goals
+    - assess_target_defenses
+    - plan_intelligence_and_surveillance
+    prompt: Collect current geopolitical, demographic, economic, and strategic information
+      about the target region and its surroundings. Provide a structured summary with
+      key political actors, military assets, terrain features, infrastructure, and
+      potential conflict hotspots. Output as JSON.
+  outline_support_and_resupply:
+    agent: false
+    description: Specifies resupply logistics for combat units.
+    name: outline_support_and_resupply
+    nodes_depended_on:
+    - develop_logistics_plan
+    nodes_dependent_on:
+    - create_maneuver_and_assault_sequence
+    prompt: Detail the resupply chain, including depot locations, transport assets,
+      and resupply intervals for each combat element. Output as a table.
+  plan_intelligence_and_surveillance:
+    agent: false
+    description: Plans intelligence gathering and surveillance operations.
+    name: plan_intelligence_and_surveillance
+    nodes_depended_on:
+    - gather_initial_geopolitical_data
+    - assess_target_defenses
+    nodes_dependent_on:
+    - draft_tactical_operations_plan
+    prompt: Design an ISR (Intelligence, Surveillance, Reconnaissance) plan covering
+      aerial, satellite, signals, human, and cyber sources. Specify assets, frequencies,
+      and target areas. Output as JSON.
+  review_and_approve_campaign:
+    agent: false
+    description: Final approval step for the campaign.
+    name: review_and_approve_campaign
+    nodes_depended_on:
+    - compile_campaign_briefing
+    nodes_dependent_on: []
+    prompt: Review the compiled briefing for completeness and accuracy. Confirm alignment
+      with strategic goals and approve the plan. Output a single approval statement.

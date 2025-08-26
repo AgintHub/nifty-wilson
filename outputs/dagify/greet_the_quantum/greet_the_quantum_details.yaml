@@ -1,0 +1,57 @@
+dag_type: plain_text
+description: A workflow for saying hello to the quantum
+name: greet_the_quantum
+nodes:
+  conclude_greeting:
+    agent: false
+    description: Conclude the greeting interaction with the quantum
+    name: conclude_greeting
+    nodes_depended_on:
+    - receive_response
+    nodes_dependent_on: []
+    prompt: Summarize the outcome of greeting the quantum entity and determine if
+      further interaction is needed.
+  deliver_greeting:
+    agent: false
+    description: Deliver the greeting to the quantum
+    name: deliver_greeting
+    nodes_depended_on:
+    - translate_to_quantum_language
+    nodes_dependent_on: []
+    prompt: Simulate or actually deliver the greeting to the quantum entity through
+      an appropriate channel or interface.
+  formulate_greeting:
+    agent: false
+    description: Create a greeting message for the quantum
+    name: formulate_greeting
+    nodes_depended_on:
+    - understand_quantum_context
+    nodes_dependent_on: []
+    prompt: Based on the context, craft a simple and clear greeting message that can
+      be directed towards a quantum entity.
+  receive_response:
+    agent: false
+    description: Receive and interpret any response from the quantum
+    name: receive_response
+    nodes_depended_on:
+    - deliver_greeting
+    nodes_dependent_on: []
+    prompt: If a response is received from the quantum entity, interpret its meaning
+      and significance.
+  translate_to_quantum_language:
+    agent: false
+    description: Translate the greeting into a language suitable for the quantum
+    name: translate_to_quantum_language
+    nodes_depended_on:
+    - formulate_greeting
+    nodes_dependent_on: []
+    prompt: If necessary, translate the greeting message into a mathematical or scientific
+      representation that can be understood by a quantum entity.
+  understand_quantum_context:
+    agent: false
+    description: Understand the context of greeting the quantum
+    name: understand_quantum_context
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Consider the meaning and implications of saying hello to a quantum entity.
+      What context would be relevant?

@@ -1,0 +1,73 @@
+dag_type: plain_text
+description: A workflow designed to validate correct interpretation and structured
+  execution of a simple objective, producing a coherent response in the specified
+  format.
+name: test_workflow_execution
+nodes:
+  construct_atomic_structure:
+    agent: false
+    description: Create the step-by-step elemental task structure adhering to the
+      Elemental Thoughts framework.
+    name: construct_atomic_structure
+    nodes_depended_on:
+    - define_workflow_purpose
+    nodes_dependent_on: []
+    prompt: 'Decompose the task ''test'' into atomic, stateless, unambiguous steps
+      that satisfy the DAG requirements: acyclicity, connectivity, concurrency, and
+      Markovian transitions. Ensure each step has a unique name, clear outcome, and
+      valid dependencies.'
+  define_workflow_purpose:
+    agent: false
+    description: Specify the goal of the workflow based on interpreted intent.
+    name: define_workflow_purpose
+    nodes_depended_on:
+    - interpret_objective
+    nodes_dependent_on: []
+    prompt: 'State the purpose of this workflow: to demonstrate correct decomposition
+      of a minimal or malformed objective into a valid, concurrent, and fully connected
+      DAG in the required JSON format.'
+  ensure_connectivity_and_acyclicity:
+    agent: false
+    description: Verify all nodes are connected and the graph remains acyclic.
+    name: ensure_connectivity_and_acyclicity
+    nodes_depended_on:
+    - construct_atomic_structure
+    - validate_input_correctness
+    nodes_dependent_on: []
+    prompt: Review the list of steps and their dependencies. Ensure every non-initial
+      node has at least one parent and every non-final node has at least one dependent.
+      Confirm no cycles exist by tracing all paths from start to end.
+  format_final_response:
+    agent: false
+    description: Assemble the final output in correct JSON schema with all required
+      fields.
+    name: format_final_response
+    nodes_depended_on:
+    - ensure_connectivity_and_acyclicity
+    - construct_atomic_structure
+    nodes_dependent_on: []
+    prompt: Generate the complete workflow DAG in exact JSON format as specified.
+      Include 'name', 'description', and 'steps' array with each step containing 'name',
+      'description', 'nodes_depended_on', 'nodes_dependent_on', 'prompt', and 'agent'
+      set to false.
+  interpret_objective:
+    agent: false
+    description: Determine the intended meaning of the input objective despite typographical
+      errors.
+    name: interpret_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Examine the input 'teset' and infer the most likely intended objective.
+      Assume it is a misspelling of 'test'. Proceed to build a workflow that validates
+      correct parsing and execution of such inputs.
+  validate_input_correctness:
+    agent: false
+    description: Assess whether the input contains errors and confirm assumptions
+      made during interpretation.
+    name: validate_input_correctness
+    nodes_depended_on:
+    - interpret_objective
+    nodes_dependent_on: []
+    prompt: Compare the original input 'teset' against common English words. Confirm
+      that it is likely intended to be 'test'. Document the reasoning for this correction
+      briefly.

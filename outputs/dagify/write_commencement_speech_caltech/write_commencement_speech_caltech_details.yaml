@@ -1,0 +1,85 @@
+dag_type: plain_text
+description: Draft a commencement speech for Caltech
+name: write_commencement_speech_caltech
+nodes:
+  clarify_speech_objectives:
+    agent: false
+    description: Define the core themes and goals of the speech
+    name: clarify_speech_objectives
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Identify the primary objectives for this commencement speech. Is it to
+      thank graduates, challenge them to new endeavors, inspire innovation? Provide
+      2–3 bullet points outlining the main themes.
+  craft_commencement_address_outline:
+    agent: false
+    description: Develop the structure and content of the commencement address
+    name: craft_commencement_address_outline
+    nodes_depended_on:
+    - clarify_speech_objectives
+    - research_caltech_history
+    - define_commencement_audience
+    nodes_dependent_on: []
+    prompt: Create an outline for the commencement address based on the identified
+      objectives, Caltech's history, and the audience's profile. Organize the speech
+      into introduction, body, and conclusion. Use bullet points and concise sentences.
+  craft_commencementspeech_body:
+    agent: false
+    description: Write the core content of the commencement address
+    name: craft_commencementspeech_body
+    nodes_depended_on:
+    - craft_commencement_address_outline
+    - develop_insightful_grad_quotes
+    nodes_dependent_on: []
+    prompt: Write the main body of the commencement address. Use the outline and quotes
+      to develop cohesive paragraphs. Reference specific examples from Caltech's history
+      and the graduates' backgrounds.
+  define_commencement_audience:
+    agent: false
+    description: Identify the demographics and expectations of the commencement audience
+    name: define_commencement_audience
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Describe the commencement audience. Who are the graduates, their families,
+      and friends? What are their backgrounds, experiences, and expectations? Provide
+      2–3 bullet points outlining their characteristics.
+  develop_insightful_grad_quotes:
+    agent: false
+    description: Create motivational quotes and anecdotes to inspire graduates
+    name: develop_insightful_grad_quotes
+    nodes_depended_on:
+    - research_caltech_history
+    nodes_dependent_on: []
+    prompt: Write inspiring quotes related to graduates' careers, interests, and potential.
+      Reference Caltech's achievements and principles. Provide 3–5 quote options with
+      attributed sources.
+  edit_and_improve_commencement_speech:
+    agent: false
+    description: Refine and perfect the commencement speech for clarity, concision,
+      and emotional impact
+    name: edit_and_improve_commencement_speech
+    nodes_depended_on:
+    - craft_commencementspeech_body
+    nodes_dependent_on: []
+    prompt: Review and refine the speech for clarity, coherence, and effectiveness.
+      Use a conversational tone to engage the audience. Check for grammar, punctuation,
+      and formatting accuracy.
+  prepare_final_draft_commencement_speech:
+    agent: false
+    description: Finalize the commencement speech for presentation
+    name: prepare_final_draft_commencement_speech
+    nodes_depended_on:
+    - edit_and_improve_commencement_speech
+    nodes_dependent_on: []
+    prompt: Finalize the commencement speech by incorporating reviewers' feedback,
+      making last-minute adjustments, and ensuring formatting consistency throughout.
+      Deliver the final version.
+  research_caltech_history:
+    agent: false
+    description: Gather relevant information about Caltech's history and achievements
+    name: research_caltech_history
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Document key milestones in Caltech's history. Highlight its most notable
+      achievements, discoveries, and contributions to science and engineering. Provide
+      a list of 5 key dates.

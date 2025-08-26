@@ -1,0 +1,92 @@
+dag_type: plain_text
+description: A workflow that defines and conducts a basic test procedure, including
+  specification, execution, and reporting of the test results.
+name: basic_test_workflow
+nodes:
+  collect_test_outputs:
+    agent: false
+    description: Record all outputs, results, or observable outcomes produced by the
+      test execution.
+    name: collect_test_outputs
+    nodes_depended_on:
+    - execute_test_procedure
+    nodes_dependent_on: []
+    prompt: Capture and document all results, outputs, and observable changes produced
+      as a direct result of executing the test procedure. Do not analyze or interpret
+      results here—only record them factually.
+  define_test_objective:
+    agent: false
+    description: Clarify and state the singular, immediate goal or purpose of the
+      test.
+    name: define_test_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Clearly state one direct and specific objective for performing this test.
+      Focus only on the immediate goal, without outlining procedures or steps.
+  describe_test_procedure:
+    agent: false
+    description: Detail an explicit, stepwise procedure for carrying out the test
+      from start to finish.
+    name: describe_test_procedure
+    nodes_depended_on:
+    - specify_test_criteria
+    - prepare_test_inputs
+    nodes_dependent_on: []
+    prompt: Write a step-by-step procedure describing exactly how to execute the test.
+      Use actionable, direct instructions for each step. Do not skip any details or
+      assume prior knowledge.
+  evaluate_test_results:
+    agent: false
+    description: Assess the collected outputs against each of the predefined test
+      criteria.
+    name: evaluate_test_results
+    nodes_depended_on:
+    - collect_test_outputs
+    - specify_test_criteria
+    nodes_dependent_on: []
+    prompt: For each specified test criterion, determine whether the collected output
+      meets, fails to meet, or partially meets the requirement. List results for each
+      criterion with a clear pass/fail/partial outcome.
+  execute_test_procedure:
+    agent: false
+    description: Carry out the test procedure exactly as described using the prepared
+      inputs.
+    name: execute_test_procedure
+    nodes_depended_on:
+    - describe_test_procedure
+    - prepare_test_inputs
+    nodes_dependent_on: []
+    prompt: Follow the provided step-by-step procedure exactly, carrying out each
+      instruction using the supplied inputs. Document only what occurs during execution.
+  prepare_test_inputs:
+    agent: false
+    description: Generate all necessary inputs, tools, or materials required to execute
+      the test.
+    name: prepare_test_inputs
+    nodes_depended_on:
+    - specify_test_criteria
+    nodes_dependent_on: []
+    prompt: List or describe all required inputs, tools, or initial settings needed
+      to execute the test according to the specified criteria. Ensure each input is
+      explicit and concrete.
+  specify_test_criteria:
+    agent: false
+    description: List clear, objective criteria that will determine the success or
+      failure of the test.
+    name: specify_test_criteria
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on: []
+    prompt: List specific, directly measurable criteria or conditions that must be
+      met to consider the test successful. Make each criterion unambiguous.
+  summarize_test_conclusion:
+    agent: false
+    description: Summarize the overall result of the test and key findings based on
+      the criteria evaluation.
+    name: summarize_test_conclusion
+    nodes_depended_on:
+    - evaluate_test_results
+    nodes_dependent_on: []
+    prompt: Based on the evaluation of the results against the test criteria, provide
+      a clear summary stating the overall outcome of the test (pass, fail, inconclusive)
+      and list any notable findings.

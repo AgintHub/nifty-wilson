@@ -1,0 +1,226 @@
+dag_type: plain_text
+description: Workflow to produce a fully formatted academic paper on the history of
+  Diophantine equations.
+name: write_paper_on_history_of_diophantine_equations
+nodes:
+  compile_bibliography:
+    agent: false
+    description: Create the bibliography.
+    name: compile_bibliography
+    nodes_depended_on:
+    - search_ancient_sources
+    - search_medieval_sources
+    - search_modern_sources
+    - identify_key_contributions
+    nodes_dependent_on:
+    - format_citations
+    prompt: Using the compiled source list, generate a bibliography in IEEE citation
+      style. Each entry must include author(s), title, publication, year.
+  compile_source_list:
+    agent: false
+    description: Create a unified list of all identified sources.
+    name: compile_source_list
+    nodes_depended_on:
+    - search_ancient_sources
+    - search_medieval_sources
+    - search_modern_sources
+    nodes_dependent_on:
+    - identify_key_contributions
+    prompt: Combine the lists from the ancient, medieval, and modern source searches
+      into a single comprehensive source list. Output the list with unique identifiers.
+  create_timeline:
+    agent: false
+    description: Produce a timeline of historical milestones.
+    name: create_timeline
+    nodes_depended_on:
+    - identify_key_contributions
+    nodes_dependent_on:
+    - draft_introduction
+    - draft_section_early_history
+    - draft_section_medieval_development
+    - draft_section_modern_investigations
+    - draft_section_20th_21st_century
+    - draft_section_impact_and_applications
+    - draft_conclusion
+    prompt: Using the key contributions identified, construct a chronological timeline
+      of major milestones in the history of Diophantine equations. Output each milestone
+      with year (or era) and short description.
+  draft_conclusion:
+    agent: false
+    description: Write the paper conclusion.
+    name: draft_conclusion
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - write_abstract
+    prompt: Write the conclusion summarizing key points, future research directions,
+      and final thoughts.
+  draft_introduction:
+    agent: false
+    description: Write the paper introduction.
+    name: draft_introduction
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - write_abstract
+    prompt: Write the introduction of the paper using the timeline and key contributions.
+      The introduction should set context, explain significance, and outline the paper
+      structure.
+  draft_section_20th_21st_century:
+    agent: false
+    description: Write the 20th–21st century advances section.
+    name: draft_section_20th_21st_century
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - format_citations
+    prompt: Write a section titled '20th and 21st Century Advances' covering Diophantine
+      geometry, algorithmic number theory, and related fields.
+  draft_section_early_history:
+    agent: false
+    description: Write the early history section.
+    name: draft_section_early_history
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - format_citations
+    prompt: Write a section titled 'Early History of Diophantine Equations' using
+      ancient sources. Include discussion of Diophantus, earlier Greek mathematicians,
+      and initial problems.
+  draft_section_impact_and_applications:
+    agent: false
+    description: Write the impact and applications section.
+    name: draft_section_impact_and_applications
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - format_citations
+    prompt: Write a section titled 'Impact and Applications' discussing how Diophantine
+      equations influence cryptography, coding theory, etc.
+  draft_section_medieval_development:
+    agent: false
+    description: Write the medieval development section.
+    name: draft_section_medieval_development
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - format_citations
+    prompt: Write a section titled 'Medieval Development' using medieval sources.
+      Discuss contributions of Al-Khwarizmi, Fibonacci, and others.
+  draft_section_modern_investigations:
+    agent: false
+    description: Write the modern investigations section.
+    name: draft_section_modern_investigations
+    nodes_depended_on:
+    - identify_key_contributions
+    - create_timeline
+    nodes_dependent_on:
+    - format_citations
+    prompt: Write a section titled 'Modern Investigations' covering 17th–19th century
+      developments (Fermat, Euler, etc.).
+  final_formatting:
+    agent: false
+    description: Apply final formatting.
+    name: final_formatting
+    nodes_depended_on:
+    - proofread_and_edit
+    nodes_dependent_on:
+    - generate_final_paper
+    prompt: 'Apply final formatting: title page, abstract, sections with headings,
+      numbered references, and page numbering. Ensure adherence to academic paper
+      standards.'
+  format_citations:
+    agent: false
+    description: Insert citations into the text.
+    name: format_citations
+    nodes_depended_on:
+    - draft_introduction
+    - draft_section_early_history
+    - draft_section_medieval_development
+    - draft_section_modern_investigations
+    - draft_section_20th_21st_century
+    - draft_section_impact_and_applications
+    - draft_conclusion
+    - compile_bibliography
+    nodes_dependent_on:
+    - proofread_and_edit
+    prompt: Insert in-text citations into each draft section using IEEE numeric format,
+      referencing the bibliography. Ensure citation numbers match bibliography order.
+  generate_final_paper:
+    agent: false
+    description: Assemble the final paper.
+    name: generate_final_paper
+    nodes_depended_on:
+    - final_formatting
+    nodes_dependent_on: []
+    prompt: Combine all formatted sections into a single document titled 'The History
+      of Diophantine Equations'. Include title page, abstract, main body, references,
+      and appendices if any.
+  identify_key_contributions:
+    agent: false
+    description: Identify major milestones in the study of Diophantine equations.
+    name: identify_key_contributions
+    nodes_depended_on:
+    - compile_source_list
+    nodes_dependent_on:
+    - create_timeline
+    prompt: From the compiled source list, extract key mathematical contributions
+      related to Diophantine equations (e.g., discovery of Diophantine equations,
+      Fermat's Last Theorem, Thue's theorem, Mordell–Weil theorem). Provide each contribution
+      with brief description and the source identifier.
+  proofread_and_edit:
+    agent: false
+    description: Proofread and edit the paper.
+    name: proofread_and_edit
+    nodes_depended_on:
+    - format_citations
+    nodes_dependent_on:
+    - final_formatting
+    prompt: Proofread the entire draft for grammar, clarity, and consistency. Correct
+      any errors and suggest stylistic improvements.
+  search_ancient_sources:
+    agent: false
+    description: Gather a list of ancient sources mentioning Diophantine equations.
+    name: search_ancient_sources
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - compile_source_list
+    prompt: Search academic databases for references to Diophantine equations in ancient
+      texts (e.g., Diophantus's *Arithmetica*, works of Greek mathematicians). List
+      each source with title, author, publication year, and brief description.
+  search_medieval_sources:
+    agent: false
+    description: Gather a list of medieval sources mentioning Diophantine equations.
+    name: search_medieval_sources
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - compile_source_list
+    prompt: Search academic databases for references to Diophantine equations in medieval
+      literature (e.g., Al-Khwarizmi, Fibonacci, Omar Khayyam). List each source with
+      title, author, publication year, and brief description.
+  search_modern_sources:
+    agent: false
+    description: Gather a list of modern sources mentioning Diophantine equations.
+    name: search_modern_sources
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - compile_source_list
+    prompt: Search academic databases for references to Diophantine equations in modern
+      mathematics (e.g., Fermat, Euler, Thue, Hilbert, Mordell). List each source
+      with title, author, publication year, and brief description.
+  write_abstract:
+    agent: false
+    description: Write the paper abstract.
+    name: write_abstract
+    nodes_depended_on:
+    - draft_introduction
+    - draft_conclusion
+    nodes_dependent_on: []
+    prompt: Write an abstract summarizing the entire paper, including background,
+      methods, findings, and conclusions, based on the introduction and conclusion.

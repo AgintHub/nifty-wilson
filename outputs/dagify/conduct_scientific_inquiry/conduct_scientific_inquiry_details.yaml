@@ -1,0 +1,288 @@
+dag_type: plain_text
+description: A streamlined scientific inquiry workflow with some nodes removed to
+  simplify the process while preserving logical flow and connectivity.
+name: conduct_scientific_inquiry
+nodes:
+  assess_assumptions_and_limitations:
+    agent: false
+    description: Evaluate validity and scope of the study’s conclusions
+    name: assess_assumptions_and_limitations
+    nodes_depended_on:
+    - interpret_results_in_context
+    nodes_dependent_on: []
+    prompt: List all key assumptions made during design and analysis. Identify study
+      limitations including sample bias, measurement error, and confounding variables.
+  collect_primary_data:
+    agent: false
+    description: Execute the final experiment and record all observations
+    name: collect_primary_data
+    nodes_depended_on:
+    - refine_experiment_protocol
+    - obtain_ethical_approval
+    - establish_control_conditions
+    nodes_dependent_on: []
+    prompt: Run the experiment using the refined protocol. Collect data for all subjects
+      or trials, ensuring adherence to randomization, timing, and control conditions.
+      Save raw data securely.
+  conduct_pilot_experiment:
+    agent: false
+    description: Run a small-scale test to validate procedures
+    name: conduct_pilot_experiment
+    nodes_depended_on:
+    - design_experiment_protocols
+    - construct_data_collection_forms
+    - prepare_lab_or_field_setup
+    - generate_randomization_scheme
+    nodes_dependent_on: []
+    prompt: Execute the experimental protocol on a pilot sample (10–20% of target
+      size). Record procedural issues, timing, data quality, and unexpected behaviors.
+  construct_data_collection_forms:
+    agent: false
+    description: Develop templates for recording experimental observations
+    name: construct_data_collection_forms
+    nodes_depended_on:
+    - design_experiment_protocols
+    - select_measurement_instruments
+    nodes_dependent_on: []
+    prompt: Create standardized data entry forms (digital or physical) with labeled
+      fields for each variable, timestamp, trial ID, and observer notes. Include units
+      and valid ranges.
+  design_experiment_protocols:
+    agent: false
+    description: Create detailed procedural steps for data collection
+    name: design_experiment_protocols
+    nodes_depended_on:
+    - identify_variables
+    - develop_hypothesis
+    nodes_dependent_on: []
+    prompt: Write a step-by-step experimental protocol including setup, intervention,
+      measurement, timing, and repetition. Ensure instructions are replicable by an
+      independent researcher.
+  determine_sample_size_and_population:
+    agent: false
+    description: Define the subject or data source scope and required quantity
+    name: determine_sample_size_and_population
+    nodes_depended_on:
+    - develop_hypothesis
+    nodes_dependent_on: []
+    prompt: Specify the target population and determine minimum sample size using
+      statistical power principles. Justify based on expected effect size and variability.
+  develop_hypothesis:
+    agent: false
+    description: Construct a testable prediction based on the research question
+    name: develop_hypothesis
+    nodes_depended_on:
+    - formulate_research_question
+    - review_prior_literature
+    nodes_dependent_on: []
+    prompt: 'State a single, directional hypothesis that predicts the relationship
+      between the independent and dependent variables. Format: ''If X increases, then
+      Y will increase/decrease, because...'''
+  establish_control_conditions:
+    agent: false
+    description: Define baseline or null conditions for comparison
+    name: establish_control_conditions
+    nodes_depended_on:
+    - identify_variables
+    - design_experiment_protocols
+    nodes_dependent_on: []
+    prompt: Describe the control group or baseline condition. Specify how it differs
+      from experimental conditions and how it isolates the effect of the independent
+      variable.
+  formulate_research_question:
+    agent: false
+    description: Define a clear, testable scientific question based on observation
+      or gap in knowledge
+    name: formulate_research_question
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: 'Based on existing knowledge or observed phenomena, state a single, focused,
+      and falsifiable scientific research question. Use standard format: ''What is
+      the effect of X on Y under Z conditions?'''
+  generate_randomization_scheme:
+    agent: false
+    description: Create method for assigning subjects or trials to conditions
+    name: generate_randomization_scheme
+    nodes_depended_on:
+    - determine_sample_size_and_population
+    nodes_dependent_on: []
+    prompt: Generate a random assignment protocol for subjects or trials across control
+      and experimental conditions. Specify seeding, blocking, or stratification if
+      needed.
+  generate_visualizations:
+    agent: false
+    description: Create graphs and charts to represent data and results
+    name: generate_visualizations
+    nodes_depended_on:
+    - run_statistical_analysis
+    - perform_data_cleaning
+    nodes_dependent_on: []
+    prompt: 'Produce one figure for each key result: include raw data distribution,
+      comparison between groups, and effect size. Use standard scientific visualization
+      principles.'
+  identify_variables:
+    agent: false
+    description: Specify independent, dependent, and control variables for the experiment
+    name: identify_variables
+    nodes_depended_on:
+    - formulate_research_question
+    nodes_dependent_on: []
+    prompt: List the independent variable(s), dependent variable(s), and key control
+      variables that must be held constant. Define operational measures for each.
+  interpret_results_in_context:
+    agent: false
+    description: Relate statistical findings back to the original hypothesis and field
+    name: interpret_results_in_context
+    nodes_depended_on:
+    - run_statistical_analysis
+    - review_prior_literature
+    nodes_dependent_on: []
+    prompt: 'Interpret the results: state whether the hypothesis is supported or rejected.
+      Compare findings to prior literature. Discuss potential mechanisms and anomalies.'
+  obtain_ethical_approval:
+    agent: false
+    description: Secure formal review and approval for research involving subjects
+    name: obtain_ethical_approval
+    nodes_depended_on:
+    - design_experiment_protocols
+    - determine_sample_size_and_population
+    nodes_dependent_on: []
+    prompt: Prepare documentation for ethics review board submission, including consent
+      forms, risk assessments, and data use statements. Include only materials required
+      by standard IRB checklist.
+  peer_review_internal_check:
+    agent: false
+    description: Critically evaluate the draft for clarity, rigor, and coherence
+    name: peer_review_internal_check
+    nodes_depended_on:
+    - write_research_paper_draft
+    nodes_dependent_on: []
+    prompt: 'Review the draft as a peer would: check logic flow, data-method alignment,
+      interpretation validity, and figure clarity. Provide 6 specific, constructive
+      critiques.'
+  perform_data_cleaning:
+    agent: false
+    description: Process raw data into analyzable format
+    name: perform_data_cleaning
+    nodes_depended_on:
+    - collect_primary_data
+    nodes_dependent_on: []
+    prompt: Inspect raw data for missing values, outliers, and transcription errors.
+      Apply corrections, imputations, or exclusions based on predefined criteria.
+      Output clean dataset with log of changes.
+  prepare_lab_or_field_setup:
+    agent: false
+    description: Assemble physical or virtual environment for experimentation
+    name: prepare_lab_or_field_setup
+    nodes_depended_on:
+    - design_experiment_protocols
+    - select_measurement_instruments
+    nodes_dependent_on: []
+    prompt: List all equipment, software, reagents, or site preparations needed. Provide
+      setup instructions, calibration steps, and safety checks for each component.
+  present_findings_at_conference:
+    agent: false
+    description: Deliver results orally or via poster at scientific meeting
+    name: present_findings_at_conference
+    nodes_depended_on:
+    - generate_visualizations
+    - interpret_results_in_context
+    nodes_dependent_on: []
+    prompt: 'Create a 15-minute talk or conference poster format: title, authors,
+      intro, methods, results, conclusion, figures. Optimize for visual clarity and
+      audience engagement.'
+  refine_experiment_protocol:
+    agent: false
+    description: Update procedures based on pilot results
+    name: refine_experiment_protocol
+    nodes_depended_on:
+    - conduct_pilot_experiment
+    nodes_dependent_on: []
+    prompt: Revise the experimental protocol to fix issues identified in the pilot.
+      List all changes made and justification for each.
+  review_prior_literature:
+    agent: false
+    description: Gather and summarize existing studies relevant to the research question
+    name: review_prior_literature
+    nodes_depended_on:
+    - formulate_research_question
+    nodes_dependent_on: []
+    prompt: Search peer-reviewed databases for studies directly related to the research
+      question. Extract and summarize methodology, results, and limitations of each
+      key study. Limit to 10 most relevant.
+  revise_research_paper:
+    agent: false
+    description: Improve manuscript based on internal peer feedback
+    name: revise_research_paper
+    nodes_depended_on:
+    - peer_review_internal_check
+    nodes_dependent_on: []
+    prompt: Revise the paper addressing all critiques. Highlight changes made in response
+      to each point. Optimize clarity, precision, and argument strength.
+  run_statistical_analysis:
+    agent: false
+    description: Apply statistical tests to the cleaned dataset
+    name: run_statistical_analysis
+    nodes_depended_on:
+    - perform_data_cleaning
+    - select_statistical_analysis_method
+    nodes_dependent_on: []
+    prompt: Perform the selected statistical analysis using standard software. Report
+      test statistic, p-value, confidence intervals, and effect size. Include only
+      raw output and summary table.
+  select_measurement_instruments:
+    agent: false
+    description: Choose tools and techniques for observing and recording data
+    name: select_measurement_instruments
+    nodes_depended_on:
+    - identify_variables
+    nodes_dependent_on: []
+    prompt: List the specific instruments, software, or observational techniques required
+      to measure each variable. Justify each choice based on accuracy, precision,
+      and suitability.
+  select_statistical_analysis_method:
+    agent: false
+    description: Choose appropriate quantitative tests based on data and hypothesis
+    name: select_statistical_analysis_method
+    nodes_depended_on:
+    - develop_hypothesis
+    - identify_variables
+    - determine_sample_size_and_population
+    nodes_dependent_on: []
+    prompt: Select the correct statistical test (e.g., t-test, ANOVA, regression)
+      based on variable types, sample size, and hypothesis. Justify choice and state
+      assumptions.
+  share_data_and_code:
+    agent: false
+    description: Archive and publish research materials for reproducibility
+    name: share_data_and_code
+    nodes_depended_on:
+    - perform_data_cleaning
+    - run_statistical_analysis
+    nodes_dependent_on: []
+    prompt: Upload cleaned dataset, analysis scripts, and experimental protocols to
+      a public repository (e.g., OSF, GitHub, Zenodo). Include README with metadata
+      and usage instructions.
+  submit_paper_to_journal:
+    agent: false
+    description: Submit final manuscript to a peer-reviewed publication venue
+    name: submit_paper_to_journal
+    nodes_depended_on:
+    - revise_research_paper
+    nodes_dependent_on: []
+    prompt: Select an appropriate journal based on scope and impact. Format manuscript
+      per journal guidelines. Submit with cover letter, figures, and any required
+      forms.
+  write_research_paper_draft:
+    agent: false
+    description: Compose full manuscript in standard scientific format
+    name: write_research_paper_draft
+    nodes_depended_on:
+    - interpret_results_in_context
+    - assess_assumptions_and_limitations
+    - generate_visualizations
+    - review_prior_literature
+    nodes_dependent_on: []
+    prompt: 'Write a complete research paper draft: Abstract, Introduction, Methods,
+      Results, Discussion, Conclusion. Include all figures and tables. Use formal
+      academic tone.'

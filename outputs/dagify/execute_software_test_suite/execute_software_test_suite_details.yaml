@@ -1,0 +1,117 @@
+dag_type: plain_text
+description: Generated workflow from UI.
+name: execute_software_test_suite
+nodes:
+  analyze_test_failures:
+    agent: false
+    description: Identify root causes of failed or anomalous test cases.
+    name: analyze_test_failures
+    nodes_depended_on:
+    - collect_test_results
+    nodes_dependent_on: []
+    prompt: Review failed test outputs and logs. For each failure, state the most
+      likely root cause (e.g., code defect, config error, data issue).
+  collect_test_results:
+    agent: false
+    description: Aggregate raw outputs from all test executions.
+    name: collect_test_results
+    nodes_depended_on:
+    - execute_unit_tests
+    - execute_integration_tests
+    nodes_dependent_on: []
+    prompt: Gather all test execution logs, pass/fail statuses, performance metrics,
+      and error reports. Organize by test type and timestamp.
+  configure_test_environment:
+    agent: false
+    description: Apply configuration settings to deployed infrastructure and software.
+    name: configure_test_environment
+    nodes_depended_on:
+    - install_test_software
+    nodes_dependent_on: []
+    prompt: Configure environment variables, service endpoints, database connections,
+      and logging settings as required for test execution. Validate configuration.
+  define_test_scope:
+    agent: false
+    description: Identify the components, features, or functionality to be tested.
+    name: define_test_scope
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the specific software components, modules, or features that must
+      be tested. Include only functional boundaries and exclude testing methods.
+  design_test_cases:
+    agent: false
+    description: Create detailed test cases for each testable item in scope.
+    name: design_test_cases
+    nodes_depended_on:
+    - define_test_scope
+    - identify_test_types
+    nodes_dependent_on: []
+    prompt: For each item in the test scope, write clear, step-by-step test cases
+      including preconditions, inputs, expected outputs, and postconditions. Organize
+      by test type.
+  execute_integration_tests:
+    agent: false
+    description: Run integration-level test cases across modules or services.
+    name: execute_integration_tests
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Execute all integration test cases. Report interface behaviors, data flow
+      correctness, and error conditions. Include pass/fail results.
+  execute_unit_tests:
+    agent: false
+    description: Run unit-level test cases against individual code components.
+    name: execute_unit_tests
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Execute all unit test cases. Output pass/fail status for each test, timing
+      data, and stack traces for failures.
+  generate_test_summary_report:
+    agent: false
+    description: Produce a high-level report of test outcomes and quality status.
+    name: generate_test_summary_report
+    nodes_depended_on:
+    - collect_test_results
+    - analyze_test_failures
+    nodes_dependent_on: []
+    prompt: 'Create a structured test summary: total tests, passed, failed, skipped;
+      categorized by type. Include brief conclusions on system readiness.'
+  identify_test_types:
+    agent: false
+    description: Determine the categories of tests required (e.g., unit, integration,
+      regression).
+    name: identify_test_types
+    nodes_depended_on:
+    - define_test_scope
+    nodes_dependent_on: []
+    prompt: Based on the test scope, list the appropriate types of tests to perform
+      (e.g., unit, integration, end-to-end, performance). One type per line, no descriptions.
+  install_test_software:
+    agent: false
+    description: Install the application under test and supporting tools.
+    name: install_test_software
+    nodes_depended_on:
+    - provision_test_infrastructure
+    nodes_dependent_on: []
+    prompt: Install the application build and required testing tools (e.g., browser
+      drivers, CLI tools) on the provisioned infrastructure. Confirm installation
+      completeness.
+  provision_test_infrastructure:
+    agent: false
+    description: Deploy or allocate the physical or virtual resources for the test
+      environment.
+    name: provision_test_infrastructure
+    nodes_depended_on:
+    - setup_test_environment
+    nodes_dependent_on: []
+    prompt: Deploy the required infrastructure (e.g., VMs, containers, cloud instances)
+      according to the environment specifications. Return resource identifiers and
+      access details.
+  setup_test_environment:
+    agent: false
+    description: Configure the hardware, software, and network settings for testing.
+    name: setup_test_environment
+    nodes_depended_on:
+    - define_test_scope
+    nodes_dependent_on: []
+    prompt: Specify the necessary environment configuration (e.g., OS, database, services,
+      ports) to match production or staging. List only technical setup requirements.

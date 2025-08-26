@@ -1,0 +1,98 @@
+dag_type: plain_text
+description: A workflow that creates a set of test cases, runs them concurrently,
+  validates their results, compiles a summary, and logs the outcome.
+name: generic_test_workflow
+nodes:
+  create_test_suite:
+    agent: false
+    description: Creates a suite of three test cases to be executed.
+    name: create_test_suite
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - run_test_case_1
+    - run_test_case_2
+    - run_test_case_3
+    prompt: Generate a list of three test cases for the system. Each test case should
+      include a name, input parameters, and expected output. Return the list as a
+      JSON array.
+  log_results:
+    agent: false
+    description: Logs the final test report.
+    name: log_results
+    nodes_depended_on:
+    - report_results
+    nodes_dependent_on: []
+    prompt: Persist the report from report_results to a log file or database for audit
+      purposes.
+  report_results:
+    agent: false
+    description: Aggregates validation outcomes into a single report.
+    name: report_results
+    nodes_depended_on:
+    - validate_test_case_1
+    - validate_test_case_2
+    - validate_test_case_3
+    nodes_dependent_on:
+    - log_results
+    prompt: Compile a summary of all test case validations, including pass/fail counts
+      and detailed differences. Return the summary as a structured report.
+  run_test_case_1:
+    agent: false
+    description: Runs test case 1 and records its actual output.
+    name: run_test_case_1
+    nodes_depended_on:
+    - create_test_suite
+    nodes_dependent_on:
+    - validate_test_case_1
+    prompt: Using the test case data from create_test_suite, execute test case 1.
+      Capture the actual output produced by the system.
+  run_test_case_2:
+    agent: false
+    description: Runs test case 2 and records its actual output.
+    name: run_test_case_2
+    nodes_depended_on:
+    - create_test_suite
+    nodes_dependent_on:
+    - validate_test_case_2
+    prompt: Using the test case data from create_test_suite, execute test case 2.
+      Capture the actual output produced by the system.
+  run_test_case_3:
+    agent: false
+    description: Runs test case 3 and records its actual output.
+    name: run_test_case_3
+    nodes_depended_on:
+    - create_test_suite
+    nodes_dependent_on:
+    - validate_test_case_3
+    prompt: Using the test case data from create_test_suite, execute test case 3.
+      Capture the actual output produced by the system.
+  validate_test_case_1:
+    agent: false
+    description: Validates the result of test case 1.
+    name: validate_test_case_1
+    nodes_depended_on:
+    - run_test_case_1
+    nodes_dependent_on:
+    - report_results
+    prompt: Compare the actual output from run_test_case_1 with the expected output
+      from the test case data. Return a pass/fail flag and any difference details.
+  validate_test_case_2:
+    agent: false
+    description: Validates the result of test case 2.
+    name: validate_test_case_2
+    nodes_depended_on:
+    - run_test_case_2
+    nodes_dependent_on:
+    - report_results
+    prompt: Compare the actual output from run_test_case_2 with the expected output
+      from the test case data. Return a pass/fail flag and any difference details.
+  validate_test_case_3:
+    agent: false
+    description: Validates the result of test case 3.
+    name: validate_test_case_3
+    nodes_depended_on:
+    - run_test_case_3
+    nodes_dependent_on:
+    - report_results
+    prompt: Compare the actual output from run_test_case_3 with the expected output
+      from the test case data. Return a pass/fail flag and any difference details.

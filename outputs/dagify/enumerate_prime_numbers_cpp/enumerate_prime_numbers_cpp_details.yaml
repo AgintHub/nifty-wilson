@@ -1,0 +1,62 @@
+dag_type: plain_text
+description: A workflow to write a C++ program that efficiently enumerates prime numbers
+name: enumerate_prime_numbers_cpp
+nodes:
+  add_input_validation:
+    agent: false
+    description: Add input validation to the prime number enumeration function
+    name: add_input_validation
+    nodes_depended_on:
+    - implement_sieve_of_eratosthenes
+    nodes_dependent_on: []
+    prompt: Modify the Sieve of Eratosthenes implementation to include input validation.
+      Check that the input limit is a positive integer and handle any errors that
+      may occur.
+  combine_code_into_single_file:
+    agent: false
+    description: Combine the C++ code into a single file
+    name: combine_code_into_single_file
+    nodes_depended_on:
+    - create_main_function
+    - add_input_validation
+    - optimize_prime_number_enumeration
+    nodes_dependent_on: []
+    prompt: Combine the C++ code from the previous steps into a single file, ensuring
+      that all necessary headers are included and that the code is properly formatted.
+  create_main_function:
+    agent: false
+    description: Create a main function to test the prime number enumeration
+    name: create_main_function
+    nodes_depended_on:
+    - implement_sieve_of_eratosthenes
+    nodes_dependent_on: []
+    prompt: Write a C++ main function that tests the Sieve of Eratosthenes implementation
+      by generating prime numbers up to a specified limit and printing them.
+  define_prime_number_check_function:
+    agent: false
+    description: Define a function to check if a number is prime
+    name: define_prime_number_check_function
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Write a C++ function that checks if a number is prime. The function should
+      take an integer as input and return a boolean value.
+  implement_sieve_of_eratosthenes:
+    agent: false
+    description: Implement the Sieve of Eratosthenes algorithm to efficiently enumerate
+      prime numbers
+    name: implement_sieve_of_eratosthenes
+    nodes_depended_on:
+    - define_prime_number_check_function
+    nodes_dependent_on: []
+    prompt: Implement the Sieve of Eratosthenes algorithm in C++ to generate prime
+      numbers up to a given limit. The function should take an integer limit as input
+      and return a list or vector of prime numbers.
+  optimize_prime_number_enumeration:
+    agent: false
+    description: Optimize the prime number enumeration function for performance
+    name: optimize_prime_number_enumeration
+    nodes_depended_on:
+    - implement_sieve_of_eratosthenes
+    nodes_dependent_on: []
+    prompt: Optimize the Sieve of Eratosthenes implementation for performance. Consider
+      using techniques such as wheel factorization or bit-packing to improve efficiency.

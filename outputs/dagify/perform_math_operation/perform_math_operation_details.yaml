@@ -1,0 +1,49 @@
+dag_type: plain_text
+description: A workflow for performing a math operation
+name: perform_math_operation
+nodes:
+  define_math_problem:
+    agent: false
+    description: Define a math problem to be solved
+    name: define_math_problem
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: State a simple math problem (e.g., 2+2, 5*3). Provide only the problem
+      statement.
+  determine_math_operation:
+    agent: false
+    description: Identify the math operation to be performed
+    name: determine_math_operation
+    nodes_depended_on:
+    - parse_math_problem
+    nodes_dependent_on: []
+    prompt: Based on the operator, determine the math operation (e.g., addition, subtraction,
+      multiplication, division).
+  parse_math_problem:
+    agent: false
+    description: Break down the math problem into components
+    name: parse_math_problem
+    nodes_depended_on:
+    - define_math_problem
+    nodes_dependent_on: []
+    prompt: Parse the math problem into operands and operator (e.g., 2, 2, +). List
+      them separately.
+  perform_math_operation:
+    agent: false
+    description: Perform the math operation
+    name: perform_math_operation
+    nodes_depended_on:
+    - determine_math_operation
+    - parse_math_problem
+    nodes_dependent_on: []
+    prompt: Perform the specified math operation on the given operands (e.g., 2 +
+      2 = 4). Provide only the result.
+  verify_math_result:
+    agent: false
+    description: Verify the result of the math operation
+    name: verify_math_result
+    nodes_depended_on:
+    - perform_math_operation
+    nodes_dependent_on: []
+    prompt: Double-check the math result using an alternative method (e.g., calculator,
+      mental math). Confirm if correct.

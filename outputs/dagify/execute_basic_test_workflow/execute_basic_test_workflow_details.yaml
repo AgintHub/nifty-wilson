@@ -1,0 +1,80 @@
+dag_type: plain_text
+description: A minimal yet complete workflow to perform a basic test operation, ensuring
+  all structural and concurrency requirements are met with properly connected, atomic
+  steps.
+name: execute_basic_test_workflow
+nodes:
+  analyze_test_results:
+    agent: false
+    description: Evaluate the outcome of the executed test case against expected behavior.
+    name: analyze_test_results
+    nodes_depended_on:
+    - execute_test_case
+    nodes_dependent_on: []
+    prompt: Analyze the raw test output to determine pass/fail status. Compare actual
+      results to expected outcomes, assess error logs, and conclude whether the test
+      succeeded or failed. Return a structured analysis with verdict and key observations.
+  execute_test_case:
+    agent: false
+    description: Run the core test logic using validated inputs and prepared environment.
+    name: execute_test_case
+    nodes_depended_on:
+    - validate_test_inputs
+    - prepare_test_environment
+    nodes_dependent_on: []
+    prompt: Execute the test case using the validated inputs and ready environment.
+      Run the designated test operation and capture raw output, logs, and execution
+      status. Return only the raw test result data.
+  generate_test_report:
+    agent: false
+    description: Produce a human-readable report summarizing the test execution and
+      results.
+    name: generate_test_report
+    nodes_depended_on:
+    - analyze_test_results
+    nodes_dependent_on: []
+    prompt: Generate a concise test report in plain text or markdown format. Include
+      test name, execution time, inputs used, environment details, and the outcome
+      (pass/fail) with reasoning. Keep the report factual and minimal.
+  initialize_test_context:
+    agent: false
+    description: Establish the initial environment and inputs required for testing.
+    name: initialize_test_context
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Set up the basic context for a test operation. Define any necessary input
+      placeholders, such as test data, configuration flags, or execution mode (e.g.,
+      dry run, full run). Output only the initialized context structure in JSON format.
+  log_test_artifacts:
+    agent: false
+    description: Archive all test-related data for auditing and future reference.
+    name: log_test_artifacts
+    nodes_depended_on:
+    - execute_test_case
+    - analyze_test_results
+    - generate_test_report
+    nodes_dependent_on: []
+    prompt: Collect all artifacts from the test—including inputs, environment config,
+      raw output, analysis, and report—and store them in a designated logging directory
+      with timestamped filenames. Return a confirmation of successful archival.
+  prepare_test_environment:
+    agent: false
+    description: Configure the runtime environment necessary to execute the test.
+    name: prepare_test_environment
+    nodes_depended_on:
+    - initialize_test_context
+    nodes_dependent_on: []
+    prompt: Configure a clean, isolated test environment based on the initialized
+      context. This includes setting environment variables, creating temporary directories,
+      or initializing mock services. Return a status indicating environment readiness.
+  validate_test_inputs:
+    agent: false
+    description: Check that all required inputs for the test are present and correctly
+      formatted.
+    name: validate_test_inputs
+    nodes_depended_on:
+    - initialize_test_context
+    nodes_dependent_on: []
+    prompt: Using the initialized context, verify that all required test inputs exist
+      and conform to expected formats (e.g., strings, booleans, valid JSON). Report
+      only whether validation passed or failed and list any missing or malformed fields.

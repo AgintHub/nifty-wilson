@@ -1,0 +1,102 @@
+dag_type: plain_text
+description: A workflow for writing a comprehensive paper on the history of Diophantine
+  equations, covering their origins, major contributors, and significant developments.
+name: write_diophantine_equations_paper
+nodes:
+  edit_and_refine_paper:
+    agent: false
+    description: Edit and refine the paper, ensuring clarity, coherence, and accuracy
+      throughout.
+    name: edit_and_refine_paper
+    nodes_depended_on:
+    - write_introduction
+    - write_historical_context
+    - write_major_developments
+    - write_conclusion
+    nodes_dependent_on: []
+    prompt: Review and revise the paper, making sure that it is well-organized, clearly
+      written, and free of errors, and that it effectively conveys the intended message.
+  identify_key_contributors:
+    agent: false
+    description: Identify and research major contributors to the field of Diophantine
+      equations, including their contributions and impact.
+    name: identify_key_contributors
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on:
+    - write_major_developments
+    prompt: Research and document the key mathematicians who have contributed significantly
+      to the development of Diophantine equations, including their notable works and
+      achievements.
+  outline_paper_structure:
+    agent: false
+    description: Create a detailed outline for the paper, including introduction,
+      historical context, major developments, and conclusion.
+    name: outline_paper_structure
+    nodes_depended_on:
+    - research_diophantine_equations_history
+    nodes_dependent_on:
+    - write_introduction
+    - write_historical_context
+    - write_major_developments
+    - write_conclusion
+    prompt: Develop a comprehensive outline for the paper, ensuring logical flow and
+      coverage of essential topics.
+  research_diophantine_equations_history:
+    agent: false
+    description: Conduct thorough research on the historical background of Diophantine
+      equations.
+    name: research_diophantine_equations_history
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - outline_paper_structure
+    - identify_key_contributors
+    prompt: Gather and organize information on the origins and evolution of Diophantine
+      equations, including key milestones and influential mathematicians.
+  write_conclusion:
+    agent: false
+    description: Write a conclusion that summarizes the main points of the paper and
+      provides final thoughts on the significance of Diophantine equations.
+    name: write_conclusion
+    nodes_depended_on:
+    - outline_paper_structure
+    - write_introduction
+    - write_historical_context
+    - write_major_developments
+    nodes_dependent_on: []
+    prompt: Craft a conclusion that effectively summarizes the main points of the
+      paper, reiterating the importance of Diophantine equations and their continued
+      relevance in mathematics.
+  write_historical_context:
+    agent: false
+    description: Write a section on the historical context of Diophantine equations,
+      including their origins and early developments.
+    name: write_historical_context
+    nodes_depended_on:
+    - outline_paper_structure
+    - research_diophantine_equations_history
+    nodes_dependent_on: []
+    prompt: Develop a section that provides a detailed historical context for Diophantine
+      equations, including their origins, early contributors, and significant milestones.
+  write_introduction:
+    agent: false
+    description: Write a compelling introduction to the paper, providing an overview
+      of Diophantine equations and their significance.
+    name: write_introduction
+    nodes_depended_on:
+    - outline_paper_structure
+    nodes_dependent_on: []
+    prompt: Craft an engaging introduction that sets the stage for the paper, introducing
+      the topic of Diophantine equations and highlighting their importance in mathematics.
+  write_major_developments:
+    agent: false
+    description: Write a section on the major developments in the field of Diophantine
+      equations, including key contributions and discoveries.
+    name: write_major_developments
+    nodes_depended_on:
+    - outline_paper_structure
+    - identify_key_contributors
+    nodes_dependent_on: []
+    prompt: Create a section that discusses the major developments in Diophantine
+      equations, highlighting the contributions of key mathematicians and the impact
+      of their work.

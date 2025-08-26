@@ -1,0 +1,103 @@
+dag_type: plain_text
+description: A workflow for replacing the brakes on a Toyota Tercel with Brembo brakes
+name: replace_brakes_toyota_tercel_with_brembo
+nodes:
+  bleed_brake_system:
+    agent: false
+    description: Bleed the brake system
+    name: bleed_brake_system
+    nodes_depended_on:
+    - replace_wheels_and_lower_vehicle
+    nodes_dependent_on: []
+    prompt: Bleed the brake system to remove any air pockets. Use a brake bleeding
+      kit and follow the manufacturer's instructions.
+  gather_required_tools_and_parts:
+    agent: false
+    description: Collect all necessary tools and parts for the brake replacement
+    name: gather_required_tools_and_parts
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List and collect all required tools (e.g., lug wrench, socket set) and
+      parts (e.g., Brembo brake pads, rotors, calipers) for the brake replacement.
+      Verify the parts are compatible with the Toyota Tercel.
+  inspect_and_clean_brake_hub:
+    agent: false
+    description: Inspect and clean the brake hub
+    name: inspect_and_clean_brake_hub
+    nodes_depended_on:
+    - remove_existing_brake_pads_and_rotors
+    nodes_dependent_on: []
+    prompt: Inspect the brake hub for any debris or rust. Clean the hub using a wire
+      brush and brake cleaner.
+  install_new_brembo_brake_pads:
+    agent: false
+    description: Install the new Brembo brake pads
+    name: install_new_brembo_brake_pads
+    nodes_depended_on:
+    - install_new_brembo_rotors
+    nodes_dependent_on: []
+    prompt: Install the new Brembo brake pads into the brake caliper. Ensure proper
+      pad alignment and secure with the provided hardware.
+  install_new_brembo_rotors:
+    agent: false
+    description: Install the new Brembo rotors
+    name: install_new_brembo_rotors
+    nodes_depended_on:
+    - inspect_and_clean_brake_hub
+    nodes_dependent_on: []
+    prompt: Mount the new Brembo rotors onto the brake hub. Ensure proper rotor seating
+      and secure with the provided hardware.
+  jack_up_vehicle_and_remove_wheels:
+    agent: false
+    description: Raise the vehicle and remove the wheels to access the brake assembly
+    name: jack_up_vehicle_and_remove_wheels
+    nodes_depended_on:
+    - gather_required_tools_and_parts
+    nodes_dependent_on: []
+    prompt: Use a car jack to lift the Toyota Tercel and remove the wheels to access
+      the brake assembly. Ensure the vehicle is securely supported.
+  reconnect_brake_pad_wear_sensor_and_abs_sensor:
+    agent: false
+    description: Reconnect the brake pad wear sensor and ABS sensor
+    name: reconnect_brake_pad_wear_sensor_and_abs_sensor
+    nodes_depended_on:
+    - reinstall_brake_caliper
+    nodes_dependent_on: []
+    prompt: Reconnect the brake pad wear sensor wires and ABS sensor connections.
+      Verify secure connections.
+  reinstall_brake_caliper:
+    agent: false
+    description: Reinstall the brake caliper
+    name: reinstall_brake_caliper
+    nodes_depended_on:
+    - install_new_brembo_brake_pads
+    nodes_dependent_on: []
+    prompt: Reinstall the brake caliper over the new brake rotor and pad assembly.
+      Ensure proper caliper alignment and secure with the provided hardware.
+  remove_existing_brake_pads_and_rotors:
+    agent: false
+    description: Take out the existing brake pads and rotors
+    name: remove_existing_brake_pads_and_rotors
+    nodes_depended_on:
+    - jack_up_vehicle_and_remove_wheels
+    nodes_dependent_on: []
+    prompt: Remove the existing brake pads and rotors from the brake assembly. Take
+      note of the brake pad wear sensor wires and ABS sensor connections.
+  replace_wheels_and_lower_vehicle:
+    agent: false
+    description: Replace the wheels and lower the vehicle
+    name: replace_wheels_and_lower_vehicle
+    nodes_depended_on:
+    - reconnect_brake_pad_wear_sensor_and_abs_sensor
+    nodes_dependent_on: []
+    prompt: Replace the wheels and lower the vehicle to the ground. Ensure proper
+      wheel torque specification.
+  test_brakes:
+    agent: false
+    description: Test the brakes
+    name: test_brakes
+    nodes_depended_on:
+    - bleed_brake_system
+    nodes_dependent_on: []
+    prompt: Test the brakes to ensure proper function. Verify smooth brake pedal feel
+      and adequate stopping power.

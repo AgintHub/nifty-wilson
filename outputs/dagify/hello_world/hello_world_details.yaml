@@ -1,0 +1,19 @@
+dag_type: plain_text
+description: A simple workflow that generates a greeting
+name: hello_world
+nodes:
+  generate_greeting:
+    agent: false
+    description: Create a simple 'hello' message
+    name: generate_greeting
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Generate a simple 'hello' message.
+  print_greeting:
+    agent: false
+    description: Output the generated greeting
+    name: print_greeting
+    nodes_depended_on:
+    - generate_greeting
+    nodes_dependent_on: []
+    prompt: 'Print the generated greeting: ''hello''.'

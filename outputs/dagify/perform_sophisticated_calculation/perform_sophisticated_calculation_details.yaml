@@ -1,0 +1,394 @@
+dag_type: plain_text
+description: A highly concurrent, atomic workflow to execute a sophisticated calculation
+  by decomposing it into independent, elemental computational and analytical steps.
+name: perform_sophisticated_calculation
+nodes:
+  aggregate_calculation_results:
+    agent: false
+    description: Collect and organize all outputs from the calculation.
+    name: aggregate_calculation_results
+    nodes_depended_on:
+    - execute_core_calculation
+    nodes_dependent_on:
+    - format_final_output
+    prompt: Gather all result components (scalars, vectors, matrices) into a single
+      structured output. Label each clearly.
+  approximate_definite_integrals:
+    agent: false
+    description: Numerically compute required integrals.
+    name: approximate_definite_integrals
+    nodes_depended_on:
+    - select_numerical_integration_method
+    nodes_dependent_on:
+    - incorporate_integral_results
+    prompt: Apply the chosen integration method to compute each definite integral.
+      Report numerical result with error estimate.
+  assess_numerical_accuracy:
+    agent: false
+    description: Evaluate precision and error of computed results.
+    name: assess_numerical_accuracy
+    nodes_depended_on:
+    - execute_core_calculation
+    nodes_dependent_on:
+    - report_calculation_uncertainty
+    prompt: Estimate numerical error from discretization, rounding, or convergence.
+      Report absolute and relative error bounds.
+  choose_numerical_method:
+    agent: false
+    description: Select appropriate algorithm for numerical evaluation.
+    name: choose_numerical_method
+    nodes_depended_on:
+    - select_mathematical_framework
+    nodes_dependent_on:
+    - implement_numerical_algorithm
+    - set_convergence_criteria
+    prompt: Choose a numerical method (e.g., Newton-Raphson, Runge-Kutta, SVD, gradient
+      descent). Specify why it's suitable for this framework.
+  compute_derived_inputs:
+    agent: false
+    description: Calculate values that depend on other inputs.
+    name: compute_derived_inputs
+    nodes_depended_on:
+    - initialize_internal_parameters
+    nodes_dependent_on:
+    - construct_input_data_structure
+    prompt: Using base inputs and internal parameters, compute any derived input variables
+      (e.g., ratios, transforms). Output values only.
+  compute_symbolic_derivatives:
+    agent: false
+    description: Calculate symbolic forms of required derivatives.
+    name: compute_symbolic_derivatives
+    nodes_depended_on:
+    - define_derivatives_or_integrals
+    nodes_dependent_on:
+    - evaluate_derivatives_at_points
+    prompt: Compute the symbolic derivative for each specified function and variable.
+      Output in standard notation.
+  construct_input_data_structure:
+    agent: false
+    description: Organize processed inputs into a usable structure.
+    name: construct_input_data_structure
+    nodes_depended_on:
+    - convert_inputs_to_uniform_format
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: Assemble all validated and converted inputs into a structured format (e.g.,
+      dictionary, matrix, vector). Do not modify values.
+  convert_inputs_to_uniform_format:
+    agent: false
+    description: Translate all inputs into a common computational format.
+    name: convert_inputs_to_uniform_format
+    nodes_depended_on:
+    - validate_input_types
+    - validate_retrieved_data_format
+    nodes_dependent_on:
+    - construct_input_data_structure
+    prompt: Convert all inputs (raw, symbolic, numerical) into a consistent format
+      (e.g., floating-point, rational, array). Do no computation.
+  decompose_calculation_components:
+    agent: false
+    description: Break the overall calculation into independent subroutines.
+    name: decompose_calculation_components
+    nodes_depended_on:
+    - define_calculation_objective
+    nodes_dependent_on:
+    - implement_subcomponent_logic
+    - identify_parallelizable_segments
+    prompt: Decompose the calculation into atomic, non-overlapping functional components.
+      Name and describe each component in one line.
+  define_calculation_objective:
+    agent: false
+    description: Articulate the precise goal of the sophisticated calculation.
+    name: define_calculation_objective
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - decompose_calculation_components
+    - identify_input_variables
+    - select_mathematical_framework
+    prompt: Clearly state the objective of the calculation in one sentence. Specify
+      the desired outcome (e.g., numerical result, function, statistical measure).
+  define_derivatives_or_integrals:
+    agent: false
+    description: Identify any derivatives or integrals required in the calculation.
+    name: define_derivatives_or_integrals
+    nodes_depended_on:
+    - select_mathematical_framework
+    nodes_dependent_on:
+    - compute_symbolic_derivatives
+    - select_numerical_integration_method
+    prompt: List all derivatives (partial or total) and integrals (definite or indefinite)
+      required. Specify variables and bounds where applicable.
+  determine_input_sources:
+    agent: false
+    description: Specify where each input variable will be sourced from.
+    name: determine_input_sources
+    nodes_depended_on:
+    - identify_input_variables
+    nodes_dependent_on:
+    - retrieve_external_data
+    - initialize_internal_parameters
+    prompt: 'For each input variable, state its source: generated, measured, estimated,
+      or retrieved from external system. Categorize each accordingly.'
+  discretize_equations_if_necessary:
+    agent: false
+    description: Convert continuous equations into discrete computational form.
+    name: discretize_equations_if_necessary
+    nodes_depended_on:
+    - symbolically_simplify_equations
+    nodes_dependent_on:
+    - implement_numerical_algorithm
+    prompt: If required, transform continuous equations into discrete approximations
+      (e.g., finite differences, grid-based). Output the discrete form.
+  establish_input_constraints:
+    agent: false
+    description: Define valid ranges, bounds, or conditions for each input.
+    name: establish_input_constraints
+    nodes_depended_on:
+    - identify_input_variables
+    nodes_dependent_on:
+    - verify_input_bounds
+    - flag_out_of_range_inputs
+    prompt: For each input variable, specify valid lower and upper bounds, required
+      precision, or categorical options. Output as a structured list.
+  evaluate_derivatives_at_points:
+    agent: false
+    description: Numerically or symbolically evaluate derivatives at specific inputs.
+    name: evaluate_derivatives_at_points
+    nodes_depended_on:
+    - compute_symbolic_derivatives
+    nodes_dependent_on:
+    - incorporate_derivative_results
+    prompt: Substitute input values into symbolic derivatives and compute numerical
+      results. Include partial derivatives if applicable.
+  execute_core_calculation:
+    agent: false
+    description: Run the primary computational engine with all inputs and methods.
+    name: execute_core_calculation
+    nodes_depended_on:
+    - construct_input_data_structure
+    - implement_subcomponent_logic
+    - implement_numerical_algorithm
+    - incorporate_derivative_results
+    - incorporate_integral_results
+    - schedule_concurrent_execution_paths
+    nodes_dependent_on:
+    - aggregate_calculation_results
+    - assess_numerical_accuracy
+    prompt: Perform the core calculation using all prepared components, inputs, and
+      algorithms. Output intermediate and final values.
+  flag_out_of_range_inputs:
+    agent: false
+    description: Mark invalid inputs for correction or exclusion.
+    name: flag_out_of_range_inputs
+    nodes_depended_on:
+    - verify_input_bounds
+    nodes_dependent_on:
+    - resolve_input_errors
+    prompt: List all out-of-range inputs and mark them as invalid. Include suggested
+      correction range.
+  format_final_output:
+    agent: false
+    description: Package final result in requested or standard format.
+    name: format_final_output
+    nodes_depended_on:
+    - aggregate_calculation_results
+    - report_calculation_uncertainty
+    nodes_dependent_on: []
+    prompt: Format the final result with units, precision, and uncertainty. Use clean,
+      structured output (e.g., JSON, table, equation).
+  formulate_core_equations:
+    agent: false
+    description: Write the fundamental equations governing the calculation.
+    name: formulate_core_equations
+    nodes_depended_on:
+    - select_mathematical_framework
+    nodes_dependent_on:
+    - symbolically_simplify_equations
+    prompt: Express the core equations using standard mathematical notation. Include
+      all variables and constants. Do not compute yet.
+  identify_input_variables:
+    agent: false
+    description: List all required input variables and parameters.
+    name: identify_input_variables
+    nodes_depended_on:
+    - define_calculation_objective
+    nodes_dependent_on:
+    - validate_input_types
+    - determine_input_sources
+    - establish_input_constraints
+    prompt: Based on the calculation objective, list all input variables needed. Include
+      name, expected data type, and unit of measure for each.
+  identify_parallelizable_segments:
+    agent: false
+    description: Determine which calculation components can run concurrently.
+    name: identify_parallelizable_segments
+    nodes_depended_on:
+    - decompose_calculation_components
+    nodes_dependent_on:
+    - schedule_concurrent_execution_paths
+    prompt: Analyze dependencies of calculation components. List which can be executed
+      in parallel without conflict.
+  implement_numerical_algorithm:
+    agent: false
+    description: Code the chosen numerical method for execution.
+    name: implement_numerical_algorithm
+    nodes_depended_on:
+    - choose_numerical_method
+    - set_convergence_criteria
+    - discretize_equations_if_necessary
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: Implement the numerical algorithm in pseudocode or executable form. Include
+      iteration logic and convergence checks.
+  implement_subcomponent_logic:
+    agent: false
+    description: Encode logic for each decomposed calculation segment.
+    name: implement_subcomponent_logic
+    nodes_depended_on:
+    - decompose_calculation_components
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: For each subcomponent, write its computational logic as a standalone function
+      or expression. Do not execute yet.
+  incorporate_derivative_results:
+    agent: false
+    description: Integrate computed derivative values into the main calculation.
+    name: incorporate_derivative_results
+    nodes_depended_on:
+    - evaluate_derivatives_at_points
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: Map derivative results to their usage locations in the core equations.
+      Prepare for substitution.
+  incorporate_integral_results:
+    agent: false
+    description: Integrate computed integral values into the main calculation.
+    name: incorporate_integral_results
+    nodes_depended_on:
+    - approximate_definite_integrals
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: Substitute integral results into the relevant equations. Preserve dimensional
+      and functional consistency.
+  initialize_internal_parameters:
+    agent: false
+    description: Set internal constants or derived parameters.
+    name: initialize_internal_parameters
+    nodes_depended_on:
+    - determine_input_sources
+    nodes_dependent_on:
+    - compute_derived_inputs
+    prompt: Assign values to internal parameters (e.g., constants, coefficients).
+      List each by name and value.
+  report_calculation_uncertainty:
+    agent: false
+    description: Summarize sources and magnitudes of uncertainty.
+    name: report_calculation_uncertainty
+    nodes_depended_on:
+    - assess_numerical_accuracy
+    nodes_dependent_on:
+    - format_final_output
+    prompt: List all uncertainty sources (input error, method error, rounding). Provide
+      overall confidence interval for final result.
+  resolve_input_errors:
+    agent: false
+    description: Correct or impute invalid input values.
+    name: resolve_input_errors
+    nodes_depended_on:
+    - flag_out_of_range_inputs
+    nodes_dependent_on:
+    - construct_input_data_structure
+    prompt: Adjust or impute out-of-range inputs using reasonable defaults or interpolation.
+      Document each correction.
+  retrieve_external_data:
+    agent: false
+    description: Obtain input data from external systems or databases.
+    name: retrieve_external_data
+    nodes_depended_on:
+    - determine_input_sources
+    nodes_dependent_on:
+    - validate_retrieved_data_format
+    prompt: For inputs marked as external, retrieve raw data from the specified source
+      format (API, file, stream). Return data as received.
+  schedule_concurrent_execution_paths:
+    agent: false
+    description: Define execution plan for parallel calculation paths.
+    name: schedule_concurrent_execution_paths
+    nodes_depended_on:
+    - identify_parallelizable_segments
+    nodes_dependent_on:
+    - execute_core_calculation
+    prompt: Map out which components will run in parallel and their synchronization
+      points. Output as a sequence diagram in text.
+  select_mathematical_framework:
+    agent: false
+    description: Choose the mathematical model or theory for the calculation.
+    name: select_mathematical_framework
+    nodes_depended_on:
+    - define_calculation_objective
+    nodes_dependent_on:
+    - formulate_core_equations
+    - choose_numerical_method
+    - define_derivatives_or_integrals
+    prompt: Select the appropriate mathematical framework (e.g., linear algebra, differential
+      equations, Monte Carlo, optimization). Justify in one sentence.
+  select_numerical_integration_method:
+    agent: false
+    description: Choose integration technique for numerical evaluation.
+    name: select_numerical_integration_method
+    nodes_depended_on:
+    - define_derivatives_or_integrals
+    nodes_dependent_on:
+    - approximate_definite_integrals
+    prompt: Select a numerical integration method (e.g., Simpson's Rule, Gaussian
+      quadrature, Monte Carlo). Explain choice briefly.
+  set_convergence_criteria:
+    agent: false
+    description: Define stopping conditions for iterative methods.
+    name: set_convergence_criteria
+    nodes_depended_on:
+    - choose_numerical_method
+    nodes_dependent_on:
+    - implement_numerical_algorithm
+    prompt: Specify tolerance thresholds, max iterations, and divergence indicators
+      for the numerical method. Use numerical values.
+  symbolically_simplify_equations:
+    agent: false
+    description: Reduce equations to simplest symbolic form.
+    name: symbolically_simplify_equations
+    nodes_depended_on:
+    - formulate_core_equations
+    nodes_dependent_on:
+    - discretize_equations_if_necessary
+    prompt: Apply algebraic or calculus rules to simplify the equations. Preserve
+      equivalence. Output only the simplified expressions.
+  validate_input_types:
+    agent: false
+    description: Verify that each input variable has a well-defined data type.
+    name: validate_input_types
+    nodes_depended_on:
+    - identify_input_variables
+    nodes_dependent_on:
+    - convert_inputs_to_uniform_format
+    prompt: 'Check each input variable''s data type against expected type. Report
+      mismatches only as ''variable: expected ≠ actual''.'
+  validate_retrieved_data_format:
+    agent: false
+    description: Ensure externally retrieved data matches expected schema.
+    name: validate_retrieved_data_format
+    nodes_depended_on:
+    - retrieve_external_data
+    nodes_dependent_on:
+    - convert_inputs_to_uniform_format
+    prompt: Check that retrieved data fields and types match expected input schema.
+      Report any schema mismatches.
+  verify_input_bounds:
+    agent: false
+    description: Check that all input values fall within valid ranges.
+    name: verify_input_bounds
+    nodes_depended_on:
+    - establish_input_constraints
+    nodes_dependent_on:
+    - flag_out_of_range_inputs
+    prompt: Compare each input value against its defined bounds. Output only those
+      values that are out of range.

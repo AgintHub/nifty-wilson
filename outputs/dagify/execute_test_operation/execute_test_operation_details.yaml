@@ -1,0 +1,53 @@
+dag_type: plain_text
+description: A minimal workflow to perform a basic test operation, ensuring correctness,
+  validation, and confirmation of outcome.
+name: execute_test_operation
+nodes:
+  define_test_input:
+    agent: false
+    description: Specify the input data or signal for the test
+    name: define_test_input
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the simplest valid input for a test operation. This may be a boolean,
+      string 'test', null, or empty object. Return only the input value.
+  execute_test:
+    agent: false
+    description: Run the core test operation using defined input
+    name: execute_test
+    nodes_depended_on:
+    - initialize_test_environment
+    - define_test_input
+    nodes_dependent_on: []
+    prompt: Using the initialized environment and defined input, execute a test operation.
+      This could be echoing the input, verifying environment state, or triggering
+      a heartbeat check. Return raw output of the test execution.
+  generate_test_summary:
+    agent: false
+    description: Produce a final summary of the test operation
+    name: generate_test_summary
+    nodes_depended_on:
+    - validate_test_output
+    nodes_dependent_on: []
+    prompt: 'Compile a concise summary of the test: input used, execution status,
+      validation result, and any notable conditions. Return as a structured object
+      with keys: input, executed, valid.'
+  initialize_test_environment:
+    agent: false
+    description: Set up the minimal required context for test execution
+    name: initialize_test_environment
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Initialize a clean, isolated environment for executing a test. Ensure
+      no external state influences execution. Return confirmation of initialization
+      status.
+  validate_test_output:
+    agent: false
+    description: Verify that the test produced expected results
+    name: validate_test_output
+    nodes_depended_on:
+    - execute_test
+    nodes_dependent_on: []
+    prompt: Compare the actual test output against the expected outcome (e.g., input
+      == output, success status). Return a boolean indicating pass/fail and a brief
+      reason if failed.

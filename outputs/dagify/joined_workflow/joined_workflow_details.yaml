@@ -1,0 +1,46 @@
+dag_type: plain_text
+description: Generated workflow by joining two existing workflows.
+name: joined_workflow
+nodes:
+  define_graphs_to_join:
+    agent: false
+    description: Determine the source graphs for the new combined workflow.
+    name: define_graphs_to_join
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: What two graphs do you want to join into one workflow?
+  define_joining_strategy:
+    agent: false
+    description: Choose a strategy for combining the nodes and edges from the two
+      input graphs.
+    name: define_joining_strategy
+    nodes_depended_on:
+    - define_graphs_to_join
+    nodes_dependent_on: []
+    prompt: How do you want to join the two graphs?
+  finalize_joined_workflow:
+    agent: false
+    description: Apply any necessary transformations or modifications to create a
+      complete and executable workflow.
+    name: finalize_joined_workflow
+    nodes_depended_on:
+    - validate_joined_graph
+    nodes_dependent_on: []
+    prompt: Finalize the joined workflow for execution.
+  merge_graphs:
+    agent: false
+    description: Apply the selected joining strategy to create a new combined graph.
+    name: merge_graphs
+    nodes_depended_on:
+    - define_joining_strategy
+    nodes_dependent_on: []
+    prompt: Join the graphs together according to the chosen strategy.
+  validate_joined_graph:
+    agent: false
+    description: Confirm that the resulting merged graph is valid and suitable for
+      further processing.
+    name: validate_joined_graph
+    nodes_depended_on:
+    - merge_graphs
+    nodes_dependent_on: []
+    prompt: Verify that the graphs have been joined correctly.

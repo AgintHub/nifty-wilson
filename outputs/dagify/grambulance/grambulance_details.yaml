@@ -1,0 +1,90 @@
+dag_type: plain_text
+description: A workflow for creating a grambulance, which seems to be a granular and
+  detailed process.
+name: grambulance
+nodes:
+  acquire_grambulance_materials:
+    agent: false
+    description: Acquire the necessary materials for grambulance construction.
+    name: acquire_grambulance_materials
+    nodes_depended_on:
+    - plan_grambulance_construction
+    nodes_dependent_on: []
+    prompt: Source and acquire the necessary materials for grambulance construction.
+  construct_grambulance:
+    agent: false
+    description: Construct the grambulance.
+    name: construct_grambulance
+    nodes_depended_on:
+    - acquire_grambulance_materials
+    nodes_dependent_on: []
+    prompt: Construct the grambulance according to the plan and design.
+  define_grambulance:
+    agent: false
+    description: Define what a grambulance is and its key components.
+    name: define_grambulance
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the term 'grambulance' and list its primary components or characteristics.
+  design_grambulance:
+    agent: false
+    description: Design the grambulance based on its components.
+    name: design_grambulance
+    nodes_depended_on:
+    - identify_grambulance_components
+    nodes_dependent_on: []
+    prompt: Create a detailed design for the grambulance, incorporating the identified
+      components.
+  finalize_grambulance:
+    agent: false
+    description: Finalize the grambulance.
+    name: finalize_grambulance
+    nodes_depended_on:
+    - refine_grambulance
+    nodes_dependent_on: []
+    prompt: Finalize the grambulance design, construction, and testing.
+  identify_grambulance_components:
+    agent: false
+    description: Identify the key components of a grambulance.
+    name: identify_grambulance_components
+    nodes_depended_on:
+    - research_existing_grambulances
+    nodes_dependent_on: []
+    prompt: List the key components of a grambulance, including any relevant subsystems
+      or modules.
+  plan_grambulance_construction:
+    agent: false
+    description: Plan the construction of the grambulance.
+    name: plan_grambulance_construction
+    nodes_depended_on:
+    - design_grambulance
+    nodes_dependent_on: []
+    prompt: Create a plan for constructing the grambulance, including materials, labor,
+      and timeline.
+  refine_grambulance:
+    agent: false
+    description: Refine the grambulance based on test results.
+    name: refine_grambulance
+    nodes_depended_on:
+    - test_grambulance
+    nodes_dependent_on: []
+    prompt: Refine the grambulance design and construction based on the results of
+      testing.
+  research_existing_grambulances:
+    agent: false
+    description: Research existing grambulances or similar concepts.
+    name: research_existing_grambulances
+    nodes_depended_on:
+    - define_grambulance
+    nodes_dependent_on: []
+    prompt: Conduct a research on existing grambulances or similar concepts. Provide
+      a summary of findings.
+  test_grambulance:
+    agent: false
+    description: Test the grambulance.
+    name: test_grambulance
+    nodes_depended_on:
+    - construct_grambulance
+    nodes_dependent_on: []
+    prompt: Conduct thorough testing of the grambulance to ensure it meets the design
+      and functionality requirements.

@@ -1,0 +1,69 @@
+dag_type: plain_text
+description: A workflow for efficiently enumerating prime numbers using a C++ program.
+name: efficient_prime_enumeration
+nodes:
+  add_input_handling:
+    agent: false
+    description: Add input handling to accept the upper limit for prime enumeration.
+    name: add_input_handling
+    nodes_depended_on:
+    - integrate_prime_enumeration_logic
+    nodes_dependent_on: []
+    prompt: Modify the prime enumeration function to accept an upper limit as input
+      and handle it correctly.
+  compile_and_test:
+    agent: false
+    description: Compile the C++ program and test it with sample inputs.
+    name: compile_and_test
+    nodes_depended_on:
+    - implement_output
+    nodes_dependent_on: []
+    prompt: Compile the C++ program using a suitable compiler (e.g., g++) and test
+      it with various inputs to ensure correct prime enumeration.
+  define_prime_enumeration_function:
+    agent: false
+    description: Define a C++ function to enumerate prime numbers.
+    name: define_prime_enumeration_function
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Write a C++ function signature to efficiently enumerate prime numbers
+      up to a given limit. Consider using a helper function for primality testing.
+  implement_output:
+    agent: false
+    description: Implement output to display or store the enumerated prime numbers.
+    name: implement_output
+    nodes_depended_on:
+    - add_input_handling
+    nodes_dependent_on: []
+    prompt: Write C++ code to output the enumerated prime numbers. Consider options
+      for displaying, storing, or further processing the primes.
+  implement_sieve_of_eratosthenes:
+    agent: false
+    description: Implement the Sieve of Eratosthenes algorithm for efficient prime
+      enumeration.
+    name: implement_sieve_of_eratosthenes
+    nodes_depended_on:
+    - define_prime_enumeration_function
+    nodes_dependent_on: []
+    prompt: Implement the Sieve of Eratosthenes algorithm in C++ to efficiently mark
+      composite numbers within the given limit.
+  integrate_prime_enumeration_logic:
+    agent: false
+    description: Integrate the prime enumeration logic with the Sieve of Eratosthenes
+      and primality test functions.
+    name: integrate_prime_enumeration_logic
+    nodes_depended_on:
+    - implement_sieve_of_eratosthenes
+    - write_primality_test_function
+    nodes_dependent_on: []
+    prompt: Integrate the Sieve of Eratosthenes and primality test functions into
+      the main prime enumeration function. Ensure correct logic flow and minimal computation.
+  write_primality_test_function:
+    agent: false
+    description: Write a helper function to test if a number is prime.
+    name: write_primality_test_function
+    nodes_depended_on:
+    - define_prime_enumeration_function
+    nodes_dependent_on: []
+    prompt: Implement a C++ function to test if a single number is prime. This function
+      will be used by the main prime enumeration function.

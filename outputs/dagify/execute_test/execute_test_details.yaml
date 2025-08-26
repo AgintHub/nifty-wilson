@@ -1,0 +1,81 @@
+dag_type: plain_text
+description: A minimal workflow to perform a test operation, ensuring all steps are
+  atomic, concurrent where possible, and fully connected within a directed acyclic
+  graph.
+name: execute_test
+nodes:
+  archive_test_artifacts:
+    agent: false
+    description: Persist all test-related data for future reference or auditing.
+    name: archive_test_artifacts
+    nodes_depended_on:
+    - generate_test_report
+    nodes_dependent_on: []
+    prompt: Save the test report, raw outputs, environment configuration, and input
+      data to a designated archive location. Confirm successful storage.
+  evaluate_test_outcome:
+    agent: false
+    description: Compare actual test results to expected outcomes and determine pass/fail
+      status.
+    name: evaluate_test_outcome
+    nodes_depended_on:
+    - execute_primary_test_logic
+    nodes_dependent_on: []
+    prompt: Assess the output of the primary test against predefined success criteria.
+      Return a binary result (pass/fail) and a short justification.
+  execute_primary_test_logic:
+    agent: false
+    description: Run the core test operation against the prepared environment and
+      inputs.
+    name: execute_primary_test_logic
+    nodes_depended_on:
+    - validate_test_input_format
+    - prepare_test_environment
+    nodes_dependent_on: []
+    prompt: Perform the main test action using validated inputs and the configured
+      environment. Capture raw output and execution status.
+  generate_test_report:
+    agent: false
+    description: Compile a structured summary of test inputs, execution, and results.
+    name: generate_test_report
+    nodes_depended_on:
+    - evaluate_test_outcome
+    - monitor_test_execution
+    nodes_dependent_on: []
+    prompt: Create a concise test report containing input details, execution status,
+      outcome, and observed metrics. Format as a structured bullet list.
+  initialize_test_context:
+    agent: false
+    description: Establish the initial conditions and inputs required for testing.
+    name: initialize_test_context
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the environment, inputs, and expected scope for the test. Include
+      only baseline assumptions such as system state, test boundaries, and entry conditions.
+  monitor_test_execution:
+    agent: false
+    description: Observe runtime behavior and capture performance or behavioral metrics.
+    name: monitor_test_execution
+    nodes_depended_on:
+    - execute_primary_test_logic
+    nodes_dependent_on: []
+    prompt: Record execution timing, resource usage, exceptions, and operational flow
+      during test run. Output only factual runtime telemetry.
+  prepare_test_environment:
+    agent: false
+    description: Set up the execution environment to isolate and support test operations.
+    name: prepare_test_environment
+    nodes_depended_on:
+    - initialize_test_context
+    nodes_dependent_on: []
+    prompt: Configure a clean, isolated environment for test execution. Include system
+      dependencies, network settings, and mock resources if needed.
+  validate_test_input_format:
+    agent: false
+    description: Ensure the test inputs conform to the expected structure and type.
+    name: validate_test_input_format
+    nodes_depended_on:
+    - initialize_test_context
+    nodes_dependent_on: []
+    prompt: Check that all test inputs from the initialized context are correctly
+      formatted. Report any discrepancies in structure, data types, or required fields.

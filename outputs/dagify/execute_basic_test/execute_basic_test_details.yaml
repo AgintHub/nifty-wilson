@@ -1,0 +1,62 @@
+dag_type: plain_text
+description: A minimal workflow to perform a basic test operation, ensuring all components
+  are functioning correctly by validating input, running test logic, and reporting
+  outcome.
+name: execute_basic_test
+nodes:
+  capture_test_logs:
+    agent: false
+    description: Collect execution logs from the test run
+    name: capture_test_logs
+    nodes_depended_on:
+    - run_test_logic
+    nodes_dependent_on: []
+    prompt: Gather all system and application logs generated during the test execution.
+      Return the raw log data as plain text.
+  generate_test_report:
+    agent: false
+    description: Produce a structured report summarizing test outcome and logs
+    name: generate_test_report
+    nodes_depended_on:
+    - run_test_logic
+    - capture_test_logs
+    nodes_dependent_on: []
+    prompt: Create a concise test report that includes the test result (pass/fail/skipped)
+      and an excerpt of relevant log messages. Format as JSON with 'result' and 'log_summary'
+      fields.
+  initialize_test_environment:
+    agent: false
+    description: Set up the runtime environment needed to execute the test
+    name: initialize_test_environment
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Prepare a clean, isolated test environment with necessary configurations.
+      Return 'ready' when complete.
+  notify_test_completion:
+    agent: false
+    description: Send a completion signal with the test report
+    name: notify_test_completion
+    nodes_depended_on:
+    - generate_test_report
+    nodes_dependent_on: []
+    prompt: Transmit the final test report to the output channel. Return 'completed'
+      upon successful delivery.
+  run_test_logic:
+    agent: false
+    description: Execute the core test logic using valid input and prepared environment
+    name: run_test_logic
+    nodes_depended_on:
+    - validate_test_input
+    - initialize_test_environment
+    nodes_dependent_on: []
+    prompt: Using the validation result and environment status, run the test procedure.
+      If inputs are invalid, return 'skipped'. Otherwise, execute and return raw outcome
+      (pass/fail).
+  validate_test_input:
+    agent: false
+    description: Check that the input for the test is present and properly formatted
+    name: validate_test_input
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Verify that the test input exists and is in the expected format. Return
+      'valid' if the input meets criteria, otherwise return 'invalid'.

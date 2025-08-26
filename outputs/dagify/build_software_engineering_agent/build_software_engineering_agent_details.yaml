@@ -1,0 +1,78 @@
+dag_type: plain_text
+description: A workflow for building a software engineering agent from requirements
+  gathering to testing and deployment.
+name: build_software_engineering_agent
+nodes:
+  define_agent_requirements:
+    agent: false
+    description: Determine the functional and non-functional requirements for the
+      software engineering agent.
+    name: define_agent_requirements
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the requirements for the software engineering agent, including its
+      purpose, functionality, and performance metrics.
+  deploy_agent:
+    agent: false
+    description: Deploy the software engineering agent to production.
+    name: deploy_agent
+    nodes_depended_on:
+    - test_agent_functionality
+    nodes_dependent_on: []
+    prompt: Deploy the software engineering agent to production, configuring it for
+      optimal performance and scalability.
+  design_agent_architecture:
+    agent: false
+    description: Create a high-level architecture for the software engineering agent.
+    name: design_agent_architecture
+    nodes_depended_on:
+    - define_agent_requirements
+    nodes_dependent_on: []
+    prompt: Design a high-level architecture for the software engineering agent, including
+      its components, interfaces, and data flows.
+  develop_agent_components:
+    agent: false
+    description: Develop the individual components of the software engineering agent.
+    name: develop_agent_components
+    nodes_depended_on:
+    - select_agent_technology_stack
+    nodes_dependent_on: []
+    prompt: Implement the components of the software engineering agent, including
+      its core logic, data processing, and interfaces.
+  integrate_agent_components:
+    agent: false
+    description: Integrate the components of the software engineering agent.
+    name: integrate_agent_components
+    nodes_depended_on:
+    - develop_agent_components
+    nodes_dependent_on: []
+    prompt: Integrate the components of the software engineering agent, ensuring that
+      they work together seamlessly and meet the requirements.
+  monitor_agent_performance:
+    agent: false
+    description: Monitor the performance of the software engineering agent.
+    name: monitor_agent_performance
+    nodes_depended_on:
+    - deploy_agent
+    nodes_dependent_on: []
+    prompt: Monitor the performance of the software engineering agent, collecting
+      metrics and logs to ensure that it is operating within expected parameters.
+  select_agent_technology_stack:
+    agent: false
+    description: Choose the technology stack for the software engineering agent.
+    name: select_agent_technology_stack
+    nodes_depended_on:
+    - design_agent_architecture
+    nodes_dependent_on: []
+    prompt: Select the programming languages, frameworks, and tools for the software
+      engineering agent, considering factors such as scalability, maintainability,
+      and performance.
+  test_agent_functionality:
+    agent: false
+    description: Test the functionality of the software engineering agent.
+    name: test_agent_functionality
+    nodes_depended_on:
+    - integrate_agent_components
+    nodes_dependent_on: []
+    prompt: Test the software engineering agent to ensure that it meets its functional
+      and non-functional requirements, and identify any defects or issues.

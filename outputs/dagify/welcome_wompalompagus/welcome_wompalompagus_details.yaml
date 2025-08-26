@@ -1,0 +1,57 @@
+dag_type: plain_text
+description: A workflow to acknowledge and celebrate the arrival of wompalompagus
+name: welcome_wompalompagus
+nodes:
+  alert_others:
+    agent: false
+    description: Notify others of wompalompagus's arrival
+    name: alert_others
+    nodes_depended_on:
+    - detect_wompalompagus
+    nodes_dependent_on: []
+    prompt: Send a notification to all relevant parties to inform them that wompalompagus
+      is present.
+  detect_wompalompagus:
+    agent: false
+    description: Verify the presence of wompalompagus
+    name: detect_wompalompagus
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Confirm that wompalompagus has arrived. Check for any signs or indications
+      of their presence.
+  document_arrival:
+    agent: false
+    description: Record wompalompagus's arrival for future reference
+    name: document_arrival
+    nodes_depended_on:
+    - detect_wompalompagus
+    nodes_dependent_on: []
+    prompt: Create a record of wompalompagus's arrival, including the date, time,
+      and any notable circumstances.
+  execute_celebration:
+    agent: false
+    description: Carry out the planned celebration
+    name: execute_celebration
+    nodes_depended_on:
+    - prepare_celebration
+    nodes_dependent_on: []
+    prompt: Execute the planned celebration. Ensure that all logistical arrangements
+      are in place and that the event runs smoothly.
+  offer_greeting:
+    agent: false
+    description: Provide a warm welcome to wompalompagus
+    name: offer_greeting
+    nodes_depended_on:
+    - detect_wompalompagus
+    nodes_dependent_on: []
+    prompt: Prepare a friendly greeting to welcome wompalompagus. Consider their preferences
+      and cultural background.
+  prepare_celebration:
+    agent: false
+    description: Plan a celebration to mark wompalompagus's arrival
+    name: prepare_celebration
+    nodes_depended_on:
+    - offer_greeting
+    nodes_dependent_on: []
+    prompt: Organize a celebration to commemorate wompalompagus's arrival. Choose
+      a suitable location, food, and entertainment.

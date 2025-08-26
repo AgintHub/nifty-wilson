@@ -1,0 +1,73 @@
+dag_type: plain_text
+description: A workflow to execute a basic test, including preparation, execution,
+  validation, and reporting of results.
+name: run_test_suite
+nodes:
+  define_test_scope:
+    agent: false
+    description: Identify what is being tested and the boundaries of the test.
+    name: define_test_scope
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the components, functions, or behaviors that are in scope for this
+      test. Provide a clear, concise definition of what will and will not be tested.
+  execute_tests:
+    agent: false
+    description: Run the test logic against the prepared environment using generated
+      inputs.
+    name: execute_tests
+    nodes_depended_on:
+    - prepare_test_environment
+    - generate_test_inputs
+    - implement_test_logic
+    nodes_dependent_on: []
+    prompt: Run all test cases using the implemented logic, inputs, and configured
+      environment. Record raw outcomes (pass/fail) and any observed behavior or errors.
+  generate_test_inputs:
+    agent: false
+    description: Create valid and invalid input data for the test cases.
+    name: generate_test_inputs
+    nodes_depended_on:
+    - define_test_scope
+    nodes_dependent_on: []
+    prompt: Generate a set of test inputs that cover edge cases, normal cases, and
+      error conditions based on the defined test scope. List each input with its expected
+      category (valid/invalid).
+  generate_test_report:
+    agent: false
+    description: Produce a summary of the test execution and results.
+    name: generate_test_report
+    nodes_depended_on:
+    - validate_test_results
+    nodes_dependent_on: []
+    prompt: 'Create a structured report that includes: total tests run, pass/fail
+      count, list of failed tests with error summaries, and environment details. Format
+      as a plain text summary.'
+  implement_test_logic:
+    agent: false
+    description: Code or define the specific test procedures to be run.
+    name: implement_test_logic
+    nodes_depended_on:
+    - define_test_scope
+    nodes_dependent_on: []
+    prompt: Write the procedural logic for executing the test, including setup, invocation,
+      and validation steps. Focus only on the mechanics of test execution.
+  prepare_test_environment:
+    agent: false
+    description: Set up the environment where the test will be executed.
+    name: prepare_test_environment
+    nodes_depended_on:
+    - define_test_scope
+    nodes_dependent_on: []
+    prompt: Configure a clean and isolated environment that meets the requirements
+      for testing. Include setup of necessary software, dependencies, and configurations.
+  validate_test_results:
+    agent: false
+    description: Compare actual test outcomes against expected outcomes.
+    name: validate_test_results
+    nodes_depended_on:
+    - execute_tests
+    nodes_dependent_on: []
+    prompt: Analyze the recorded test outputs and determine whether each test passed
+      or failed by comparing actual results to expected results. List each test and
+      its validation status.

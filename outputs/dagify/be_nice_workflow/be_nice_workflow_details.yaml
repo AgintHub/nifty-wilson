@@ -1,0 +1,60 @@
+dag_type: plain_text
+description: A workflow for being nice, focusing on spreading kindness and positivity.
+name: be_nice_workflow
+nodes:
+  choose_recipient:
+    agent: false
+    description: Choose a recipient for a nice action.
+    name: choose_recipient
+    nodes_depended_on:
+    - generate_nice_thoughts
+    nodes_dependent_on: []
+    prompt: Select someone you can be nice to today, such as a friend, family member,
+      or coworker. Consider their current situation and what would brighten their
+      day.
+  craft_nice_message:
+    agent: false
+    description: Craft a nice message or action for the chosen recipient.
+    name: craft_nice_message
+    nodes_depended_on:
+    - choose_recipient
+    - generate_nice_thoughts
+    nodes_dependent_on: []
+    prompt: Write a kind message or plan a thoughtful action for the chosen recipient.
+      Be specific and genuine in your approach.
+  execute_nice_action:
+    agent: false
+    description: Carry out the nice action or deliver the message.
+    name: execute_nice_action
+    nodes_depended_on:
+    - craft_nice_message
+    nodes_dependent_on: []
+    prompt: Take the action or deliver the message you prepared. Be sincere and genuine
+      in your approach.
+  generate_nice_thoughts:
+    agent: false
+    description: Generate a list of nice thoughts or actions.
+    name: generate_nice_thoughts
+    nodes_depended_on:
+    - reflect_on_kindness
+    nodes_dependent_on: []
+    prompt: Write down a list of nice thoughts or actions you can take to spread kindness,
+      such as sending a thank-you note or offering a compliment.
+  reflect_on_kindness:
+    agent: false
+    description: Reflect on what it means to be nice and its importance.
+    name: reflect_on_kindness
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Think about the value of being nice and how it can positively impact others.
+      Consider a recent time when you were nice to someone or someone was nice to
+      you.
+  reflect_on_outcome:
+    agent: false
+    description: Reflect on the outcome and impact of being nice.
+    name: reflect_on_outcome
+    nodes_depended_on:
+    - execute_nice_action
+    nodes_dependent_on: []
+    prompt: Consider how being nice impacted you and the recipient. Think about how
+      you can continue to spread kindness in the future.

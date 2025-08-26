@@ -1,0 +1,82 @@
+dag_type: plain_text
+description: A workflow to perform a basic test operation, ensuring correctness, completeness,
+  and concurrent validation where possible.
+name: execute_test_procedure
+nodes:
+  assess_test_reliability:
+    agent: false
+    description: Evaluate consistency and potential edge cases in test execution.
+    name: assess_test_reliability
+    nodes_depended_on:
+    - execute_test_case
+    nodes_dependent_on: []
+    prompt: Analyze the test output for signs of instability or ambiguity. Indicate
+      whether the test produces deterministic results and list any anomalies observed.
+  define_test_objective:
+    agent: false
+    description: Clarify the purpose and expected outcome of the test.
+    name: define_test_objective
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: State the objective of this test in one sentence. Focus only on what is
+      being tested and the desired result.
+  establish_test_conditions:
+    agent: false
+    description: Set up environmental or state conditions necessary for test execution.
+    name: establish_test_conditions
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on: []
+    prompt: Specify the preconditions or environment setup (e.g., system state, configurations)
+      required to run the test. Provide a bullet list of conditions.
+  execute_test_case:
+    agent: false
+    description: Run the test using prepared inputs and established conditions.
+    name: execute_test_case
+    nodes_depended_on:
+    - prepare_test_input_data
+    - establish_test_conditions
+    nodes_dependent_on: []
+    prompt: Perform the test using the provided input data and configured conditions.
+      Report the raw output or observed behavior exactly as recorded.
+  generate_test_summary:
+    agent: false
+    description: Produce a final summary of the test execution and validation.
+    name: generate_test_summary
+    nodes_depended_on:
+    - log_test_results
+    - assess_test_reliability
+    - validate_test_output
+    nodes_dependent_on: []
+    prompt: 'Compile a concise summary of the test: objective, result (pass/fail),
+      reliability assessment, and any notable observations. Limit to 5 sentences.'
+  log_test_results:
+    agent: false
+    description: Record test execution details and outcome.
+    name: log_test_results
+    nodes_depended_on:
+    - validate_test_output
+    nodes_dependent_on: []
+    prompt: 'Generate a structured log entry containing: test objective, inputs used,
+      execution timestamp, and pass/fail result. Use JSON format with string values
+      only.'
+  prepare_test_input_data:
+    agent: false
+    description: Generate or collect input data required for the test.
+    name: prepare_test_input_data
+    nodes_depended_on:
+    - define_test_objective
+    nodes_dependent_on: []
+    prompt: Create or identify the minimal set of input data needed to perform the
+      test based on the defined objective. List only the data fields and their sample
+      values.
+  validate_test_output:
+    agent: false
+    description: Check if the test output matches the expected result.
+    name: validate_test_output
+    nodes_depended_on:
+    - execute_test_case
+    - define_test_objective
+    nodes_dependent_on: []
+    prompt: Compare the actual test output with the expected outcome from the objective.
+      Return 'pass' or 'fail' and a one-sentence justification.

@@ -1,0 +1,121 @@
+dag_type: plain_text
+description: This workflow calculates the discounted cash flow (DCF) for a business
+  by determining future cash flows, discount rates, and the resulting business value.
+name: discounted_cash_flow_calculation
+nodes:
+  calculate_future_cash_flows:
+    agent: false
+    description: Calculate the yearly future cash flows based on forecasted revenues
+      and expenses.
+    name: calculate_future_cash_flows
+    nodes_depended_on:
+    - forecast_revenues
+    - forecast_operating_expenses
+    nodes_dependent_on: []
+    prompt: Subtract the forecasted operating expenses from the forecasted revenues
+      for each year to estimate the future cash flows. Provide the yearly forecasts
+      of cash flows.
+  calculate_terminal_value:
+    agent: false
+    description: Calculate the business's terminal value using the terminal growth
+      rate.
+    name: calculate_terminal_value
+    nodes_depended_on:
+    - identify_terminal_value_assumptions
+    - calculate_future_cash_flows
+    nodes_dependent_on: []
+    prompt: Using the determined terminal growth rate and the last year's projected
+      cash flow, calculate the terminal value of the business. Output the terminal
+      value with the calculation steps included.
+  calculate_total_present_value:
+    agent: false
+    description: Combine discounted cash flows and terminal value to compute the total
+      DCF valuation.
+    name: calculate_total_present_value
+    nodes_depended_on:
+    - discount_future_cash_flows
+    - discount_terminal_value
+    nodes_dependent_on: []
+    prompt: Sum up the present values of the discounted future cash flows and the
+      discounted terminal value to calculate the total present value of the business.
+      Write the total valuation result.
+  determine_discount_rate:
+    agent: false
+    description: Identify the appropriate discount rate for the DCF analysis.
+    name: determine_discount_rate
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Determine the discount rate (e.g., Weighted Average Cost of Capital (WACC))
+      for the business based on industry standards and risk. Output the percentage
+      value of the discount rate.
+  discount_future_cash_flows:
+    agent: false
+    description: Discount each year's projected cash flow to its present value.
+    name: discount_future_cash_flows
+    nodes_depended_on:
+    - calculate_future_cash_flows
+    - determine_discount_rate
+    nodes_dependent_on: []
+    prompt: Using the projected future cash flows and the discount rate, calculate
+      the present value of each year's cash flow. Present the discounted cash flows
+      in a year-by-year breakdown.
+  discount_terminal_value:
+    agent: false
+    description: Discount the terminal value to its present value.
+    name: discount_terminal_value
+    nodes_depended_on:
+    - calculate_terminal_value
+    - determine_discount_rate
+    nodes_dependent_on: []
+    prompt: Using the terminal value and discount rate, calculate the present value
+      of the terminal value. Write the calculation steps explicitly.
+  forecast_operating_expenses:
+    agent: false
+    description: Project the operating expenses for the identified cash flow projection
+      period.
+    name: forecast_operating_expenses
+    nodes_depended_on:
+    - identify_cash_flow_projection_period
+    - gather_financial_data
+    nodes_dependent_on: []
+    prompt: Using historical expense data and expense trends, forecast the annual
+      operating expenses for each year of the projection period. Present a year-by-year
+      breakdown.
+  forecast_revenues:
+    agent: false
+    description: Project the business's revenues for the identified cash flow projection
+      period.
+    name: forecast_revenues
+    nodes_depended_on:
+    - identify_cash_flow_projection_period
+    - gather_financial_data
+    nodes_dependent_on: []
+    prompt: Using historical revenue data and growth trends, forecast the annual revenues
+      for each year of the projection period. List each year's projected revenue explicitly.
+  gather_financial_data:
+    agent: false
+    description: Collect historical financial data of the business.
+    name: gather_financial_data
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Obtain historical financial data of the business, including revenue, expenses,
+      net income, and cash flows. Summarize these metrics in tabular format for at
+      least three past years.
+  identify_cash_flow_projection_period:
+    agent: false
+    description: Determine the time horizon for future cash flow projections.
+    name: identify_cash_flow_projection_period
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Decide on the number of years for which the business's future cash flows
+      will be projected, typically 5-10 years. Output the exact number of years.
+  identify_terminal_value_assumptions:
+    agent: false
+    description: Define assumptions for terminal growth rate after the projection
+      period.
+    name: identify_terminal_value_assumptions
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Specify a reasonable terminal growth rate (e.g., 2-3%, based on industry
+      average) to estimate the terminal value of the business. Output the terminal
+      growth rate in percentage terms.

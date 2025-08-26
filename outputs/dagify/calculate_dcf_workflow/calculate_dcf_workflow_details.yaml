@@ -1,0 +1,121 @@
+dag_type: plain_text
+description: Calculate the DCF value of a business by forecasting cash flows, estimating
+  cost of capital, calculating present and terminal values, and summing them.
+name: calculate_dcf_workflow
+nodes:
+  calculate_dcf:
+    agent: false
+    description: Provide the final DCF value of the business.
+    name: calculate_dcf
+    nodes_depended_on:
+    - calculate_dcf_substep_3
+    nodes_dependent_on: []
+    prompt: The DCF value is the final result from the previous steps. Provide the
+      final DCF value.
+  calculate_dcf_substep_1:
+    agent: false
+    description: Verify the sum of present value and terminal value.
+    name: calculate_dcf_substep_1
+    nodes_depended_on:
+    - sum_present_value_and_terminal_value
+    nodes_dependent_on:
+    - calculate_dcf_substep_2
+    prompt: Verify that the sum of present value and terminal value is correctly calculated.
+      Provide confirmation.
+  calculate_dcf_substep_2:
+    agent: false
+    description: Check for rounding errors in the DCF calculation.
+    name: calculate_dcf_substep_2
+    nodes_depended_on:
+    - calculate_dcf_substep_1
+    nodes_dependent_on:
+    - calculate_dcf_substep_3
+    prompt: Check for any rounding errors in the calculation. Provide the corrected
+      sum if necessary.
+  calculate_dcf_substep_3:
+    agent: false
+    description: Finalize the DCF calculation.
+    name: calculate_dcf_substep_3
+    nodes_depended_on:
+    - calculate_dcf_substep_2
+    nodes_dependent_on: []
+    prompt: Finalize the DCF value by ensuring all previous steps are accurate and
+      complete. Provide the final DCF value.
+  calculate_present_value:
+    agent: false
+    description: Calculate the present value of the forecasted cash flows.
+    name: calculate_present_value
+    nodes_depended_on:
+    - forecast_cash_flows
+    - estimate_cost_of_capital
+    nodes_dependent_on:
+    - sum_present_value_and_terminal_value
+    prompt: Using the forecasted cash flows and estimated cost of capital, calculate
+      the present value of the cash flows. Provide a detailed breakdown of the calculations.
+  calculate_terminal_value:
+    agent: false
+    description: Calculate the terminal value of the business.
+    name: calculate_terminal_value
+    nodes_depended_on:
+    - forecast_cash_flows
+    - estimate_cost_of_capital
+    nodes_dependent_on:
+    - sum_present_value_and_terminal_value
+    prompt: Using the forecasted cash flows and estimated cost of capital, calculate
+      the terminal value of the business. Provide a detailed breakdown of the calculations.
+  estimate_cost_of_capital:
+    agent: false
+    description: Estimate the cost of capital for the business.
+    name: estimate_cost_of_capital
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    prompt: Estimate the cost of capital for the business, including the cost of debt
+      and equity. Provide a weighted average cost of capital (WACC) percentage.
+  estimate_revenue_growth_rate:
+    agent: false
+    description: Estimate the revenue growth rate for the business based on historical
+      financial data.
+    name: estimate_revenue_growth_rate
+    nodes_depended_on:
+    - gather_financial_statements
+    nodes_dependent_on:
+    - forecast_cash_flows
+    prompt: Analyze the historical financial statements to estimate the revenue growth
+      rate for the business. Provide a percentage growth rate.
+  forecast_cash_flows:
+    agent: false
+    description: Forecast the future cash flows for the business.
+    name: forecast_cash_flows
+    nodes_depended_on:
+    - estimate_revenue_growth_rate
+    - gather_financial_statements
+    nodes_dependent_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    prompt: Using the estimated revenue growth rate and historical financial statements,
+      forecast the future cash flows for the business. Provide a detailed breakdown
+      of the forecasted cash flows.
+  gather_financial_statements:
+    agent: false
+    description: Collect the necessary financial statements and data for the business.
+    name: gather_financial_statements
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - estimate_revenue_growth_rate
+    - forecast_cash_flows
+    prompt: Gather the historical financial statements (income statements, balance
+      sheets, and cash flow statements) for the business. Provide the statements in
+      a format that can be easily read and analyzed.
+  sum_present_value_and_terminal_value:
+    agent: false
+    description: Sum the present value and terminal value.
+    name: sum_present_value_and_terminal_value
+    nodes_depended_on:
+    - calculate_present_value
+    - calculate_terminal_value
+    nodes_dependent_on:
+    - calculate_dcf
+    prompt: Sum the present value of the cash flows and the terminal value. Provide
+      the total value.

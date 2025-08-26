@@ -1,0 +1,49 @@
+dag_type: plain_text
+description: A workflow for executing a dessert run, from preparation to completion.
+name: run_dessert_run
+nodes:
+  confirm_delivery:
+    agent: false
+    description: Confirm that the desserts have been delivered successfully.
+    name: confirm_delivery
+    nodes_depended_on:
+    - deliver_desserts
+    nodes_dependent_on: []
+    prompt: Confirm that the desserts have been delivered to the designated locations,
+      verifying completion of the dessert run.
+  deliver_desserts:
+    agent: false
+    description: Deliver the packed desserts to the designated locations.
+    name: deliver_desserts
+    nodes_depended_on:
+    - pack_desserts_for_delivery
+    nodes_dependent_on: []
+    prompt: Deliver the packed desserts to the designated locations, ensuring timely
+      and efficient distribution.
+  pack_desserts_for_delivery:
+    agent: false
+    description: Pack the prepared desserts for delivery.
+    name: pack_desserts_for_delivery
+    nodes_depended_on:
+    - prepare_desserts
+    nodes_dependent_on: []
+    prompt: Pack the prepared desserts into containers or bags for delivery, ensuring
+      they are secure and protected.
+  plan_dessert_run:
+    agent: false
+    description: Determine the dessert run plan, including desserts to prepare and
+      deliver.
+    name: plan_dessert_run
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Plan a dessert run, including selecting desserts to prepare and determining
+      the delivery route.
+  prepare_desserts:
+    agent: false
+    description: Prepare the selected desserts for the run.
+    name: prepare_desserts
+    nodes_depended_on:
+    - plan_dessert_run
+    nodes_dependent_on: []
+    prompt: Prepare the selected desserts according to the plan, including baking,
+      decorating, and packaging.
