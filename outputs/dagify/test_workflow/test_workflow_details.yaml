@@ -1,76 +1,29 @@
 dag_type: plain_text
-description: A workflow designed to achieve the objective 'test'
+description: A workflow to test the system with a simple task
 name: test_workflow
 nodes:
-  analyze_test_results:
+  evaluate_test_result:
     agent: false
-    description: Analyze the outcomes of the executed test cases
-    name: analyze_test_results
+    description: Evaluate the result of the test
+    name: evaluate_test_result
     nodes_depended_on:
-    - execute_test_cases
+    - perform_test
     nodes_dependent_on: []
-    prompt: Review the results of the test case executions, identifying any failures,
-      errors, or areas requiring further investigation.
-  decompose_test_objective:
+    prompt: Assess the outcome of the test
+  initiate_test:
     agent: false
-    description: Break down the 'test' objective into smaller, manageable tasks
-    name: decompose_test_objective
-    nodes_depended_on:
-    - interpret_test_objective
-    nodes_dependent_on: []
-    prompt: Decompose the 'test' objective into fundamental tasks or steps that can
-      be executed concurrently or sequentially to achieve the objective.
-  design_test_cases:
-    agent: false
-    description: Create test cases based on the identified test type
-    name: design_test_cases
-    nodes_depended_on:
-    - identify_test_type
-    nodes_dependent_on: []
-    prompt: Design specific test cases that cover the requirements of the identified
-      test type, including any necessary input data or conditions.
-  execute_test_cases:
-    agent: false
-    description: Run the designed test cases
-    name: execute_test_cases
-    nodes_depended_on:
-    - prepare_test_environment
-    - design_test_cases
-    nodes_dependent_on: []
-    prompt: Execute the test cases as designed, following the prepared test plan and
-      using the configured test environment.
-  identify_test_type:
-    agent: false
-    description: Determine the type of test required
-    name: identify_test_type
-    nodes_depended_on:
-    - decompose_test_objective
-    nodes_dependent_on: []
-    prompt: Based on the decomposition, identify if the test is a unit test, integration
-      test, or another type of test.
-  interpret_test_objective:
-    agent: false
-    description: Understand the context and requirements of the 'test' objective
-    name: interpret_test_objective
+    description: Initialize the test workflow
+    name: initiate_test
     nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: Analyze the given objective 'test' and identify any specific requirements
-      or context that needs to be considered for achieving this objective.
-  prepare_test_environment:
+    nodes_dependent_on:
+    - evaluate_test_result
+    prompt: Start the test process
+  perform_test:
     agent: false
-    description: Set up the necessary test environment
-    name: prepare_test_environment
+    description: Perform the actual test
+    name: perform_test
     nodes_depended_on:
-    - design_test_cases
-    nodes_dependent_on: []
-    prompt: Prepare the test environment by configuring any necessary infrastructure,
-      tools, or data required for executing the designed test cases.
-  report_test_outcome:
-    agent: false
-    description: Document and report the outcome of the test
-    name: report_test_outcome
-    nodes_depended_on:
-    - analyze_test_results
-    nodes_dependent_on: []
-    prompt: Compile a report detailing the test outcome, including any issues encountered,
-      and provide recommendations for future actions or improvements.
+    - initiate_test
+    nodes_dependent_on:
+    - evaluate_test_result
+    prompt: Execute the test task

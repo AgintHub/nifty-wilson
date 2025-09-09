@@ -1,43 +1,113 @@
 dag_type: plain_text
-description: A workflow to find directions to the nearest car dealership
-name: find_directions_to_nearest_car_dealership
+description: A workflow to create a teddy bear from selecting materials to final assembly
+name: build_a_bear
 nodes:
-  get_current_location:
+  assemble_body:
     agent: false
-    description: Retrieve the current geographical location
-    name: get_current_location
+    description: Sew the bear's body components together
+    name: assemble_body
+    nodes_depended_on:
+    - cut_out_body_components
+    nodes_dependent_on: []
+    prompt: Sew the teddy bear's body components together, leaving a small opening
+      for turning and stuffing.
+  assemble_ears:
+    agent: false
+    description: Sew the bear's ear components together
+    name: assemble_ears
+    nodes_depended_on:
+    - cut_out_ear_components
+    nodes_dependent_on: []
+    prompt: Sew the teddy bear's ear components together, turning them right side
+      out.
+  assemble_paws:
+    agent: false
+    description: Sew the bear's paw components together
+    name: assemble_paws
+    nodes_depended_on:
+    - cut_out_paw_components
+    nodes_dependent_on: []
+    prompt: Sew the teddy bear's paw components together, turning them right side
+      out.
+  attach_ears_and_paws:
+    agent: false
+    description: Attach the ears and paws to the bear's body
+    name: attach_ears_and_paws
+    nodes_depended_on:
+    - assemble_ears
+    - assemble_paws
+    - stuff_bear
+    nodes_dependent_on: []
+    prompt: Attach the teddy bear's ears and paws to its body using a suitable method
+      (e.g., sewing, gluing).
+  create_pattern:
+    agent: false
+    description: Design a pattern for the bear's components
+    name: create_pattern
+    nodes_depended_on:
+    - select_fabric
+    nodes_dependent_on: []
+    prompt: Create a pattern for the teddy bear's components, including the body,
+      ears, and paws, using the selected fabric.
+  cut_out_body_components:
+    agent: false
+    description: Cut out the bear's body components from the fabric
+    name: cut_out_body_components
+    nodes_depended_on:
+    - create_pattern
+    nodes_dependent_on: []
+    prompt: Using the created pattern, cut out the teddy bear's body components from
+      the selected fabric.
+  cut_out_ear_components:
+    agent: false
+    description: Cut out the bear's ear components from the fabric
+    name: cut_out_ear_components
+    nodes_depended_on:
+    - create_pattern
+    nodes_dependent_on: []
+    prompt: Using the created pattern, cut out the teddy bear's ear components from
+      the selected fabric.
+  cut_out_paw_components:
+    agent: false
+    description: Cut out the bear's paw components from the fabric
+    name: cut_out_paw_components
+    nodes_depended_on:
+    - create_pattern
+    nodes_dependent_on: []
+    prompt: Using the created pattern, cut out the teddy bear's paw components from
+      the selected fabric.
+  final_assembly:
+    agent: false
+    description: Complete any final assembly tasks
+    name: final_assembly
+    nodes_depended_on:
+    - attach_ears_and_paws
+    nodes_dependent_on: []
+    prompt: Complete any remaining tasks to finalize the teddy bear's assembly, such
+      as closing the opening or adding embellishments.
+  select_fabric:
+    agent: false
+    description: Choose the fabric for the bear's outer layer
+    name: select_fabric
     nodes_depended_on: []
-    nodes_dependent_on:
-    - search_nearest_car_dealership
-    prompt: Determine the current geographical coordinates (latitude and longitude)
-      using available location services.
-  get_dealership_details:
-    agent: false
-    description: Retrieve additional details about the nearest car dealership
-    name: get_dealership_details
-    nodes_depended_on:
-    - search_nearest_car_dealership
     nodes_dependent_on: []
-    prompt: Using the name and address of the nearest car dealership, retrieve additional
-      details such as phone number, hours of operation, and available services.
-  get_directions_to_dealership:
+    prompt: Select a suitable fabric for the teddy bear's outer layer, considering
+      factors like texture, color, and durability.
+  select_stuffing:
     agent: false
-    description: Get directions from the current location to the nearest car dealership
-    name: get_directions_to_dealership
-    nodes_depended_on:
-    - search_nearest_car_dealership
-    - get_current_location
+    description: Choose the material for the bear's stuffing
+    name: select_stuffing
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Using the current location and the geographical coordinates of the nearest
-      car dealership, generate step-by-step directions to the dealership.
-  search_nearest_car_dealership:
+    prompt: Select a suitable material for the teddy bear's stuffing, considering
+      factors like loft, softness, and hypoallergenicity.
+  stuff_bear:
     agent: false
-    description: Search for the nearest car dealership using the current location
-    name: search_nearest_car_dealership
+    description: Fill the bear with the selected stuffing material
+    name: stuff_bear
     nodes_depended_on:
-    - get_current_location
-    nodes_dependent_on:
-    - get_dealership_details
-    - get_directions_to_dealership
-    prompt: Using the current location, search for the nearest car dealership. Provide
-      the name, address, and geographical coordinates of the dealership.
+    - assemble_body
+    - select_stuffing
+    nodes_dependent_on: []
+    prompt: Fill the teddy bear's body with the selected stuffing material through
+      the opening left during assembly.
