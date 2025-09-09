@@ -1,146 +1,43 @@
 dag_type: plain_text
-description: A workflow for designing and constructing a spaceship, from defining
-  mission objectives through assembly and testing
-name: build_spaceship
+description: A workflow to find directions to the nearest car dealership
+name: find_directions_to_nearest_car_dealership
 nodes:
-  compile_final_spaceship_design:
+  get_current_location:
     agent: false
-    description: Integrate all design elements into a cohesive final design package
-    name: compile_final_spaceship_design
-    nodes_depended_on:
-    - specify_propulsion_system
-    - design_structural_components
-    - plan_life_support_systems
-    - specify_communication_systems
-    - design_navigation_and_control
-    - plan_electrical_and_power_systems
-    - design_thermal_control_systems
-    - specify_materials_and_manufacturing
-    - create_assembly_plan
-    - plan_testing_and_validation
-    nodes_dependent_on: []
-    prompt: Compile all the detailed designs and plans into a single, comprehensive
-      final design document for the spaceship, incorporating all systems, components,
-      and operational considerations
-  create_assembly_plan:
-    agent: false
-    description: Develop a detailed plan for assembling the spaceship
-    name: create_assembly_plan
-    nodes_depended_on:
-    - design_structural_components
-    - plan_life_support_systems
-    - specify_communication_systems
-    - design_navigation_and_control
-    - plan_electrical_and_power_systems
-    - design_thermal_control_systems
-    nodes_dependent_on: []
-    prompt: Outline the step-by-step process for assembling the spaceship, including
-      the integration of all major systems and components. Consider the sequence of
-      operations, tooling, and any specialized equipment needed
-  define_mission_objectives:
-    agent: false
-    description: Specify the primary purpose and goals of the spaceship mission
-    name: define_mission_objectives
+    description: Retrieve the current geographical location
+    name: get_current_location
     nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: List the key objectives for the spaceship mission, including intended
-      use, payload requirements, and any specific operational needs
-  design_navigation_and_control:
+    nodes_dependent_on:
+    - search_nearest_car_dealership
+    prompt: Determine the current geographical coordinates (latitude and longitude)
+      using available location services.
+  get_dealership_details:
     agent: false
-    description: Plan the navigation and control systems for the spaceship
-    name: design_navigation_and_control
+    description: Retrieve additional details about the nearest car dealership
+    name: get_dealership_details
     nodes_depended_on:
-    - specify_propulsion_system
+    - search_nearest_car_dealership
     nodes_dependent_on: []
-    prompt: Design the navigation (e.g., star trackers, GPS) and control systems (e.g.,
-      reaction wheels, thrusters) necessary for the spaceship to achieve its mission
-      objectives, including course correction and attitude control
-  design_structural_components:
+    prompt: Using the name and address of the nearest car dealership, retrieve additional
+      details such as phone number, hours of operation, and available services.
+  get_directions_to_dealership:
     agent: false
-    description: Design the primary structural elements of the spaceship
-    name: design_structural_components
+    description: Get directions from the current location to the nearest car dealership
+    name: get_directions_to_dealership
     nodes_depended_on:
-    - determine_spaceship_type
+    - search_nearest_car_dealership
+    - get_current_location
     nodes_dependent_on: []
-    prompt: Design the main structural components, including the frame, hull, and
-      any other critical elements necessary for the spaceship's integrity and mission
-  design_thermal_control_systems:
+    prompt: Using the current location and the geographical coordinates of the nearest
+      car dealership, generate step-by-step directions to the dealership.
+  search_nearest_car_dealership:
     agent: false
-    description: Plan the thermal control and protection systems for the spaceship
-    name: design_thermal_control_systems
+    description: Search for the nearest car dealership using the current location
+    name: search_nearest_car_dealership
     nodes_depended_on:
-    - determine_spaceship_type
-    nodes_dependent_on: []
-    prompt: Design the thermal control systems, including insulation, heaters, and
-      radiators, to maintain a stable temperature within the spaceship and protect
-      it from external temperature extremes
-  determine_spaceship_type:
-    agent: false
-    description: Decide on the type of spaceship based on mission objectives
-    name: determine_spaceship_type
-    nodes_depended_on:
-    - define_mission_objectives
-    nodes_dependent_on: []
-    prompt: Based on the mission objectives, determine whether the spaceship should
-      be crewed, uncrewed, orbital, interplanetary, etc. Provide a brief rationale
-  plan_electrical_and_power_systems:
-    agent: false
-    description: Outline the electrical and power generation systems for the spaceship
-    name: plan_electrical_and_power_systems
-    nodes_depended_on:
-    - determine_spaceship_type
-    nodes_dependent_on: []
-    prompt: Design the power generation (e.g., solar panels, nuclear reactors) and
-      distribution systems, including any necessary backup power sources and energy
-      storage components
-  plan_life_support_systems:
-    agent: false
-    description: Outline the life support systems required for crewed missions
-    name: plan_life_support_systems
-    nodes_depended_on:
-    - determine_spaceship_type
-    nodes_dependent_on: []
-    prompt: If the spaceship is crewed, design the life support systems, including
-      air, water, and food supply, waste management, and temperature control. Detail
-      the components and their functionality
-  plan_testing_and_validation:
-    agent: false
-    description: Outline the testing and validation procedures for the spaceship
-    name: plan_testing_and_validation
-    nodes_depended_on:
-    - create_assembly_plan
-    nodes_dependent_on: []
-    prompt: Develop a comprehensive plan for testing the spaceship's systems and performance,
-      including any necessary simulations, ground tests, and flight tests to validate
-      its readiness for mission operations
-  specify_communication_systems:
-    agent: false
-    description: Define the communication systems for the spaceship
-    name: specify_communication_systems
-    nodes_depended_on:
-    - determine_spaceship_type
-    nodes_dependent_on: []
-    prompt: Choose suitable communication equipment (e.g., antennas, transceivers)
-      and protocols for the spaceship, considering the mission requirements and the
-      need for data transmission between the spaceship and Earth or other spacecraft
-  specify_materials_and_manufacturing:
-    agent: false
-    description: Choose materials and manufacturing processes for the spaceship's
-      construction
-    name: specify_materials_and_manufacturing
-    nodes_depended_on:
-    - design_structural_components
-    nodes_dependent_on: []
-    prompt: Select appropriate materials and manufacturing techniques for the structural
-      components and other critical parts of the spaceship, considering factors like
-      strength, weight, and resistance to environmental conditions
-  specify_propulsion_system:
-    agent: false
-    description: Define the propulsion system for the spaceship
-    name: specify_propulsion_system
-    nodes_depended_on:
-    - determine_spaceship_type
-    nodes_dependent_on: []
-    prompt: Select a suitable propulsion system (e.g., chemical rockets, ion engines,
-      nuclear propulsion) based on the spaceship type and mission requirements. Explain
-      the choice
+    - get_current_location
+    nodes_dependent_on:
+    - get_dealership_details
+    - get_directions_to_dealership
+    prompt: Using the current location, search for the nearest car dealership. Provide
+      the name, address, and geographical coordinates of the dealership.
