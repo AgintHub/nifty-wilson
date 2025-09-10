@@ -1,64 +1,51 @@
 dag_type: plain_text
-description: A workflow to achieve the objective 'test'
-name: test_workflow
+description: A workflow to find the nearest restaurants to a given location
+name: find_nearest_restaurants
 nodes:
-  analyze_test_results:
+  filter_restaurants_by_distance:
     agent: false
-    description: Analyze the test results
-    name: analyze_test_results
+    description: Filter the list of restaurants to find the nearest ones
+    name: filter_restaurants_by_distance
     nodes_depended_on:
-    - execute_test
-    nodes_dependent_on: []
-    prompt: Examine the results of the test to determine if the objectives were met
-      and identify any issues.
-  document_test_outcome:
+    - search_restaurants
+    nodes_dependent_on:
+    - sort_restaurants
+    prompt: From the list of restaurants, filter out those that are beyond a reasonable
+      distance (e.g., 5 km). Provide the filtered list.
+  get_user_location:
     agent: false
-    description: Document the test outcome
-    name: document_test_outcome
-    nodes_depended_on:
-    - analyze_test_results
-    nodes_dependent_on: []
-    prompt: Record the findings and outcomes of the test in a clear and structured
-      manner.
-  execute_test:
-    agent: false
-    description: Execute the test
-    name: execute_test
-    nodes_depended_on:
-    - prepare_test_environment
-    - plan_test_strategy
-    nodes_dependent_on: []
-    prompt: Run the test according to the planned strategy and note the outcomes.
-  identify_test_type:
-    agent: false
-    description: Identify the type of test
-    name: identify_test_type
-    nodes_depended_on:
-    - understand_test_objective
-    nodes_dependent_on: []
-    prompt: Based on the understanding of the objective, identify if it's a unit test,
-      integration test, or another type of test.
-  plan_test_strategy:
-    agent: false
-    description: Plan the test strategy
-    name: plan_test_strategy
-    nodes_depended_on:
-    - identify_test_type
-    nodes_dependent_on: []
-    prompt: Develop a strategy for conducting the test based on its type and requirements.
-  prepare_test_environment:
-    agent: false
-    description: Prepare the test environment
-    name: prepare_test_environment
-    nodes_depended_on:
-    - plan_test_strategy
-    nodes_dependent_on: []
-    prompt: Set up the necessary environment and tools required for the test.
-  understand_test_objective:
-    agent: false
-    description: Understand the objective 'test'
-    name: understand_test_objective
+    description: Obtain the user's current location
+    name: get_user_location
     nodes_depended_on: []
+    nodes_dependent_on:
+    - search_restaurants
+    prompt: Get the user's current location. Provide the latitude and longitude.
+  return_nearest_restaurants:
+    agent: false
+    description: Return the nearest restaurants to the user's location
+    name: return_nearest_restaurants
+    nodes_depended_on:
+    - sort_restaurants
     nodes_dependent_on: []
-    prompt: Analyze the given objective 'test' and determine its requirements and
-      constraints.
+    prompt: From the sorted list, return the top N nearest restaurants (e.g., top
+      5). Provide their names, distances, and any other relevant details.
+  search_restaurants:
+    agent: false
+    description: Search for restaurants near the user's location
+    name: search_restaurants
+    nodes_depended_on:
+    - get_user_location
+    nodes_dependent_on:
+    - filter_restaurants_by_distance
+    prompt: Using the user's location, search for nearby restaurants. Provide a list
+      of restaurant names, their distances, and coordinates.
+  sort_restaurants:
+    agent: false
+    description: Sort the filtered restaurants by distance
+    name: sort_restaurants
+    nodes_depended_on:
+    - filter_restaurants_by_distance
+    nodes_dependent_on:
+    - return_nearest_restaurants
+    prompt: Sort the filtered list of restaurants by their distance from the user's
+      location. Provide the sorted list.
