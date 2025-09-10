@@ -1,11 +1,12 @@
 dag_type: plain_text
-description: Plan a road trip from Denver to Raleigh with three stopovers, then find
-  Indian restaurants near Raleigh.
+description: Plan a Denver‑to‑Raleigh road trip, select stopovers, and compile a list
+  of Indian restaurants near Raleigh, ensuring all Denver‑related tasks are performed
+  before any Raleigh‑related tasks.
 name: road_trip_with_restaurant_search
 nodes:
   compile_restaurant_list:
     agent: false
-    description: Compile the final list of Indian restaurants near Raleigh
+    description: Compile the final list of Indian restaurants near Raleigh.
     name: compile_restaurant_list
     nodes_depended_on:
     - filter_restaurants_by_cuisine
@@ -14,18 +15,17 @@ nodes:
       including their names, addresses, and any relevant details.
   compute_route_denver_to_raleigh:
     agent: false
-    description: Calculate the optimal driving route from Denver to Raleigh
+    description: Calculate the optimal driving route from Denver to Raleigh.
     name: compute_route_denver_to_raleigh
     nodes_depended_on:
     - geocode_denver
-    - geocode_raleigh
     nodes_dependent_on:
     - identify_stopover_points
-    prompt: Using the geocoded coordinates of Denver and Raleigh, compute the best
-      driving route between them, including distance and estimated travel time.
+    prompt: Using the geocoded coordinates of Denver, compute the best driving route
+      between Denver and Raleigh, including distance and estimated travel time.
   filter_restaurants_by_cuisine:
     agent: false
-    description: Filter listings to include only confirmed Indian restaurants
+    description: Filter listings to include only confirmed Indian restaurants.
     name: filter_restaurants_by_cuisine
     nodes_depended_on:
     - search_indian_restaurants
@@ -35,7 +35,7 @@ nodes:
       are confirmed Indian restaurants.
   geocode_denver:
     agent: false
-    description: Convert 'Denver' to latitude and longitude coordinates
+    description: Convert 'Denver' to latitude and longitude coordinates.
     name: geocode_denver
     nodes_depended_on: []
     nodes_dependent_on:
@@ -43,25 +43,26 @@ nodes:
     prompt: Geocode 'Denver' to obtain its latitude and longitude coordinates.
   geocode_raleigh:
     agent: false
-    description: Convert 'Raleigh' to latitude and longitude coordinates
+    description: Convert 'Raleigh' to latitude and longitude coordinates.
     name: geocode_raleigh
-    nodes_depended_on: []
+    nodes_depended_on:
+    - identify_stopover_points
     nodes_dependent_on:
-    - compute_route_denver_to_raleigh
     - search_indian_restaurants
     prompt: Geocode 'Raleigh' to obtain its latitude and longitude coordinates.
   identify_stopover_points:
     agent: false
-    description: Select three suitable stopover locations along the route
+    description: Select three suitable stopover locations along the route.
     name: identify_stopover_points
     nodes_depended_on:
     - compute_route_denver_to_raleigh
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - geocode_raleigh
     prompt: From the computed route, choose three cities or towns to stop at before
       reaching Raleigh. Provide each stop's name and coordinates.
   search_indian_restaurants:
     agent: false
-    description: Find Indian restaurants near Raleigh
+    description: Find Indian restaurants near Raleigh.
     name: search_indian_restaurants
     nodes_depended_on:
     - geocode_raleigh
