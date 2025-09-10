@@ -1,51 +1,39 @@
 dag_type: plain_text
-description: A workflow to find the nearest restaurants to a given location
-name: find_nearest_restaurants
+description: A workflow to discover Indian restaurants near Raleigh, including geocoding,
+  search, and result filtering
+name: find_indian_restaurants_near_raleigh
 nodes:
-  filter_restaurants_by_distance:
+  compile_restaurant_list:
     agent: false
-    description: Filter the list of restaurants to find the nearest ones
-    name: filter_restaurants_by_distance
+    description: Compile the final list of Indian restaurants near Raleigh
+    name: compile_restaurant_list
     nodes_depended_on:
-    - search_restaurants
-    nodes_dependent_on:
-    - sort_restaurants
-    prompt: From the list of restaurants, filter out those that are beyond a reasonable
-      distance (e.g., 5 km). Provide the filtered list.
-  get_user_location:
-    agent: false
-    description: Obtain the user's current location
-    name: get_user_location
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - search_restaurants
-    prompt: Get the user's current location. Provide the latitude and longitude.
-  return_nearest_restaurants:
-    agent: false
-    description: Return the nearest restaurants to the user's location
-    name: return_nearest_restaurants
-    nodes_depended_on:
-    - sort_restaurants
+    - filter_restaurants_by_cuisine
     nodes_dependent_on: []
-    prompt: From the sorted list, return the top N nearest restaurants (e.g., top
-      5). Provide their names, distances, and any other relevant details.
-  search_restaurants:
+    prompt: Organize the filtered Indian restaurant listings into a structured list,
+      including their names, addresses, and any relevant details
+  filter_restaurants_by_cuisine:
     agent: false
-    description: Search for restaurants near the user's location
-    name: search_restaurants
+    description: Filter search results to ensure they are Indian restaurants
+    name: filter_restaurants_by_cuisine
     nodes_depended_on:
-    - get_user_location
-    nodes_dependent_on:
-    - filter_restaurants_by_distance
-    prompt: Using the user's location, search for nearby restaurants. Provide a list
-      of restaurant names, their distances, and coordinates.
-  sort_restaurants:
+    - search_indian_restaurants
+    nodes_dependent_on: []
+    prompt: From the search results, filter the listings to include only those that
+      are confirmed Indian restaurants
+  geocode_raleigh:
     agent: false
-    description: Sort the filtered restaurants by distance
-    name: sort_restaurants
+    description: Convert 'Raleigh' to precise geographic coordinates
+    name: geocode_raleigh
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Geocode 'Raleigh' to obtain its latitude and longitude coordinates
+  search_indian_restaurants:
+    agent: false
+    description: Search for Indian restaurants near the geocoded Raleigh location
+    name: search_indian_restaurants
     nodes_depended_on:
-    - filter_restaurants_by_distance
-    nodes_dependent_on:
-    - return_nearest_restaurants
-    prompt: Sort the filtered list of restaurants by their distance from the user's
-      location. Provide the sorted list.
+    - geocode_raleigh
+    nodes_dependent_on: []
+    prompt: Using the geocoded coordinates of Raleigh, search for nearby Indian restaurants
+      within a reasonable radius (e.g., 5 miles)
