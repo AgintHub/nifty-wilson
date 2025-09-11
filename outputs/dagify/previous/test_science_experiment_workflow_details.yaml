@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A workflow for testing a science experiment, from hypothesis formulation
-  to result analysis.
+dag_type: typed
+description: Generated workflow from UI.
 name: test_science_experiment_workflow
 nodes:
   analyze_data:
@@ -9,8 +8,28 @@ nodes:
     name: analyze_data
     nodes_depended_on:
     - collect_data
-    nodes_dependent_on:
-    - interpret_results
+    nodes_dependent_on: []
+    output_structure:
+    - description: Concise written summary of the overall analysis, including key
+        findings and statistical significance.
+      key: analysis_summary
+      type: str
+    - description: List of individual trend observations identified in the data (e.g.,
+        increasing temperature over time).
+      key: trend_descriptions
+      type: List[str]
+    - description: Brief description of any significant correlations discovered between
+        variables, with correlation coefficient values.
+      key: correlation_summary
+      type: str
+    - description: List of variables or factors that had statistically significant
+        impact on the outcome.
+      key: significant_factors
+      type: List[str]
+    - description: True if the analysis was completed without errors and the data
+        met quality standards, otherwise False.
+      key: is_analysis_successful
+      type: bool
     prompt: Analyze the collected data using appropriate statistical methods and tools.
       Identify trends, patterns, or correlations.
   collect_data:
@@ -19,8 +38,20 @@ nodes:
     name: collect_data
     nodes_depended_on:
     - conduct_experiment
-    nodes_dependent_on:
-    - analyze_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Number of observations recorded during the experiment.
+      key: observation_count
+      type: int
+    - description: Numeric values collected during the experiment.
+      key: data_values
+      type: List[float]
+    - description: Whether the recorded data meets quality criteria.
+      key: is_data_valid
+      type: bool
+    - description: Textual notes or comments associated with each observation.
+      key: observation_notes
+      type: List[str]
     prompt: Collect and record data from the experiment. Ensure data is accurate and
       comprehensive.
   conduct_experiment:
@@ -30,8 +61,32 @@ nodes:
     nodes_depended_on:
     - design_experiment
     - prepare_materials
-    nodes_dependent_on:
-    - collect_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Indicates if the experiment was carried out to completion
+      key: experiment_completed
+      type: bool
+    - description: Indicates whether all required safety protocols were followed
+      key: safety_compliance
+      type: bool
+    - description: Number of observations recorded during the experiment
+      key: observation_count
+      type: int
+    - description: Textual notes of each observation
+      key: observations
+      type: List[str]
+    - description: Indicates if any anomalies were encountered
+      key: anomalies_detected
+      type: bool
+    - description: Descriptions of each anomaly encountered, if any
+      key: anomaly_descriptions
+      type: List[str]
+    - description: The trial number or batch identifier for this run
+      key: trial_number
+      type: int
+    - description: Whether data collection was successfully performed
+      key: data_collection_status
+      type: bool
     prompt: Carry out the experiment according to the designed plan, ensuring to follow
       safety protocols and record any observations.
   design_experiment:
@@ -40,9 +95,30 @@ nodes:
     name: design_experiment
     nodes_depended_on:
     - formulate_hypothesis
-    nodes_dependent_on:
-    - prepare_materials
-    - conduct_experiment
+    nodes_dependent_on: []
+    output_structure:
+    - description: The testable hypothesis to be examined
+      key: hypothesis
+      type: str
+    - description: List of variables that will be manipulated in the experiment
+      key: independent_variables
+      type: List[str]
+    - description: List of variables that will be measured as outcomes
+      key: dependent_variables
+      type: List[str]
+    - description: List of variables that will be held constant to avoid confounding
+        effects
+      key: control_variables
+      type: List[str]
+    - description: Methods or instruments used to quantify each dependent variable
+      key: measurement_methods
+      type: List[str]
+    - description: Number of experimental units or trials to be performed
+      key: sample_size
+      type: int
+    - description: Step‑by‑step description of how the experiment will be executed
+      key: experimental_protocol
+      type: str
     prompt: Design an experiment to test the formulated hypothesis. Include details
       on variables, controls, and measurement methods.
   document_experiment:
@@ -52,6 +128,39 @@ nodes:
     nodes_depended_on:
     - draw_conclusion
     nodes_dependent_on: []
+    output_structure:
+    - description: Title of the final report
+      key: report_title
+      type: str
+    - description: The formulated hypothesis used in the experiment
+      key: hypothesis
+      type: str
+    - description: Summary of the experimental design, including variables, controls,
+        and measurement methods
+      key: design_summary
+      type: str
+    - description: Overview of the data collected, noting key observations and data
+        integrity
+      key: data_collection_summary
+      type: str
+    - description: Summary of the statistical analyses performed on the collected
+        data
+      key: analysis_summary
+      type: str
+    - description: Interpretation of the analysis results in the context of the hypothesis
+      key: interpretation
+      type: str
+    - description: Conclusion drawn regarding the hypothesis, including whether it
+        was supported or rejected
+      key: conclusion
+      type: str
+    - description: Descriptions or file names of visual aids such as graphs or diagrams
+        included in the report
+      key: visual_aids
+      type: List[str]
+    - description: Indicates whether the report has been fully compiled and finalized
+      key: is_complete
+      type: bool
     prompt: Compile a detailed report of the experiment, including hypothesis, design,
       data collection, analysis, interpretation, and conclusion. Include visual aids
       like graphs or diagrams as necessary.
@@ -61,8 +170,14 @@ nodes:
     name: draw_conclusion
     nodes_depended_on:
     - interpret_results
-    nodes_dependent_on:
-    - document_experiment
+    nodes_dependent_on: []
+    output_structure:
+    - description: True if the hypothesis is supported, False if rejected
+      key: hypothesis_support
+      type: bool
+    - description: A concise textual summary of the conclusion drawn from the experiment
+      key: conclusion_text
+      type: str
     prompt: Based on the interpreted results, state whether the hypothesis was supported
       or rejected. Provide a clear conclusion.
   formulate_hypothesis:
@@ -70,8 +185,11 @@ nodes:
     description: Formulate a clear hypothesis for the science experiment
     name: formulate_hypothesis
     nodes_depended_on: []
-    nodes_dependent_on:
-    - design_experiment
+    nodes_dependent_on: []
+    output_structure:
+    - description: A single-sentence, testable hypothesis for the experiment
+      key: hypothesis_sentence
+      type: str
     prompt: Based on the experiment's objective, formulate a clear and testable hypothesis.
       State it in a single sentence.
   interpret_results:
@@ -80,17 +198,64 @@ nodes:
     name: interpret_results
     nodes_depended_on:
     - analyze_data
-    nodes_dependent_on:
-    - draw_conclusion
+    nodes_dependent_on: []
+    output_structure:
+    - description: A concise narrative summarizing the key interpretations of the
+        analyzed data.
+      key: interpretation_summary
+      type: str
+    - description: Indicates whether the hypothesis was supported, rejected, or remains
+        inconclusive.
+      key: hypothesis_conclusion
+      type: str
+    - description: Names of the primary metrics or statistical tests that informed
+        the interpretation.
+      key: key_metric_names
+      type: List[str]
+    - description: Corresponding numerical values (e.g., p-values, effect sizes) for
+        each key metric.
+      key: key_metric_values
+      type: List[float]
+    - description: Known limitations or sources of uncertainty affecting the interpretation.
+      key: limitations
+      type: List[str]
+    - description: Suggested next steps or actions based on the interpretation.
+      key: recommendations
+      type: List[str]
+    - description: Quantitative confidence level (0 to 1) that the interpretation
+        accurately reflects the data.
+      key: confidence_score
+      type: float
+    - description: Flag indicating whether the data analysis was performed correctly
+        and results are reliable.
+      key: is_analysis_valid
+      type: bool
     prompt: Interpret the results of the analysis in the context of the hypothesis.
       Discuss implications and limitations.
   prepare_materials:
     agent: false
-    description: Prepare the necessary materials for the experiment
+    description: Prepare the necessary materials and equipment required for the experiment
+      based on the design specifications.
     name: prepare_materials
     nodes_depended_on:
     - design_experiment
-    nodes_dependent_on:
-    - conduct_experiment
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of all materials and equipment items required for the experiment
+      key: required_items
+      type: List[str]
+    - description: Quantities of each corresponding item listed in required_items
+      key: quantities
+      type: List[int]
+    - description: Estimated total cost of all prepared items
+      key: total_cost
+      type: float
+    - description: Whether all items have been successfully prepared and ready for
+        use
+      key: is_prepared
+      type: bool
+    - description: Any additional notes or remarks about the preparation process
+      key: preparation_notes
+      type: str
     prompt: List and prepare all necessary materials and equipment as per the experiment
       design.
