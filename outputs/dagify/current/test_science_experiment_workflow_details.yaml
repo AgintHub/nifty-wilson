@@ -1,12 +1,43 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: test_science_experiment_workflow
 nodes:
   analyze_data:
     agent: false
+    code_node_type: stub
     description: This node consumes the raw data and metadata produced by the collect_data
       node, performs a rigorous statistical analysis, and outputs a structured summary
       of findings that will feed into downstream interpretation.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CollectDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for collect_data node outputs.\"\"\"\n    observation_count:\
+      \ int = Field(..., description=\"Number of observations recorded during the\
+      \ experiment.\")\n    data_values: float = Field(..., description=\"Numeric\
+      \ values collected during the experiment.\")\n    is_data_valid: bool = Field(...,\
+      \ description=\"Whether the recorded data meets quality criteria.\")\n    observation_notes:\
+      \ str = Field(..., description=\"Textual notes or comments associated with each\
+      \ observation.\")\n\n\nclass AnalyzeDataOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for analyze_data node outputs.\"\"\"\n    analysis_summary: str = Field(...,\
+      \ description=\"Concise written summary of the overall analysis, including key\
+      \ findings and statistical significance.\")\n    trend_descriptions: str = Field(...,\
+      \ description=\"List of individual trend observations identified in the data\
+      \ (e.g., increasing temperature over time).\")\n    correlation_summary: str\
+      \ = Field(..., description=\"Brief description of any significant correlations\
+      \ discovered between variables, with correlation coefficient values.\")\n  \
+      \  significant_factors: str = Field(..., description=\"List of variables or\
+      \ factors that had statistically significant impact on the outcome.\")\n   \
+      \ is_analysis_successful: bool = Field(..., description=\"True if the analysis\
+      \ was completed without errors and the data met quality standards, otherwise\
+      \ False.\")\n\n\ndef analyze_data(collect_data_input: CollectDataOutput, **kwargs)\
+      \ -> AnalyzeDataOutput:\n    \"\"\"This node consumes the raw data and metadata\
+      \ produced by the collect_data node, performs a rigorous statistical analysis,\
+      \ and outputs a structured summary of findings that will feed into downstream\
+      \ interpretation.\n\n    Args:\n        collect_data_input: Input from the 'collect_data'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       AnalyzeDataOutput: Object containing outputs for this node.\n    \"\"\
+      \"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
+      \ values\n    return AnalyzeDataOutput(\n        analysis_summary=\"\",\n  \
+      \      trend_descriptions=\"\",\n        correlation_summary=\"\",\n       \
+      \ significant_factors=\"\",\n        is_analysis_successful=False,\n    )"
     name: analyze_data
     nodes_depended_on:
     - collect_data
@@ -96,10 +127,42 @@ nodes:
           all steps.'
     prompt: Analyze the collected data using appropriate statistical methods and tools.
       Identify trends, patterns, or correlations.
+    shims: []
   collect_data:
     agent: false
+    code_node_type: stub
     description: Collect and record numerical data and observation notes from the
       completed experiment, ensuring accuracy and completeness.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ConductExperimentOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ conduct_experiment node outputs.\"\"\"\n    experiment_completed: bool = Field(...,\
+      \ description=\"Indicates if the experiment was carried out to completion\"\
+      )\n    safety_compliance: bool = Field(..., description=\"Indicates whether\
+      \ all required safety protocols were followed\")\n    observation_count: int\
+      \ = Field(..., description=\"Number of observations recorded during the experiment\"\
+      )\n    observations: List[str] = Field(..., description=\"Textual notes of each\
+      \ observation\")\n    anomalies_detected: bool = Field(..., description=\"Indicates\
+      \ if any anomalies were encountered\")\n    anomaly_descriptions: List[str]\
+      \ = Field(..., description=\"Descriptions of each anomaly encountered, if any\"\
+      )\n    trial_number: int = Field(..., description=\"The trial number or batch\
+      \ identifier for this run\")\n    data_collection_status: bool = Field(...,\
+      \ description=\"Whether data collection was successfully performed\")\n\n\n\
+      class CollectDataOutput(BaseModel):\n    \"\"\"Pydantic model for collect_data\
+      \ node outputs.\"\"\"\n    observation_count: int = Field(..., description=\"\
+      Number of observations recorded during the experiment.\")\n    data_values:\
+      \ float = Field(..., description=\"Numeric values collected during the experiment.\"\
+      )\n    is_data_valid: bool = Field(..., description=\"Whether the recorded data\
+      \ meets quality criteria.\")\n    observation_notes: str = Field(..., description=\"\
+      Textual notes or comments associated with each observation.\")\n\n\ndef collect_data(conduct_experiment_input:\
+      \ ConductExperimentOutput, **kwargs) -> CollectDataOutput:\n    \"\"\"Collect\
+      \ and record numerical data and observation notes from the completed experiment,\
+      \ ensuring accuracy and completeness.\n\n    Args:\n        conduct_experiment_input:\
+      \ Input from the 'conduct_experiment' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        CollectDataOutput: Object containing outputs\
+      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return CollectDataOutput(\n     \
+      \   observation_count=0,\n        data_values=0.0,\n        is_data_valid=False,\n\
+      \        observation_notes=\"\",\n    )"
     name: collect_data
     nodes_depended_on:
     - conduct_experiment
@@ -232,12 +295,62 @@ nodes:
       thresholds (e.g., 3σ outliers) for validation.
 
       '
+    shims: []
   conduct_experiment:
     agent: false
+    code_node_type: stub
     description: This node executes the laboratory or field experiment as specified
       in the design and preparation steps. It must follow the experimental protocol,
       enforce safety checks, log observations and anomalies, and signal whether data
       collection succeeded.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignExperimentOutput(BaseModel):\n    \"\"\"Pydantic model for design_experiment\
+      \ node outputs.\"\"\"\n    hypothesis: str = Field(..., description=\"The testable\
+      \ hypothesis to be examined\")\n    independent_variables: str = Field(...,\
+      \ description=\"List of variables that will be manipulated in the experiment\"\
+      )\n    dependent_variables: str = Field(..., description=\"List of variables\
+      \ that will be measured as outcomes\")\n    control_variables: str = Field(...,\
+      \ description=\"List of variables that will be held constant to avoid confounding\
+      \ effects\")\n    measurement_methods: str = Field(..., description=\"Methods\
+      \ or instruments used to quantify each dependent variable\")\n    sample_size:\
+      \ int = Field(..., description=\"Number of experimental units or trials to be\
+      \ performed\")\n    experimental_protocol: str = Field(..., description=\"Step\\\
+      u2011by\\u2011step description of how the experiment will be executed\")\n\n\
+      \nclass PrepareMaterialsOutput(BaseModel):\n    \"\"\"Pydantic model for prepare_materials\
+      \ node outputs.\"\"\"\n    required_items: List[str] = Field(..., description=\"\
+      Names of all materials and equipment items required for the experiment\")\n\
+      \    quantities: List[int] = Field(..., description=\"Quantities of each corresponding\
+      \ item listed in required_items\")\n    total_cost: float = Field(..., description=\"\
+      Estimated total cost of all prepared items\")\n    is_prepared: bool = Field(...,\
+      \ description=\"Whether all items have been successfully prepared and ready\
+      \ for use\")\n    preparation_notes: str = Field(..., description=\"Any additional\
+      \ notes or remarks about the preparation process\")\n\n\nclass ConductExperimentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for conduct_experiment node outputs.\"\"\"\n    experiment_completed:\
+      \ bool = Field(..., description=\"Indicates if the experiment was carried out\
+      \ to completion\")\n    safety_compliance: bool = Field(..., description=\"\
+      Indicates whether all required safety protocols were followed\")\n    observation_count:\
+      \ int = Field(..., description=\"Number of observations recorded during the\
+      \ experiment\")\n    observations: List[str] = Field(..., description=\"Textual\
+      \ notes of each observation\")\n    anomalies_detected: bool = Field(..., description=\"\
+      Indicates if any anomalies were encountered\")\n    anomaly_descriptions: List[str]\
+      \ = Field(..., description=\"Descriptions of each anomaly encountered, if any\"\
+      )\n    trial_number: int = Field(..., description=\"The trial number or batch\
+      \ identifier for this run\")\n    data_collection_status: bool = Field(...,\
+      \ description=\"Whether data collection was successfully performed\")\n\n\n\
+      def conduct_experiment(design_experiment_input: DesignExperimentOutput, prepare_materials_input:\
+      \ PrepareMaterialsOutput, **kwargs) -> ConductExperimentOutput:\n    \"\"\"\
+      This node executes the laboratory or field experiment as specified in the design\
+      \ and preparation steps. It must follow the experimental protocol, enforce safety\
+      \ checks, log observations and anomalies, and signal whether data collection\
+      \ succeeded.\n\n    Args:\n        design_experiment_input: Input from the 'design_experiment'\
+      \ node.\n        prepare_materials_input: Input from the 'prepare_materials'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ConductExperimentOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return ConductExperimentOutput(\n        experiment_completed=False,\n\
+      \        safety_compliance=False,\n        observation_count=0,\n        observations=[],\n\
+      \        anomalies_detected=False,\n        anomaly_descriptions=[],\n     \
+      \   trial_number=0,\n        data_collection_status=False,\n    )"
     name: conduct_experiment
     nodes_depended_on:
     - design_experiment
@@ -359,9 +472,36 @@ nodes:
           in the order of execution.
     prompt: Carry out the experiment according to the designed plan, ensuring to follow
       safety protocols and record any observations.
+    shims: []
   design_experiment:
     agent: false
+    code_node_type: stub
     description: Design the experiment to test the hypothesis
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass FormulateHypothesisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for formulate_hypothesis node outputs.\"\"\"\n   \
+      \ hypothesis_sentence: str = Field(..., description=\"A single-sentence, testable\
+      \ hypothesis for the experiment\")\n\n\nclass DesignExperimentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_experiment node outputs.\"\"\"\n    hypothesis:\
+      \ str = Field(..., description=\"The testable hypothesis to be examined\")\n\
+      \    independent_variables: str = Field(..., description=\"List of variables\
+      \ that will be manipulated in the experiment\")\n    dependent_variables: str\
+      \ = Field(..., description=\"List of variables that will be measured as outcomes\"\
+      )\n    control_variables: str = Field(..., description=\"List of variables that\
+      \ will be held constant to avoid confounding effects\")\n    measurement_methods:\
+      \ str = Field(..., description=\"Methods or instruments used to quantify each\
+      \ dependent variable\")\n    sample_size: int = Field(..., description=\"Number\
+      \ of experimental units or trials to be performed\")\n    experimental_protocol:\
+      \ str = Field(..., description=\"Step\\u2011by\\u2011step description of how\
+      \ the experiment will be executed\")\n\n\ndef design_experiment(formulate_hypothesis_input:\
+      \ FormulateHypothesisOutput, **kwargs) -> DesignExperimentOutput:\n    \"\"\"\
+      Design the experiment to test the hypothesis\n\n    Args:\n        formulate_hypothesis_input:\
+      \ Input from the 'formulate_hypothesis' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DesignExperimentOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DesignExperimentOutput(\n\
+      \        hypothesis=\"\",\n        independent_variables=\"\",\n        dependent_variables=\"\
+      \",\n        control_variables=\"\",\n        measurement_methods=\"\",\n  \
+      \      sample_size=0,\n        experimental_protocol=\"\",\n    )"
     name: design_experiment
     nodes_depended_on:
     - formulate_hypothesis
@@ -475,9 +615,42 @@ nodes:
           before returning it to the workflow engine.
     prompt: Design an experiment to test the formulated hypothesis. Include details
       on variables, controls, and measurement methods.
+    shims: []
   document_experiment:
     agent: false
+    code_node_type: stub
     description: Document the entire experiment process and findings.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DrawConclusionOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for draw_conclusion node outputs.\"\"\"\n    hypothesis_support:\
+      \ bool = Field(..., description=\"True if the hypothesis is supported, False\
+      \ if rejected\")\n    conclusion_text: str = Field(..., description=\"A concise\
+      \ textual summary of the conclusion drawn from the experiment\")\n\n\nclass\
+      \ DocumentExperimentOutput(BaseModel):\n    \"\"\"Pydantic model for document_experiment\
+      \ node outputs.\"\"\"\n    report_title: str = Field(..., description=\"Title\
+      \ of the final report\")\n    hypothesis: str = Field(..., description=\"The\
+      \ formulated hypothesis used in the experiment\")\n    design_summary: str =\
+      \ Field(..., description=\"Summary of the experimental design, including variables,\
+      \ controls, and measurement methods\")\n    data_collection_summary: str = Field(...,\
+      \ description=\"Overview of the data collected, noting key observations and\
+      \ data integrity\")\n    analysis_summary: str = Field(..., description=\"Summary\
+      \ of the statistical analyses performed on the collected data\")\n    interpretation:\
+      \ str = Field(..., description=\"Interpretation of the analysis results in the\
+      \ context of the hypothesis\")\n    conclusion: str = Field(..., description=\"\
+      Conclusion drawn regarding the hypothesis, including whether it was supported\
+      \ or rejected\")\n    visual_aids: str = Field(..., description=\"Descriptions\
+      \ or file names of visual aids such as graphs or diagrams included in the report\"\
+      )\n    is_complete: bool = Field(..., description=\"Indicates whether the report\
+      \ has been fully compiled and finalized\")\n\n\ndef document_experiment(draw_conclusion_input:\
+      \ DrawConclusionOutput, **kwargs) -> DocumentExperimentOutput:\n    \"\"\"Document\
+      \ the entire experiment process and findings.\n\n    Args:\n        draw_conclusion_input:\
+      \ Input from the 'draw_conclusion' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        DocumentExperimentOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return DocumentExperimentOutput(\n\
+      \        report_title=\"\",\n        hypothesis=\"\",\n        design_summary=\"\
+      \",\n        data_collection_summary=\"\",\n        analysis_summary=\"\",\n\
+      \        interpretation=\"\",\n        conclusion=\"\",\n        visual_aids=\"\
+      \",\n        is_complete=False,\n    )"
     name: document_experiment
     nodes_depended_on:
     - draw_conclusion
@@ -605,9 +778,38 @@ nodes:
     prompt: Compile a detailed report of the experiment, including hypothesis, design,
       data collection, analysis, interpretation, and conclusion. Include visual aids
       like graphs or diagrams as necessary.
+    shims: []
   draw_conclusion:
     agent: false
+    code_node_type: stub
     description: Draw a conclusion based on the experiment's findings
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass InterpretResultsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for interpret_results node outputs.\"\"\"\n    interpretation_summary:\
+      \ str = Field(..., description=\"A concise narrative summarizing the key interpretations\
+      \ of the analyzed data.\")\n    hypothesis_conclusion: str = Field(..., description=\"\
+      Indicates whether the hypothesis was supported, rejected, or remains inconclusive.\"\
+      )\n    key_metric_names: str = Field(..., description=\"Names of the primary\
+      \ metrics or statistical tests that informed the interpretation.\")\n    key_metric_values:\
+      \ float = Field(..., description=\"Corresponding numerical values (e.g., p-values,\
+      \ effect sizes) for each key metric.\")\n    limitations: str = Field(..., description=\"\
+      Known limitations or sources of uncertainty affecting the interpretation.\"\
+      )\n    recommendations: str = Field(..., description=\"Suggested next steps\
+      \ or actions based on the interpretation.\")\n    confidence_score: float =\
+      \ Field(..., description=\"Quantitative confidence level (0 to 1) that the interpretation\
+      \ accurately reflects the data.\")\n    is_analysis_valid: bool = Field(...,\
+      \ description=\"Flag indicating whether the data analysis was performed correctly\
+      \ and results are reliable.\")\n\n\nclass DrawConclusionOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for draw_conclusion node outputs.\"\"\"\n    hypothesis_support:\
+      \ bool = Field(..., description=\"True if the hypothesis is supported, False\
+      \ if rejected\")\n    conclusion_text: str = Field(..., description=\"A concise\
+      \ textual summary of the conclusion drawn from the experiment\")\n\n\ndef draw_conclusion(interpret_results_input:\
+      \ InterpretResultsOutput, **kwargs) -> DrawConclusionOutput:\n    \"\"\"Draw\
+      \ a conclusion based on the experiment's findings\n\n    Args:\n        interpret_results_input:\
+      \ Input from the 'interpret_results' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        DrawConclusionOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return DrawConclusionOutput(\n\
+      \        hypothesis_support=False,\n        conclusion_text=\"\",\n    )"
     name: draw_conclusion
     nodes_depended_on:
     - interpret_results
@@ -698,11 +900,26 @@ nodes:
           of critical variables to aid debugging.
     prompt: Based on the interpreted results, state whether the hypothesis was supported
       or rejected. Provide a clear conclusion.
+    shims: []
   formulate_hypothesis:
     agent: false
+    code_node_type: stub
     description: Generate a concise, testable hypothesis that encapsulates the expected
       relationship between the experiment's variables. The hypothesis must be expressed
       as a single, grammatically correct sentence.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass FormulateHypothesisOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for formulate_hypothesis node outputs.\"\"\"\n   \
+      \ hypothesis_sentence: str = Field(..., description=\"A single-sentence, testable\
+      \ hypothesis for the experiment\")\n\n\ndef formulate_hypothesis(general_input:\
+      \ str, **kwargs) -> FormulateHypothesisOutput:\n    \"\"\"Generate a concise,\
+      \ testable hypothesis that encapsulates the expected relationship between the\
+      \ experiment's variables. The hypothesis must be expressed as a single, grammatically\
+      \ correct sentence.\n\n    Args:\n        general_input: General input string\
+      \ for the root node.\n        **kwargs: Additional keyword arguments.\n\n  \
+      \  Returns:\n        FormulateHypothesisOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return FormulateHypothesisOutput(\n\
+      \        hypothesis_sentence=\"\",\n    )"
     name: formulate_hypothesis
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -763,10 +980,51 @@ nodes:
           ensuring the string is returned exactly as produced.
     prompt: Based on the experiment's objective, formulate a clear and testable hypothesis.
       State it in a single sentence.
+    shims: []
   interpret_results:
     agent: false
+    code_node_type: stub
     description: Interprets statistical findings from the analysis stage, synthesizing
       them into a narrative that addresses the hypothesis and informs next steps.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass AnalyzeDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for analyze_data node outputs.\"\"\"\n    analysis_summary:\
+      \ str = Field(..., description=\"Concise written summary of the overall analysis,\
+      \ including key findings and statistical significance.\")\n    trend_descriptions:\
+      \ str = Field(..., description=\"List of individual trend observations identified\
+      \ in the data (e.g., increasing temperature over time).\")\n    correlation_summary:\
+      \ str = Field(..., description=\"Brief description of any significant correlations\
+      \ discovered between variables, with correlation coefficient values.\")\n  \
+      \  significant_factors: str = Field(..., description=\"List of variables or\
+      \ factors that had statistically significant impact on the outcome.\")\n   \
+      \ is_analysis_successful: bool = Field(..., description=\"True if the analysis\
+      \ was completed without errors and the data met quality standards, otherwise\
+      \ False.\")\n\n\nclass InterpretResultsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for interpret_results node outputs.\"\"\"\n    interpretation_summary:\
+      \ str = Field(..., description=\"A concise narrative summarizing the key interpretations\
+      \ of the analyzed data.\")\n    hypothesis_conclusion: str = Field(..., description=\"\
+      Indicates whether the hypothesis was supported, rejected, or remains inconclusive.\"\
+      )\n    key_metric_names: str = Field(..., description=\"Names of the primary\
+      \ metrics or statistical tests that informed the interpretation.\")\n    key_metric_values:\
+      \ float = Field(..., description=\"Corresponding numerical values (e.g., p-values,\
+      \ effect sizes) for each key metric.\")\n    limitations: str = Field(..., description=\"\
+      Known limitations or sources of uncertainty affecting the interpretation.\"\
+      )\n    recommendations: str = Field(..., description=\"Suggested next steps\
+      \ or actions based on the interpretation.\")\n    confidence_score: float =\
+      \ Field(..., description=\"Quantitative confidence level (0 to 1) that the interpretation\
+      \ accurately reflects the data.\")\n    is_analysis_valid: bool = Field(...,\
+      \ description=\"Flag indicating whether the data analysis was performed correctly\
+      \ and results are reliable.\")\n\n\ndef interpret_results(analyze_data_input:\
+      \ AnalyzeDataOutput, **kwargs) -> InterpretResultsOutput:\n    \"\"\"Interprets\
+      \ statistical findings from the analysis stage, synthesizing them into a narrative\
+      \ that addresses the hypothesis and informs next steps.\n\n    Args:\n     \
+      \   analyze_data_input: Input from the 'analyze_data' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        InterpretResultsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ InterpretResultsOutput(\n        interpretation_summary=\"\",\n        hypothesis_conclusion=\"\
+      \",\n        key_metric_names=\"\",\n        key_metric_values=0.0,\n      \
+      \  limitations=\"\",\n        recommendations=\"\",\n        confidence_score=0.0,\n\
+      \        is_analysis_valid=False,\n    )"
     name: interpret_results
     nodes_depended_on:
     - analyze_data
@@ -883,10 +1141,43 @@ nodes:
           types exactly match the specified schema and that lists are properly ordered.'
     prompt: Interpret the results of the analysis in the context of the hypothesis.
       Discuss implications and limitations.
+    shims: []
   prepare_materials:
     agent: false
+    code_node_type: stub
     description: Prepare the necessary materials and equipment required for the experiment
       based on the design specifications.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignExperimentOutput(BaseModel):\n    \"\"\"Pydantic model for design_experiment\
+      \ node outputs.\"\"\"\n    hypothesis: str = Field(..., description=\"The testable\
+      \ hypothesis to be examined\")\n    independent_variables: str = Field(...,\
+      \ description=\"List of variables that will be manipulated in the experiment\"\
+      )\n    dependent_variables: str = Field(..., description=\"List of variables\
+      \ that will be measured as outcomes\")\n    control_variables: str = Field(...,\
+      \ description=\"List of variables that will be held constant to avoid confounding\
+      \ effects\")\n    measurement_methods: str = Field(..., description=\"Methods\
+      \ or instruments used to quantify each dependent variable\")\n    sample_size:\
+      \ int = Field(..., description=\"Number of experimental units or trials to be\
+      \ performed\")\n    experimental_protocol: str = Field(..., description=\"Step\\\
+      u2011by\\u2011step description of how the experiment will be executed\")\n\n\
+      \nclass PrepareMaterialsOutput(BaseModel):\n    \"\"\"Pydantic model for prepare_materials\
+      \ node outputs.\"\"\"\n    required_items: List[str] = Field(..., description=\"\
+      Names of all materials and equipment items required for the experiment\")\n\
+      \    quantities: List[int] = Field(..., description=\"Quantities of each corresponding\
+      \ item listed in required_items\")\n    total_cost: float = Field(..., description=\"\
+      Estimated total cost of all prepared items\")\n    is_prepared: bool = Field(...,\
+      \ description=\"Whether all items have been successfully prepared and ready\
+      \ for use\")\n    preparation_notes: str = Field(..., description=\"Any additional\
+      \ notes or remarks about the preparation process\")\n\n\ndef prepare_materials(design_experiment_input:\
+      \ DesignExperimentOutput, **kwargs) -> PrepareMaterialsOutput:\n    \"\"\"Prepare\
+      \ the necessary materials and equipment required for the experiment based on\
+      \ the design specifications.\n\n    Args:\n        design_experiment_input:\
+      \ Input from the 'design_experiment' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        PrepareMaterialsOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return PrepareMaterialsOutput(\n\
+      \        required_items=[],\n        quantities=[],\n        total_cost=0.0,\n\
+      \        is_prepared=False,\n        preparation_notes=\"\",\n    )"
     name: prepare_materials
     nodes_depended_on:
     - design_experiment
@@ -972,3 +1263,4 @@ nodes:
           special handling instructions, or procurement actions taken.
     prompt: List and prepare all necessary materials and equipment as per the experiment
       design.
+    shims: []
