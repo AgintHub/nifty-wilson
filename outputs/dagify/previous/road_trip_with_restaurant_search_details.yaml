@@ -1,5 +1,0 @@
-dag_type: plain_text
-description: Calculate travel routes, select stopovers, and compile a list of Indian
-  restaurants near Raleigh by splitting tasks into smaller concurrent steps.
-name: road_trip_with_restaurant_search
-nodes: {}
