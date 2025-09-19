@@ -1,3 +1,19 @@
+from ._split_data.validate_data_path_and_metadata import validate_data_path_and_metadata
+from ._split_data.get_sample_count import get_sample_count
+from ._split_data.get_split_ratios_from_config import get_split_ratios_from_config
+from ._split_data.get_split_seed_from_config import get_split_seed_from_config
+from ._split_data.validate_split_ratios import validate_split_ratios
+from ._split_data.generate_random_permutation import generate_random_permutation
+from ._split_data.compute_split_boundaries import compute_split_boundaries
+from ._split_data.slice_permutation_by_boundaries import slice_permutation_by_boundaries
+from ._split_data.construct_split_file_paths import construct_split_file_paths
+from ._split_data.split_and_write_data_files import split_and_write_data_files
+from ._split_data.persist_split_metadata import persist_split_metadata
+from ._split_data.validate_split_results import validate_split_results
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Validate the incoming preprocessed data path and metadata.
 #   Reason: Ensures that downstream operations have the correct input files and that
@@ -115,7 +131,6 @@
 #           float, str, or list accordingly; perform final type validation.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class PrepareTrainingDataOutput(BaseModel):
@@ -148,16 +163,88 @@ def split_data(prepare_training_data_input: PrepareTrainingDataOutput, **kwargs)
     Returns:
         SplitDataOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Validate the incoming preprocessed data path and metadata
+    validate_data_path_and_metadata(data_path=prepare_training_data_input.preprocessed_data_path, metadata=prepare_training_data_input)
+    
+    # Determine the total sample count from the metadata
+    sample_count: int = get_sample_count(metadata=prepare_training_data_input)
+    
+    # Extract split configuration from kwargs
+    split_ratios: list = get_split_ratios_from_config(kwargs=kwargs)
+    split_seed: int = get_split_seed_from_config(kwargs=kwargs)
+    
+    # Validate split ratios sum to 1.0 within tolerance
+    validate_split_ratios(ratios=split_ratios)
+    
+    # Generate a reproducible random permutation of sample indices
+    permutation_indices: list = generate_random_permutation(sample_count=sample_count, seed=split_seed)
+    
+    # Compute split boundaries based on the ratios
+    train_boundary: int
+    val_boundary: int
+    train_boundary, val_boundary = compute_split_boundaries(sample_count=sample_count, ratios=split_ratios)
+    
+    # Slice the permutation array into training, validation, and test index lists
+    train_indices: list
+    val_indices: list
+    test_indices: list
+    train_indices, val_indices, test_indices = slice_permutation_by_boundaries(
+        permutation=permutation_indices, 
+        train_boundary=train_boundary, 
+        val_boundary=val_boundary
+    )
+    
+    # Construct filesystem paths for each split file
+    train_path: str
+    validation_path: str
+    test_path: str
+    train_path, validation_path, test_path = construct_split_file_paths(
+        original_data_path=prepare_training_data_input.preprocessed_data_path
+    )
+    
+    # Read the full preprocessed data file and write three separate files
+    split_and_write_data_files(
+        source_path=prepare_training_data_input.preprocessed_data_path,
+        train_indices=train_indices,
+        val_indices=val_indices,
+        test_indices=test_indices,
+        train_path=train_path,
+        validation_path=validation_path,
+        test_path=test_path
+    )
+    
+    # Record the sizes of each split
+    train_set_size: int = len(train_indices)
+    validation_set_size: int = len(val_indices)
+    test_set_size: int = len(test_indices)
+    
+    # Persist split metadata to a JSON manifest file
+    persist_split_metadata(
+        train_size=train_set_size,
+        val_size=validation_set_size,
+        test_size=test_set_size,
+        ratios=split_ratios,
+        seed=split_seed,
+        paths={'train': train_path, 'validation': validation_path, 'test': test_path},
+        original_data_path=prepare_training_data_input.preprocessed_data_path
+    )
+    
+    # Validate that the sum of splits equals original sample count and ratios match
+    validate_split_results(
+        train_size=train_set_size,
+        val_size=validation_set_size,
+        test_size=test_set_size,
+        original_count=sample_count,
+        expected_ratios=split_ratios
+    )
+    
     return SplitDataOutput(
-        train_set_size=0,
-        validation_set_size=0,
-        test_set_size=0,
-        train_data_path="",
-        validation_data_path="",
-        test_data_path="",
-        split_ratios=0.0,
-        split_seed=0,
+        train_set_size=train_set_size,
+        validation_set_size=validation_set_size,
+        test_set_size=test_set_size,
+        train_data_path=train_path,
+        validation_data_path=validation_path,
+        test_data_path=test_path,
+        split_ratios=split_ratios,
+        split_seed=split_seed
     )

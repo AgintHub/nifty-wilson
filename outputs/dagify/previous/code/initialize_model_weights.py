@@ -1,3 +1,14 @@
+from ._initialize_model_weights.validate_architecture_config import validate_architecture_config
+from ._initialize_model_weights.create_model_from_architecture import create_model_from_architecture
+from ._initialize_model_weights.determine_initialization_strategy import determine_initialization_strategy
+from ._initialize_model_weights.apply_weight_initialization import apply_weight_initialization
+from ._initialize_model_weights.calculate_trainable_parameters import calculate_trainable_parameters
+from ._initialize_model_weights.generate_architecture_signature import generate_architecture_signature
+from ._initialize_model_weights.log_initialization_error import log_initialization_error
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Retrieve the architecture configuration from the `define_model_architecture`
 #   output, ensuring that all required fields (model_type, number_of_layers,
@@ -86,7 +97,6 @@
 #           traceback and set success flag to False.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class DefineModelArchitectureOutput(BaseModel):
@@ -118,12 +128,39 @@ def initialize_model_weights(define_model_architecture_input: DefineModelArchite
     Returns:
         InitializeModelWeightsOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
-    return InitializeModelWeightsOutput(
-        initialization_success=False,
-        num_parameters=0,
-        initialization_method="",
-        architecture_signature="",
-    )
+    try:
+        # Validate architecture configuration
+        validated_config: dict = validate_architecture_config(architecture=define_model_architecture_input)
+        
+        # Instantiate the model using framework-agnostic factory
+        model = create_model_from_architecture(config=validated_config)
+        
+        # Determine initialization strategy from config/environment
+        init_strategy: str = determine_initialization_strategy(**kwargs)
+        
+        # Apply chosen initialization across all trainable parameters
+        apply_weight_initialization(model=model, strategy=init_strategy)
+        
+        # Calculate total number of trainable parameters
+        total_params: int = calculate_trainable_parameters(model=model)
+        
+        # Generate deterministic architecture signature
+        signature: str = generate_architecture_signature(config=validated_config)
+        
+        return InitializeModelWeightsOutput(
+            initialization_success=True,
+            num_parameters=total_params,
+            initialization_method=init_strategy,
+            architecture_signature=signature
+        )
+        
+    except Exception as e:
+        # Log error and return failure state
+        log_initialization_error(error=e)
+        
+        return InitializeModelWeightsOutput(
+            initialization_success=False,
+            num_parameters=0,
+            initialization_method="failed",
+            architecture_signature=""
+        )

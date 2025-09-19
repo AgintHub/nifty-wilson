@@ -102,7 +102,7 @@ class FineTuneModelOutput(BaseModel):
 
 class TestModelOutput(BaseModel):
     """Pydantic model for test_model node outputs."""
-    metric_names: str = Field(..., description="Names of evaluation metrics computed on the test set, e.g., \"perplexity\", \"accuracy\".")
+    metric_names: str = Field(..., description="Names of evaluation metrics computed on the test set, e.g., "perplexity", "accuracy".")
     metric_values: float = Field(..., description="Numeric values corresponding to each metric in metric_names, in the same order.")
     test_dataset_size: int = Field(..., description="Number of samples in the test dataset.")
     evaluation_successful: bool = Field(..., description="Whether the evaluation process completed without errors.")
