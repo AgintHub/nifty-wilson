@@ -1,70 +1,78 @@
 dag_type: plain_text
-description: A workflow for creating a daily fitness plan using AI, focusing on educational
-  aspects only.
+description: A workflow for creating a daily fitness plan using AI
 name: workout_planner
 nodes:
   assess_user_fitness_level:
     agent: false
-    description: Evaluate the user's current fitness level.
+    description: Evaluate the user's current fitness level
     name: assess_user_fitness_level
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Assess the user's current fitness level by considering their exercise
-      history, current activity level, and any physical limitations.
-  compile_educational_content:
+    prompt: What is the user's current fitness level? (e.g., beginner, intermediate,
+      advanced)
+  compile_workout_and_nutrition_plan:
     agent: false
-    description: Prepare educational materials on fitness and nutrition.
-    name: compile_educational_content
+    description: Combine the daily workout plan and nutrition recommendations into
+      a comprehensive plan
+    name: compile_workout_and_nutrition_plan
     nodes_depended_on:
-    - generate_exercise_plan
-    - create_nutritional_guidelines
+    - create_daily_workout_plan
+    - provide_exercise_instructions
+    - recommend_nutrition_plan
     nodes_dependent_on: []
-    prompt: Compile educational content explaining the benefits and proper execution
-      of the exercises in the plan, as well as the nutritional guidelines provided.
-  create_nutritional_guidelines:
+    prompt: Compile the daily workout plan, exercise instructions, and nutrition recommendations
+      into a single, cohesive plan
+  create_daily_workout_plan:
     agent: false
-    description: Provide nutritional advice to support the fitness plan.
-    name: create_nutritional_guidelines
+    description: Generate a daily workout plan tailored to the user's goals and fitness
+      level
+    name: create_daily_workout_plan
     nodes_depended_on:
-    - define_user_fitness_goals
+    - select_workout_type
+    - determine_available_workout_time
     nodes_dependent_on: []
-    prompt: Offer nutritional guidelines that align with the user's fitness goals,
-      including recommendations on macronutrient intake and meal timing.
+    prompt: Create a daily workout plan that includes specific exercises, sets, reps,
+      and duration
   define_user_fitness_goals:
     agent: false
-    description: Identify the user's fitness objectives and preferences.
+    description: Identify the user's fitness objectives
     name: define_user_fitness_goals
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: List the primary fitness goals for the user (e.g., weight loss, muscle
-      gain, endurance). Consider their preferences and limitations.
-  finalize_workout_plan:
+    prompt: What are the user's primary fitness goals? (e.g., weight loss, muscle
+      gain, endurance)
+  determine_available_workout_time:
     agent: false
-    description: Combine the exercise plan and educational content into a final workout
-      plan.
-    name: finalize_workout_plan
-    nodes_depended_on:
-    - generate_exercise_plan
-    - compile_educational_content
+    description: Determine the user's available workout time per day
+    name: determine_available_workout_time
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Integrate the daily exercise plan with the educational content to create
-      a comprehensive workout plan for the user.
-  generate_exercise_plan:
+    prompt: How many minutes per day can the user dedicate to working out?
+  provide_exercise_instructions:
     agent: false
-    description: Create a detailed daily exercise plan.
-    name: generate_exercise_plan
+    description: Provide detailed instructions for each exercise in the workout plan
+    name: provide_exercise_instructions
     nodes_depended_on:
-    - select_exercise_type
+    - create_daily_workout_plan
     nodes_dependent_on: []
-    prompt: Generate a daily exercise plan including specific exercises, sets, reps,
-      and rest periods based on the selected exercise type.
-  select_exercise_type:
+    prompt: For each exercise in the daily workout plan, provide step-by-step instructions
+      and any necessary safety precautions
+  recommend_nutrition_plan:
     agent: false
-    description: Choose the type of exercises suitable for the user.
-    name: select_exercise_type
+    description: Suggest a nutrition plan to support the user's fitness goals
+    name: recommend_nutrition_plan
+    nodes_depended_on:
+    - define_user_fitness_goals
+    nodes_dependent_on: []
+    prompt: What nutrition plan would best support the user's fitness objectives?
+      (e.g., macronutrient balance, meal frequency)
+  select_workout_type:
+    agent: false
+    description: Choose the type of workout based on user goals and fitness level
+    name: select_workout_type
     nodes_depended_on:
     - define_user_fitness_goals
     - assess_user_fitness_level
     nodes_dependent_on: []
-    prompt: Based on the user's goals and fitness level, select the appropriate type
-      of exercises (e.g., cardio, strength training, flexibility).
+    prompt: What type of workout is most suitable for the user? (e.g., cardio, strength
+      training, yoga)
