@@ -1,75 +1,152 @@
 dag_type: plain_text
-description: A comedic take on writing a historical fiction book about the Revolutionary
-  War, from research to final edits.
+description: Generated workflow from UI.
 name: write_historical_fiction_book_comedic
 nodes:
   create_story_outline:
     agent: false
-    description: Produce a comedic outline for the historical fiction book.
+    description: Crafts a hilariously absurd outline for a Civil‑War historical fiction
+      novel featuring a North‑bound protagonist and the ghost of George Washington,
+      blending comedic character arcs, snort‑inducing plot twists, and key battles
+      with punchy humor.
     name: create_story_outline
     nodes_depended_on:
     - research_revolutionary_war
     nodes_dependent_on: []
-    prompt: Using your comedic research, draft a detailed outline for the book. Include
-      absurd character arcs, plot twists that make readers snort, and key historical
-      events with a punchline.
+    prompt: Using your comedic research, draft a detailed outline for a Civil‑War
+      historical fiction novel. The protagonist is a North‑bound soldier, guided by
+      the mischievous ghost of George Washington, who offers sarcastic counsel at
+      every turn. Include absurd character arcs—an over‑enthusiastic Union scout,
+      a time‑confused sidekick, and Washington’s spectral pop‑ups—alongside key Civil
+      War battles such as Gettysburg, Antietam, and Vicksburg. For each event, weave
+      a punchy joke or plot twist that will have readers snort. Keep the outline cohesive,
+      ensuring each chapter escalates the humor while still honoring the historical
+      context.
   develop_character_profiles:
     agent: false
-    description: Craft humorous character profiles.
+    description: Craft whimsical, historically flavored character profiles for a comedic
+      Civil War narrative featuring Northern protagonists and a spectral cameo of
+      George Washington. The profiles draw on Revolutionary War facts supplied by
+      the parent node, reimagining them into Civil War contexts while maintaining
+      humor.
     name: develop_character_profiles
     nodes_depended_on:
     - research_revolutionary_war
     nodes_dependent_on: []
-    prompt: Create quirky profiles for the main characters. Each profile should include
-      their background, motivations, a comedic flaw, and a one‑line joke that defines
-      them.
+    prompt: 'Using the humorous historical facts from the Revolutionary War provided
+      by the previous node, create quirky profiles for the main characters of a Civil
+      War story. For each character include:
+
+
+      1. **Background** – Briefly set the character in the Civil War era, clearly
+      indicating their allegiance (North vs. South).
+
+      2. **Motivation** – Explain what drives the character, tying in one of the Revolutionary
+      War facts as a playful source of inspiration.
+
+      3. **Comedic flaw** – Highlight a humorous weakness or quirk that leads to comedic
+      situations.
+
+      4. **One‑line joke** – Provide a punchy line that sums up the character’s personality.
+
+
+      Special requirements:
+
+      - The protagonist must be a Northern soldier.
+
+      - A ghostly cameo of George Washington should appear as a spectral advisor or
+      mentor figure.
+
+      - Keep the tone light, witty, and historically playful throughout.
+
+
+      Format each profile as a short paragraph, using the structure above. Use the
+      supplied historical facts creatively, reimagining them in a Civil War context
+      while preserving the comedic twist.'
   edit_and_revise:
     agent: false
-    description: Edit and polish the manuscript with comedic flair.
+    description: Polishes a Civil War‑set manuscript, tightening flow, sharpening
+      comedic beats, and verifying historical accuracy while keeping the Northern
+      protagonist’s voice and the Ghost of George Washington’s humorous cameo.
     name: edit_and_revise
     nodes_depended_on:
     - write_chapter_1
     - write_chapter_2
     - write_chapter_3
     nodes_dependent_on: []
-    prompt: Read all three chapters and edit for coherence, comedic timing, and historical
-      accuracy. Make sure jokes land, pacing is smooth, and the narrative remains
-      faithful to the Revolutionary War.
+    prompt: Read Chapters 1–3 and perform a comprehensive edit that ensures narrative
+      coherence, sharp comedic timing, and factual accuracy for the Civil War era.  Confirm
+      that the protagonist is a Northern soldier, that the Ghost of George Washington
+      makes a playful, spectral appearance in each chapter, and that all dates, battles,
+      and military terminology reflect Civil War realities.  Refine pacing, punchlines,
+      and dialogue to maximize humor while preserving the story’s historical integrity.  Deliver
+      a polished manuscript ready for the next production stage.
   fact_check:
     agent: false
-    description: Ensure chapter three is historically accurate with a dash of humor.
+    description: Ensures Chapter 3’s Civil War setting and plot are historically accurate,
+      with the protagonist fighting for the North, while maintaining comedic flair
+      and a ghostly cameo from George Washington.
     name: fact_check
     nodes_depended_on:
     - write_chapter_3
     nodes_dependent_on: []
-    prompt: Verify the historical accuracy of chapter three, checking dates, events,
-      and character actions. While fact‑checking, sprinkle in a subtle joke about
-      how history loves to surprise us.
+    prompt: 'Fact‑check Chapter 3 for strict adherence to Civil War history while
+      preserving its comedic heart. Verify that:
+
+
+      1. All dates, locations, and military units align with primary Civil War records.
+
+      2. The protagonist’s actions reflect a genuine Northern Union soldier’s experience.
+
+      3. The cameo of George Washington’s ghost remains historically plausible as
+      a playful anachronism.
+
+      4. Any anachronistic or historically inaccurate details are corrected.
+
+
+      While reviewing, sprinkle in a subtle joke that history loves to surprise even
+      the dead—perhaps a quick nod to Washington’s “I am the father of the nation”
+      speech being interrupted by a Union flag. Keep the tone light and witty, ensuring
+      the chapter still reads like a humorous Civil War adventure.'
   research_revolutionary_war:
     agent: false
-    description: Gather historical facts about the Revolutionary War with a humorous
-      twist.
+    description: Gather accurate Civil War facts infused with comedic flair, spotlighting
+      a Northern protagonist and the mischievous ghost of George Washington.
     name: research_revolutionary_war
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Act as a comedic historian with a monocle. Research the Revolutionary
-      War, poking fun at 18th‑century politics while still gathering accurate facts.
-      Provide a list of key events, battles, and notable figures, with a side‑by‑side
-      joke for each.
+    prompt: Assume the role of a comedic historian sporting a monocle. Research the
+      American Civil War from the perspective of a Northern protagonist, while the
+      ghost of George Washington offers witty commentary. Compile a list of key events,
+      battles, and notable figures, pairing each with a humorous side‑by‑side joke
+      that reflects 19th‑century quirks and the ghost’s mischievous insights.
   write_chapter_1:
     agent: false
-    description: Write a comedic first chapter.
+    description: Compose a witty, historically grounded opening chapter set in the
+      American Civil War era, featuring a Northern protagonist, the mischievous ghost
+      of George Washington, and humorous character interactions. The chapter establishes
+      the story’s humor, foreshadows recurring jokes, and sets a clear hook for the
+      adventure that follows.
     name: write_chapter_1
     nodes_depended_on:
     - create_story_outline
     - develop_character_profiles
     nodes_dependent_on: []
-    prompt: Write the first chapter of the book, introducing the main characters with
-      comedic banter, setting the historical context, and planting a joke that will
-      echo throughout the story.
+    prompt: Write the first chapter of the book. Set the scene during the American
+      Civil War, with a spirited Northern soldier protagonist navigating the chaos
+      of camp life. Introduce the main characters through quick‑fire, witty dialogue,
+      and bring in the ghost of George Washington as a sardonic mentor who offers
+      absurd advice. Sprinkle playful, historically accurate details—such as a misprinted
+      army order or a Confederate horse named "Sour Grapes"—to ground the comedy.
+      Plant a joke that will echo throughout the story, and ensure the tone remains
+      light‑hearted and punchy. Provide vivid descriptions, memorable banter, and
+      a compelling hook that sets the stage for the coming adventure.
   write_chapter_2:
     agent: false
-    description: Write a comedic second chapter.
+    description: Write a comedic second chapter of a historical fiction book set during
+      the American Civil War.  The protagonist, a Union soldier, encounters the ghost
+      of George Washington, who gives absurd military advice while the story humorously
+      advances the plot.  The chapter should reference and cleverly twist the joke
+      introduced in chapter one.
     name: write_chapter_2
     nodes_depended_on:
     - create_story_outline
@@ -77,17 +154,46 @@ nodes:
     - write_chapter_1
     nodes_dependent_on: []
     prompt: Continue the story in chapter two, advancing the plot while keeping the
-      humor rolling. Make sure to reference a joke from chapter one and twist it in
-      a clever way.
+      humor rolling.  The setting is the American Civil War and the protagonist is
+      a spirited Union soldier.  The ghost of George Washington haunts the battlefield,
+      offering absurdly sage military advice and poking fun at the era’s tropes.  Reference
+      the joke planted in chapter one and twist it in a clever, punchy way that delivers
+      a comedic payoff.  Include vivid Civil War details, witty dialogue, and a humorous
+      twist that ties the earlier joke into the new chapter’s narrative.
   write_chapter_3:
     agent: false
-    description: Write a comedic third chapter.
+    description: Write a comedic third chapter that deepens character relationships
+      within a Civil War backdrop, featuring a Northern protagonist and a spectral
+      George Washington cameo, all while escalating the humor.
     name: write_chapter_3
     nodes_depended_on:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_2
     nodes_dependent_on: []
-    prompt: Write the third chapter, deepening character relationships and pushing
-      the comedic stakes higher. End with a punchline that ties back to the opening
-      joke.
+    prompt: '### Task
+
+      Compose the **third chapter** of our Civil War‑era historical comedy. Your protagonist
+      is a spirited Northern soldier (name & quirks drawn from the character profile).
+      In this chapter:
+
+
+      - **Deepen character relationships**: show how the protagonist’s interactions
+      with his squad evolve, using the personalities outlined earlier.
+
+      - **Escalate the comedic stakes**: introduce a battlefield mishap that turns
+      absurdly humorous, referencing a joke from Chapter 1 and twisting it in a clever
+      way.
+
+      - **Include the ghost of George Washington**: the spectral advisor offers sarcastic
+      military wisdom and a one‑liner that ties into the story’s humor.
+
+      - **Maintain continuity**: keep the tone and plot arcs consistent with the outline,
+      and ensure all events can be referenced by later chapters.
+
+      - **End with a punchline**: close the chapter with a joke that circles back
+      to the opening gag, delivering a satisfying comedic payoff.
+
+
+      Your output should be a fully formed narrative that feels cohesive, witty, and
+      true to the Civil War setting while staying light‑hearted and entertaining.'
