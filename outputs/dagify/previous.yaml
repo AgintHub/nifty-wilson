@@ -1,11 +1,21 @@
 dag_type: plain_text
-description: A workflow for training a large language model from scratch, involving
-  data preparation, model architecture definition, training, evaluation, and fine-tuning.
+description: Workflow to prepare data, initialize the model, train it, evaluate, fine‑tune
+  and test a large language model.
 name: train_large_language_model
 nodes:
+  allocate_resources:
+    agent: false
+    description: Reserve the necessary hardware resources.
+    name: allocate_resources
+    nodes_depended_on:
+    - load_configuration
+    nodes_dependent_on:
+    - define_model_architecture
+    prompt: Allocate computing resources such as GPUs and memory required for training
+      the model.
   create_vocabulary:
     agent: false
-    description: Create a vocabulary based on the tokenized data
+    description: Create a vocabulary based on the tokenized data.
     name: create_vocabulary
     nodes_depended_on:
     - tokenize_data
@@ -15,19 +25,19 @@ nodes:
       frequency and relevance for the language model.
   define_model_architecture:
     agent: false
-    description: Define the architecture and configuration of the large language model
+    description: Define the architecture and configuration of the large language model.
     name: define_model_architecture
     nodes_depended_on:
     - create_vocabulary
+    - allocate_resources
     nodes_dependent_on:
     - initialize_model_weights
-    - train_model
     prompt: Specify the architecture of the language model, including the number of
       layers, hidden size, and attention heads, based on the created vocabulary and
       desired model capabilities.
   evaluate_model:
     agent: false
-    description: Evaluate the trained model's performance on the validation set
+    description: Evaluate the trained model's performance on the validation set.
     name: evaluate_model
     nodes_depended_on:
     - train_model
@@ -37,16 +47,17 @@ nodes:
       metrics relevant to language understanding tasks (e.g., perplexity, accuracy).
   fine_tune_model:
     agent: false
-    description: Fine-tune the model on specific tasks or datasets as needed
+    description: Fine‑tune the model on specific tasks or datasets as needed.
     name: fine_tune_model
     nodes_depended_on:
     - evaluate_model
-    nodes_dependent_on: []
-    prompt: Optionally fine-tune the trained model on specific downstream tasks or
+    nodes_dependent_on:
+    - test_model
+    prompt: Optionally fine‑tune the trained model on specific downstream tasks or
       datasets to enhance its performance on those tasks.
   initialize_model_weights:
     agent: false
-    description: Initialize the weights of the defined model architecture
+    description: Initialize the weights of the defined model architecture.
     name: initialize_model_weights
     nodes_depended_on:
     - define_model_architecture
@@ -54,9 +65,19 @@ nodes:
     - train_model
     prompt: Initialize the model's weights using an appropriate method (e.g., random
       initialization, pre-trained weights), preparing the model for training.
+  load_configuration:
+    agent: false
+    description: Read and validate project configuration.
+    name: load_configuration
+    nodes_depended_on:
+    - setup_environment
+    nodes_dependent_on:
+    - allocate_resources
+    prompt: Load configuration parameters from the project settings, ensuring all
+      hyperparameters and paths are correctly specified.
   prepare_training_data:
     agent: false
-    description: Collect and preprocess the dataset for training the language model
+    description: Collect and preprocess the dataset for training the language model.
     name: prepare_training_data
     nodes_depended_on: []
     nodes_dependent_on:
@@ -65,9 +86,18 @@ nodes:
     prompt: Gather a large corpus of text data suitable for training a language model.
       Ensure the data is diverse and representative of the desired language understanding
       tasks.
+  setup_environment:
+    agent: false
+    description: Prepare the runtime environment for the workflow.
+    name: setup_environment
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - load_configuration
+    prompt: Set up the execution environment, installing necessary libraries and configuring
+      paths.
   split_data:
     agent: false
-    description: Split the preprocessed data into training, validation, and test sets
+    description: Split the preprocessed data into training, validation, and test sets.
     name: split_data
     nodes_depended_on:
     - prepare_training_data
@@ -78,7 +108,7 @@ nodes:
       distribution.
   test_model:
     agent: false
-    description: Test the final model's performance on the test dataset
+    description: Test the final model's performance on the test dataset.
     name: test_model
     nodes_depended_on:
     - fine_tune_model
@@ -87,7 +117,7 @@ nodes:
       generalizability and effectiveness.
   tokenize_data:
     agent: false
-    description: Tokenize the prepared training data into subwords or tokens
+    description: Tokenize the prepared training data into subwords or tokens.
     name: tokenize_data
     nodes_depended_on:
     - prepare_training_data
@@ -97,7 +127,7 @@ nodes:
       training data to create a vocabulary of subwords or tokens.
   train_model:
     agent: false
-    description: Train the language model on the training dataset
+    description: Train the language model on the training dataset.
     name: train_model
     nodes_depended_on:
     - split_data

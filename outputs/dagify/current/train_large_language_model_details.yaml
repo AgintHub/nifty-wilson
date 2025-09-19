@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: Workflow to prepare data, initialize the model, train it, evaluate, fine‑tune
-  and test a large language model.
+dag_type: typed
+description: Generated workflow from UI.
 name: train_large_language_model
 nodes:
   allocate_resources:
@@ -9,8 +8,20 @@ nodes:
     name: allocate_resources
     nodes_depended_on:
     - load_configuration
-    nodes_dependent_on:
-    - define_model_architecture
+    nodes_dependent_on: []
+    output_structure:
+    - description: Number of GPUs allocated for training.
+      key: gpu_count
+      type: int
+    - description: Model or type of GPU allocated (e.g., V100, A100).
+      key: gpu_type
+      type: str
+    - description: Total GPU memory in gigabytes allocated.
+      key: memory_gb
+      type: float
+    - description: Indicates whether the resource allocation was successful.
+      key: allocation_success
+      type: bool
     prompt: Allocate computing resources such as GPUs and memory required for training
       the model.
   create_vocabulary:
@@ -19,8 +30,21 @@ nodes:
     name: create_vocabulary
     nodes_depended_on:
     - tokenize_data
-    nodes_dependent_on:
-    - define_model_architecture
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of unique tokens constituting the vocabulary
+      key: vocabulary
+      type: List[str]
+    - description: Frequency count for each corresponding token in the vocabulary
+        list
+      key: token_frequencies
+      type: List[int]
+    - description: Total number of unique tokens in the vocabulary
+      key: vocab_size
+      type: int
+    - description: Whether the vocabulary creation was successful
+      key: is_valid
+      type: bool
     prompt: Compile a vocabulary of unique tokens from the tokenized data, considering
       frequency and relevance for the language model.
   define_model_architecture:
@@ -30,8 +54,29 @@ nodes:
     nodes_depended_on:
     - create_vocabulary
     - allocate_resources
-    nodes_dependent_on:
-    - initialize_model_weights
+    nodes_dependent_on: []
+    output_structure:
+    - description: Name or type of the model architecture (e.g., 'Transformer').
+      key: model_type
+      type: str
+    - description: Total number of transformer layers in the model.
+      key: number_of_layers
+      type: int
+    - description: Dimensionality of each transformer hidden layer.
+      key: hidden_size
+      type: int
+    - description: Number of attention heads per transformer layer.
+      key: attention_heads
+      type: int
+    - description: Size of the vocabulary derived from the tokenized data.
+      key: vocab_size
+      type: int
+    - description: Maximum token sequence length supported by the model.
+      key: max_sequence_length
+      type: int
+    - description: Estimated total number of trainable parameters in the model.
+      key: total_parameters
+      type: int
     prompt: Specify the architecture of the language model, including the number of
       layers, hidden size, and attention heads, based on the created vocabulary and
       desired model capabilities.
@@ -41,8 +86,20 @@ nodes:
     name: evaluate_model
     nodes_depended_on:
     - train_model
-    nodes_dependent_on:
-    - fine_tune_model
+    nodes_dependent_on: []
+    output_structure:
+    - description: Perplexity metric calculated on the validation dataset.
+      key: perplexity
+      type: float
+    - description: Accuracy percentage on the validation dataset.
+      key: accuracy
+      type: float
+    - description: Cross‑entropy loss value on the validation dataset.
+      key: cross_entropy_loss
+      type: float
+    - description: Total number of samples evaluated in the validation set.
+      key: validation_samples
+      type: int
     prompt: Assess the trained model's performance on the validation dataset, using
       metrics relevant to language understanding tasks (e.g., perplexity, accuracy).
   fine_tune_model:
@@ -51,8 +108,23 @@ nodes:
     name: fine_tune_model
     nodes_depended_on:
     - evaluate_model
-    nodes_dependent_on:
-    - test_model
+    nodes_dependent_on: []
+    output_structure:
+    - description: Filesystem path to the fine‑tuned model checkpoint.
+      key: model_file_path
+      type: str
+    - description: Indicates whether the fine‑tuning process completed without errors.
+      key: fine_tuning_successful
+      type: bool
+    - description: Number of epochs used during fine‑tuning.
+      key: num_fine_tuning_epochs
+      type: int
+    - description: Loss value on the training set after fine‑tuning.
+      key: final_training_loss
+      type: float
+    - description: Perplexity on the validation set after fine‑tuning.
+      key: final_validation_perplexity
+      type: float
     prompt: Optionally fine‑tune the trained model on specific downstream tasks or
       datasets to enhance its performance on those tasks.
   initialize_model_weights:
@@ -61,8 +133,21 @@ nodes:
     name: initialize_model_weights
     nodes_depended_on:
     - define_model_architecture
-    nodes_dependent_on:
-    - train_model
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether the weight initialization completed successfully
+      key: initialization_success
+      type: bool
+    - description: Total number of trainable parameters in the model
+      key: num_parameters
+      type: int
+    - description: Method used for weight initialization (e.g., 'random', 'xavier',
+        'pretrained')
+      key: initialization_method
+      type: str
+    - description: Hash or unique string representing the model architecture configuration
+      key: architecture_signature
+      type: str
     prompt: Initialize the model's weights using an appropriate method (e.g., random
       initialization, pre-trained weights), preparing the model for training.
   load_configuration:
@@ -71,8 +156,35 @@ nodes:
     name: load_configuration
     nodes_depended_on:
     - setup_environment
-    nodes_dependent_on:
-    - allocate_resources
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether the configuration passed validation checks
+      key: config_valid
+      type: bool
+    - description: List of validation error messages, empty if config_valid is true
+      key: error_messages
+      type: List[str]
+    - description: Number of training epochs specified in the configuration
+      key: max_epochs
+      type: int
+    - description: Batch size for training specified in the configuration
+      key: batch_size
+      type: int
+    - description: Learning rate for optimizer as specified in the configuration
+      key: learning_rate
+      type: float
+    - description: File system path to the training data
+      key: data_path
+      type: str
+    - description: File system path where the trained model checkpoints will be stored
+      key: model_output_path
+      type: str
+    - description: Version identifier for the configuration file
+      key: config_version
+      type: str
+    - description: Name of the project as defined in the configuration
+      key: project_name
+      type: str
     prompt: Load configuration parameters from the project settings, ensuring all
       hyperparameters and paths are correctly specified.
   prepare_training_data:
@@ -80,9 +192,21 @@ nodes:
     description: Collect and preprocess the dataset for training the language model.
     name: prepare_training_data
     nodes_depended_on: []
-    nodes_dependent_on:
-    - tokenize_data
-    - split_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: File system path to the preprocessed training dataset
+      key: preprocessed_data_path
+      type: str
+    - description: Total number of training samples in the dataset
+      key: sample_count
+      type: int
+    - description: Total number of tokens after preprocessing
+      key: token_count
+      type: int
+    - description: Indicates whether the preprocessing was successful and the dataset
+        is ready for further steps
+      key: is_valid
+      type: bool
     prompt: Gather a large corpus of text data suitable for training a language model.
       Ensure the data is diverse and representative of the desired language understanding
       tasks.
@@ -91,8 +215,26 @@ nodes:
     description: Prepare the runtime environment for the workflow.
     name: setup_environment
     nodes_depended_on: []
-    nodes_dependent_on:
-    - load_configuration
+    nodes_dependent_on: []
+    output_structure:
+    - description: Whether the environment was set up successfully.
+      key: environment_ready
+      type: bool
+    - description: List of package names that were installed during setup.
+      key: installed_packages
+      type: List[str]
+    - description: Corresponding package versions for installed packages.
+      key: installed_package_versions
+      type: List[str]
+    - description: List of system paths that were configured (e.g., PATH, PYTHONPATH).
+      key: configured_paths
+      type: List[str]
+    - description: List of environment variable names that were set.
+      key: environment_variables
+      type: List[str]
+    - description: A log string summarizing the setup process.
+      key: setup_log
+      type: str
     prompt: Set up the execution environment, installing necessary libraries and configuring
       paths.
   split_data:
@@ -101,8 +243,33 @@ nodes:
     name: split_data
     nodes_depended_on:
     - prepare_training_data
-    nodes_dependent_on:
-    - train_model
+    nodes_dependent_on: []
+    output_structure:
+    - description: Number of examples in the training set
+      key: train_set_size
+      type: int
+    - description: Number of examples in the validation set
+      key: validation_set_size
+      type: int
+    - description: Number of examples in the test set
+      key: test_set_size
+      type: int
+    - description: Filesystem path to the training dataset file
+      key: train_data_path
+      type: str
+    - description: Filesystem path to the validation dataset file
+      key: validation_data_path
+      type: str
+    - description: Filesystem path to the test dataset file
+      key: test_data_path
+      type: str
+    - description: Ratios used for splitting the data, in order [train, validation,
+        test]
+      key: split_ratios
+      type: List[float]
+    - description: Random seed used for reproducibility during splitting
+      key: split_seed
+      type: int
     prompt: Divide the preprocessed data into three distinct sets for training, validation,
       and testing, ensuring that the splits are representative of the overall data
       distribution.
@@ -113,6 +280,24 @@ nodes:
     nodes_depended_on:
     - fine_tune_model
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of evaluation metrics computed on the test set, e.g., "perplexity",
+        "accuracy".
+      key: metric_names
+      type: List[str]
+    - description: Numeric values corresponding to each metric in metric_names, in
+        the same order.
+      key: metric_values
+      type: List[float]
+    - description: Number of samples in the test dataset.
+      key: test_dataset_size
+      type: int
+    - description: Whether the evaluation process completed without errors.
+      key: evaluation_successful
+      type: bool
+    - description: True if all metrics fall within pre‑defined acceptable ranges.
+      key: within_expected_range
+      type: bool
     prompt: Evaluate the final model's performance on the test dataset to assess its
       generalizability and effectiveness.
   tokenize_data:
@@ -121,8 +306,17 @@ nodes:
     name: tokenize_data
     nodes_depended_on:
     - prepare_training_data
-    nodes_dependent_on:
-    - create_vocabulary
+    nodes_dependent_on: []
+    output_structure:
+    - description: Tokenized representation of each training sentence or document.
+      key: tokenized_texts
+      type: List[str]
+    - description: Unique tokens extracted from the tokenized data.
+      key: vocabulary
+      type: List[str]
+    - description: Total number of unique tokens in the vocabulary.
+      key: vocab_size
+      type: int
     prompt: Apply a tokenization algorithm (e.g., WordPiece, BPE) to the preprocessed
       training data to create a vocabulary of subwords or tokens.
   train_model:
@@ -132,7 +326,28 @@ nodes:
     nodes_depended_on:
     - split_data
     - initialize_model_weights
-    nodes_dependent_on:
-    - evaluate_model
+    nodes_dependent_on: []
+    output_structure:
+    - description: Final training loss after the last epoch.
+      key: final_loss
+      type: float
+    - description: Final training perplexity after the last epoch.
+      key: final_perplexity
+      type: float
+    - description: Training accuracy expressed as a percentage.
+      key: training_accuracy
+      type: float
+    - description: Total number of training epochs performed.
+      key: training_epochs
+      type: int
+    - description: Total training duration in minutes.
+      key: training_duration_minutes
+      type: float
+    - description: Filesystem path to the final model checkpoint.
+      key: model_path
+      type: str
+    - description: Indicates whether training completed successfully.
+      key: training_status
+      type: bool
     prompt: Train the language model using the training dataset, optimizing the model's
       parameters to minimize the loss function over the training data.
