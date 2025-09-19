@@ -1,202 +1,191 @@
 dag_type: plain_text
-description: Creates a detailed, educational‑only daily and weekly workout plan using
-  AI. The workflow gathers user information, filters a master exercise catalog, generates
-  warm‑up, main, and cool‑down routines, adds educational content and safety tips,
-  builds a weekly schedule, progression guidance, FAQ, and assembles the final document.
-name: complex_workout_planner
+description: A highly concurrent workflow that constructs a detailed, multi‑level
+  pathophysiology for a chosen disease or condition, from anatomy and baseline physiology
+  through molecular, cellular, systemic mechanisms, and produces a narrative and schematic
+  diagram.
+name: assemble_complex_pathophysiology
 nodes:
-  assemble_daily_workout_plan:
+  collect_environmental_factors:
     agent: false
-    description: Combine warm‑up, main, cooldown, education, and safety into a single
-      structured daily plan.
-    name: assemble_daily_workout_plan
+    description: Identify key environmental or lifestyle contributors.
+    name: collect_environmental_factors
     nodes_depended_on:
-    - generate_warmup_exercises
-    - generate_main_workout_exercises
-    - generate_cooldown_exercises
-    - generate_educational_snippets_for_exercises
-    - compile_safety_guidelines
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: 'Create a JSON object named daily_plan with sections: warmup (array),
-      main (array), cooldown (array), education (object), safety (array). Preserve
-      the exact structures produced by the dependent steps. Add a field total_estimated_time_minutes
-      calculated as sum of warmup, main, and cooldown durations (assume 60 seconds
-      per rep and given rest times).'
-  categorize_exercises_by_muscle_group:
+    prompt: List up to eight environmental or lifestyle risk factors (e.g., smoking,
+      high‑salt diet) with a concise impact phrase.
+  collect_genetic_factors:
     agent: false
-    description: Group the fetched exercises by their primary muscle group for easy
-      lookup.
-    name: categorize_exercises_by_muscle_group
+    description: Identify major genetic variants or heritable traits linked to the
+      disease.
+    name: collect_genetic_factors
     nodes_depended_on:
-    - fetch_exercise_catalog
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: Take the exercises array and produce a JSON object where each key is a
-      primary_muscle_group (e.g., "Chest", "Back", "Legs", "Shoulders", "Arms", "Core",
-      "Full Body", "Cardio") and the value is an array of exercise names belonging
-      to that group.
-  collect_user_profile:
+    prompt: Provide up to eight genetic factors (genes or polymorphisms) known to
+      influence susceptibility or progression. Include a one‑line functional note.
+  create_diagram_specification:
     agent: false
-    description: Gather the user's personal data, fitness goals, available equipment,
-      time budget, and any injury constraints.
-    name: collect_user_profile
+    description: Define the visual schematic requirements for the pathophysiology
+      diagram.
+    name: create_diagram_specification
+    nodes_depended_on:
+    - map_key_pathways
+    - identify_feedback_loops
+    nodes_dependent_on: []
+    prompt: 'Outline a diagram layout: list main boxes (e.g., Genetic Factors, Molecular
+      Cascade, Cellular Response, Systemic Outcome) and arrows connecting them, indicating
+      direction and loop symbols. Provide the specification in plain text.'
+  define_target_condition:
+    agent: false
+    description: Select the specific disease/condition for which the pathophysiology
+      will be built.
+    name: define_target_condition
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: 'Ask the user for the following information and return it as a JSON object
-      with keys: age, gender, fitness_level (beginner/intermediate/advanced), primary_goal
-      (strength/endurance/flexibility/weight_loss), available_equipment (list), workout_duration_minutes,
-      injury_notes (if any). Do not provide any analysis, only the raw data.'
-  compile_safety_guidelines:
+    prompt: Choose one disease or clinical condition (e.g., chronic heart failure,
+      type 2 diabetes) and state its common name and ICD‑10 code. Provide no additional
+      detail.
+  draft_pathophysiology_narrative:
     agent: false
-    description: Produce a set of general safety rules tailored to the user's injury
-      notes and equipment.
-    name: compile_safety_guidelines
+    description: Compose a comprehensive, paragraph‑style narrative that weaves together
+      all levels of pathophysiology.
+    name: draft_pathophysiology_narrative
     nodes_depended_on:
-    - collect_user_profile
+    - integrate_molecular_cellular
+    - integrate_systemic
+    - map_key_pathways
+    - identify_feedback_loops
     nodes_dependent_on: []
-    prompt: Based on the user's injury_notes and available_equipment, list 5‑7 bullet‑point
-      safety guidelines (e.g., "Maintain neutral spine when lifting.", "Avoid deep
-      knee bends if you have knee pain."). Return a JSON array named safety_guidelines.
-  create_faq_section:
+    prompt: Write a 600‑word narrative describing the disease progression, starting
+      with genetic/environmental triggers, moving through molecular/cellular changes,
+      and ending with systemic clinical consequences. Incorporate the feedback loops
+      where relevant.
+  finalize_pathophysiology_document:
     agent: false
-    description: Generate a short FAQ addressing common beginner questions related
-      to the plan.
-    name: create_faq_section
+    description: Assemble the final document containing the narrative, diagram, and
+      a brief reference list.
+    name: finalize_pathophysiology_document
     nodes_depended_on:
-    - collect_user_profile
-    - generate_educational_snippets_for_exercises
+    - review_for_accuracy
     nodes_dependent_on: []
-    prompt: 'Write 5 FAQ entries (question and answer) that a typical beginner might
-      ask about this workout plan (e.g., "How many rest days are needed?", "Can I
-      substitute equipment?"). Keep answers concise (max 2 sentences). Return a JSON
-      array named faq where each item has fields: question, answer.'
-  define_fitness_objectives:
+    prompt: Combine the narrative, the ASCII diagram, and a list of up to ten primary
+      literature references (title only) into a single markdown document. Add a heading
+      "Pathophysiology of <Condition>" at the top.
+  gather_cellular_mechanisms:
     agent: false
-    description: Translate the user's primary goal and fitness level into concrete
-      workout objectives (e.g., weekly volume, rep schemes).
-    name: define_fitness_objectives
+    description: Collect cellular‑level dysfunctions (e.g., apoptosis, hypertrophy).
+    name: gather_cellular_mechanisms
     nodes_depended_on:
-    - collect_user_profile
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: 'Based on the user''s primary_goal and fitness_level, output a JSON object
-      with keys: target_sessions_per_week, target_total_volume_per_week (in sets),
-      suggested_rep_range, suggested_intensity (% of 1RM), and progression_focus (strength,
-      hypertrophy, endurance, mobility). No narrative, only the structured data.'
-  design_weekly_schedule:
+    prompt: Identify up to ten cellular processes that become abnormal in the disease.
+      For each, give a one‑sentence impact statement.
+  gather_molecular_mechanisms:
     agent: false
-    description: Distribute the daily plan across the week according to target_sessions_per_week.
-    name: design_weekly_schedule
+    description: Collect key molecular pathways and signaling events altered in the
+      condition.
+    name: gather_molecular_mechanisms
     nodes_depended_on:
-    - assemble_daily_workout_plan
-    - define_fitness_objectives
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: Using the daily_plan and the target_sessions_per_week from fitness_objectives,
-      produce a JSON object named weekly_schedule with keys Monday‑Sunday. Populate
-      only the days that meet the session count with a copy of daily_plan; other days
-      should have value null. Also include a field weekly_total_time_minutes (sum
-      of daily estimated times).
-  develop_progression_plan:
+    prompt: List up to fifteen molecular mechanisms (e.g., receptor activation, enzyme
+      deficiency, gene expression change) that are documented contributors to the
+      disease. Provide a brief (≤10‑word) description for each.
+  gather_systemic_mechanisms:
     agent: false
-    description: Outline how the user should increase load or volume over the next
-      4 weeks.
-    name: develop_progression_plan
+    description: Collect organ‑system and whole‑body alterations (e.g., neuro‑humoral
+      activation).
+    name: gather_systemic_mechanisms
     nodes_depended_on:
-    - design_weekly_schedule
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: Provide a 4‑week progression table (JSON array) where each entry has week_number,
-      suggested_load_change (e.g., "+5%"), suggested_rep_adjustment (e.g., "increase
-      to 12 reps"), and a brief rationale. Base changes on the initial load percentages
-      from main_exercises.
-  fetch_exercise_catalog:
+    prompt: List up to twelve systemic pathophysiological changes associated with
+      the condition, each with a brief (≤12‑word) description.
+  generate_diagram:
     agent: false
-    description: Retrieve a comprehensive list of exercises with metadata (muscle
-      group, equipment required, difficulty, movement pattern).
-    name: fetch_exercise_catalog
-    nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: 'Produce a JSON array named exercises. Each exercise object must contain:
-      name, primary_muscle_group, secondary_muscle_groups (list), equipment_needed
-      (list), difficulty (beginner/intermediate/advanced), movement_type (compound/isolation),
-      typical_rep_range, typical_set_range, brief_description. Include at least 150
-      diverse exercises covering bodyweight, dumbbell, barbell, machine, and cardio
-      movements.'
-  filter_exercises_by_equipment_and_level:
-    agent: false
-    description: Create a subset of exercises that match the user’s equipment availability
-      and fitness level.
-    name: filter_exercises_by_equipment_and_level
+    description: Produce a textual diagram (ASCII/markdown) based on the specification.
+    name: generate_diagram
     nodes_depended_on:
-    - fetch_exercise_catalog
-    - collect_user_profile
+    - create_diagram_specification
     nodes_dependent_on: []
-    prompt: From the exercises array, keep only those where every item in equipment_needed
-      is present in the user's available_equipment list (or the exercise requires
-      no equipment). Also keep only exercises whose difficulty is less than or equal
-      to the user's fitness_level (map beginner<intermediate<advanced). Return the
-      filtered list as JSON array named filtered_exercises, preserving all original
-      fields.
-  generate_cooldown_exercises:
+    prompt: Using the specification, draw a simple ASCII/markdown flow diagram that
+      visually represents the integrated pathophysiology. Include labels and arrow
+      symbols.
+  identify_feedback_loops:
     agent: false
-    description: Choose 2‑4 low‑intensity stretches or mobility drills suitable for
-      the user's equipment and time.
-    name: generate_cooldown_exercises
+    description: Detect positive and negative feedback loops within the integrated
+      pathways.
+    name: identify_feedback_loops
     nodes_depended_on:
-    - collect_user_profile
+    - map_key_pathways
     nodes_dependent_on: []
-    prompt: 'Select 2‑4 static or dynamic stretches that address muscles worked in
-      the main workout. For each, provide: name, hold_time_seconds (or reps), equipment
-      (if any), and a cue for proper form. Return a JSON array named cooldown_exercises.'
-  generate_educational_snippets_for_exercises:
+    prompt: From the pathways listed, write two bullet points describing one positive
+      feedback loop and one negative feedback loop, specifying the initiating event
+      and the looped effect.
+  integrate_molecular_cellular:
     agent: false
-    description: Create concise educational blurbs explaining biomechanics and common
-      mistakes for each main exercise.
-    name: generate_educational_snippets_for_exercises
+    description: Combine molecular and cellular mechanisms into a unified cascade.
+    name: integrate_molecular_cellular
     nodes_depended_on:
-    - generate_main_workout_exercises
+    - gather_molecular_mechanisms
+    - gather_cellular_mechanisms
     nodes_dependent_on: []
-    prompt: For each exercise in main_exercises, write a 2‑sentence educational snippet
-      covering the primary muscle worked and a top safety tip. Output a JSON object
-      where keys are exercise names and values are the snippets. Name this object
-      exercise_education.
-  generate_main_workout_exercises:
+    prompt: Create a numbered flowchart (1‑N) linking each molecular mechanism to
+      the downstream cellular effect(s) it triggers. Use arrows (->) to indicate direction.
+  integrate_systemic:
     agent: false
-    description: Build the core workout set based on the defined objectives, focusing
-      on primary muscle groups and rep schemes.
-    name: generate_main_workout_exercises
+    description: Map how anatomical structures, baseline physiology, and systemic
+      mechanisms interact.
+    name: integrate_systemic
     nodes_depended_on:
-    - define_fitness_objectives
-    - filter_exercises_by_equipment_and_level
+    - list_core_anatomical_structures
+    - list_baseline_physiology
+    - gather_systemic_mechanisms
     nodes_dependent_on: []
-    prompt: 'Using the target_rep_range and intensity from fitness_objectives, select
-      a balanced mix of 5‑7 exercises from filtered_exercises covering all major muscle
-      groups. For each exercise, output: name, sets, reps per set, suggested load
-      (as % of 1RM or bodyweight), rest_seconds, and a brief technique tip. Return
-      a JSON array named main_exercises.'
-  generate_warmup_exercises:
+    prompt: 'Produce a table with columns: Anatomical Structure | Normal Physiology
+      | Altered Systemic Effect. Fill rows for each structure using information from
+      the prior steps.'
+  list_baseline_physiology:
     agent: false
-    description: Select 3‑5 low‑intensity warm‑up movements appropriate for the user's
-      equipment and time budget.
-    name: generate_warmup_exercises
+    description: Summarize normal physiological functions of the identified structures.
+    name: list_baseline_physiology
     nodes_depended_on:
-    - collect_user_profile
-    - filter_exercises_by_equipment_and_level
+    - list_core_anatomical_structures
     nodes_dependent_on: []
-    prompt: 'From filtered_exercises, choose 3‑5 dynamic movements that target major
-      joints (e.g., arm circles, bodyweight squats, light jogging). For each, provide:
-      name, sets, reps, duration (seconds), and a one‑sentence cue. Return a JSON
-      array named warmup_exercises.'
-  produce_final_workout_document:
+    prompt: For each anatomical structure listed previously, write one concise sentence
+      describing its normal physiological role. Use the same order as the list.
+  list_core_anatomical_structures:
     agent: false
-    description: Compile weekly schedule, progression, FAQ, and safety into a polished,
-      educational workout document.
-    name: produce_final_workout_document
+    description: Identify the primary organs, tissues, and cells directly involved
+      in the chosen condition.
+    name: list_core_anatomical_structures
     nodes_depended_on:
-    - design_weekly_schedule
-    - develop_progression_plan
-    - create_faq_section
-    - compile_safety_guidelines
+    - define_target_condition
     nodes_dependent_on: []
-    prompt: 'Create a markdown document string named final_document that includes:
-      1) Title, 2) Overview of objectives, 3) Weekly Schedule table, 4) Daily Plan
-      summary (use daily_plan structure), 5) 4‑Week Progression table, 6) Safety Guidelines
-      bullet list, 7) FAQ section. Ensure the document is educational only, with no
-      medical prescriptions. Output the markdown text.'
+    prompt: Based on the selected condition, list up to ten relevant anatomical structures
+      (organs, tissues, cell types). Return each item as a bullet point.
+  map_key_pathways:
+    agent: false
+    description: Identify and enumerate the central pathophysiological pathways spanning
+      molecular, cellular, and systemic levels.
+    name: map_key_pathways
+    nodes_depended_on:
+    - integrate_molecular_cellular
+    - integrate_systemic
+    - collect_genetic_factors
+    - collect_environmental_factors
+    nodes_dependent_on: []
+    prompt: Synthesize a list of up to six overarching pathways (e.g., insulin resistance
+      → hyperglycemia → microvascular damage). For each, cite the contributing molecular,
+      cellular, genetic, and environmental elements in parentheses.
+  review_for_accuracy:
+    agent: false
+    description: Cross‑check narrative and diagram for consistency and completeness.
+    name: review_for_accuracy
+    nodes_depended_on:
+    - draft_pathophysiology_narrative
+    - generate_diagram
+    nodes_dependent_on: []
+    prompt: Compare the narrative and diagram line‑by‑line. List any mismatches or
+      missing elements as bullet points. If none, state "All elements consistent."
