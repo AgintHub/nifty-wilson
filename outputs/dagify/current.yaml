@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: train_large_language_model
 nodes:
@@ -22,29 +22,156 @@ nodes:
     - description: Indicates whether the resource allocation was successful.
       key: allocation_success
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Parse the load_configuration output dictionary; use dict.get with
+          default values; perform type validation and conversion to int/float.
+        reason: Explicitly capturing the user’s GPU preferences ensures deterministic
+          allocation and avoids hard‑coded assumptions.
+        text: Extract GPU requirement parameters from the configuration returned by
+          load_configuration, using keys such as requested_gpu_count, requested_gpu_type,
+          and memory_per_gpu. If any key is missing, fall back to sensible defaults
+          (e.g., 1 V100, 16 GB).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Execute the appropriate inventory command via subprocess, or call
+          the scheduler’s REST endpoint; parse the output to count free GPUs of the
+          requested type; handle exceptions and timeouts.
+        reason: Pre‑emptively detecting insufficiencies prevents runtime failures
+          and resource contention.
+        text: Validate that the requested number of GPUs is available on the target
+          compute node or cluster by querying the system’s GPU inventory (e.g., `nvidia-smi
+          --list-gpus` for local nodes, or the cluster scheduler API for cloud environments).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: For cloud environments, construct the job submission JSON and POST
+          to the cluster’s API; for local nodes, invoke CUDA driver calls (cuDeviceGetCount,
+          cuCtxCreate) to lock GPUs; verify allocation status via API responses or
+          CUDA error codes.
+        reason: Actual resource reservation is required before model initialization
+          to avoid oversubscription and to lock the GPUs for the training job.
+        text: If the inventory check passes, request allocation of the specified GPUs
+          using the platform’s resource allocation interface (e.g., Slurm `srun --gres=gpu:count`,
+          Kubernetes GPU requests in Pod spec, or a direct CUDA context allocation
+          for local runs).
+      - complexity: LOW
+        impact: LOW
+        method: 'Use a simple arithmetic operation: memory_gb = gpu_count * memory_per_gpu;
+          ensure result is float and round to two decimal places.'
+        reason: Providing an aggregate memory figure simplifies downstream budgeting
+          and monitoring.
+        text: Compute the total memory to be reported as `memory_gb` by multiplying
+          the allocated GPU count by the per‑GPU memory (converted to gigabytes).
+      - complexity: LOW
+        impact: HIGH
+        method: Create a dict with the four fields; if any step fails, set allocation_success
+          to false and assign zeroes or empty strings for other fields; otherwise
+          set true and the actual values.
+        reason: Accurately conveying allocation status is critical for error propagation
+          to downstream nodes.
+        text: 'Populate the output structure: set `gpu_count`, `gpu_type`, `memory_gb`,
+          and determine `allocation_success` based on the success flags returned by
+          the allocation API and any exceptions caught during the process.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Format a JSON or plain‑text log entry; write to a file in /tmp or
+          append to an in‑memory list; expose via an optional `allocation_log` output
+          if the node interface allows.
+        reason: Traceability aids debugging and compliance with resource usage policies.
+        text: Log the allocation attempt with details such as timestamp, requested
+          parameters, actual allocated GPUs, and any error messages, storing the log
+          in a temporary file or returning it in a hidden side channel for auditing
+          purposes.
     prompt: Allocate computing resources such as GPUs and memory required for training
       the model.
   create_vocabulary:
     agent: false
-    description: Create a vocabulary based on the tokenized data.
+    description: Creates a unique token list (vocabulary) from the tokenized training
+      data, records token frequencies, and validates the result.
     name: create_vocabulary
     nodes_depended_on:
     - tokenize_data
     nodes_dependent_on: []
     output_structure:
-    - description: List of unique tokens constituting the vocabulary
+    - description: List of unique tokens constituting the vocabulary.
       key: vocabulary
-      type: List[str]
+      type: str
     - description: Frequency count for each corresponding token in the vocabulary
-        list
+        list.
       key: token_frequencies
-      type: List[int]
-    - description: Total number of unique tokens in the vocabulary
+      type: int
+    - description: Total number of unique tokens in the vocabulary.
       key: vocab_size
       type: int
-    - description: Whether the vocabulary creation was successful
+    - description: Whether the vocabulary creation was successful.
       key: is_valid
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: 'Use a list comprehension: `[token for sentence in tokenized_texts
+          for token in sentence.split()]` or equivalent depending on token format.'
+        reason: A flat list enables efficient frequency counting and eliminates per-sentence
+          overhead.
+        text: Aggregate all tokenized sentences into a single flat list of tokens.
+      - complexity: LOW
+        impact: HIGH
+        method: Instantiate `freq_counter = Counter(all_tokens)`; this yields a dict-like
+          mapping token -> count.
+        reason: Counter provides a fast, memory‑efficient frequency map directly from
+          the token stream.
+        text: Count the occurrence of each token using a collections.Counter.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Construct a filtered dict: `{t: c for t, c in freq_counter.items()
+          if c >= min_freq}`; expose `min_freq` as a configurable parameter.'
+        reason: Low‑frequency tokens inflate vocab size without contributing much
+          learning signal and may cause OOV issues.
+        text: Apply a minimum frequency threshold (e.g., 2 or 5) to filter out extremely
+          rare tokens.
+      - complexity: MEDIUM
+        impact: LOW
+        method: 'Use `sorted_tokens = sorted(filtered_tokens.keys(), key=lambda t:
+          filtered_tokens[t], reverse=True)`.'
+        reason: Ordering by frequency allows optional truncation for sub‑vocabularies
+          and facilitates reproducibility.
+        text: Sort the remaining tokens by descending frequency to produce the final
+          vocabulary list.
+      - complexity: LOW
+        impact: LOW
+        method: 'List comprehension: `token_frequencies = [filtered_tokens[token]
+          for token in sorted_tokens]`.'
+        reason: Outputs must maintain index alignment for downstream consumption.
+        text: 'Create two aligned lists: `vocabulary` (sorted token list) and `token_frequencies`
+          (corresponding counts).'
+      - complexity: LOW
+        impact: LOW
+        method: Set `vocab_size = len(vocabulary)`.
+        reason: Provides an easily consumable metric for architecture definition.
+        text: Compute `vocab_size` as the length of the vocabulary list.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Use a simple conditional: `is_valid = vocab_size > 0`.'
+        reason: Ensures downstream nodes do not operate on an empty or corrupted vocabulary.
+        text: 'Validate the result: `is_valid` should be True if `vocab_size` > 0;
+          otherwise False.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Create a dict: `output = { ''vocabulary'': vocabulary, ''token_frequencies'':
+          token_frequencies, ''vocab_size'': vocab_size, ''is_valid'': is_valid }`;
+          optionally log `f"vocab_size={vocab_size}, unique_tokens={len(filtered_tokens)}"`.'
+        reason: Debug logs aid reproducibility and quick fault isolation.
+        text: Package all four outputs into the specified data structure and log metadata
+          for debugging.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use type annotations or runtime checks (e.g., `assert isinstance(vocabulary,
+          list)`), then return the dict.
+        reason: Strict type adherence prevents downstream type errors.
+        text: Return the output structure exactly as defined, ensuring type consistency.
     prompt: Compile a vocabulary of unique tokens from the tokenized data, considering
       frequency and relevance for the language model.
   define_model_architecture:
@@ -77,12 +204,94 @@ nodes:
     - description: Estimated total number of trainable parameters in the model.
       key: total_parameters
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read 'vocab_size' from create_vocabulary output; read 'gpu_count',
+          'gpu_type', and 'memory_gb' from allocate_resources output; store them in
+          local variables for later calculations.
+        reason: The vocab_size dictates the size of the embedding matrix, while GPU
+          memory limits constrain hidden layer dimensionality and overall parameter
+          count.
+        text: Extract the vocabulary size and GPU allocation metrics from the outputs
+          of create_vocabulary and allocate_resources to serve as constraints for
+          architecture sizing.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Implement a helper function that accepts vocab_size, hidden_size,
+          number_of_layers, attention_heads and returns an integer estimate; use the
+          standard transformer parameter count formula including embedding, layer
+          norm, feed‑forward, and attention projection terms.
+        reason: Having a parameter budget early helps validate that the chosen hyper‑parameters
+          fit within hardware constraints and guides subsequent decisions.
+        text: 'Compute an initial estimate of total trainable parameters using the
+          closed‑form formula for a transformer: params ≈ vocab_size * hidden_size
+          + 12 * number_of_layers * hidden_size^2 + ... and round to nearest integer.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Iteratively loop over candidate layer counts (e.g., 6, 12, 24, 36);
+          for each, compute total_parameters (from bullet 2) and compare against memory_gb
+          * gpu_count * 0.9 * 1024 (bytes). Select the largest count that satisfies
+          the constraint.
+        reason: Layer depth is a primary driver of model capacity; staying within
+          memory limits prevents out‑of‑memory failures during training.
+        text: 'Determine number_of_layers by balancing desired performance, convergence
+          speed, and available GPU memory: start from a baseline (e.g., 12 layers)
+          and increase until the estimated parameter count approaches but does not
+          exceed 90% of the GPU memory capacity per GPU.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Compute the available memory per GPU in bytes; subtract memory needed
+          for embedding (vocab_size * hidden_size * 4 bytes) and optimizer buffers
+          (≈ 2 * hidden_size * number_of_layers * hidden_size). Solve for hidden_size
+          iteratively, checking divisibility by candidate attention_heads (typically
+          8, 12, 16). Choose the largest hidden_size that satisfies both constraints.
+        reason: Hidden size directly scales the memory footprint of activations and
+          gradients; ensuring divisibility by attention_heads preserves efficient
+          attention implementation.
+        text: Select hidden_size such that the product hidden_size * number_of_layers
+          * hidden_size fits within the remaining memory after accounting for embeddings
+          and optimizer states; also enforce that hidden_size % attention_heads ==
+          0.
+      - complexity: LOW
+        impact: MEDIUM
+        method: If hidden_size >= 1024 use 16 heads; else if hidden_size >= 768 use
+          12 heads; otherwise use 8 heads; ensure hidden_size % attention_heads ==
+          0.
+        reason: Standard head counts provide well‑tested scaling behavior and efficient
+          GPU utilization.
+        text: Set attention_heads by choosing a value that evenly divides hidden_size
+          and aligns with common transformer configurations (e.g., 8, 12, 16); default
+          to 12 if hidden_size >= 768 and <= 1024.
+      - complexity: LOW
+        impact: LOW
+        method: If the training configuration (from load_configuration) includes a
+          'max_sequence_length', use it; otherwise compute the maximum token count
+          across a sample of training examples; if that exceeds 512 set to 1024, else
+          set to 512.
+        reason: Sequence length impacts memory linearly; setting a conservative default
+          avoids OOM during training while allowing longer inputs if resources permit.
+        text: Define max_sequence_length based on the training data's longest sequence
+          and the memory budget; if unspecified, default to 512 or 1024 for larger
+          models.
+      - complexity: LOW
+        impact: LOW
+        method: 'Create a JSON object containing keys: model_type=''Transformer'',
+          number_of_layers, hidden_size, attention_heads, vocab_size, max_sequence_length,
+          total_parameters; cast all numeric values to int where appropriate.'
+        reason: Providing a consistent, typed output is required for downstream nodes
+          such as initialize_model_weights.
+        text: Assemble the final output dictionary with all computed fields, ensuring
+          that total_parameters matches the estimate from bullet 2.
     prompt: Specify the architecture of the language model, including the number of
       layers, hidden size, and attention heads, based on the created vocabulary and
       desired model capabilities.
   evaluate_model:
     agent: false
-    description: Evaluate the trained model's performance on the validation set.
+    description: Evaluate the trained language model on the validation set, producing
+      key metrics such as perplexity, accuracy, cross‑entropy loss, and the number
+      of samples evaluated.
     name: evaluate_model
     nodes_depended_on:
     - train_model
@@ -100,11 +309,84 @@ nodes:
     - description: Total number of samples evaluated in the validation set.
       key: validation_samples
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse the JSON responses of 'train_model' and 'split_data', store
+          the paths in local variables for subsequent loading.
+        reason: The evaluation requires direct access to the trained weights and the
+          validation data; both paths are produced upstream.
+        text: Retrieve the trained model checkpoint path from the parent node 'train_model'
+          output 'model_path', and the validation dataset path from the global DAG
+          context (split_data output 'validation_data_path').
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `torch.load(model_path)` or equivalent, then instantiate the model
+          with `define_model_architecture` parameters and call `load_state_dict`.
+        reason: Consistent framework usage guarantees that the model state dict matches
+          the architecture.
+        text: Load the model checkpoint into memory using the same framework used
+          for training (e.g., PyTorch or TensorFlow).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read the validation dataset file, apply the same tokenization and
+          padding logic used during training, and wrap it in a `torch.utils.data.DataLoader`.
+        reason: Consistent batch sizing ensures comparable memory usage and allows
+          deterministic evaluation.
+        text: Instantiate a DataLoader for the validation set with `batch_size` matching
+          the training configuration (from 'load_configuration' output 'batch_size')
+          and `shuffle=False`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Wrap the inference loop in a context manager that suppresses gradients.
+        reason: Evaluation must be free of gradient tracking to save memory and avoid
+          unintended weight updates.
+        text: Set the model to evaluation mode (`model.eval()`) and disable gradient
+          computation (`torch.no_grad()` or `tf.GradientTape(persistent=False)`),
+          then iterate over the DataLoader to compute logits for each batch.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `torch.nn.functional.cross_entropy(logits, labels, reduction='sum')`
+          and `torch.argmax(logits, dim=-1)` for predictions.
+        reason: Accurate metrics require summing loss over all samples and comparing
+          predictions to true labels.
+        text: For each batch, compute the cross‑entropy loss using the framework's
+          loss function, accumulate total loss and number of samples, and compute
+          per‑sample predictions to determine accuracy.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Simple arithmetic division.
+        reason: Average loss provides a single scalar reflecting overall model performance.
+        text: After processing all batches, compute the average cross‑entropy loss
+          (`total_loss / validation_samples`).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `math.exp(min(max(average_loss, -50), 50))`.
+        reason: Perplexity is the exponentiated loss; clipping avoids overflow errors.
+        text: Compute perplexity as `exp(average_loss)` ensuring numerical stability
+          by clipping the loss to a reasonable range before exponentiation.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Maintain a counter of correct predictions during batch processing.
+        reason: Accuracy gives an interpretable measure of correct predictions.
+        text: Calculate accuracy as `(correct_predictions / validation_samples) *
+          100` to express it as a percentage.
+      - complexity: LOW
+        impact: HIGH
+        method: Use a dictionary and `json.dumps` to serialize.
+        reason: Strict adherence to the schema guarantees downstream nodes receive
+          correctly typed data.
+        text: Return the four metrics (`perplexity`, `accuracy`, `cross_entropy_loss`,
+          `validation_samples`) in the exact order and types specified by the output
+          structure, serializing them as JSON.
     prompt: Assess the trained model's performance on the validation dataset, using
       metrics relevant to language understanding tasks (e.g., perplexity, accuracy).
   fine_tune_model:
     agent: false
-    description: Fine‑tune the model on specific tasks or datasets as needed.
+    description: Fine‑tune the base language model using a task‑specific dataset to
+      improve downstream performance. The node consumes evaluation metrics from the
+      base model and produces a fine‑tuned checkpoint along with training statistics.
     name: fine_tune_model
     nodes_depended_on:
     - evaluate_model
@@ -125,6 +407,116 @@ nodes:
     - description: Perplexity on the validation set after fine‑tuning.
       key: final_validation_perplexity
       type: float
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: LOW
+        method: Implement a simple schema check using Python type hints and `math.isnan`
+          for floats; raise a descriptive exception if validation fails.
+        reason: Early validation prevents downstream failures due to corrupted or
+          incomplete metrics.
+        text: 'Validate the evaluate_model input: ensure that `perplexity`, `accuracy`,
+          `cross_entropy_loss`, and `validation_samples` are present and of type float/int.
+          If any are missing or NaN, abort fine‑tuning with `fine_tuning_successful
+          = false` and log an error.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `os.getenv` with a default, then `os.path.isfile`; if not found,
+          emit a warning and set `fine_tuning_successful = false`.
+        reason: Fine‑tuning requires the base weights; ensuring the checkpoint is
+          available avoids runtime errors.
+        text: Retrieve the path to the trained model checkpoint. Prefer the environment
+          variable `MODEL_PATH`; if unset, fall back to a hard‑coded path from the
+          project configuration (`model_output_path`). Verify that the file exists
+          before proceeding.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Instantiate a `torch.utils.data.Dataset` subclass that reads the file,
+          tokenizes using the same tokenizer used in pretraining, and returns tensors.
+          Cache the dataset to avoid repeated I/O.
+        reason: Task‑specific data is needed for supervised fine‑tuning and may differ
+          in format from the pretraining corpus.
+        text: Load the downstream fine‑tuning dataset from a configuration parameter
+          (e.g., `fine_tune_dataset_path`). If the path is relative, resolve it against
+          the project root. Use a data loader that yields batches of tokenized inputs
+          and labels suitable for the task (e.g., classification or sequence labeling).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read from a dedicated `fine_tune_config.json` file; use `argparse`‑style
+          precedence (env > config > defaults).
+        reason: Hyperparameter flexibility lets the user adapt the fine‑tuning to
+          the size of the downstream dataset.
+        text: 'Set fine‑tuning hyperparameters: epoch count (`fine_tune_epochs`),
+          learning rate (`fine_tune_lr`), batch size (`fine_tune_batch_size`). Use
+          default values from the configuration if not explicitly overridden, but
+          allow command‑line overrides via environment variables for flexibility.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use HuggingFace `AutoModelForSequenceClassification` or `AutoModelForTokenClassification`
+          depending on task; if the head differs, call `model.resize_token_embeddings`
+          and reinitialize the new head with Xavier uniform.
+        reason: Task‑specific heads enable the model to produce predictions aligned
+          with the target labels.
+        text: 'Initialize the model for fine‑tuning: load the base checkpoint into
+          the same architecture, optionally replacing the final classification head
+          with a task‑specific head if the downstream task differs from pretraining
+          (e.g., add a `nn.Linear` for NER).'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Instantiate `torch.optim.AdamW` with `weight_decay=0.01`; create `get_linear_schedule_with_warmup`
+          from `transformers` library.
+        reason: AdamW with warmup stabilizes fine‑tuning and prevents catastrophic
+          forgetting.
+        text: 'Define the optimizer and scheduler: use AdamW with weight decay, and
+          a linear scheduler with warmup proportional to `fine_tune_epochs`. Tie the
+          learning rate to the base training rate scaled by a fine‑tune factor (e.g.,
+          0.1).'
+      - complexity: HIGH
+        impact: HIGH
+        method: Use `torch.no_grad()` for validation; compute perplexity as `torch.exp(torch.mean(loss))`.
+          Store the best epoch based on lowest validation perplexity.
+        reason: Capturing per‑epoch metrics enables monitoring and early stopping
+          decisions.
+        text: 'Implement the training loop: for each epoch, iterate over the fine‑tuning
+          data loader, compute loss, perform back‑propagation, update parameters,
+          and record training loss. After each epoch, evaluate on the validation split
+          (derived from the same fine‑tune dataset) to compute perplexity using the
+          same metric as the base evaluation.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Maintain a counter of non‑improvement epochs; break loop when threshold
+          exceeded.
+        reason: Prevents over‑fitting and reduces unnecessary compute time.
+        text: 'Implement early stopping: if validation perplexity does not improve
+          for `patience` consecutive epochs (default 3), terminate training early
+          to save compute.'
+      - complexity: LOW
+        impact: HIGH
+        method: Call `model.save_pretrained()` for HuggingFace models or `torch.save`
+          for plain state_dicts.
+        reason: Providing concrete metrics allows downstream nodes to assess fine‑tuning
+          quality.
+        text: After training, compute the final training loss as the average loss
+          over the last epoch and the final validation perplexity from the best epoch.
+          Save the fine‑tuned model checkpoint to a new path derived from the project
+          output directory (e.g., `model_output_path/fine_tuned_checkpoint.pt`).
+      - complexity: LOW
+        impact: LOW
+        method: Construct a dictionary mapping the output keys to the computed values
+          and return it.
+        reason: All required outputs must be deterministically derived from the fine‑tuning
+          process.
+        text: 'Populate the output fields: set `model_file_path` to the saved checkpoint
+          path, `fine_tuning_successful = true`, `num_fine_tuning_epochs` to the number
+          of epochs actually run, `final_training_loss` to the last epoch average
+          loss, and `final_validation_perplexity` to the best validation perplexity.'
+      - complexity: LOW
+        impact: LOW
+        method: Use Python's `logging` module with a file handler; format logs in
+          JSON for downstream ingestion.
+        reason: Logging aids debugging and audit trails for ML pipelines.
+        text: Log all key events (start, per‑epoch metrics, early stop, final status)
+          to a log file located alongside the checkpoint for traceability.
     prompt: Optionally fine‑tune the trained model on specific downstream tasks or
       datasets to enhance its performance on those tasks.
   initialize_model_weights:
@@ -148,6 +540,76 @@ nodes:
     - description: Hash or unique string representing the model architecture configuration
       key: architecture_signature
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read the JSON payload from the parent node; perform type validation
+          and range checks (e.g., positive integers for sizes).
+        reason: The initialization routine must be informed of the exact architecture
+          to construct the model correctly. Missing or malformed inputs would cause
+          construction failures or inconsistent parameter counts.
+        text: Retrieve the architecture configuration from the `define_model_architecture`
+          output, ensuring that all required fields (model_type, number_of_layers,
+          hidden_size, attention_heads, vocab_size, max_sequence_length, total_parameters)
+          are present and valid.
+      - complexity: HIGH
+        impact: HIGH
+        method: Implement a mapping from `model_type` to a builder class; within the
+          builder, create transformer layers with the specified hidden size, attention
+          heads, and positional embeddings; use the vocab size for the embedding matrix.
+        reason: Abstracting the model construction decouples initialization from the
+          underlying deep learning library, facilitating future swaps or extensions.
+        text: Instantiate the model using a framework‑agnostic factory (e.g., a custom
+          `ModelBuilder` that accepts the architecture dict and returns a PyTorch
+          `nn.Module` or TensorFlow `tf.keras.Model`).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Parse environment variables with a fallback; if `pretrained_path`
+          exists, load state_dict from that path; otherwise apply Xavier initialization
+          to all linear and embedding layers.
+        reason: Choosing an appropriate strategy ensures good convergence behaviour;
+          using pretrained weights can drastically reduce training time and improve
+          final performance.
+        text: Determine the initialization strategy by inspecting a configuration
+          flag (e.g., `use_pretrained`, `pretrained_path`) that may be passed via
+          an optional environment variable or a separate config node; default to Xavier/Glorot
+          uniform if no pretrained weights are provided.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Iterate over `model.modules()`; use `torch.nn.init.xavier_uniform_`
+          for weights and `torch.nn.init.zeros_` for biases; wrap in a try/except
+          to catch any unsupported module types.
+        reason: Uniformly initializing all parameters avoids biasing the network and
+          promotes symmetric learning dynamics.
+        text: 'Apply the chosen initialization across all trainable parameters: for
+          each module, if it is a `Linear`, `Conv1D`, or `Embedding`, invoke the corresponding
+          weight initialization function; for biases, zero‑initialize.'
+      - complexity: LOW
+        impact: LOW
+        method: 'Use a generator expression: `sum(p.numel() for p in model.parameters()
+          if p.requires_grad)`.'
+        reason: Providing an accurate parameter count is essential for logging, debugging,
+          and ensuring that the model matches the architecture specification.
+        text: Calculate the total number of trainable parameters by summing the `numel()`
+          of every parameter with `requires_grad=True` in the model.
+      - complexity: LOW
+        impact: LOW
+        method: Serialize with `json.dumps(arch_dict, sort_keys=True)`; compute hash
+          via `hashlib.sha256()`; encode as hex string.
+        reason: The signature serves as a unique fingerprint of the model configuration,
+          useful for versioning, caching, and ensuring reproducibility.
+        text: Generate a deterministic `architecture_signature` by serializing the
+          sorted architecture dictionary into a JSON string and hashing it with SHA‑256.
+      - complexity: LOW
+        impact: LOW
+        method: Wrap the entire initialization in a try/except; on exception, log
+          the traceback and set success flag to False.
+        reason: Explicit success flag enables downstream nodes to conditionally proceed
+          or trigger fallback workflows.
+        text: Return the output bundle with `initialization_success=True` if all steps
+          complete without unhandled exceptions; otherwise set to `False` and provide
+          a meaningful error message in the logs.
     prompt: Initialize the model's weights using an appropriate method (e.g., random
       initialization, pre-trained weights), preparing the model for training.
   load_configuration:
@@ -163,7 +625,7 @@ nodes:
       type: bool
     - description: List of validation error messages, empty if config_valid is true
       key: error_messages
-      type: List[str]
+      type: str
     - description: Number of training epochs specified in the configuration
       key: max_epochs
       type: int
@@ -185,6 +647,77 @@ nodes:
     - description: Name of the project as defined in the configuration
       key: project_name
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Use pathlib.Path to check existence and read permissions; if missing,
+          record a descriptive error.
+        reason: Ensures the workflow starts with a valid source of configuration and
+          avoids file-not-found errors later.
+        text: Locate the configuration file using an environment variable set by the
+          setup_environment node (e.g., CONFIG_PATH). Verify the file exists and is
+          readable before proceeding.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Employ `yaml.safe_load` for YAML or `json.load` for JSON; use try/except
+          blocks to capture `YAMLError` or `JSONDecodeError`.
+        reason: Parsing errors can lead to silent failures; capturing them early improves
+          debuggability.
+        text: Parse the configuration file as YAML or JSON into a Python dictionary,
+          catching and reporting any syntax errors.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a dictionary mapping field names to validation lambdas or use
+          jsonschema for declarative validation.
+        reason: A schema centralizes validation logic and ensures consistency across
+          runs.
+        text: Define a schema for required fields (max_epochs, batch_size, learning_rate,
+          data_path, model_output_path, config_version, project_name) with their expected
+          types and acceptable ranges.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Iterate over schema entries; for each field, apply lambda; append
+          descriptive messages for failures.
+        reason: Field-level validation guarantees that downstream nodes receive well-formed
+          data.
+        text: 'Validate each required field against the schema: check presence, type,
+          and logical constraints (e.g., epochs > 0, learning_rate > 0, paths are
+          absolute). Collect any violations into the error_messages list.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use pathlib to check `is_file()` or `exists()` and `is_dir()`. Attempt
+          to create output directory with `mkdir(parents=True, exist_ok=True)`; catch
+          PermissionError.
+        reason: Runtime errors during training often stem from missing or inaccessible
+          paths; pre-empting them avoids costly failures.
+        text: 'Validate filesystem paths: ensure data_path exists and is readable,
+          and model_output_path is writable (create directory if it doesn''t exist).
+          Record path-related errors.'
+      - complexity: LOW
+        impact: HIGH
+        method: Set `config_valid = len(error_messages) == 0`.
+        reason: A clear validity flag simplifies downstream decision logic.
+        text: 'Determine the overall configuration validity: set config_valid to True
+          only if no error_messages were recorded; otherwise False.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use dictionary lookups; for missing keys in error case, assign None
+          or 0 and document the decision in the log.
+        reason: Consistent output structure is required for downstream nodes regardless
+          of validation outcome.
+        text: If config_valid is true, extract validated values into the corresponding
+          output fields; otherwise, populate numeric fields with None or default sentinel
+          values.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Serialize a dict with keys matching output_structure; validate types
+          before returning.
+        reason: Strict type adherence guarantees compatibility with the typed workflow
+          engine.
+        text: Return a structured JSON object containing all output fields, ensuring
+          each matches the declared PrimitiveType and includes a clear description
+          of any defaulted or error values.
     prompt: Load configuration parameters from the project settings, ensuring all
       hyperparameters and paths are correctly specified.
   prepare_training_data:
@@ -207,12 +740,78 @@ nodes:
         is ready for further steps
       key: is_valid
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Load the YAML/JSON config file specified by the environment, extract
+          `data_path` and `data_sources` fields, and validate that each entry contains
+          a `url` or `local_path` along with optional `checksum`.
+        reason: Using the configuration ensures that the node knows where to fetch
+          data and what constraints to apply, reducing hard‑coding and increasing
+          reproducibility.
+        text: Parse the project configuration to obtain data source definitions and
+          metadata requirements.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use `requests` for HTTP(S) downloads, `shutil.copyfile` for local
+          copies, verify SHA‑256 checksums, and implement exponential back‑off for
+          transient failures.
+        reason: Guarantees the integrity and availability of raw data, which is critical
+          for a high‑quality training corpus.
+        text: Download or copy all specified data sources, performing checksum verification
+          and retry logic where necessary.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Iterate through each file, yield lines to a `set` to track seen hashes,
+          write unique lines to a temporary output file.
+        reason: Avoids redundancy that could bias the model, yet keeps source traceability
+          for debugging.
+        text: Merge data from multiple sources into a single stream, removing exact
+          duplicate lines while preserving source order for provenance.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use `unicodedata.normalize('NFKC')`, `html5lib` for tag removal, regular
+          expressions for whitespace collapse, and a configurable `allowed_char_set`
+          filter.
+        reason: Cleaner data reduces noise in the tokenization step and improves model
+          generalization.
+        text: 'Perform comprehensive text cleaning: normalize Unicode, strip HTML
+          tags, collapse whitespace, remove non‑ASCII characters beyond a defined
+          threshold, and filter out empty lines.'
+      - complexity: LOW
+        impact: LOW
+        method: Apply `nltk.word_tokenize` to each cleaned line, count tokens, and
+          aggregate counts.
+        reason: Provides an early metric for dataset size without incurring the full
+          cost of subword tokenization.
+        text: Estimate the token count using a lightweight tokenizer (e.g., NLTK's
+          `word_tokenize`) to avoid a full tokenization pass during preprocessing.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Open a `gzip.open` file in write mode, stream cleaned lines as UTF‑8
+          encoded bytes, and close the handle gracefully.
+        reason: Compressed storage conserves space and speeds up data loading for
+          later steps.
+        text: Write the cleaned lines to a compressed UTF‑8 file (e.g., Gzip) to reduce
+          disk usage and speed up downstream I/O.
+      - complexity: LOW
+        impact: HIGH
+        method: Count the number of written lines for `sample_count`, use the token
+          counter from step 5 for `token_count`, and set `is_valid` to true if no
+          errors were encountered.
+        reason: These metadata fields are required by downstream nodes and enable
+          validation checks before training.
+        text: 'Populate the output structure: compute `sample_count`, `token_count`,
+          set `is_valid` based on success flags, and expose the final file path.'
     prompt: Gather a large corpus of text data suitable for training a language model.
       Ensure the data is diverse and representative of the desired language understanding
       tasks.
   setup_environment:
     agent: false
-    description: Prepare the runtime environment for the workflow.
+    description: Prepare the runtime environment for the workflow by ensuring that
+      all required libraries are installed, appropriate system paths are configured,
+      and environment variables are set for subsequent nodes.
     name: setup_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -222,19 +821,104 @@ nodes:
       type: bool
     - description: List of package names that were installed during setup.
       key: installed_packages
-      type: List[str]
+      type: str
     - description: Corresponding package versions for installed packages.
       key: installed_package_versions
-      type: List[str]
+      type: str
     - description: List of system paths that were configured (e.g., PATH, PYTHONPATH).
       key: configured_paths
-      type: List[str]
+      type: str
     - description: List of environment variable names that were set.
       key: environment_variables
-      type: List[str]
+      type: str
     - description: A log string summarizing the setup process.
       key: setup_log
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `python -m venv .venv`; activate with `. .venv/bin/activate`;
+          verify activation by checking `sys.prefix`.
+        reason: Virtual environments isolate the workflow’s Python packages, ensuring
+          reproducibility across different machines and preventing version conflicts.
+        text: Create a dedicated Python virtual environment using `venv` to isolate
+          dependencies and prevent clashes with system packages.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Run `pip install --upgrade pip setuptools wheel` and capture stdout/stderr
+          for logging.
+        reason: Older package managers can fail to install binary wheels, causing
+          unnecessary compilation and longer setup times.
+        text: Upgrade pip, setuptools, and wheel to the latest stable versions to
+          guarantee compatibility with the latest package wheels.
+      - complexity: LOW
+        impact: HIGH
+        method: Open the file, parse lines ignoring comments, and construct a list
+          of package specifiers.
+        reason: Explicit version specifications prevent inadvertent upgrades that
+          could break the workflow.
+        text: Read a predefined `requirements.txt` (or similar manifest) located in
+          the project root to obtain the exact list of required packages and their
+          version constraints.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: For each specifier, execute `pip install <specifier>` via `subprocess.run`;
+          parse `pip` output for the installed version; append to lists.
+        reason: Sequential installation allows fine-grained error handling and precise
+          logging of failures.
+        text: Install each package sequentially with pip, capturing the resolved version
+          after installation to populate `installed_packages` and `installed_package_versions`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `importlib.import_module`; catch `ImportError` and record error
+          messages.
+        reason: Installation may succeed but the package could still be broken due
+          to missing binary dependencies or Python version incompatibilities.
+        text: Verify that each package is importable by attempting to import it after
+          installation, marking the setup as failed if any import errors arise.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Prepend `os.path.join(venv_path, 'bin')` to `os.environ['PATH']`.
+        reason: Certain packages expose CLI tools that must be available for later
+          nodes (e.g., tokenizers, data preprocessors).
+        text: Configure the `PATH` environment variable to include the `bin` directory
+          of the virtual environment, ensuring executables from installed packages
+          are discoverable.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Add `os.path.abspath('src')` or similar to `PYTHONPATH` using `os.environ['PYTHONPATH']`.
+        reason: Custom modules may reside outside the standard site‑packages path;
+          this ensures Python can locate them.
+        text: Set `PYTHONPATH` to include any project‑specific source directories
+          that contain modules required by the workflow.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Detect available GPUs via `nvidia-smi` or `torch.cuda.is_available()`;
+          set `CUDA_VISIBLE_DEVICES` accordingly.
+        reason: Explicitly setting these variables improves reproducibility and avoids
+          accidental over‑use of GPUs or CPU cores.
+        text: Define essential environment variables (e.g., `CUDA_VISIBLE_DEVICES`,
+          `OMP_NUM_THREADS`) based on configuration or system detection to control
+          resource usage.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Append each step’s outcome to a list and `''
+
+          ''.join(log_entries)`.'
+        reason: A detailed log aids debugging, auditability, and future environment
+          replication.
+        text: Aggregate all configuration actions into a comprehensive `setup_log`
+          string, including timestamps, installed packages and versions, environment
+          variable settings, and any errors encountered.
+      - complexity: LOW
+        impact: HIGH
+        method: Maintain a boolean flag `ready` that is set to `False` upon any exception;
+          final output reflects this flag.
+        reason: Child nodes depend on a ready environment; propagating a clear failure
+          flag prevents silent downstream failures.
+        text: Return `environment_ready=True` only if every step succeeded; otherwise
+          set to `False` and populate `error_messages` (embedded in `setup_log`).
     prompt: Set up the execution environment, installing necessary libraries and configuring
       paths.
   split_data:
@@ -266,16 +950,108 @@ nodes:
     - description: Ratios used for splitting the data, in order [train, validation,
         test]
       key: split_ratios
-      type: List[float]
+      type: float
     - description: Random seed used for reproducibility during splitting
       key: split_seed
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use os.path.exists to confirm file existence; read a small sample
+          (e.g., 100 lines) with pandas to verify CSV/JSON structure; log any discrepancies.
+        reason: Ensures that downstream operations have the correct input files and
+          that the data is ready for splitting.
+        text: Validate the incoming preprocessed data path and metadata.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read the `sample_count` field directly; if not provided, perform a
+          streaming count of the file using a line counter for large datasets.
+        reason: The split ratios are applied relative to this count; accurate counting
+          prevents off‑by‑one errors.
+        text: Determine the total sample count from the metadata provided by prepare_training_data.
+      - complexity: LOW
+        impact: HIGH
+        method: Instantiate numpy.random.default_rng(split_seed) and generate an array
+          of indices with rng.permutation(sample_count).
+        reason: A fixed seed guarantees that the same splits are produced across runs,
+          aiding debugging and reproducibility.
+        text: Generate a reproducible random permutation of sample indices using the
+          configured split_seed.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Validate split_ratios length is 3; round each ratio to 4 decimal places;
+          compute cumulative sums; calculate integer boundaries using floor and adjust
+          the last boundary to consume all samples.
+        reason: Flexible ratios accommodate different project requirements while preventing
+          mis‑allocation of samples.
+        text: Compute split boundaries based on standard ratios (e.g., 80/10/10) or
+          user‑supplied ratios, ensuring that the sum equals 1.0 within tolerance.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Use numpy array slicing: train_idx = perm[:train_boundary]; val_idx
+          = perm[train_boundary:val_boundary]; test_idx = perm[val_boundary:]'
+        reason: Direct indexing preserves the randomness introduced by the permutation
+          and avoids bias.
+        text: Slice the permutation array into training, validation, and test index
+          lists based on the computed boundaries.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Open the source file with a buffered reader; for each line, write
+          to the appropriate output file based on its line number; use multiprocessing
+          or asyncio if file is >1GB to keep memory usage low.
+        reason: A single pass minimizes I/O overhead; writing separate files is required
+          for subsequent training stages.
+        text: Read the full preprocessed data file once and write three separate files
+          using the derived indices.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use the lengths of the index arrays (train_idx, val_idx, test_idx)
+          to set train_set_size, validation_set_size, test_set_size.
+        reason: Accurate split sizes are essential for reporting and for downstream
+          model training loops.
+        text: Record the sizes of each split by counting written lines or using the
+          boundary indices.
+      - complexity: LOW
+        impact: LOW
+        method: Join os.path.dirname(preprocessed_data_path) with 'splits' and generate
+          filenames like train.tsv, val.tsv, test.tsv.
+        reason: Consistent path organization simplifies downstream path discovery
+          and versioning.
+        text: Construct filesystem paths for each split file within a dedicated `splits/`
+          directory under the original data path.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create a dict with all output fields; write to 'splits/manifest.json'
+          using json.dump with indentation for readability.
+        reason: A manifest provides a single source of truth for split details, aiding
+          reproducibility and audit trails.
+        text: Persist split metadata to a JSON manifest file alongside the split datasets.
+      - complexity: LOW
+        impact: HIGH
+        method: Assert sum of sizes == sample_count; compute actual_ratios = [train/total,
+          val/total, test/total] and compare to split_ratios using numpy.isclose.
+        reason: Detects any off‑by‑one or rounding errors introduced during integer
+          boundary calculation.
+        text: Validate that the sum of train, validation, and test sizes equals the
+          original sample count, and that the split ratios match the expected values
+          within a tolerance of ±0.01.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Construct a dict with keys matching output_structure; cast values
+          to int, float, str, or list accordingly; perform final type validation.
+        reason: The downstream nodes consume these fields; type mismatches can cause
+          silent failures.
+        text: Return all output fields in the exact order specified by the output
+          structure, ensuring type compliance.
     prompt: Divide the preprocessed data into three distinct sets for training, validation,
       and testing, ensuring that the splits are representative of the overall data
       distribution.
   test_model:
     agent: false
-    description: Test the final model's performance on the test dataset.
+    description: This node evaluates a fine‑tuned language model against a held‑out
+      test set, calculating key performance metrics and determining whether the model
+      meets predefined quality thresholds.
     name: test_model
     nodes_depended_on:
     - fine_tune_model
@@ -284,11 +1060,11 @@ nodes:
     - description: Names of evaluation metrics computed on the test set, e.g., "perplexity",
         "accuracy".
       key: metric_names
-      type: List[str]
+      type: str
     - description: Numeric values corresponding to each metric in metric_names, in
         the same order.
       key: metric_values
-      type: List[float]
+      type: float
     - description: Number of samples in the test dataset.
       key: test_dataset_size
       type: int
@@ -298,6 +1074,80 @@ nodes:
     - description: True if all metrics fall within pre‑defined acceptable ranges.
       key: within_expected_range
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: LOW
+        method: Use os.path.exists() to confirm both paths, raise informative error
+          if missing.
+        reason: Ensures that downstream evaluation has the necessary inputs and prevents
+          runtime failures due to missing files.
+        text: Extract the fine‑tuned model file path and test dataset path from the
+          parent node fine_tune_model's output, and validate that both files exist
+          on disk before proceeding.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: torch.load(model_file_path), instantiate model class, call model.eval(),
+          load tokenizer from stored config.
+        reason: Consistent model state and tokenization are crucial for accurate metric
+          computation.
+        text: Load the fine‑tuned model into memory using the same deep‑learning framework
+          that produced it (e.g., PyTorch), set the model to evaluation mode, and
+          attach the tokenizer that was used during training.
+      - complexity: LOW
+        impact: LOW
+        method: Iterate over file lines, apply tokenizer.encode_plus(...), collect
+          input_ids and attention_masks.
+        reason: Tokenization must mirror training to preserve vocabulary alignment.
+        text: Read the test dataset file (JSONL, CSV, or TFRecord) and convert each
+          example into tokenized input IDs using the loaded tokenizer.
+      - complexity: LOW
+        impact: LOW
+        method: torch.utils.data.DataLoader(dataset, batch_size=config.batch_size,
+          shuffle=False).
+        reason: Batching improves inference throughput and memory usage.
+        text: Create a PyTorch DataLoader (or equivalent) for the test set with a
+          batch size derived from the original configuration, shuffling disabled for
+          deterministic evaluation.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'with torch.no_grad(): loss = criterion(logits.view(-1, vocab_size),
+          targets.view(-1)), accumulate loss sum, track correct predictions by comparing
+          argmax predictions to targets.'
+        reason: Collects the raw data needed to compute both perplexity and accuracy.
+        text: 'Run a no‑gradient inference loop: for each batch, compute logits, calculate
+          cross‑entropy loss, derive predicted token sequences, and aggregate correct
+          predictions to compute accuracy.'
+      - complexity: LOW
+        impact: LOW
+        method: accuracy = correct / total_tokens; perplexity = math.exp(total_loss
+          / total_tokens); metric_names = ['perplexity', 'accuracy']; metric_values
+          = [perplexity, accuracy].
+        reason: Matches the specified output schema and provides interpretable results.
+        text: 'After processing all batches, compute overall metrics: accuracy as
+          (correct / total), perplexity as exp(total_loss / total_tokens), and populate
+          metric_names and metric_values lists in the same order.'
+      - complexity: LOW
+        impact: LOW
+        method: test_dataset_size = len(dataset).
+        reason: Required field in output for downstream reporting.
+        text: Set test_dataset_size to the total number of examples in the test set
+          (len(dataset)).
+      - complexity: LOW
+        impact: LOW
+        method: 'try: <evaluation code> except Exception as e: evaluation_successful
+          = False; log error.'
+        reason: Guarantees that the node signals failure rather than crashing the
+          workflow.
+        text: Wrap the entire evaluation process in a try/except block; if any exception
+          occurs, set evaluation_successful to False and log the error stack trace.
+      - complexity: LOW
+        impact: LOW
+        method: within_expected_range = (perplexity <= 20.0) and (accuracy >= 0.75).
+        reason: Provides a quick pass/fail indicator for model quality.
+        text: Determine within_expected_range by comparing each metric against pre‑defined
+          thresholds (e.g., perplexity <= 20.0, accuracy >= 0.75). If all conditions
+          are satisfied, set the flag to True; otherwise, False.
     prompt: Evaluate the final model's performance on the test dataset to assess its
       generalizability and effectiveness.
   tokenize_data:
@@ -310,18 +1160,102 @@ nodes:
     output_structure:
     - description: Tokenized representation of each training sentence or document.
       key: tokenized_texts
-      type: List[str]
+      type: str
     - description: Unique tokens extracted from the tokenized data.
       key: vocabulary
-      type: List[str]
+      type: str
     - description: Total number of unique tokens in the vocabulary.
       key: vocab_size
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Use `open(file_path, 'r', encoding='utf-8')` and `read().splitlines()`
+          to create a list of strings.
+        reason: Ensuring the input is available in a consistent format is critical
+          before any tokenization logic can be applied.
+        text: Read the preprocessed dataset file from `preprocessed_data_path` provided
+          by the parent node and load it into memory as a list of raw text lines.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read env variable `TOKENIZATION_METHOD` with fallback to 'bpe'. Normalize
+          to lower case for consistency.
+        reason: Providing flexibility allows the workflow to adapt to different subword
+          strategies without code changes.
+        text: Select the tokenization algorithm based on a configuration flag (`tokenization_method`)
+          passed via environment variables or a config file (default to 'BPE' if unspecified).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'For BPE: `Tokenizer.from_pretrained(''bert-base-uncased'', use_fast=True)`
+          and adjust `tokenizer.pre_tokenizer` to `Whitespace()`. For WordPiece: use
+          `tokenizer.from_pretrained(''bert-base-uncased'')` and set `tokenizer.pre_tokenizer`
+          to `Whitespace()`. Configure `tokenizer.post_processor` to add special tokens
+          if required.'
+        reason: HuggingFace Tokenizers offers highly efficient, C++-backed implementations
+          suitable for large corpora.
+        text: 'Instantiate the chosen tokenizer using the HuggingFace Tokenizers library
+          (`tokenizers.Tokenizer` with `BPE` or `WordPiece` models). Configure essential
+          options: case sensitivity, unknown token handling, and pre-tokenizer to
+          split on whitespace.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Pass `files=[preprocessed_data_path]` and set `vocab_size` and `min_frequency`
+          parameters. Capture training logs for reproducibility.
+        reason: Training builds a subword vocabulary tailored to the dataset, improving
+          tokenization quality and downstream model performance.
+        text: Train the tokenizer on the loaded text corpus by invoking `tokenizer.train(files=...)`
+          with a specified vocabulary size (e.g., 32,000) and optional special tokens
+          (`[CLS]`, `[SEP]`, `[UNK]`, `[PAD]`).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Iterate over the text list: `for line in text_list: tokens = tokenizer.encode(line).tokens;
+          tokenized_texts.append('' ''.join(tokens))`.'
+        reason: Converting to token strings preserves readability for downstream processes
+          like vocabulary extraction and allows easier debugging.
+        text: Apply the trained tokenizer to every line in the corpus, converting
+          each raw text string into a list of token IDs and then back to token strings
+          using `tokenizer.decode`. Store these token strings in `tokenized_texts`
+          as space‑separated tokens.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Initialize an empty set and update it with `set.update(tokens.split())`
+          for each entry in `tokenized_texts`.
+        reason: Using a set guarantees uniqueness efficiently, which is critical for
+          building a correct vocabulary list.
+        text: Aggregate all tokens from `tokenized_texts` into a Python set to deduplicate
+          and extract the unique vocabulary.
+      - complexity: LOW
+        impact: LOW
+        method: Use `vocabulary = sorted(list(unique_tokens))` and `vocab_size = len(vocabulary)`.
+        reason: Sorting provides deterministic ordering which aids reproducibility
+          of downstream steps (e.g., creating embeddings).
+        text: Convert the set of unique tokens into a sorted list and assign it to
+          the `vocabulary` output. Compute `vocab_size` as the length of this list.
+      - complexity: LOW
+        impact: LOW
+        method: Call `tokenizer.save('tokenizer.json')` after training.
+        reason: Storing the trained tokenizer ensures consistency between tokenization
+          and vocabulary creation steps, preventing accidental drift.
+        text: Persist the tokenizer model and vocabulary to disk for later reuse in
+          the `create_vocabulary` node (e.g., `tokenizer.save('tokenizer.json')`).
+      - complexity: LOW
+        impact: HIGH
+        method: Implement assertion checks and structured logging via the `logging`
+          module.
+        reason: Early validation catches data pipeline issues before they propagate
+          to later stages like training.
+        text: Validate that `vocab_size` matches the length of the `vocabulary` list
+          and that `tokenized_texts` is non-empty; log any anomalies and raise an
+          exception if validation fails.
     prompt: Apply a tokenization algorithm (e.g., WordPiece, BPE) to the preprocessed
       training data to create a vocabulary of subwords or tokens.
   train_model:
     agent: false
-    description: Train the language model on the training dataset.
+    description: This node performs supervised training of the language model on the
+      split training dataset, applying gradient descent to reduce the training loss.
+      It also records key metrics (loss, perplexity, accuracy) and saves the trained
+      model checkpoint.
     name: train_model
     nodes_depended_on:
     - split_data
@@ -349,5 +1283,102 @@ nodes:
     - description: Indicates whether training completed successfully.
       key: training_status
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Check that split_data.train_data_path exists and is readable; confirm
+          initialize_model_weights.initialization_success is True. Log any failures
+          and set training_status=False immediately.
+        reason: Ensures that training does not proceed with missing or corrupted data,
+          preventing downstream failures.
+        text: Validate parent inputs and set up training environment.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a lightweight parser (e.g., TensorFlow's tf.data.TextLineDataset
+          or PyTorch's Dataset) to read the tokenized text file line by line, converting
+          each line into a tensor of token IDs using the vocabulary built in create_vocabulary.
+          Store the result in a PyTorch Dataset that returns `(input_ids, target_ids)`
+          pairs.
+        reason: Allows batched processing without disk I/O bottlenecks during training.
+        text: Load the training data from the file system into an efficient in‑memory
+          representation.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Retrieve model_type, number_of_layers, hidden_size, attention_heads,
+          and vocab_size from a persisted architecture file or from environment variables
+          set by define_model_architecture. Construct a `torch.nn.Module` subclass
+          (e.g., a Transformer) using `nn.TransformerEncoderLayer` repeated `number_of_layers`
+          times, with `hidden_size` and `attention_heads`. Initialize weights using
+          the method specified in initialize_model_weights.initialization_method.
+        reason: Creates a clean, correctly sized model ready for training.
+        text: Instantiate the model architecture based on the parameters provided
+          by initialize_model_weights (or via a configuration file).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Instantiate an AdamW optimizer with learning_rate from load_configuration.
+          Use a `StepLR` scheduler that decays the learning rate every `config['decay_step']`
+          epochs by factor `config['decay_gamma']`.
+        reason: Ensures consistency between training configuration and execution.
+        text: Prepare the optimizer and learning‑rate scheduler according to load_configuration
+          hyperparameters.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create DataLoader(dataset, batch_size=config['batch_size'], shuffle=True,
+          num_workers=4, pin_memory=True).
+        reason: Provides shuffling, batching, and parallel loading.
+        text: Wrap the dataset in a DataLoader with the batch_size from load_configuration,
+          using `torch.utils.data.DataLoader`.
+      - complexity: HIGH
+        impact: HIGH
+        method: "For each epoch in range(max_epochs):\n  set model.train();\n  for\
+          \ batch in dataloader:\n    inputs, targets = batch\n    outputs = model(inputs)\n\
+          \    loss = criterion(outputs.view(-1, vocab_size), targets.view(-1))\n\
+          \    optimizer.zero_grad()\n    loss.backward()\n    optimizer.step();\n\
+          \  scheduler.step();\n  record epoch_loss += loss.item() * batch_size."
+        reason: Core of the training process that optimizes model parameters.
+        text: 'Implement the training loop: iterate over epochs and batches, compute
+          loss, backpropagate, and update model weights.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: After the inner loop, calculate `epoch_loss / total_examples`. Perplexity
+          is `math.exp(epoch_loss / total_examples)` capped at a reasonable value
+          to avoid overflow. Accuracy is computed by comparing `outputs.argmax(dim=-1)`
+          with `targets` and summing correct predictions.
+        reason: Provides diagnostic information for each epoch and final metrics for
+          the output.
+        text: 'Compute epoch‑level metrics: loss average, perplexity (`exp(loss)`),
+          and accuracy.'
+      - complexity: LOW
+        impact: LOW
+        method: Wrap the entire epoch loop in `time.time()` start/stop calls, compute
+          `(stop - start) / 60` to get minutes.
+        reason: Necessary for reporting training performance and resource budgeting.
+        text: Measure and record training duration.
+      - complexity: LOW
+        impact: HIGH
+        method: Use `torch.save(model.state_dict(), output_path)` where output_path
+          is constructed from load_configuration.model_output_path + '/final_model.pt'.
+          Include metadata such as training_epochs, final_loss, etc.
+        reason: Ensures the trained model can be reused by downstream nodes such as
+          evaluate_model.
+        text: Save the trained model checkpoint to disk.
+      - complexity: LOW
+        impact: LOW
+        method: Create a dictionary with keys final_loss, final_perplexity, training_accuracy,
+          training_epochs, training_duration_minutes, model_path, training_status.
+          Populate each with the computed values; set training_status=True if no exceptions
+          were raised.
+        reason: Matches the expected output schema of the node.
+        text: Set the output fields according to the defined structure.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Wrap the training loop in a try/except block. On exception, log the
+          traceback, set training_status=False, and optionally write a partial checkpoint
+          if possible. Ensure that even in failure, the node returns a consistent
+          output structure.
+        reason: Prevents the entire DAG from crashing on transient errors and provides
+          clear diagnostics.
+        text: Implement robust exception handling and graceful failure reporting.
     prompt: Train the language model using the training dataset, optimizing the model's
       parameters to minimize the loss function over the training data.
