@@ -1,9 +1,103 @@
 dag_type: plain_text
-description: A workflow for creating a comprehensive pathophysiology model that integrates
-  anatomical systems, disease mechanisms, cellular processes, and clinical manifestations
-  into a cohesive framework.
+description: Generated workflow from UI.
 name: construct_pathophysiology_framework
 nodes:
+  analyze_cardiopulmonary_gas_exchange:
+    agent: false
+    description: Analyze gas exchange interactions between heart and lungs
+    name: analyze_cardiopulmonary_gas_exchange
+    nodes_depended_on:
+    - detail_cardiovascular_pathophysiology
+    - detail_respiratory_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze the gas exchange interactions between cardiovascular and respiratory
+      systems, focusing on oxygen delivery and carbon dioxide removal.
+  analyze_cardiopulmonary_hemodynamics:
+    agent: false
+    description: Analyze hemodynamic interactions between heart and lungs
+    name: analyze_cardiopulmonary_hemodynamics
+    nodes_depended_on:
+    - detail_cardiovascular_pathophysiology
+    - detail_respiratory_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze the hemodynamic interactions between cardiovascular and respiratory
+      systems, focusing on pulmonary circulation and venous return.
+  analyze_immunorenal_glomerular_function:
+    agent: false
+    description: Analyze immune-mediated glomerular pathology
+    name: analyze_immunorenal_glomerular_function
+    nodes_depended_on:
+    - detail_immune_pathophysiology
+    - detail_renal_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze immune-mediated glomerular diseases including complement activation,
+      immune complex deposition, and autoimmune glomerulonephritis.
+  analyze_immunorenal_inflammatory_responses:
+    agent: false
+    description: Analyze inflammatory responses in kidney disease
+    name: analyze_immunorenal_inflammatory_responses
+    nodes_depended_on:
+    - detail_immune_pathophysiology
+    - detail_renal_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze inflammatory responses in kidney disease including cytokine-mediated
+      injury and immune cell infiltration.
+  analyze_neuroendocrine_hypothalamic_function:
+    agent: false
+    description: Analyze hypothalamic control of endocrine function
+    name: analyze_neuroendocrine_hypothalamic_function
+    nodes_depended_on:
+    - detail_neurological_pathophysiology
+    - detail_endocrine_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze hypothalamic control mechanisms over endocrine function, including
+      releasing hormones and pituitary regulation.
+  analyze_neuroendocrine_stress_responses:
+    agent: false
+    description: Analyze stress response pathways involving neural and endocrine systems
+    name: analyze_neuroendocrine_stress_responses
+    nodes_depended_on:
+    - detail_neurological_pathophysiology
+    - detail_endocrine_pathophysiology
+    nodes_dependent_on: []
+    prompt: Analyze stress response pathways including hypothalamic-pituitary-adrenal
+      axis and sympathetic nervous system activation.
+  categorize_acute_diseases:
+    agent: false
+    description: Define characteristics of acute disease processes
+    name: categorize_acute_diseases
+    nodes_depended_on:
+    - establish_disease_categories
+    nodes_dependent_on: []
+    prompt: Define the characteristics of acute disease processes including rapid
+      onset, short duration, and immediate pathophysiological changes.
+  categorize_chronic_diseases:
+    agent: false
+    description: Define characteristics of chronic disease processes
+    name: categorize_chronic_diseases
+    nodes_depended_on:
+    - establish_disease_categories
+    nodes_dependent_on: []
+    prompt: Define the characteristics of chronic disease processes including gradual
+      onset, prolonged duration, and progressive pathophysiological changes.
+  categorize_system_anatomical_structures:
+    agent: false
+    description: Break down each system into anatomical components
+    name: categorize_system_anatomical_structures
+    nodes_depended_on:
+    - identify_anatomical_systems
+    nodes_dependent_on: []
+    prompt: For each identified anatomical system, list the major anatomical structures
+      and components that will be included in pathophysiology analysis.
+  categorize_system_physiological_functions:
+    agent: false
+    description: Define normal physiological functions for each system
+    name: categorize_system_physiological_functions
+    nodes_depended_on:
+    - categorize_system_anatomical_structures
+    nodes_dependent_on: []
+    prompt: For each anatomical system, define the normal physiological functions
+      and processes that occur within each anatomical component.
   compile_pathophysiology_compendium:
     agent: false
     description: Assemble all components into a comprehensive pathophysiology reference
@@ -19,116 +113,335 @@ nodes:
     description: Develop decision trees for differential diagnosis
     name: create_diagnostic_algorithms
     nodes_depended_on:
-    - map_clinical_manifestations
-    - establish_biomarker_framework
+    - create_differential_diagnosis_trees
+    - create_diagnostic_scoring_systems
     nodes_dependent_on: []
     prompt: Create diagnostic algorithms that use clinical manifestations and biomarkers
       to differentiate between various pathophysiological processes. Structure as
       decision trees with clear branching points.
+  create_diagnostic_scoring_systems:
+    agent: false
+    description: Develop scoring systems for disease diagnosis
+    name: create_diagnostic_scoring_systems
+    nodes_depended_on:
+    - map_clinical_manifestations
+    - establish_biomarker_framework
+    nodes_dependent_on: []
+    prompt: Create diagnostic scoring systems that weight different clinical manifestations
+      and biomarkers to calculate disease probability scores.
+  create_differential_diagnosis_trees:
+    agent: false
+    description: Develop decision trees for distinguishing between diseases
+    name: create_differential_diagnosis_trees
+    nodes_depended_on:
+    - map_clinical_manifestations
+    - establish_biomarker_framework
+    nodes_dependent_on: []
+    prompt: Create differential diagnosis decision trees that use clinical manifestations
+      and biomarkers to distinguish between similar disease presentations.
   create_temporal_progression_models:
     agent: false
     description: Define how diseases progress over time
     name: create_temporal_progression_models
     nodes_depended_on:
-    - establish_disease_categories
+    - define_decompensation_stages
     nodes_dependent_on: []
     prompt: Create models showing how different disease categories typically progress
       over time. Include acute vs chronic phases, compensatory mechanisms, and stages
       of decompensation.
-  define_cellular_mechanisms:
+  define_apoptotic_mechanisms:
     agent: false
-    description: Establish fundamental cellular and molecular processes
-    name: define_cellular_mechanisms
+    description: Establish programmed cell death pathways
+    name: define_apoptotic_mechanisms
+    nodes_depended_on:
+    - define_molecular_mechanisms
+    nodes_dependent_on: []
+    prompt: Define apoptotic mechanisms including caspase activation, mitochondrial
+      permeability transition, and DNA fragmentation pathways based on molecular processes.
+  define_cellular_metabolic_mechanisms:
+    agent: false
+    description: Establish cellular metabolic pathways and energy processes
+    name: define_cellular_metabolic_mechanisms
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Define the core cellular and molecular mechanisms that underlie pathological
-      processes (e.g., inflammation, apoptosis, oxidative stress, signal transduction).
-      List 10-15 mechanisms with brief descriptions.
+    prompt: Define cellular metabolic mechanisms including glycolysis disruption,
+      mitochondrial dysfunction, ATP depletion, and metabolic acidosis that underlie
+      disease processes.
+  define_cellular_signaling_mechanisms:
+    agent: false
+    description: Establish cellular communication and signaling pathways
+    name: define_cellular_signaling_mechanisms
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define cellular signaling mechanisms including receptor dysfunction, second
+      messenger systems, and intercellular communication pathways that contribute
+      to pathology.
+  define_cellular_transport_mechanisms:
+    agent: false
+    description: Establish cellular transport and membrane processes
+    name: define_cellular_transport_mechanisms
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define cellular transport mechanisms including active transport, passive
+      diffusion, endocytosis, and membrane permeability changes that contribute to
+      pathological states.
+  define_compensatory_mechanisms:
+    agent: false
+    description: Define physiological compensation in disease
+    name: define_compensatory_mechanisms
+    nodes_depended_on:
+    - categorize_acute_diseases
+    - categorize_chronic_diseases
+    nodes_dependent_on: []
+    prompt: Define physiological compensatory mechanisms that occur in response to
+      acute and chronic disease processes.
+  define_decompensation_stages:
+    agent: false
+    description: Define stages of physiological decompensation
+    name: define_decompensation_stages
+    nodes_depended_on:
+    - define_compensatory_mechanisms
+    nodes_dependent_on: []
+    prompt: Define the stages of physiological decompensation when compensatory mechanisms
+      fail, including early, intermediate, and late stages.
+  define_inflammatory_mechanisms:
+    agent: false
+    description: Establish inflammatory response pathways
+    name: define_inflammatory_mechanisms
+    nodes_depended_on:
+    - define_molecular_mechanisms
+    nodes_dependent_on: []
+    prompt: Define inflammatory mechanisms including complement activation, cytokine
+      cascades, and inflammatory mediator release based on established molecular processes.
+  define_molecular_mechanisms:
+    agent: false
+    description: Define fundamental molecular processes underlying pathology
+    name: define_molecular_mechanisms
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Define the core molecular mechanisms that underlie pathological processes,
+      including DNA damage, protein misfolding, metabolic disruption, and signal transduction
+      errors. List 8-10 mechanisms with brief descriptions.
+  define_oxidative_stress_mechanisms:
+    agent: false
+    description: Establish reactive oxygen species and antioxidant pathways
+    name: define_oxidative_stress_mechanisms
+    nodes_depended_on:
+    - define_cellular_metabolic_mechanisms
+    nodes_dependent_on: []
+    prompt: Define oxidative stress mechanisms including free radical generation,
+      antioxidant depletion, and lipid peroxidation based on cellular metabolic processes.
+  detail_cardiovascular_anatomy:
+    agent: false
+    description: Define cardiovascular anatomical components
+    name: detail_cardiovascular_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the cardiovascular system including
+      heart chambers, valves, major vessels, and coronary circulation.
   detail_cardiovascular_pathophysiology:
     agent: false
     description: Develop pathophysiology for cardiovascular system
     name: detail_cardiovascular_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_cardiovascular_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the cardiovascular system,
       incorporating relevant cellular mechanisms. Include hemodynamics, cardiac electrophysiology,
       vascular function, and common pathological states.
+  detail_cardiovascular_physiology:
+    agent: false
+    description: Define normal cardiovascular physiological processes
+    name: detail_cardiovascular_physiology
+    nodes_depended_on:
+    - detail_cardiovascular_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal cardiovascular physiology including cardiac cycle, hemodynamics,
+      blood pressure regulation, and cardiac output control.
+  detail_endocrine_anatomy:
+    agent: false
+    description: Define endocrine anatomical components
+    name: detail_endocrine_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the endocrine system including major
+      glands, hormone-producing tissues, and target organs.
   detail_endocrine_pathophysiology:
     agent: false
     description: Develop pathophysiology for endocrine system
     name: detail_endocrine_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_endocrine_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the endocrine system,
       incorporating relevant cellular mechanisms. Include hormone synthesis, receptor
       interactions, feedback loops, and common pathological states.
+  detail_endocrine_physiology:
+    agent: false
+    description: Define normal endocrine physiological processes
+    name: detail_endocrine_physiology
+    nodes_depended_on:
+    - detail_endocrine_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal endocrine physiology including hormone synthesis, secretion,
+      transport, receptor binding, and feedback regulation.
+  detail_gastrointestinal_anatomy:
+    agent: false
+    description: Define gastrointestinal anatomical components
+    name: detail_gastrointestinal_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the gastrointestinal system including
+      digestive tract segments, accessory organs, and gut barrier structures.
   detail_gastrointestinal_pathophysiology:
     agent: false
     description: Develop pathophysiology for digestive system
     name: detail_gastrointestinal_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_gastrointestinal_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the gastrointestinal system,
       incorporating relevant cellular mechanisms. Include digestion, absorption, gut
       barrier function, microbiome interactions, and common pathological states.
+  detail_gastrointestinal_physiology:
+    agent: false
+    description: Define normal gastrointestinal physiological processes
+    name: detail_gastrointestinal_physiology
+    nodes_depended_on:
+    - detail_gastrointestinal_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal gastrointestinal physiology including digestion, absorption,
+      motility, and barrier function.
+  detail_immune_anatomy:
+    agent: false
+    description: Define immune system anatomical components
+    name: detail_immune_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the immune system including primary
+      and secondary lymphoid organs, immune cell populations, and barrier tissues.
   detail_immune_pathophysiology:
     agent: false
     description: Develop pathophysiology for immune system
     name: detail_immune_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_immune_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the immune system, incorporating
       relevant cellular mechanisms. Include innate and adaptive immunity, inflammatory
       responses, immunodeficiency, and autoimmunity.
+  detail_immune_physiology:
+    agent: false
+    description: Define normal immune physiological processes
+    name: detail_immune_physiology
+    nodes_depended_on:
+    - detail_immune_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal immune physiology including innate immunity, adaptive immunity,
+      immune cell activation, and immune tolerance.
+  detail_neurological_anatomy:
+    agent: false
+    description: Define neurological anatomical components
+    name: detail_neurological_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the nervous system including brain
+      regions, spinal cord, peripheral nerves, and blood-brain barrier.
   detail_neurological_pathophysiology:
     agent: false
     description: Develop pathophysiology for nervous system
     name: detail_neurological_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_neurological_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the nervous system, incorporating
       relevant cellular mechanisms. Include neurotransmission, blood-brain barrier,
       neuroplasticity, and common pathological states.
+  detail_neurological_physiology:
+    agent: false
+    description: Define normal neurological physiological processes
+    name: detail_neurological_physiology
+    nodes_depended_on:
+    - detail_neurological_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal neurological physiology including neurotransmission, synaptic
+      function, action potential propagation, and neural plasticity.
+  detail_renal_anatomy:
+    agent: false
+    description: Define renal anatomical components
+    name: detail_renal_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the renal system including nephron
+      structure, vascular supply, and collecting system.
   detail_renal_pathophysiology:
     agent: false
     description: Develop pathophysiology for renal system
     name: detail_renal_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_renal_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the renal system, incorporating
       relevant cellular mechanisms. Include filtration, tubular function, acid-base
       balance, electrolyte homeostasis, and common pathological states.
+  detail_renal_physiology:
+    agent: false
+    description: Define normal renal physiological processes
+    name: detail_renal_physiology
+    nodes_depended_on:
+    - detail_renal_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal renal physiology including filtration, reabsorption, secretion,
+      and regulatory functions.
+  detail_respiratory_anatomy:
+    agent: false
+    description: Define respiratory anatomical components
+    name: detail_respiratory_anatomy
+    nodes_depended_on:
+    - integrate_system_interactions
+    nodes_dependent_on: []
+    prompt: Detail the anatomical components of the respiratory system including airways,
+      alveoli, pleura, and respiratory muscles.
   detail_respiratory_pathophysiology:
     agent: false
     description: Develop pathophysiology for respiratory system
     name: detail_respiratory_pathophysiology
     nodes_depended_on:
-    - identify_anatomical_systems
-    - define_cellular_mechanisms
+    - detail_respiratory_physiology
+    - integrate_cellular_mechanisms
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the respiratory system,
       incorporating relevant cellular mechanisms. Include gas exchange, ventilation
       mechanics, pulmonary circulation, and common pathological states.
+  detail_respiratory_physiology:
+    agent: false
+    description: Define normal respiratory physiological processes
+    name: detail_respiratory_physiology
+    nodes_depended_on:
+    - detail_respiratory_anatomy
+    nodes_dependent_on: []
+    prompt: Define normal respiratory physiology including ventilation mechanics,
+      gas exchange, oxygen transport, and respiratory control.
   develop_multisystem_disease_models:
     agent: false
     description: Create pathophysiology models for diseases affecting multiple systems
     name: develop_multisystem_disease_models
     nodes_depended_on:
-    - integrate_cardiopulmonary_interactions
-    - integrate_neuroendocrine_interactions
-    - integrate_immunorenal_interactions
+    - model_diabetes_multisystem
+    - model_sepsis_organ_failure
+    - model_heart_failure_multisystem
     nodes_dependent_on: []
     prompt: Develop comprehensive pathophysiology models for major multisystem diseases
       (e.g., diabetes, sepsis, heart failure, chronic kidney disease). Show how these
@@ -138,8 +451,9 @@ nodes:
     description: Define measurable indicators of pathological processes
     name: establish_biomarker_framework
     nodes_depended_on:
-    - define_cellular_mechanisms
-    - establish_disease_categories
+    - identify_laboratory_biomarkers
+    - identify_imaging_biomarkers
+    - identify_physiological_biomarkers
     nodes_dependent_on: []
     prompt: Establish a framework of biomarkers that can be used to detect and monitor
       pathological processes. Include laboratory values, imaging findings, and physiological
@@ -158,8 +472,9 @@ nodes:
     description: Identify potential intervention points in pathophysiological processes
     name: establish_therapeutic_targets
     nodes_depended_on:
-    - develop_multisystem_disease_models
-    - create_temporal_progression_models
+    - identify_molecular_therapeutic_targets
+    - identify_cellular_therapeutic_targets
+    - identify_system_therapeutic_targets
     nodes_dependent_on: []
     prompt: Identify key therapeutic targets within the pathophysiology framework.
       Map intervention points to specific molecular pathways, cellular processes,
@@ -173,26 +488,97 @@ nodes:
     prompt: List the primary anatomical systems that will be included in this pathophysiology
       (e.g., cardiovascular, respiratory, nervous, endocrine). Provide 8-12 systems
       with brief one-line functional descriptions.
+  identify_cellular_therapeutic_targets:
+    agent: false
+    description: Identify cellular-level intervention points
+    name: identify_cellular_therapeutic_targets
+    nodes_depended_on:
+    - develop_multisystem_disease_models
+    nodes_dependent_on: []
+    prompt: Identify cellular therapeutic targets including cell survival pathways,
+      metabolic processes, and cellular communication mechanisms.
+  identify_imaging_biomarkers:
+    agent: false
+    description: Define imaging-based disease indicators
+    name: identify_imaging_biomarkers
+    nodes_depended_on:
+    - integrate_cellular_mechanisms
+    - establish_disease_categories
+    nodes_dependent_on: []
+    prompt: Identify imaging biomarkers including radiological findings, ultrasound
+      changes, and other imaging indicators of pathological processes.
+  identify_laboratory_biomarkers:
+    agent: false
+    description: Define laboratory-based disease indicators
+    name: identify_laboratory_biomarkers
+    nodes_depended_on:
+    - integrate_cellular_mechanisms
+    - establish_disease_categories
+    nodes_dependent_on: []
+    prompt: Identify laboratory biomarkers including blood tests, urine tests, and
+      other fluid analyses that indicate pathological processes.
+  identify_molecular_therapeutic_targets:
+    agent: false
+    description: Identify molecular-level intervention points
+    name: identify_molecular_therapeutic_targets
+    nodes_depended_on:
+    - develop_multisystem_disease_models
+    nodes_dependent_on: []
+    prompt: Identify molecular therapeutic targets including specific proteins, enzymes,
+      receptors, and signaling molecules that can be targeted for intervention.
+  identify_physiological_biomarkers:
+    agent: false
+    description: Define physiological measurement-based disease indicators
+    name: identify_physiological_biomarkers
+    nodes_depended_on:
+    - integrate_cellular_mechanisms
+    - establish_disease_categories
+    nodes_dependent_on: []
+    prompt: Identify physiological biomarkers including vital signs, functional measurements,
+      and physiological parameters that indicate disease states.
+  identify_system_therapeutic_targets:
+    agent: false
+    description: Identify system-level intervention points
+    name: identify_system_therapeutic_targets
+    nodes_depended_on:
+    - develop_multisystem_disease_models
+    - create_temporal_progression_models
+    nodes_dependent_on: []
+    prompt: Identify system-level therapeutic targets including hemodynamic support,
+      ventilatory support, and organ function replacement strategies.
   integrate_cardiopulmonary_interactions:
     agent: false
     description: Model interactions between cardiovascular and respiratory systems
     name: integrate_cardiopulmonary_interactions
     nodes_depended_on:
-    - detail_cardiovascular_pathophysiology
-    - detail_respiratory_pathophysiology
-    - map_system_interactions
+    - analyze_cardiopulmonary_hemodynamics
+    - analyze_cardiopulmonary_gas_exchange
     nodes_dependent_on: []
     prompt: Integrate cardiovascular and respiratory pathophysiology frameworks, focusing
       on heart-lung interactions, pulmonary circulation, and combined cardiopulmonary
       diseases.
+  integrate_cellular_mechanisms:
+    agent: false
+    description: Combine all cellular mechanisms into unified framework
+    name: integrate_cellular_mechanisms
+    nodes_depended_on:
+    - define_cellular_transport_mechanisms
+    - define_cellular_metabolic_mechanisms
+    - define_cellular_signaling_mechanisms
+    - define_inflammatory_mechanisms
+    - define_apoptotic_mechanisms
+    - define_oxidative_stress_mechanisms
+    nodes_dependent_on: []
+    prompt: Integrate all defined cellular mechanisms into a unified framework showing
+      how transport, metabolic, signaling, inflammatory, apoptotic, and oxidative
+      stress mechanisms interact.
   integrate_immunorenal_interactions:
     agent: false
     description: Model interactions between immune and renal systems
     name: integrate_immunorenal_interactions
     nodes_depended_on:
-    - detail_immune_pathophysiology
-    - detail_renal_pathophysiology
-    - map_system_interactions
+    - analyze_immunorenal_glomerular_function
+    - analyze_immunorenal_inflammatory_responses
     nodes_dependent_on: []
     prompt: Integrate immune and renal pathophysiology frameworks, focusing on glomerulonephritis,
       autoimmune kidney disease, and immune-mediated renal injury.
@@ -201,40 +587,214 @@ nodes:
     description: Model interactions between nervous and endocrine systems
     name: integrate_neuroendocrine_interactions
     nodes_depended_on:
-    - detail_neurological_pathophysiology
-    - detail_endocrine_pathophysiology
-    - map_system_interactions
+    - analyze_neuroendocrine_hypothalamic_function
+    - analyze_neuroendocrine_stress_responses
     nodes_dependent_on: []
     prompt: Integrate neurological and endocrine pathophysiology frameworks, focusing
       on hypothalamic-pituitary axes, stress responses, and neuroendocrine disorders.
+  integrate_system_interactions:
+    agent: false
+    description: Combine all system interaction types into unified model
+    name: integrate_system_interactions
+    nodes_depended_on:
+    - map_system_interaction_hormonal
+    - map_system_interaction_neural
+    - map_system_interaction_mechanical
+    nodes_dependent_on: []
+    prompt: Integrate hormonal, neural, and mechanical system interactions into a
+      comprehensive model of inter-system communication and regulation.
   map_clinical_manifestations:
     agent: false
     description: Connect pathophysiological processes to observable symptoms and signs
     name: map_clinical_manifestations
     nodes_depended_on:
-    - establish_biomarker_framework
+    - map_symptom_manifestations
+    - map_physical_examination_findings
+    - map_diagnostic_test_results
     nodes_dependent_on: []
     prompt: Create a comprehensive mapping between pathophysiological processes and
       their clinical manifestations. Include symptoms, physical examination findings,
       and diagnostic test results.
-  map_system_interactions:
+  map_diagnostic_test_results:
     agent: false
-    description: Define how anatomical systems interact with each other
-    name: map_system_interactions
+    description: Connect pathophysiology to diagnostic test abnormalities
+    name: map_diagnostic_test_results
     nodes_depended_on:
-    - identify_anatomical_systems
+    - establish_biomarker_framework
     nodes_dependent_on: []
-    prompt: Create an interaction matrix showing how the identified anatomical systems
-      influence each other. Focus on key regulatory pathways, feedback loops, and
-      compensatory mechanisms.
+    prompt: Map pathophysiological processes to diagnostic test results including
+      laboratory values, imaging findings, and functional test abnormalities.
+  map_physical_examination_findings:
+    agent: false
+    description: Connect pathophysiology to physical examination signs
+    name: map_physical_examination_findings
+    nodes_depended_on:
+    - establish_biomarker_framework
+    nodes_dependent_on: []
+    prompt: Map pathophysiological processes to physical examination findings including
+      inspection, palpation, percussion, and auscultation findings.
+  map_symptom_manifestations:
+    agent: false
+    description: Connect pathophysiology to patient symptoms
+    name: map_symptom_manifestations
+    nodes_depended_on:
+    - establish_biomarker_framework
+    nodes_dependent_on: []
+    prompt: Map pathophysiological processes to patient-reported symptoms including
+      pain, dyspnea, fatigue, and functional limitations.
+  map_system_interaction_hormonal:
+    agent: false
+    description: Define hormonal interactions between systems
+    name: map_system_interaction_hormonal
+    nodes_depended_on:
+    - map_system_interaction_pathways
+    nodes_dependent_on: []
+    prompt: Detail the hormonal signaling pathways that connect different anatomical
+      systems, including hormone sources, targets, and effects.
+  map_system_interaction_mechanical:
+    agent: false
+    description: Define mechanical interactions between systems
+    name: map_system_interaction_mechanical
+    nodes_depended_on:
+    - map_system_interaction_pathways
+    nodes_dependent_on: []
+    prompt: Detail the mechanical interactions between anatomical systems, including
+      pressure relationships, structural support, and physical constraints.
+  map_system_interaction_neural:
+    agent: false
+    description: Define neural interactions between systems
+    name: map_system_interaction_neural
+    nodes_depended_on:
+    - map_system_interaction_pathways
+    nodes_dependent_on: []
+    prompt: Detail the neural control mechanisms that coordinate different anatomical
+      systems, including autonomic and central nervous system pathways.
+  map_system_interaction_pathways:
+    agent: false
+    description: Define specific pathways of inter-system communication
+    name: map_system_interaction_pathways
+    nodes_depended_on:
+    - categorize_system_physiological_functions
+    nodes_dependent_on: []
+    prompt: Map the specific communication pathways, feedback loops, and regulatory
+      mechanisms between different anatomical systems.
+  model_diabetes_cardiovascular_effects:
+    agent: false
+    description: Model cardiovascular complications of diabetes
+    name: model_diabetes_cardiovascular_effects
+    nodes_depended_on:
+    - integrate_cardiopulmonary_interactions
+    - integrate_neuroendocrine_interactions
+    nodes_dependent_on: []
+    prompt: Model the cardiovascular complications of diabetes including atherosclerosis,
+      cardiomyopathy, and vascular dysfunction.
+  model_diabetes_multisystem:
+    agent: false
+    description: Create comprehensive diabetes disease model
+    name: model_diabetes_multisystem
+    nodes_depended_on:
+    - model_diabetes_cardiovascular_effects
+    - model_diabetes_renal_effects
+    - model_diabetes_neurological_effects
+    nodes_dependent_on: []
+    prompt: Create a comprehensive multisystem disease model for diabetes showing
+      how it affects cardiovascular, renal, and neurological systems simultaneously.
+  model_diabetes_neurological_effects:
+    agent: false
+    description: Model neurological complications of diabetes
+    name: model_diabetes_neurological_effects
+    nodes_depended_on:
+    - integrate_neuroendocrine_interactions
+    nodes_dependent_on: []
+    prompt: Model the neurological complications of diabetes including diabetic neuropathy,
+      autonomic dysfunction, and central nervous system effects.
+  model_diabetes_renal_effects:
+    agent: false
+    description: Model renal complications of diabetes
+    name: model_diabetes_renal_effects
+    nodes_depended_on:
+    - integrate_neuroendocrine_interactions
+    - integrate_immunorenal_interactions
+    nodes_dependent_on: []
+    prompt: Model the renal complications of diabetes including diabetic nephropathy,
+      glomerular damage, and progressive kidney dysfunction.
+  model_heart_failure_multisystem:
+    agent: false
+    description: Create comprehensive heart failure disease model
+    name: model_heart_failure_multisystem
+    nodes_depended_on:
+    - integrate_cardiopulmonary_interactions
+    - integrate_neuroendocrine_interactions
+    nodes_dependent_on: []
+    prompt: Create a comprehensive multisystem disease model for heart failure showing
+      effects on cardiovascular, respiratory, renal, and neuroendocrine systems.
+  model_sepsis_hemodynamic_effects:
+    agent: false
+    description: Model hemodynamic dysfunction in sepsis
+    name: model_sepsis_hemodynamic_effects
+    nodes_depended_on:
+    - integrate_cardiopulmonary_interactions
+    nodes_dependent_on: []
+    prompt: Model hemodynamic dysfunction in sepsis including distributive shock,
+      cardiac depression, and microcirculatory dysfunction.
+  model_sepsis_immune_effects:
+    agent: false
+    description: Model immune system dysfunction in sepsis
+    name: model_sepsis_immune_effects
+    nodes_depended_on:
+    - integrate_cardiopulmonary_interactions
+    - integrate_immunorenal_interactions
+    nodes_dependent_on: []
+    prompt: Model immune system dysfunction in sepsis including inflammatory cascade
+      activation, immune suppression, and organ-specific immune effects.
+  model_sepsis_organ_failure:
+    agent: false
+    description: Model multiple organ failure in sepsis
+    name: model_sepsis_organ_failure
+    nodes_depended_on:
+    - model_sepsis_immune_effects
+    - model_sepsis_hemodynamic_effects
+    nodes_dependent_on: []
+    prompt: Model multiple organ failure in sepsis showing how immune and hemodynamic
+      dysfunction leads to organ system failure.
+  validate_framework_completeness:
+    agent: false
+    description: Ensure all pathophysiology components are included
+    name: validate_framework_completeness
+    nodes_depended_on:
+    - develop_multisystem_disease_models
+    - establish_therapeutic_targets
+    - create_diagnostic_algorithms
+    nodes_dependent_on: []
+    prompt: Validate that the pathophysiology framework includes all necessary components
+      and covers all major disease categories and organ systems.
+  validate_framework_consistency:
+    agent: false
+    description: Ensure internal logic consistency across components
+    name: validate_framework_consistency
+    nodes_depended_on:
+    - develop_multisystem_disease_models
+    - establish_therapeutic_targets
+    - create_diagnostic_algorithms
+    nodes_dependent_on: []
+    prompt: Validate the internal consistency of the pathophysiology framework, ensuring
+      that all components follow logical relationships and scientific principles.
+  validate_framework_gaps:
+    agent: false
+    description: Identify and address gaps in pathophysiology coverage
+    name: validate_framework_gaps
+    nodes_depended_on:
+    - validate_framework_completeness
+    - validate_framework_consistency
+    nodes_dependent_on: []
+    prompt: Identify any gaps or missing elements in the pathophysiology framework
+      and propose solutions to address these deficiencies.
   validate_pathophysiology_coherence:
     agent: false
     description: Ensure internal consistency across all pathophysiology components
     name: validate_pathophysiology_coherence
     nodes_depended_on:
-    - develop_multisystem_disease_models
-    - establish_therapeutic_targets
-    - create_diagnostic_algorithms
+    - validate_framework_gaps
     nodes_dependent_on: []
     prompt: Review the integrated pathophysiology framework for internal consistency,
       logical flow, and coherence. Identify any contradictions or gaps and propose
