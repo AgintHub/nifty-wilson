@@ -4,8 +4,10 @@ name: write_historical_fiction_book_comedic_with_additional_chapters
 nodes:
   create_story_outline:
     agent: false
-    description: Craft a comedic outline for a Civil‑War historical fiction novel
-      featuring a North‑bound protagonist and the ghost of George Washington.
+    description: Generates a witty, historically grounded outline for a Civil‑War
+      period novel featuring a North‑bound protagonist and the mischievous ghost of
+      George Washington. The outline balances sharp humor, detailed character arcs,
+      and key Civil‑War battles while maintaining narrative cohesion.
     name: create_story_outline
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -26,47 +28,97 @@ nodes:
     - description: A short overview of each main character’s arc and comedic flaw.
       key: character_overview
       type: List[str]
-    prompt: Using your comedic research, draft a detailed outline for a Civil‑War
-      historical fiction novel. The protagonist is a North‑bound soldier, guided by
-      the mischievous ghost of George Washington, who offers sarcastic counsel at
-      every turn. Include absurd character arcs—an over‑enthusiastic Union scout,
-      a time‑confused sidekick, and Washington’s spectral pop‑ups—alongside key Civil
-      War battles such as Gettysburg, Antietam, and Vicksburg. For each event, weave
-      a punchy joke or plot twist that will have readers snort. Keep the outline cohesive,
-      ensuring each chapter escalates the humor while still honoring the historical
-      context.
+    prompt: 'Using your comedic research and deep knowledge of Civil‑War history,
+      craft a chapter‑by‑chapter outline for a satirical historical‑fiction novel.
+      The story centers on a North‑bound Union soldier guided by the mischievous,
+      sarcastic ghost of George Washington. For each chapter, provide:
+
+
+      1. **chapter_titles** – a witty title that hints at the chapter’s event.
+
+      2. **chapter_descriptions** – a concise narrative of the main plot point.
+
+      3. **chapter_battles** – the Civil‑War battle referenced (if any).
+
+      4. **chapter_jokes** – a punchline or twist that will make readers snort.
+
+      5. **character_overview** – a short arc and comedic flaw for each key character.
+
+
+      **Special emphasis**: Chapter 3 must be an exceptionally detailed exploration
+      of character development. Include exhaustive motivations, back‑stories, and
+      evolving relationships for the protagonist, the Union scout, the time‑confused
+      sidekick, and Washington’s spectral pop‑ups. Ensure the outline remains cohesive,
+      historically respectful, and escalates humor through the narrative arc. Do not
+      alter any other instructions or fields.'
   develop_character_profiles:
     agent: false
-    description: Generate whimsical, historically flavored character profiles for
-      the comedic Civil War narrative.
+    description: Generates richly detailed, whimsical, historically flavored character
+      profiles for Chapter 3 of a comedic Civil War narrative, emphasizing deep character
+      development while preserving humor and historical ties.
     name: develop_character_profiles
     nodes_depended_on: []
     nodes_dependent_on: []
     output_structure:
-    - description: Ordered list of character names, used to map each profile field
+    - description: Ordered list of character names.
       key: character_names
       type: List[str]
-    - description: Background description for each character
+    - description: Detailed background narrative for each character.
       key: character_backgrounds
       type: List[str]
-    - description: Motivation statement for each character
+    - description: Internal motivation driving each character’s actions.
       key: character_motivations
       type: List[str]
-    - description: Comedic flaw description for each character
+    - description: Humorous flaw or quirk for each character.
       key: character_comedic_flaws
       type: List[str]
-    - description: One‑line joke that encapsulates each character's humor
+    - description: One‑line joke that encapsulates each character’s humor.
       key: character_jokes
       type: List[str]
-    prompt: Using the humorous historical facts from the Revolutionary War provided
-      by the previous node, create quirky profiles for the main characters of a Civil
-      War story. For each character include Background, Motivation, Comedic flaw,
-      and a one‑line joke. Ensure the protagonist is a Northern soldier and that George
-      Washington appears as a spectral advisor. Format each profile as a short paragraph,
-      using the structure above and preserving the comedic twist.
+    prompt: 'You are creating an exceptionally detailed, whimsical, historically flavored
+      character profile sheet for Chapter 3 of a comedic Civil War narrative. Using
+      the humorous Revolutionary‑War facts supplied earlier, write richly textured
+      profiles for each main character. Each profile must include:
+
+
+      1. **Background** – a vivid history that ties the character to both the Civil
+      War era and the earlier Revolutionary‑War humor, with specific formative events,
+      quirks, and historical nods.
+
+      2. **Motivation** – a deeply personal drive that fuels the character’s actions
+      in this chapter, hinting at internal conflict or a comic twist.
+
+      3. **Comedic flaw** – a humorous quirk or idiosyncrasy that generates situational
+      comedy.
+
+      4. **One‑line joke** – a punchy line that encapsulates the character’s humor.
+
+
+      The protagonist must be a Northern soldier whose arc centers on redemption and
+      comic misadventures. George Washington must appear as a spectral advisor, offering
+      sage yet sarcastic counsel. Each profile should be a short paragraph that follows
+      the structure above, maintaining the comedic twist while providing exhaustive
+      depth. Format each profile exactly as:
+
+
+      "**Name**: [Name]
+
+      **Background**: ...
+
+      **Motivation**: ...
+
+      **Comedic flaw**: ...
+
+      **Joke**: ..."
+
+
+      Return the results in the output format below.'
   edit_and_revise:
     agent: false
-    description: Polish the manuscript, ensuring continuity, pacing, and humor.
+    description: Deepen relationships and escalation with comedic stakes, while providing
+      an intensive focus on character development. This node builds nuanced, detailed
+      character arcs and interpersonal dynamics, ensuring each character is richly
+      portrayed and evolves throughout the chapter.
     name: edit_and_revise
     nodes_depended_on:
     - write_chapter_1
@@ -78,44 +130,46 @@ nodes:
     - write_chapter_7
     nodes_dependent_on: []
     output_structure:
-    - description: The complete, polished manuscript text after editing.
-      key: finalManuscript
+    - description: The sequential number of the chapter.
+      key: chapter_number
+      type: int
+    - description: A short, descriptive title for the chapter.
+      key: chapter_title
       type: str
-    - description: List of chapter titles in the final manuscript in order.
-      key: chapterTitles
+    - description: The full narrative text of the chapter.
+      key: chapter_text
+      type: str
+    - description: A brief description of the joke from Chapter 1 that is referenced
+        or twisted in this chapter.
+      key: joke_reference
+      type: str
+    - description: List of one‑liner sarcastic remarks delivered by the ghost of George
+        Washington in this chapter.
+      key: ghost_sarcasm_lines
       type: List[str]
-    - description: A concise summary of the major changes, edits, and humor adjustments
-        made.
-      key: changesSummary
-      type: str
-    - description: True if the manuscript demonstrates narrative continuity and pacing
-        consistency.
-      key: isConsistent
-      type: bool
-    - description: True if all dates, battles, and military terminology are accurate
-        for the Civil War era.
-      key: isHistoricallyAccurate
-      type: bool
-    prompt: Read Chapters 1–7 and perform a comprehensive edit that ensures narrative
-      coherence, sharp comedic timing, and factual accuracy for the Civil War era.
-      Confirm that the protagonist is a Northern soldier, that the Ghost of George
-      Washington makes a playful, spectral appearance in each chapter, and that all
-      dates, battles, and military terminology reflect Civil War realities. Refine
-      pacing, punchlines, and dialogue to maximize humor while preserving the story’s
-      historical integrity. Deliver a polished manuscript ready for the final publication
-      stage.
+    prompt: Compose the third chapter of our Civil War‑era historical comedy. Show
+      how the protagonist’s interactions with his squad evolve, with a particular
+      emphasis on rich, character‑driven storytelling. Include detailed internal monologues,
+      backstories, and interpersonal dynamics that illustrate growth and change. Introduce
+      a battlefield mishap that turns absurdly humorous, referencing a joke from Chapter 1
+      and twisting it. Include the ghost of George Washington offering sarcastic wisdom
+      and a one‑liner that ties into the story’s humor. Maintain continuity, keep
+      the tone consistent, and end with a punchline that circles back to the opening
+      gag.
   fact_check:
     agent: false
-    description: Ensure Chapter 3 is historically accurate.
+    description: Performs a comprehensive fact‑checking of Chapter 3, ensuring historical
+      accuracy of all Civil War‑era details, verifying the depth of character development,
+      and maintaining comedic integrity.
     name: fact_check
     nodes_depended_on:
     - write_chapter_3
     nodes_dependent_on: []
     output_structure:
-    - description: Indicates if Chapter 3 adheres to Civil War history.
+    - description: Indicates whether Chapter 3 adheres to Civil War historical facts.
       key: is_historically_accurate
       type: bool
-    - description: Percent of historical accuracy (0-100).
+    - description: Overall percentage of historical accuracy (0‑100).
       key: accuracy_percentage
       type: int
     - description: List of identified inaccuracies with brief details.
@@ -125,10 +179,12 @@ nodes:
       key: subtle_joke
       type: str
     prompt: Fact‑check Chapter 3 for strict adherence to Civil War history while preserving
-      its comedic heart. Verify dates, locations, units, and the protagonist’s Union
-      identity. Keep the ghostly cameo historically plausible as a playful anachronism.
-      Sprinkle a subtle joke that history loves to surprise even the dead. Keep the
-      tone light and witty.
+      its comedic heart, and verify that the chapter delivers deeply detailed character
+      development as demanded by the narrative. Verify dates, locations, units, the
+      protagonist’s Union identity, and the evolution of squad relationships. Ensure
+      the ghostly cameo is historically plausible as a playful anachronism. Sprinkle
+      a subtle joke that history loves to surprise even the dead. Keep the tone light
+      and witty.
   write_chapter_1:
     agent: false
     description: Compose a witty, historically grounded opening chapter.
@@ -159,7 +215,12 @@ nodes:
       light‑hearted and punchy.
   write_chapter_2:
     agent: false
-    description: Continue the story with comedic progression.
+    description: Continue the story with a comedic crescendo, building on the tone
+      of chapter one, deepening the bond between the spirited Union soldier and the
+      sardonic ghost of George Washington. Weave absurd military wisdom, escalating
+      humor, and deliver a satisfying payoff to the joke planted earlier. The chapter
+      should further develop character dynamics while maintaining the light‑hearted,
+      punchy style.
     name: write_chapter_2
     nodes_depended_on:
     - create_story_outline
@@ -177,15 +238,21 @@ nodes:
         and comedic beats.
       key: chapter_text
       type: str
-    prompt: Continue the story in chapter two, advancing the plot while keeping the
-      humor rolling. The setting is the American Civil War and the protagonist is
-      a spirited Union soldier. The ghost of George Washington haunts the battlefield,
-      offering absurdly sage military advice and poking fun at the era’s tropes. Reference
-      the joke planted in chapter one and twist it in a clever, punchy way that delivers
-      a comedic payoff.
+    prompt: Write Chapter Two of the novel, advancing the plot with escalating comedy.
+      Keep the setting at the American Civil War. The protagonist, a spirited Union
+      soldier, encounters the ghost of George Washington who offers absurd yet oddly
+      wise military advice. Ensure the ghost's commentary pokes fun at period tropes
+      and plays off the joke that was planted in Chapter One. Twist that joke in a
+      clever, punchy way that culminates in a comedic payoff. Include lively dialogue,
+      vivid battlefield descriptions, and comedic beats that maintain the light‑hearted,
+      punchy style of the opening chapter. Expand on character dynamics, show the
+      soldier's reactions to Washington’s advice, and deepen the comedic relationship
+      between them.
   write_chapter_3:
     agent: false
-    description: Deepen relationships and escalation with comedic stakes.
+    description: Deepen and intricately develop character relationships and comedic
+      escalation, focusing on detailed evolution of personalities and interactions
+      within the squad.
     name: write_chapter_3
     nodes_depended_on:
     - create_story_outline
@@ -210,12 +277,17 @@ nodes:
         Washington in this chapter.
       key: ghost_sarcasm_lines
       type: List[str]
-    prompt: Compose the third chapter of our Civil War‑era historical comedy. Show
-      how the protagonist’s interactions with his squad evolve. Introduce a battlefield
-      mishap that turns absurdly humorous, referencing a joke from Chapter 1 and twisting
-      it. Include the ghost of George Washington offering sarcastic wisdom and a one‑liner
-      that ties into the story’s humor. Maintain continuity, keep the tone consistent,
-      and end with a punchline that circles back to the opening gag.
+    prompt: Write chapter 3 of our Civil War‑era historical comedy. Focus on detailed,
+      nuanced development of the protagonist’s relationships with his squad, highlighting
+      each character’s quirks, motivations, and evolving comedic flaws. Show how the
+      protagonist’s interactions with his fellow soldiers deepen and change in response
+      to shared mishaps, camaraderie, and conflict, providing vivid inner monologue
+      and dialogue. Introduce a battlefield mishap that escalates into an absurdly
+      humorous spectacle, cleverly referencing and twisting the joke planted in Chapter 1.
+      Include the ghost of George Washington offering sarcastic, sage military advice
+      and deliver one‑liners that weave seamlessly into the comedic fabric. Maintain
+      continuity, a consistent comedic tone, and conclude with a punchline that circles
+      back to the opening gag, tying the chapter together with a satisfying callback.
   write_chapter_4:
     agent: false
     description: Introduce a new comedic scenario building on previous jokes.
@@ -246,7 +318,13 @@ nodes:
       accuracy, and character dynamics.
   write_chapter_5:
     agent: false
-    description: Escalate the stakes with a humorous twist on leadership.
+    description: Elevate the narrative stakes by positioning the protagonist as a
+      newly minted temporary lieutenant thrust into the chaos of a disorganized Union
+      regiment. Through the spectral guidance of George Washington, who offers humorously
+      anachronistic wisdom, the story explores leadership under pressure while maintaining
+      a sharp comedic edge. The chapter weaves in a persistent bureaucratic gag that
+      builds on earlier jokes, culminating in a punchline that resurrects the recurring
+      comedic motif introduced in Chapter 3.
     name: write_chapter_5
     nodes_depended_on:
     - create_story_outline
@@ -258,11 +336,19 @@ nodes:
         jokes, and any necessary chapter metadata.
       key: chapter_text
       type: str
-    prompt: Write chapter 5. The protagonist is promoted to temporary lieutenant but
-      must manage a disorganized Union regiment. The ghost of George Washington appears
-      as a comedic mentor, advising on how to keep morale high. Incorporate a running
-      joke about military bureaucracy, referencing earlier chapters, and deliver a
-      punchline that re‑introduces a comedic element from chapter 3.
+    prompt: Write Chapter 5 in full. The protagonist is now a temporary lieutenant
+      tasked with restoring order to a chaotic Union regiment. He must learn how to
+      command, inspire, and keep the soldiers from mutiny, all while juggling the
+      absurdities of 19th‑century military bureaucracy. A ghostly apparition of George
+      Washington appears as a comedic mentor, dispensing modern, sarcastic advice
+      that clashes with Civil‑War norms and offers unexpected tactical insight. Include
+      a running joke about bureaucratic paperwork—such as endless forms for a simple
+      parade—that references the jokes introduced in earlier chapters. The chapter
+      must develop the protagonist’s character arc, reinforce the comedic tone, and
+      deliver a punchline that resurrects the recurring comedic motif from Chapter 3
+      (e.g., the soldier’s inexplicable fascination with pocket calculators). Format
+      the entire chapter—including title, narrative, dialogue, jokes, and the final
+      punchline—as a single string.
   write_chapter_6:
     agent: false
     description: Build tension with a comedic battlefield miscommunication.
