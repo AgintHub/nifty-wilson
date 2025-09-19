@@ -1,10 +1,41 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: train_large_language_model
 nodes:
   allocate_resources:
     agent: false
+    code_node_type: stub
     description: Reserve the necessary hardware resources.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass LoadConfigurationOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for load_configuration node outputs.\"\"\"\n    config_valid:\
+      \ bool = Field(..., description=\"Whether the configuration passed validation\
+      \ checks\")\n    error_messages: str = Field(..., description=\"List of validation\
+      \ error messages, empty if config_valid is true\")\n    max_epochs: int = Field(...,\
+      \ description=\"Number of training epochs specified in the configuration\")\n\
+      \    batch_size: int = Field(..., description=\"Batch size for training specified\
+      \ in the configuration\")\n    learning_rate: float = Field(..., description=\"\
+      Learning rate for optimizer as specified in the configuration\")\n    data_path:\
+      \ str = Field(..., description=\"File system path to the training data\")\n\
+      \    model_output_path: str = Field(..., description=\"File system path where\
+      \ the trained model checkpoints will be stored\")\n    config_version: str =\
+      \ Field(..., description=\"Version identifier for the configuration file\")\n\
+      \    project_name: str = Field(..., description=\"Name of the project as defined\
+      \ in the configuration\")\n\n\nclass AllocateResourcesOutput(BaseModel):\n \
+      \   \"\"\"Pydantic model for allocate_resources node outputs.\"\"\"\n    gpu_count:\
+      \ int = Field(..., description=\"Number of GPUs allocated for training.\")\n\
+      \    gpu_type: str = Field(..., description=\"Model or type of GPU allocated\
+      \ (e.g., V100, A100).\")\n    memory_gb: float = Field(..., description=\"Total\
+      \ GPU memory in gigabytes allocated.\")\n    allocation_success: bool = Field(...,\
+      \ description=\"Indicates whether the resource allocation was successful.\"\
+      )\n\n\ndef allocate_resources(load_configuration_input: LoadConfigurationOutput,\
+      \ **kwargs) -> AllocateResourcesOutput:\n    \"\"\"Reserve the necessary hardware\
+      \ resources.\n\n    Args:\n        load_configuration_input: Input from the\
+      \ 'load_configuration' node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        AllocateResourcesOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return AllocateResourcesOutput(\n\
+      \        gpu_count=0,\n        gpu_type=\"\",\n        memory_gb=0.0,\n    \
+      \    allocation_success=False,\n    )"
     name: allocate_resources
     nodes_depended_on:
     - load_configuration
@@ -86,10 +117,34 @@ nodes:
           purposes.
     prompt: Allocate computing resources such as GPUs and memory required for training
       the model.
+    shims: []
   create_vocabulary:
     agent: false
+    code_node_type: stub
     description: Creates a unique token list (vocabulary) from the tokenized training
       data, records token frequencies, and validates the result.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass TokenizeDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for tokenize_data node outputs.\"\"\"\n    tokenized_texts:\
+      \ str = Field(..., description=\"Tokenized representation of each training sentence\
+      \ or document.\")\n    vocabulary: str = Field(..., description=\"Unique tokens\
+      \ extracted from the tokenized data.\")\n    vocab_size: int = Field(..., description=\"\
+      Total number of unique tokens in the vocabulary.\")\n\n\nclass CreateVocabularyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_vocabulary node outputs.\"\"\"\n    vocabulary:\
+      \ str = Field(..., description=\"List of unique tokens constituting the vocabulary.\"\
+      )\n    token_frequencies: int = Field(..., description=\"Frequency count for\
+      \ each corresponding token in the vocabulary list.\")\n    vocab_size: int =\
+      \ Field(..., description=\"Total number of unique tokens in the vocabulary.\"\
+      )\n    is_valid: bool = Field(..., description=\"Whether the vocabulary creation\
+      \ was successful.\")\n\n\ndef create_vocabulary(tokenize_data_input: TokenizeDataOutput,\
+      \ **kwargs) -> CreateVocabularyOutput:\n    \"\"\"Creates a unique token list\
+      \ (vocabulary) from the tokenized training data, records token frequencies,\
+      \ and validates the result.\n\n    Args:\n        tokenize_data_input: Input\
+      \ from the 'tokenize_data' node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        CreateVocabularyOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return CreateVocabularyOutput(\n\
+      \        vocabulary=\"\",\n        token_frequencies=0,\n        vocab_size=0,\n\
+      \        is_valid=False,\n    )"
     name: create_vocabulary
     nodes_depended_on:
     - tokenize_data
@@ -174,9 +229,48 @@ nodes:
         text: Return the output structure exactly as defined, ensuring type consistency.
     prompt: Compile a vocabulary of unique tokens from the tokenized data, considering
       frequency and relevance for the language model.
+    shims: []
   define_model_architecture:
     agent: false
+    code_node_type: stub
     description: Define the architecture and configuration of the large language model.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CreateVocabularyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_vocabulary node outputs.\"\"\"\n    vocabulary:\
+      \ str = Field(..., description=\"List of unique tokens constituting the vocabulary.\"\
+      )\n    token_frequencies: int = Field(..., description=\"Frequency count for\
+      \ each corresponding token in the vocabulary list.\")\n    vocab_size: int =\
+      \ Field(..., description=\"Total number of unique tokens in the vocabulary.\"\
+      )\n    is_valid: bool = Field(..., description=\"Whether the vocabulary creation\
+      \ was successful.\")\n\n\nclass AllocateResourcesOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for allocate_resources node outputs.\"\"\"\n    gpu_count:\
+      \ int = Field(..., description=\"Number of GPUs allocated for training.\")\n\
+      \    gpu_type: str = Field(..., description=\"Model or type of GPU allocated\
+      \ (e.g., V100, A100).\")\n    memory_gb: float = Field(..., description=\"Total\
+      \ GPU memory in gigabytes allocated.\")\n    allocation_success: bool = Field(...,\
+      \ description=\"Indicates whether the resource allocation was successful.\"\
+      )\n\n\nclass DefineModelArchitectureOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for define_model_architecture node outputs.\"\"\"\n    model_type: str = Field(...,\
+      \ description=\"Name or type of the model architecture (e.g., 'Transformer').\"\
+      )\n    number_of_layers: int = Field(..., description=\"Total number of transformer\
+      \ layers in the model.\")\n    hidden_size: int = Field(..., description=\"\
+      Dimensionality of each transformer hidden layer.\")\n    attention_heads: int\
+      \ = Field(..., description=\"Number of attention heads per transformer layer.\"\
+      )\n    vocab_size: int = Field(..., description=\"Size of the vocabulary derived\
+      \ from the tokenized data.\")\n    max_sequence_length: int = Field(..., description=\"\
+      Maximum token sequence length supported by the model.\")\n    total_parameters:\
+      \ int = Field(..., description=\"Estimated total number of trainable parameters\
+      \ in the model.\")\n\n\ndef define_model_architecture(create_vocabulary_input:\
+      \ CreateVocabularyOutput, allocate_resources_input: AllocateResourcesOutput,\
+      \ **kwargs) -> DefineModelArchitectureOutput:\n    \"\"\"Define the architecture\
+      \ and configuration of the large language model.\n\n    Args:\n        create_vocabulary_input:\
+      \ Input from the 'create_vocabulary' node.\n        allocate_resources_input:\
+      \ Input from the 'allocate_resources' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        DefineModelArchitectureOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DefineModelArchitectureOutput(\n\
+      \        model_type=\"\",\n        number_of_layers=0,\n        hidden_size=0,\n\
+      \        attention_heads=0,\n        vocab_size=0,\n        max_sequence_length=0,\n\
+      \        total_parameters=0,\n    )"
     name: define_model_architecture
     nodes_depended_on:
     - create_vocabulary
@@ -287,11 +381,40 @@ nodes:
     prompt: Specify the architecture of the language model, including the number of
       layers, hidden size, and attention heads, based on the created vocabulary and
       desired model capabilities.
+    shims: []
   evaluate_model:
     agent: false
+    code_node_type: stub
     description: Evaluate the trained language model on the validation set, producing
       key metrics such as perplexity, accuracy, cross‑entropy loss, and the number
       of samples evaluated.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass TrainModelOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for train_model node outputs.\"\"\"\n    final_loss:\
+      \ float = Field(..., description=\"Final training loss after the last epoch.\"\
+      )\n    final_perplexity: float = Field(..., description=\"Final training perplexity\
+      \ after the last epoch.\")\n    training_accuracy: float = Field(..., description=\"\
+      Training accuracy expressed as a percentage.\")\n    training_epochs: int =\
+      \ Field(..., description=\"Total number of training epochs performed.\")\n \
+      \   training_duration_minutes: float = Field(..., description=\"Total training\
+      \ duration in minutes.\")\n    model_path: str = Field(..., description=\"Filesystem\
+      \ path to the final model checkpoint.\")\n    training_status: bool = Field(...,\
+      \ description=\"Indicates whether training completed successfully.\")\n\n\n\
+      class EvaluateModelOutput(BaseModel):\n    \"\"\"Pydantic model for evaluate_model\
+      \ node outputs.\"\"\"\n    perplexity: float = Field(..., description=\"Perplexity\
+      \ metric calculated on the validation dataset.\")\n    accuracy: float = Field(...,\
+      \ description=\"Accuracy percentage on the validation dataset.\")\n    cross_entropy_loss:\
+      \ float = Field(..., description=\"Cross\\u2011entropy loss value on the validation\
+      \ dataset.\")\n    validation_samples: int = Field(..., description=\"Total\
+      \ number of samples evaluated in the validation set.\")\n\n\ndef evaluate_model(train_model_input:\
+      \ TrainModelOutput, **kwargs) -> EvaluateModelOutput:\n    \"\"\"Evaluate the\
+      \ trained language model on the validation set, producing key metrics such as\
+      \ perplexity, accuracy, cross‑entropy loss, and the number of samples evaluated.\n\
+      \n    Args:\n        train_model_input: Input from the 'train_model' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        EvaluateModelOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ EvaluateModelOutput(\n        perplexity=0.0,\n        accuracy=0.0,\n   \
+      \     cross_entropy_loss=0.0,\n        validation_samples=0,\n    )"
     name: evaluate_model
     nodes_depended_on:
     - train_model
@@ -382,11 +505,41 @@ nodes:
           structure, serializing them as JSON.
     prompt: Assess the trained model's performance on the validation dataset, using
       metrics relevant to language understanding tasks (e.g., perplexity, accuracy).
+    shims: []
   fine_tune_model:
     agent: false
+    code_node_type: stub
     description: Fine‑tune the base language model using a task‑specific dataset to
       improve downstream performance. The node consumes evaluation metrics from the
       base model and produces a fine‑tuned checkpoint along with training statistics.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass EvaluateModelOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for evaluate_model node outputs.\"\"\"\n    perplexity:\
+      \ float = Field(..., description=\"Perplexity metric calculated on the validation\
+      \ dataset.\")\n    accuracy: float = Field(..., description=\"Accuracy percentage\
+      \ on the validation dataset.\")\n    cross_entropy_loss: float = Field(...,\
+      \ description=\"Cross\\u2011entropy loss value on the validation dataset.\"\
+      )\n    validation_samples: int = Field(..., description=\"Total number of samples\
+      \ evaluated in the validation set.\")\n\n\nclass FineTuneModelOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for fine_tune_model node outputs.\"\"\"\n    model_file_path:\
+      \ str = Field(..., description=\"Filesystem path to the fine\\u2011tuned model\
+      \ checkpoint.\")\n    fine_tuning_successful: bool = Field(..., description=\"\
+      Indicates whether the fine\\u2011tuning process completed without errors.\"\
+      )\n    num_fine_tuning_epochs: int = Field(..., description=\"Number of epochs\
+      \ used during fine\\u2011tuning.\")\n    final_training_loss: float = Field(...,\
+      \ description=\"Loss value on the training set after fine\\u2011tuning.\")\n\
+      \    final_validation_perplexity: float = Field(..., description=\"Perplexity\
+      \ on the validation set after fine\\u2011tuning.\")\n\n\ndef fine_tune_model(evaluate_model_input:\
+      \ EvaluateModelOutput, **kwargs) -> FineTuneModelOutput:\n    \"\"\"Fine‑tune\
+      \ the base language model using a task‑specific dataset to improve downstream\
+      \ performance. The node consumes evaluation metrics from the base model and\
+      \ produces a fine‑tuned checkpoint along with training statistics.\n\n    Args:\n\
+      \        evaluate_model_input: Input from the 'evaluate_model' node.\n     \
+      \   **kwargs: Additional keyword arguments.\n\n    Returns:\n        FineTuneModelOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ FineTuneModelOutput(\n        model_file_path=\"\",\n        fine_tuning_successful=False,\n\
+      \        num_fine_tuning_epochs=0,\n        final_training_loss=0.0,\n     \
+      \   final_validation_perplexity=0.0,\n    )"
     name: fine_tune_model
     nodes_depended_on:
     - evaluate_model
@@ -519,9 +672,40 @@ nodes:
           to a log file located alongside the checkpoint for traceability.
     prompt: Optionally fine‑tune the trained model on specific downstream tasks or
       datasets to enhance its performance on those tasks.
+    shims: []
   initialize_model_weights:
     agent: false
+    code_node_type: stub
     description: Initialize the weights of the defined model architecture.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineModelArchitectureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_model_architecture node outputs.\"\"\"\n\
+      \    model_type: str = Field(..., description=\"Name or type of the model architecture\
+      \ (e.g., 'Transformer').\")\n    number_of_layers: int = Field(..., description=\"\
+      Total number of transformer layers in the model.\")\n    hidden_size: int =\
+      \ Field(..., description=\"Dimensionality of each transformer hidden layer.\"\
+      )\n    attention_heads: int = Field(..., description=\"Number of attention heads\
+      \ per transformer layer.\")\n    vocab_size: int = Field(..., description=\"\
+      Size of the vocabulary derived from the tokenized data.\")\n    max_sequence_length:\
+      \ int = Field(..., description=\"Maximum token sequence length supported by\
+      \ the model.\")\n    total_parameters: int = Field(..., description=\"Estimated\
+      \ total number of trainable parameters in the model.\")\n\n\nclass InitializeModelWeightsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for initialize_model_weights node outputs.\"\"\"\n\
+      \    initialization_success: bool = Field(..., description=\"Whether the weight\
+      \ initialization completed successfully\")\n    num_parameters: int = Field(...,\
+      \ description=\"Total number of trainable parameters in the model\")\n    initialization_method:\
+      \ str = Field(..., description=\"Method used for weight initialization (e.g.,\
+      \ 'random', 'xavier', 'pretrained')\")\n    architecture_signature: str = Field(...,\
+      \ description=\"Hash or unique string representing the model architecture configuration\"\
+      )\n\n\ndef initialize_model_weights(define_model_architecture_input: DefineModelArchitectureOutput,\
+      \ **kwargs) -> InitializeModelWeightsOutput:\n    \"\"\"Initialize the weights\
+      \ of the defined model architecture.\n\n    Args:\n        define_model_architecture_input:\
+      \ Input from the 'define_model_architecture' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        InitializeModelWeightsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ InitializeModelWeightsOutput(\n        initialization_success=False,\n   \
+      \     num_parameters=0,\n        initialization_method=\"\",\n        architecture_signature=\"\
+      \",\n    )"
     name: initialize_model_weights
     nodes_depended_on:
     - define_model_architecture
@@ -612,9 +796,46 @@ nodes:
           a meaningful error message in the logs.
     prompt: Initialize the model's weights using an appropriate method (e.g., random
       initialization, pre-trained weights), preparing the model for training.
+    shims: []
   load_configuration:
     agent: false
+    code_node_type: stub
     description: Read and validate project configuration.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SetupEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_environment node outputs.\"\"\"\n    environment_ready:\
+      \ bool = Field(..., description=\"Whether the environment was set up successfully.\"\
+      )\n    installed_packages: str = Field(..., description=\"List of package names\
+      \ that were installed during setup.\")\n    installed_package_versions: str\
+      \ = Field(..., description=\"Corresponding package versions for installed packages.\"\
+      )\n    configured_paths: str = Field(..., description=\"List of system paths\
+      \ that were configured (e.g., PATH, PYTHONPATH).\")\n    environment_variables:\
+      \ str = Field(..., description=\"List of environment variable names that were\
+      \ set.\")\n    setup_log: str = Field(..., description=\"A log string summarizing\
+      \ the setup process.\")\n\n\nclass LoadConfigurationOutput(BaseModel):\n   \
+      \ \"\"\"Pydantic model for load_configuration node outputs.\"\"\"\n    config_valid:\
+      \ bool = Field(..., description=\"Whether the configuration passed validation\
+      \ checks\")\n    error_messages: str = Field(..., description=\"List of validation\
+      \ error messages, empty if config_valid is true\")\n    max_epochs: int = Field(...,\
+      \ description=\"Number of training epochs specified in the configuration\")\n\
+      \    batch_size: int = Field(..., description=\"Batch size for training specified\
+      \ in the configuration\")\n    learning_rate: float = Field(..., description=\"\
+      Learning rate for optimizer as specified in the configuration\")\n    data_path:\
+      \ str = Field(..., description=\"File system path to the training data\")\n\
+      \    model_output_path: str = Field(..., description=\"File system path where\
+      \ the trained model checkpoints will be stored\")\n    config_version: str =\
+      \ Field(..., description=\"Version identifier for the configuration file\")\n\
+      \    project_name: str = Field(..., description=\"Name of the project as defined\
+      \ in the configuration\")\n\n\ndef load_configuration(setup_environment_input:\
+      \ SetupEnvironmentOutput, **kwargs) -> LoadConfigurationOutput:\n    \"\"\"\
+      Read and validate project configuration.\n\n    Args:\n        setup_environment_input:\
+      \ Input from the 'setup_environment' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        LoadConfigurationOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return LoadConfigurationOutput(\n\
+      \        config_valid=False,\n        error_messages=\"\",\n        max_epochs=0,\n\
+      \        batch_size=0,\n        learning_rate=0.0,\n        data_path=\"\",\n\
+      \        model_output_path=\"\",\n        config_version=\"\",\n        project_name=\"\
+      \",\n    )"
     name: load_configuration
     nodes_depended_on:
     - setup_environment
@@ -720,9 +941,27 @@ nodes:
           of any defaulted or error values.
     prompt: Load configuration parameters from the project settings, ensuring all
       hyperparameters and paths are correctly specified.
+    shims: []
   prepare_training_data:
     agent: false
+    code_node_type: stub
     description: Collect and preprocess the dataset for training the language model.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass PrepareTrainingDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for prepare_training_data node outputs.\"\"\"\n  \
+      \  preprocessed_data_path: str = Field(..., description=\"File system path to\
+      \ the preprocessed training dataset\")\n    sample_count: int = Field(..., description=\"\
+      Total number of training samples in the dataset\")\n    token_count: int = Field(...,\
+      \ description=\"Total number of tokens after preprocessing\")\n    is_valid:\
+      \ bool = Field(..., description=\"Indicates whether the preprocessing was successful\
+      \ and the dataset is ready for further steps\")\n\n\ndef prepare_training_data(general_input:\
+      \ str, **kwargs) -> PrepareTrainingDataOutput:\n    \"\"\"Collect and preprocess\
+      \ the dataset for training the language model.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        PrepareTrainingDataOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return PrepareTrainingDataOutput(\n\
+      \        preprocessed_data_path=\"\",\n        sample_count=0,\n        token_count=0,\n\
+      \        is_valid=False,\n    )"
     name: prepare_training_data
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -807,11 +1046,35 @@ nodes:
     prompt: Gather a large corpus of text data suitable for training a language model.
       Ensure the data is diverse and representative of the desired language understanding
       tasks.
+    shims: []
   setup_environment:
     agent: false
+    code_node_type: stub
     description: Prepare the runtime environment for the workflow by ensuring that
       all required libraries are installed, appropriate system paths are configured,
       and environment variables are set for subsequent nodes.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SetupEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_environment node outputs.\"\"\"\n    environment_ready:\
+      \ bool = Field(..., description=\"Whether the environment was set up successfully.\"\
+      )\n    installed_packages: str = Field(..., description=\"List of package names\
+      \ that were installed during setup.\")\n    installed_package_versions: str\
+      \ = Field(..., description=\"Corresponding package versions for installed packages.\"\
+      )\n    configured_paths: str = Field(..., description=\"List of system paths\
+      \ that were configured (e.g., PATH, PYTHONPATH).\")\n    environment_variables:\
+      \ str = Field(..., description=\"List of environment variable names that were\
+      \ set.\")\n    setup_log: str = Field(..., description=\"A log string summarizing\
+      \ the setup process.\")\n\n\ndef setup_environment(general_input: str, **kwargs)\
+      \ -> SetupEnvironmentOutput:\n    \"\"\"Prepare the runtime environment for\
+      \ the workflow by ensuring that all required libraries are installed, appropriate\
+      \ system paths are configured, and environment variables are set for subsequent\
+      \ nodes.\n\n    Args:\n        general_input: General input string for the root\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SetupEnvironmentOutput: Object containing outputs for this node.\n \
+      \   \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SetupEnvironmentOutput(\n        environment_ready=False,\n\
+      \        installed_packages=\"\",\n        installed_package_versions=\"\",\n\
+      \        configured_paths=\"\",\n        environment_variables=\"\",\n     \
+      \   setup_log=\"\",\n    )"
     name: setup_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -921,9 +1184,41 @@ nodes:
           set to `False` and populate `error_messages` (embedded in `setup_log`).
     prompt: Set up the execution environment, installing necessary libraries and configuring
       paths.
+    shims: []
   split_data:
     agent: false
+    code_node_type: stub
     description: Split the preprocessed data into training, validation, and test sets.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass PrepareTrainingDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for prepare_training_data node outputs.\"\"\"\n  \
+      \  preprocessed_data_path: str = Field(..., description=\"File system path to\
+      \ the preprocessed training dataset\")\n    sample_count: int = Field(..., description=\"\
+      Total number of training samples in the dataset\")\n    token_count: int = Field(...,\
+      \ description=\"Total number of tokens after preprocessing\")\n    is_valid:\
+      \ bool = Field(..., description=\"Indicates whether the preprocessing was successful\
+      \ and the dataset is ready for further steps\")\n\n\nclass SplitDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for split_data node outputs.\"\"\"\n    train_set_size:\
+      \ int = Field(..., description=\"Number of examples in the training set\")\n\
+      \    validation_set_size: int = Field(..., description=\"Number of examples\
+      \ in the validation set\")\n    test_set_size: int = Field(..., description=\"\
+      Number of examples in the test set\")\n    train_data_path: str = Field(...,\
+      \ description=\"Filesystem path to the training dataset file\")\n    validation_data_path:\
+      \ str = Field(..., description=\"Filesystem path to the validation dataset file\"\
+      )\n    test_data_path: str = Field(..., description=\"Filesystem path to the\
+      \ test dataset file\")\n    split_ratios: float = Field(..., description=\"\
+      Ratios used for splitting the data, in order [train, validation, test]\")\n\
+      \    split_seed: int = Field(..., description=\"Random seed used for reproducibility\
+      \ during splitting\")\n\n\ndef split_data(prepare_training_data_input: PrepareTrainingDataOutput,\
+      \ **kwargs) -> SplitDataOutput:\n    \"\"\"Split the preprocessed data into\
+      \ training, validation, and test sets.\n\n    Args:\n        prepare_training_data_input:\
+      \ Input from the 'prepare_training_data' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SplitDataOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return SplitDataOutput(\n\
+      \        train_set_size=0,\n        validation_set_size=0,\n        test_set_size=0,\n\
+      \        train_data_path=\"\",\n        validation_data_path=\"\",\n       \
+      \ test_data_path=\"\",\n        split_ratios=0.0,\n        split_seed=0,\n \
+      \   )"
     name: split_data
     nodes_depended_on:
     - prepare_training_data
@@ -1047,11 +1342,43 @@ nodes:
     prompt: Divide the preprocessed data into three distinct sets for training, validation,
       and testing, ensuring that the splits are representative of the overall data
       distribution.
+    shims: []
   test_model:
     agent: false
+    code_node_type: stub
     description: This node evaluates a fine‑tuned language model against a held‑out
       test set, calculating key performance metrics and determining whether the model
       meets predefined quality thresholds.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass FineTuneModelOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for fine_tune_model node outputs.\"\"\"\n    model_file_path:\
+      \ str = Field(..., description=\"Filesystem path to the fine\\u2011tuned model\
+      \ checkpoint.\")\n    fine_tuning_successful: bool = Field(..., description=\"\
+      Indicates whether the fine\\u2011tuning process completed without errors.\"\
+      )\n    num_fine_tuning_epochs: int = Field(..., description=\"Number of epochs\
+      \ used during fine\\u2011tuning.\")\n    final_training_loss: float = Field(...,\
+      \ description=\"Loss value on the training set after fine\\u2011tuning.\")\n\
+      \    final_validation_perplexity: float = Field(..., description=\"Perplexity\
+      \ on the validation set after fine\\u2011tuning.\")\n\n\nclass TestModelOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for test_model node outputs.\"\"\"\n    metric_names:\
+      \ str = Field(..., description=\"Names of evaluation metrics computed on the\
+      \ test set, e.g., \\\"perplexity\\\", \\\"accuracy\\\".\")\n    metric_values:\
+      \ float = Field(..., description=\"Numeric values corresponding to each metric\
+      \ in metric_names, in the same order.\")\n    test_dataset_size: int = Field(...,\
+      \ description=\"Number of samples in the test dataset.\")\n    evaluation_successful:\
+      \ bool = Field(..., description=\"Whether the evaluation process completed without\
+      \ errors.\")\n    within_expected_range: bool = Field(..., description=\"True\
+      \ if all metrics fall within pre\\u2011defined acceptable ranges.\")\n\n\ndef\
+      \ test_model(fine_tune_model_input: FineTuneModelOutput, **kwargs) -> TestModelOutput:\n\
+      \    \"\"\"This node evaluates a fine‑tuned language model against a held‑out\
+      \ test set, calculating key performance metrics and determining whether the\
+      \ model meets predefined quality thresholds.\n\n    Args:\n        fine_tune_model_input:\
+      \ Input from the 'fine_tune_model' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        TestModelOutput: Object containing outputs\
+      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return TestModelOutput(\n       \
+      \ metric_names=\"\",\n        metric_values=0.0,\n        test_dataset_size=0,\n\
+      \        evaluation_successful=False,\n        within_expected_range=False,\n\
+      \    )"
     name: test_model
     nodes_depended_on:
     - fine_tune_model
@@ -1150,9 +1477,32 @@ nodes:
           are satisfied, set the flag to True; otherwise, False.
     prompt: Evaluate the final model's performance on the test dataset to assess its
       generalizability and effectiveness.
+    shims: []
   tokenize_data:
     agent: false
+    code_node_type: stub
     description: Tokenize the prepared training data into subwords or tokens.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass PrepareTrainingDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for prepare_training_data node outputs.\"\"\"\n  \
+      \  preprocessed_data_path: str = Field(..., description=\"File system path to\
+      \ the preprocessed training dataset\")\n    sample_count: int = Field(..., description=\"\
+      Total number of training samples in the dataset\")\n    token_count: int = Field(...,\
+      \ description=\"Total number of tokens after preprocessing\")\n    is_valid:\
+      \ bool = Field(..., description=\"Indicates whether the preprocessing was successful\
+      \ and the dataset is ready for further steps\")\n\n\nclass TokenizeDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for tokenize_data node outputs.\"\"\"\n    tokenized_texts:\
+      \ str = Field(..., description=\"Tokenized representation of each training sentence\
+      \ or document.\")\n    vocabulary: str = Field(..., description=\"Unique tokens\
+      \ extracted from the tokenized data.\")\n    vocab_size: int = Field(..., description=\"\
+      Total number of unique tokens in the vocabulary.\")\n\n\ndef tokenize_data(prepare_training_data_input:\
+      \ PrepareTrainingDataOutput, **kwargs) -> TokenizeDataOutput:\n    \"\"\"Tokenize\
+      \ the prepared training data into subwords or tokens.\n\n    Args:\n       \
+      \ prepare_training_data_input: Input from the 'prepare_training_data' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        TokenizeDataOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ TokenizeDataOutput(\n        tokenized_texts=\"\",\n        vocabulary=\"\"\
+      ,\n        vocab_size=0,\n    )"
     name: tokenize_data
     nodes_depended_on:
     - prepare_training_data
@@ -1250,12 +1600,57 @@ nodes:
           exception if validation fails.
     prompt: Apply a tokenization algorithm (e.g., WordPiece, BPE) to the preprocessed
       training data to create a vocabulary of subwords or tokens.
+    shims: []
   train_model:
     agent: false
+    code_node_type: stub
     description: This node performs supervised training of the language model on the
       split training dataset, applying gradient descent to reduce the training loss.
       It also records key metrics (loss, perplexity, accuracy) and saves the trained
       model checkpoint.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SplitDataOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for split_data node outputs.\"\"\"\n    train_set_size:\
+      \ int = Field(..., description=\"Number of examples in the training set\")\n\
+      \    validation_set_size: int = Field(..., description=\"Number of examples\
+      \ in the validation set\")\n    test_set_size: int = Field(..., description=\"\
+      Number of examples in the test set\")\n    train_data_path: str = Field(...,\
+      \ description=\"Filesystem path to the training dataset file\")\n    validation_data_path:\
+      \ str = Field(..., description=\"Filesystem path to the validation dataset file\"\
+      )\n    test_data_path: str = Field(..., description=\"Filesystem path to the\
+      \ test dataset file\")\n    split_ratios: float = Field(..., description=\"\
+      Ratios used for splitting the data, in order [train, validation, test]\")\n\
+      \    split_seed: int = Field(..., description=\"Random seed used for reproducibility\
+      \ during splitting\")\n\n\nclass InitializeModelWeightsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for initialize_model_weights node outputs.\"\"\"\n\
+      \    initialization_success: bool = Field(..., description=\"Whether the weight\
+      \ initialization completed successfully\")\n    num_parameters: int = Field(...,\
+      \ description=\"Total number of trainable parameters in the model\")\n    initialization_method:\
+      \ str = Field(..., description=\"Method used for weight initialization (e.g.,\
+      \ 'random', 'xavier', 'pretrained')\")\n    architecture_signature: str = Field(...,\
+      \ description=\"Hash or unique string representing the model architecture configuration\"\
+      )\n\n\nclass TrainModelOutput(BaseModel):\n    \"\"\"Pydantic model for train_model\
+      \ node outputs.\"\"\"\n    final_loss: float = Field(..., description=\"Final\
+      \ training loss after the last epoch.\")\n    final_perplexity: float = Field(...,\
+      \ description=\"Final training perplexity after the last epoch.\")\n    training_accuracy:\
+      \ float = Field(..., description=\"Training accuracy expressed as a percentage.\"\
+      )\n    training_epochs: int = Field(..., description=\"Total number of training\
+      \ epochs performed.\")\n    training_duration_minutes: float = Field(..., description=\"\
+      Total training duration in minutes.\")\n    model_path: str = Field(..., description=\"\
+      Filesystem path to the final model checkpoint.\")\n    training_status: bool\
+      \ = Field(..., description=\"Indicates whether training completed successfully.\"\
+      )\n\n\ndef train_model(split_data_input: SplitDataOutput, initialize_model_weights_input:\
+      \ InitializeModelWeightsOutput, **kwargs) -> TrainModelOutput:\n    \"\"\"This\
+      \ node performs supervised training of the language model on the split training\
+      \ dataset, applying gradient descent to reduce the training loss. It also records\
+      \ key metrics (loss, perplexity, accuracy) and saves the trained model checkpoint.\n\
+      \n    Args:\n        split_data_input: Input from the 'split_data' node.\n \
+      \       initialize_model_weights_input: Input from the 'initialize_model_weights'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       TrainModelOutput: Object containing outputs for this node.\n    \"\"\
+      \"\n    # TODO: Implement this function\n\n    # Return stub output with placeholder\
+      \ values\n    return TrainModelOutput(\n        final_loss=0.0,\n        final_perplexity=0.0,\n\
+      \        training_accuracy=0.0,\n        training_epochs=0,\n        training_duration_minutes=0.0,\n\
+      \        model_path=\"\",\n        training_status=False,\n    )"
     name: train_model
     nodes_depended_on:
     - split_data
@@ -1382,3 +1777,4 @@ nodes:
         text: Implement robust exception handling and graceful failure reporting.
     prompt: Train the language model using the training dataset, optimizing the model's
       parameters to minimize the loss function over the training data.
+    shims: []
