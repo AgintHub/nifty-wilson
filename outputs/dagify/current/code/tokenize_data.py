@@ -1,3 +1,18 @@
+from ._tokenize_data.load_text_file import load_text_file
+from ._tokenize_data.get_tokenization_method import get_tokenization_method
+from ._tokenize_data.create_huggingface_tokenizer import create_huggingface_tokenizer
+from ._tokenize_data.train_tokenizer import train_tokenizer
+from ._tokenize_data.tokenize_text_lines import tokenize_text_lines
+from ._tokenize_data.extract_unique_tokens import extract_unique_tokens
+from ._tokenize_data.create_sorted_vocabulary import create_sorted_vocabulary
+from ._tokenize_data.save_tokenizer import save_tokenizer
+from ._tokenize_data.validate_tokenization_results import validate_tokenization_results
+from ._tokenize_data.format_tokenized_texts import format_tokenized_texts
+from ._tokenize_data.format_vocabulary import format_vocabulary
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Read the preprocessed dataset file from `preprocessed_data_path` provided by
 #   the parent node and load it into memory as a list of raw text lines.
@@ -99,7 +114,6 @@
 #   Method: Implement assertion checks and structured logging via the `logging` module.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class PrepareTrainingDataOutput(BaseModel):
@@ -127,11 +141,48 @@ def tokenize_data(prepare_training_data_input: PrepareTrainingDataOutput, **kwar
     Returns:
         TokenizeDataOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Load preprocessed dataset file into memory as list of text lines
+    text_lines: list[str] = load_text_file(file_path=prepare_training_data_input.preprocessed_data_path)
+    
+    # Get tokenization method from environment/config with BPE as default
+    tokenization_method: str = get_tokenization_method(default="bpe")
+    
+    # Instantiate and configure the chosen tokenizer
+    tokenizer = create_huggingface_tokenizer(method=tokenization_method)
+    
+    # Train the tokenizer on the loaded text corpus
+    train_tokenizer(
+        tokenizer=tokenizer, 
+        file_path=prepare_training_data_input.preprocessed_data_path,
+        vocab_size=32000
+    )
+    
+    # Apply trained tokenizer to convert text lines to tokenized strings
+    tokenized_texts_list: list[str] = tokenize_text_lines(tokenizer=tokenizer, text_lines=text_lines)
+    
+    # Extract unique vocabulary from all tokenized texts
+    unique_tokens_set: set[str] = extract_unique_tokens(tokenized_texts=tokenized_texts_list)
+    
+    # Convert to sorted vocabulary list and compute size
+    vocabulary_list: list[str] = create_sorted_vocabulary(unique_tokens=unique_tokens_set)
+    vocab_size: int = len(vocabulary_list)
+    
+    # Persist tokenizer model to disk for reuse
+    save_tokenizer(tokenizer=tokenizer, output_path="tokenizer.json")
+    
+    # Validate outputs and log any anomalies
+    validate_tokenization_results(
+        vocabulary=vocabulary_list,
+        vocab_size=vocab_size,
+        tokenized_texts=tokenized_texts_list
+    )
+    
+    # Convert lists to string format for output
+    tokenized_texts_str: str = format_tokenized_texts(tokenized_texts=tokenized_texts_list)
+    vocabulary_str: str = format_vocabulary(vocabulary=vocabulary_list)
+    
     return TokenizeDataOutput(
-        tokenized_texts="",
-        vocabulary="",
-        vocab_size=0,
+        tokenized_texts=tokenized_texts_str,
+        vocabulary=vocabulary_str,
+        vocab_size=vocab_size
     )

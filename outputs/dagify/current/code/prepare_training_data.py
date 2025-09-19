@@ -1,3 +1,17 @@
+from ._prepare_training_data.load_project_configuration import load_project_configuration
+from ._prepare_training_data.extract_data_sources import extract_data_sources
+from ._prepare_training_data.extract_metadata_requirements import extract_metadata_requirements
+from ._prepare_training_data.download_data_sources import download_data_sources
+from ._prepare_training_data.merge_data_sources import merge_data_sources
+from ._prepare_training_data.clean_text_data import clean_text_data
+from ._prepare_training_data.estimate_token_count import estimate_token_count
+from ._prepare_training_data.write_compressed_dataset import write_compressed_dataset
+from ._prepare_training_data.count_samples import count_samples
+from ._prepare_training_data.validate_processing_success import validate_processing_success
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Parse the project configuration to obtain data source definitions and
 #   metadata requirements.
@@ -76,7 +90,6 @@
 #           errors were encountered.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class PrepareTrainingDataOutput(BaseModel):
@@ -97,12 +110,59 @@ def prepare_training_data(general_input: str, **kwargs) -> PrepareTrainingDataOu
     Returns:
         PrepareTrainingDataOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Parse project configuration to get data sources and metadata requirements
+    config_data: dict = load_project_configuration(env_var="PROJECT_CONFIG_PATH")
+    data_sources: list = extract_data_sources(config=config_data)
+    metadata_requirements: dict = extract_metadata_requirements(config=config_data)
+    
+    # Download or copy all specified data sources with verification
+    downloaded_files: list = download_data_sources(
+        sources=data_sources,
+        verify_checksums=True,
+        retry_logic=True
+    )
+    
+    # Merge data from multiple sources while removing duplicates
+    merged_data_stream: str = merge_data_sources(
+        files=downloaded_files,
+        preserve_order=True,
+        remove_duplicates=True
+    )
+    
+    # Perform comprehensive text cleaning
+    cleaned_lines: list = clean_text_data(
+        data_stream=merged_data_stream,
+        normalize_unicode=True,
+        strip_html=True,
+        collapse_whitespace=True,
+        filter_non_ascii=True,
+        remove_empty_lines=True
+    )
+    
+    # Estimate token count using lightweight tokenizer
+    estimated_token_count: int = estimate_token_count(
+        cleaned_lines=cleaned_lines,
+        tokenizer="nltk_word_tokenize"
+    )
+    
+    # Write cleaned data to compressed file
+    output_file_path: str = write_compressed_dataset(
+        cleaned_lines=cleaned_lines,
+        format="gzip",
+        encoding="utf-8"
+    )
+    
+    # Calculate final metrics and validation status
+    final_sample_count: int = count_samples(cleaned_lines=cleaned_lines)
+    processing_success: bool = validate_processing_success(
+        output_path=output_file_path,
+        sample_count=final_sample_count,
+        token_count=estimated_token_count
+    )
+    
     return PrepareTrainingDataOutput(
-        preprocessed_data_path="",
-        sample_count=0,
-        token_count=0,
-        is_valid=False,
+        preprocessed_data_path=output_file_path,
+        sample_count=final_sample_count,
+        token_count=estimated_token_count,
+        is_valid=processing_success
     )

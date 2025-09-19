@@ -1,3 +1,23 @@
+from ._train_model.validate_inputs import validate_inputs
+from ._train_model.load_configuration import load_configuration
+from ._train_model.load_training_data import load_training_data
+from ._train_model.create_model_architecture import create_model_architecture
+from ._train_model.setup_optimizer import setup_optimizer
+from ._train_model.setup_lr_scheduler import setup_lr_scheduler
+from ._train_model.create_dataloader import create_dataloader
+from ._train_model.setup_loss_criterion import setup_loss_criterion
+from ._train_model.get_current_time import get_current_time
+from ._train_model.train_single_epoch import train_single_epoch
+from ._train_model.log_epoch_progress import log_epoch_progress
+from ._train_model.calculate_duration_minutes import calculate_duration_minutes
+from ._train_model.calculate_perplexity import calculate_perplexity
+from ._train_model.save_model_checkpoint import save_model_checkpoint
+from ._train_model.log_training_exception import log_training_exception
+from ._train_model.save_partial_checkpoint_if_possible import save_partial_checkpoint_if_possible
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Validate parent inputs and set up training environment.
 #   Reason: Ensures that training does not proceed with missing or corrupted data,
@@ -122,7 +142,6 @@
 #           the node returns a consistent output structure.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class SplitDataOutput(BaseModel):
@@ -167,15 +186,118 @@ def train_model(split_data_input: SplitDataOutput, initialize_model_weights_inpu
     Returns:
         TrainModelOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
-    return TrainModelOutput(
-        final_loss=0.0,
-        final_perplexity=0.0,
-        training_accuracy=0.0,
-        training_epochs=0,
-        training_duration_minutes=0.0,
-        model_path="",
-        training_status=False,
-    )
+    try:
+        # Validate parent inputs and set up training environment
+        validation_success: bool = validate_inputs(
+            train_data_path=split_data_input.train_data_path,
+            initialization_success=initialize_model_weights_input.initialization_success
+        )
+        
+        if not validation_success:
+            return TrainModelOutput(
+                final_loss=0.0,
+                final_perplexity=0.0,
+                training_accuracy=0.0,
+                training_epochs=0,
+                training_duration_minutes=0.0,
+                model_path="",
+                training_status=False,
+            )
+        
+        # Load configuration
+        config: dict = load_configuration()
+        
+        # Load training data into efficient in-memory representation
+        dataset = load_training_data(
+            train_data_path=split_data_input.train_data_path,
+            vocab_path=config.get('vocab_path')
+        )
+        
+        # Instantiate model architecture
+        model = create_model_architecture(
+            initialization_method=initialize_model_weights_input.initialization_method,
+            config=config
+        )
+        
+        # Prepare optimizer and learning rate scheduler
+        optimizer = setup_optimizer(model=model, config=config)
+        scheduler = setup_lr_scheduler(optimizer=optimizer, config=config)
+        
+        # Wrap dataset in DataLoader
+        dataloader = create_dataloader(dataset=dataset, config=config)
+        
+        # Setup loss criterion
+        criterion = setup_loss_criterion(vocab_size=config['vocab_size'])
+        
+        # Start timing training
+        training_start_time: float = get_current_time()
+        
+        # Training loop variables
+        max_epochs: int = config['max_epochs']
+        total_loss: float = 0.0
+        total_accuracy: float = 0.0
+        
+        # Implement the training loop
+        for epoch in range(max_epochs):
+            epoch_metrics: dict = train_single_epoch(
+                model=model,
+                dataloader=dataloader,
+                optimizer=optimizer,
+                criterion=criterion,
+                vocab_size=config['vocab_size']
+            )
+            
+            scheduler.step()
+            
+            total_loss = epoch_metrics['loss']
+            total_accuracy = epoch_metrics['accuracy']
+            
+            log_epoch_progress(epoch=epoch, metrics=epoch_metrics)
+        
+        # Calculate training duration
+        training_end_time: float = get_current_time()
+        training_duration_minutes: float = calculate_duration_minutes(
+            start_time=training_start_time,
+            end_time=training_end_time
+        )
+        
+        # Compute final metrics
+        final_perplexity: float = calculate_perplexity(loss=total_loss)
+        
+        # Save trained model checkpoint
+        model_path: str = save_model_checkpoint(
+            model=model,
+            config=config,
+            final_loss=total_loss,
+            training_epochs=max_epochs
+        )
+        
+        return TrainModelOutput(
+            final_loss=total_loss,
+            final_perplexity=final_perplexity,
+            training_accuracy=total_accuracy,
+            training_epochs=max_epochs,
+            training_duration_minutes=training_duration_minutes,
+            model_path=model_path,
+            training_status=True,
+        )
+        
+    except Exception as e:
+        # Handle exceptions gracefully
+        log_training_exception(exception=e)
+        
+        # Attempt to save partial checkpoint if possible
+        partial_model_path: str = save_partial_checkpoint_if_possible(
+            model=locals().get('model'),
+            config=locals().get('config', {})
+        )
+        
+        return TrainModelOutput(
+            final_loss=0.0,
+            final_perplexity=0.0,
+            training_accuracy=0.0,
+            training_epochs=0,
+            training_duration_minutes=0.0,
+            model_path=partial_model_path,
+            training_status=False,
+        )

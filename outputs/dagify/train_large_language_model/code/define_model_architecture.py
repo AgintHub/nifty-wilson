@@ -1,3 +1,12 @@
+from ._define_model_architecture.determine_optimal_layers import determine_optimal_layers
+from ._define_model_architecture.calculate_optimal_hidden_size import calculate_optimal_hidden_size
+from ._define_model_architecture.determine_attention_heads import determine_attention_heads
+from ._define_model_architecture.determine_max_sequence_length import determine_max_sequence_length
+from ._define_model_architecture.compute_transformer_parameters import compute_transformer_parameters
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Extract the vocabulary size and GPU allocation metrics from the outputs of
 #   create_vocabulary and allocate_resources to serve as constraints for
@@ -97,7 +106,6 @@
 #           to int where appropriate.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class CreateVocabularyOutput(BaseModel):
@@ -138,15 +146,51 @@ def define_model_architecture(create_vocabulary_input: CreateVocabularyOutput, a
     Returns:
         DefineModelArchitectureOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract vocabulary size and GPU allocation metrics
+    vocab_size: int = create_vocabulary_input.vocab_size
+    gpu_count: int = allocate_resources_input.gpu_count
+    gpu_type: str = allocate_resources_input.gpu_type
+    memory_gb: float = allocate_resources_input.memory_gb
+    
+    # Determine optimal number of layers within memory constraints
+    optimal_layers: int = determine_optimal_layers(
+        gpu_count=gpu_count, 
+        memory_gb=memory_gb, 
+        vocab_size=vocab_size
+    )
+    
+    # Calculate hidden size that fits memory and divisibility constraints
+    optimal_hidden_size: int = calculate_optimal_hidden_size(
+        number_of_layers=optimal_layers,
+        vocab_size=vocab_size,
+        memory_gb=memory_gb,
+        gpu_count=gpu_count
+    )
+    
+    # Set attention heads based on hidden size and standard configurations
+    attention_heads: int = determine_attention_heads(hidden_size=optimal_hidden_size)
+    
+    # Determine max sequence length from training config or defaults
+    max_sequence_length: int = determine_max_sequence_length(
+        training_config=kwargs.get('training_config', {}),
+        memory_gb=memory_gb
+    )
+    
+    # Compute final parameter count estimate
+    total_parameters: int = compute_transformer_parameters(
+        vocab_size=vocab_size,
+        hidden_size=optimal_hidden_size,
+        number_of_layers=optimal_layers,
+        attention_heads=attention_heads
+    )
+    
+    # Assemble final output
     return DefineModelArchitectureOutput(
-        model_type="",
-        number_of_layers=0,
-        hidden_size=0,
-        attention_heads=0,
-        vocab_size=0,
-        max_sequence_length=0,
-        total_parameters=0,
+        model_type="Transformer",
+        number_of_layers=optimal_layers,
+        hidden_size=optimal_hidden_size,
+        attention_heads=attention_heads,
+        vocab_size=vocab_size,
+        max_sequence_length=max_sequence_length,
+        total_parameters=total_parameters
     )

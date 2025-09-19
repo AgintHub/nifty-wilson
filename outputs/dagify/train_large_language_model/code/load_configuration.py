@@ -1,3 +1,13 @@
+from ._load_configuration.locate_config_file_from_environment import locate_config_file_from_environment
+from ._load_configuration.verify_file_exists_and_readable import verify_file_exists_and_readable
+from ._load_configuration.parse_config_file import parse_config_file
+from ._load_configuration.define_config_validation_schema import define_config_validation_schema
+from ._load_configuration.validate_config_fields import validate_config_fields
+from ._load_configuration.validate_filesystem_paths import validate_filesystem_paths
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Locate the configuration file using an environment variable set by the
 #   setup_environment node (e.g., CONFIG_PATH). Verify the file exists and is
@@ -83,7 +93,6 @@
 #           returning.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class SetupEnvironmentOutput(BaseModel):
@@ -119,17 +128,80 @@ def load_configuration(setup_environment_input: SetupEnvironmentOutput, **kwargs
     Returns:
         LoadConfigurationOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Locate and verify configuration file
+    config_file_path: str = locate_config_file_from_environment()
+    file_accessible: bool = verify_file_exists_and_readable(path=config_file_path)
+    
+    error_messages = []
+    
+    if not file_accessible:
+        error_messages.append("Configuration file not found or not readable")
+        return LoadConfigurationOutput(
+            config_valid=False,
+            error_messages=", ".join(error_messages),
+            max_epochs=0,
+            batch_size=0,
+            learning_rate=0.0,
+            data_path="",
+            model_output_path="",
+            config_version="",
+            project_name=""
+        )
+    
+    # Parse configuration file
+    config_dict: dict = parse_config_file(file_path=config_file_path, error_list=error_messages)
+    
+    if not config_dict:
+        return LoadConfigurationOutput(
+            config_valid=False,
+            error_messages=", ".join(error_messages),
+            max_epochs=0,
+            batch_size=0,
+            learning_rate=0.0,
+            data_path="",
+            model_output_path="",
+            config_version="",
+            project_name=""
+        )
+    
+    # Define validation schema
+    validation_schema: dict = define_config_validation_schema()
+    
+    # Validate required fields against schema
+    validate_config_fields(config_dict=config_dict, schema=validation_schema, error_list=error_messages)
+    
+    # Validate filesystem paths
+    validate_filesystem_paths(config_dict=config_dict, error_list=error_messages)
+    
+    # Determine overall configuration validity
+    config_valid: bool = len(error_messages) == 0
+    
+    # Extract validated values or use defaults
+    if config_valid:
+        max_epochs: int = config_dict.get("max_epochs", 0)
+        batch_size: int = config_dict.get("batch_size", 0)
+        learning_rate: float = config_dict.get("learning_rate", 0.0)
+        data_path: str = config_dict.get("data_path", "")
+        model_output_path: str = config_dict.get("model_output_path", "")
+        config_version: str = config_dict.get("config_version", "")
+        project_name: str = config_dict.get("project_name", "")
+    else:
+        max_epochs = 0
+        batch_size = 0
+        learning_rate = 0.0
+        data_path = ""
+        model_output_path = ""
+        config_version = ""
+        project_name = ""
+    
     return LoadConfigurationOutput(
-        config_valid=False,
-        error_messages="",
-        max_epochs=0,
-        batch_size=0,
-        learning_rate=0.0,
-        data_path="",
-        model_output_path="",
-        config_version="",
-        project_name="",
+        config_valid=config_valid,
+        error_messages=", ".join(error_messages),
+        max_epochs=max_epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        data_path=data_path,
+        model_output_path=model_output_path,
+        config_version=config_version,
+        project_name=project_name
     )

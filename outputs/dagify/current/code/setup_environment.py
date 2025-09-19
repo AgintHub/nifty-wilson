@@ -1,3 +1,18 @@
+from ._setup_environment.create_virtual_environment import create_virtual_environment
+from ._setup_environment.activate_virtual_environment import activate_virtual_environment
+from ._setup_environment.upgrade_package_managers import upgrade_package_managers
+from ._setup_environment.read_requirements_file import read_requirements_file
+from ._setup_environment.install_package_with_pip import install_package_with_pip
+from ._setup_environment.verify_package_import import verify_package_import
+from ._setup_environment.configure_path_environment import configure_path_environment
+from ._setup_environment.configure_pythonpath import configure_pythonpath
+from ._setup_environment.detect_and_configure_gpu_variables import detect_and_configure_gpu_variables
+from ._setup_environment.configure_cpu_variables import configure_cpu_variables
+from ._setup_environment.format_setup_log import format_setup_log
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Create a dedicated Python virtual environment using `venv` to isolate
 #   dependencies and prevent clashes with system packages.
@@ -104,7 +119,6 @@
 #           final output reflects this flag.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class SetupEnvironmentOutput(BaseModel):
@@ -127,14 +141,84 @@ def setup_environment(general_input: str, **kwargs) -> SetupEnvironmentOutput:
     Returns:
         SetupEnvironmentOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Initialize tracking variables
+    environment_ready: bool = True
+    log_entries: list = []
+    installed_packages_list: list = []
+    installed_versions_list: list = []
+    configured_paths_list: list = []
+    environment_vars_list: list = []
+    
+    try:
+        # Create virtual environment
+        venv_path: str = create_virtual_environment()
+        log_entries.append(f"Created virtual environment at {venv_path}")
+        
+        # Activate virtual environment
+        activation_success: bool = activate_virtual_environment(venv_path=venv_path)
+        if not activation_success:
+            environment_ready = False
+            log_entries.append("Failed to activate virtual environment")
+        
+        # Upgrade pip, setuptools, wheel
+        upgrade_result: dict = upgrade_package_managers()
+        log_entries.append(f"Upgraded package managers: {upgrade_result}")
+        
+        # Read requirements.txt
+        package_specifiers: list = read_requirements_file(file_path="requirements.txt")
+        log_entries.append(f"Read {len(package_specifiers)} package requirements")
+        
+        # Install packages sequentially
+        for specifier in package_specifiers:
+            install_result: dict = install_package_with_pip(package_specifier=specifier)
+            if install_result["success"]:
+                installed_packages_list.append(install_result["package_name"])
+                installed_versions_list.append(install_result["version"])
+                log_entries.append(f"Installed {install_result['package_name']} {install_result['version']}")
+            else:
+                environment_ready = False
+                log_entries.append(f"Failed to install {specifier}: {install_result['error']}")
+        
+        # Verify package imports
+        for package_name in installed_packages_list:
+            import_success: bool = verify_package_import(package_name=package_name)
+            if not import_success:
+                environment_ready = False
+                log_entries.append(f"Failed to import {package_name}")
+        
+        # Configure PATH environment variable
+        path_config_result: str = configure_path_environment(venv_path=venv_path)
+        configured_paths_list.append(path_config_result)
+        log_entries.append(f"Configured PATH: {path_config_result}")
+        
+        # Set PYTHONPATH
+        pythonpath_result: str = configure_pythonpath()
+        configured_paths_list.append(pythonpath_result)
+        log_entries.append(f"Configured PYTHONPATH: {pythonpath_result}")
+        
+        # Set essential environment variables
+        gpu_config: dict = detect_and_configure_gpu_variables()
+        for var_name, var_value in gpu_config.items():
+            environment_vars_list.append(var_name)
+            log_entries.append(f"Set {var_name}={var_value}")
+        
+        cpu_config: dict = configure_cpu_variables()
+        for var_name, var_value in cpu_config.items():
+            environment_vars_list.append(var_name)
+            log_entries.append(f"Set {var_name}={var_value}")
+        
+    except Exception as e:
+        environment_ready = False
+        log_entries.append(f"Setup failed with error: {str(e)}")
+    
+    # Aggregate results
+    setup_log_final: str = format_setup_log(log_entries=log_entries)
+    
     return SetupEnvironmentOutput(
-        environment_ready=False,
-        installed_packages="",
-        installed_package_versions="",
-        configured_paths="",
-        environment_variables="",
-        setup_log="",
+        environment_ready=environment_ready,
+        installed_packages=",".join(installed_packages_list),
+        installed_package_versions=",".join(installed_versions_list),
+        configured_paths=",".join(configured_paths_list),
+        environment_variables=",".join(environment_vars_list),
+        setup_log=setup_log_final,
     )
