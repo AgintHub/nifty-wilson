@@ -1,6 +1,8 @@
 dag_type: plain_text
-description: Generated workflow from UI.
-name: construct_pathophysiology_framework
+description: Generated workflow from UI with enhanced immune system pathophysiology
+  including T cell and B cell selection mechanisms, signaling channels, and secondary
+  messengers.
+name: construct_pathophysiology_framework_with_lymphocyte_selection
 nodes:
   analyze_cardiopulmonary_gas_exchange:
     agent: false
@@ -158,6 +160,26 @@ nodes:
     nodes_dependent_on: []
     prompt: Define apoptotic mechanisms including caspase activation, mitochondrial
       permeability transition, and DNA fragmentation pathways based on molecular processes.
+  define_bcell_negative_selection:
+    agent: false
+    description: Define B cell negative selection mechanisms in bone marrow and periphery
+    name: define_bcell_negative_selection
+    nodes_depended_on:
+    - define_cellular_signaling_mechanisms
+    nodes_dependent_on: []
+    prompt: Define B cell negative selection mechanisms including BCR cross-linking
+      by self-antigens, anergy induction, receptor editing, clonal deletion, and elimination
+      of autoreactive B cells through apoptosis.
+  define_bcell_positive_selection:
+    agent: false
+    description: Define B cell positive selection mechanisms in bone marrow
+    name: define_bcell_positive_selection
+    nodes_depended_on:
+    - define_cellular_signaling_mechanisms
+    nodes_dependent_on: []
+    prompt: Define B cell positive selection mechanisms including functional BCR signaling,
+      Ig heavy and light chain pairing, pre-BCR checkpoint signaling through Syk and
+      BLNK, and survival signals promoting B cell maturation.
   define_cellular_metabolic_mechanisms:
     agent: false
     description: Establish cellular metabolic pathways and energy processes
@@ -231,6 +253,26 @@ nodes:
     nodes_dependent_on: []
     prompt: Define oxidative stress mechanisms including free radical generation,
       antioxidant depletion, and lipid peroxidation based on cellular metabolic processes.
+  define_tcell_negative_selection:
+    agent: false
+    description: Define T cell negative selection mechanisms in thymus
+    name: define_tcell_negative_selection
+    nodes_depended_on:
+    - define_cellular_signaling_mechanisms
+    nodes_dependent_on: []
+    prompt: Define T cell negative selection mechanisms including high-affinity TCR-MHC
+      interactions, calcium overload, activation of pro-apoptotic pathways, caspase
+      activation, and elimination of autoreactive T cells.
+  define_tcell_positive_selection:
+    agent: false
+    description: Define T cell positive selection mechanisms in thymus
+    name: define_tcell_positive_selection
+    nodes_depended_on:
+    - define_cellular_signaling_mechanisms
+    nodes_dependent_on: []
+    prompt: Define T cell positive selection mechanisms including TCR-MHC interactions,
+      calcium signaling via IP3 and DAG, PKC activation, and survival signals through
+      the PI3K/Akt pathway that promote thymocyte survival.
   detail_cardiovascular_anatomy:
     agent: false
     description: Define cardiovascular anatomical components
@@ -320,16 +362,19 @@ nodes:
       motility, and barrier function.
   detail_immune_anatomy:
     agent: false
-    description: Define immune system anatomical components
+    description: Define immune system anatomical components including lymphocyte development
+      sites
     name: detail_immune_anatomy
     nodes_depended_on:
     - integrate_system_interactions
     nodes_dependent_on: []
     prompt: Detail the anatomical components of the immune system including primary
-      and secondary lymphoid organs, immune cell populations, and barrier tissues.
+      lymphoid organs (thymus, bone marrow), secondary lymphoid organs, immune cell
+      populations, barrier tissues, and sites of T cell and B cell selection.
   detail_immune_pathophysiology:
     agent: false
-    description: Develop pathophysiology for immune system
+    description: Develop pathophysiology for immune system including lymphocyte selection
+      disorders
     name: detail_immune_pathophysiology
     nodes_depended_on:
     - detail_immune_physiology
@@ -337,16 +382,21 @@ nodes:
     nodes_dependent_on: []
     prompt: Create a detailed pathophysiology framework for the immune system, incorporating
       relevant cellular mechanisms. Include innate and adaptive immunity, inflammatory
-      responses, immunodeficiency, and autoimmunity.
+      responses, immunodeficiency, autoimmunity, and pathological states affecting
+      T cell and B cell selection including SCID, DiGeorge syndrome, and autoimmune
+      diseases resulting from defective negative selection.
   detail_immune_physiology:
     agent: false
-    description: Define normal immune physiological processes
+    description: Define normal immune physiological processes including lymphocyte
+      selection
     name: detail_immune_physiology
     nodes_depended_on:
     - detail_immune_anatomy
+    - integrate_lymphocyte_selection_mechanisms
     nodes_dependent_on: []
     prompt: Define normal immune physiology including innate immunity, adaptive immunity,
-      immune cell activation, and immune tolerance.
+      immune cell activation, immune tolerance, and detailed T cell and B cell selection
+      processes with their associated signaling pathways and secondary messengers.
   detail_neurological_anatomy:
     agent: false
     description: Define neurological anatomical components
@@ -582,6 +632,20 @@ nodes:
     nodes_dependent_on: []
     prompt: Integrate immune and renal pathophysiology frameworks, focusing on glomerulonephritis,
       autoimmune kidney disease, and immune-mediated renal injury.
+  integrate_lymphocyte_selection_mechanisms:
+    agent: false
+    description: Combine T cell and B cell selection pathways into unified immune
+      development framework
+    name: integrate_lymphocyte_selection_mechanisms
+    nodes_depended_on:
+    - define_tcell_positive_selection
+    - define_tcell_negative_selection
+    - define_bcell_positive_selection
+    - define_bcell_negative_selection
+    nodes_dependent_on: []
+    prompt: Integrate T cell and B cell positive and negative selection mechanisms
+      into a comprehensive framework showing shared signaling pathways, calcium channels,
+      secondary messengers (IP3, DAG, cAMP), and divergent selection outcomes.
   integrate_neuroendocrine_interactions:
     agent: false
     description: Model interactions between nervous and endocrine systems
