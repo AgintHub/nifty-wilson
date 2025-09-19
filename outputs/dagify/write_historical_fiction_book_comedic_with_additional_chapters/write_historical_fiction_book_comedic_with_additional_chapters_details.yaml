@@ -1,7 +1,5 @@
-dag_type: plain_text
-description: A workflow to produce a humorous Civil‑War historical fiction book, expanding
-  from three to seven chapters while preserving the original outline, character profiles,
-  and editing structure.
+dag_type: typed
+description: Generated workflow from UI.
 name: write_historical_fiction_book_comedic_with_additional_chapters
 nodes:
   create_story_outline:
@@ -10,14 +8,24 @@ nodes:
       featuring a North‑bound protagonist and the ghost of George Washington.
     name: create_story_outline
     nodes_depended_on: []
-    nodes_dependent_on:
-    - write_chapter_1
-    - write_chapter_2
-    - write_chapter_3
-    - write_chapter_4
-    - write_chapter_5
-    - write_chapter_6
-    - write_chapter_7
+    nodes_dependent_on: []
+    output_structure:
+    - description: The title of each chapter in order.
+      key: chapter_titles
+      type: List[str]
+    - description: A brief description of the main event or plot point in each chapter.
+      key: chapter_descriptions
+      type: List[str]
+    - description: The Civil War battle referenced or featured in each chapter, if
+        any.
+      key: chapter_battles
+      type: List[str]
+    - description: The punchline or comedic twist that will appear in each chapter.
+      key: chapter_jokes
+      type: List[str]
+    - description: A short overview of each main character’s arc and comedic flaw.
+      key: character_overview
+      type: List[str]
     prompt: Using your comedic research, draft a detailed outline for a Civil‑War
       historical fiction novel. The protagonist is a North‑bound soldier, guided by
       the mischievous ghost of George Washington, who offers sarcastic counsel at
@@ -33,14 +41,23 @@ nodes:
       the comedic Civil War narrative.
     name: develop_character_profiles
     nodes_depended_on: []
-    nodes_dependent_on:
-    - write_chapter_1
-    - write_chapter_2
-    - write_chapter_3
-    - write_chapter_4
-    - write_chapter_5
-    - write_chapter_6
-    - write_chapter_7
+    nodes_dependent_on: []
+    output_structure:
+    - description: Ordered list of character names, used to map each profile field
+      key: character_names
+      type: List[str]
+    - description: Background description for each character
+      key: character_backgrounds
+      type: List[str]
+    - description: Motivation statement for each character
+      key: character_motivations
+      type: List[str]
+    - description: Comedic flaw description for each character
+      key: character_comedic_flaws
+      type: List[str]
+    - description: One‑line joke that encapsulates each character's humor
+      key: character_jokes
+      type: List[str]
     prompt: Using the humorous historical facts from the Revolutionary War provided
       by the previous node, create quirky profiles for the main characters of a Civil
       War story. For each character include Background, Motivation, Comedic flaw,
@@ -60,6 +77,25 @@ nodes:
     - write_chapter_6
     - write_chapter_7
     nodes_dependent_on: []
+    output_structure:
+    - description: The complete, polished manuscript text after editing.
+      key: finalManuscript
+      type: str
+    - description: List of chapter titles in the final manuscript in order.
+      key: chapterTitles
+      type: List[str]
+    - description: A concise summary of the major changes, edits, and humor adjustments
+        made.
+      key: changesSummary
+      type: str
+    - description: True if the manuscript demonstrates narrative continuity and pacing
+        consistency.
+      key: isConsistent
+      type: bool
+    - description: True if all dates, battles, and military terminology are accurate
+        for the Civil War era.
+      key: isHistoricallyAccurate
+      type: bool
     prompt: Read Chapters 1–7 and perform a comprehensive edit that ensures narrative
       coherence, sharp comedic timing, and factual accuracy for the Civil War era.
       Confirm that the protagonist is a Northern soldier, that the Ghost of George
@@ -75,6 +111,19 @@ nodes:
     nodes_depended_on:
     - write_chapter_3
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates if Chapter 3 adheres to Civil War history.
+      key: is_historically_accurate
+      type: bool
+    - description: Percent of historical accuracy (0-100).
+      key: accuracy_percentage
+      type: int
+    - description: List of identified inaccuracies with brief details.
+      key: inaccuracies
+      type: List[str]
+    - description: A light, historically‑inspired joke woven into the fact‑check report.
+      key: subtle_joke
+      type: str
     prompt: Fact‑check Chapter 3 for strict adherence to Civil War history while preserving
       its comedic heart. Verify dates, locations, units, and the protagonist’s Union
       identity. Keep the ghostly cameo historically plausible as a playful anachronism.
@@ -87,8 +136,19 @@ nodes:
     nodes_depended_on:
     - create_story_outline
     - develop_character_profiles
-    nodes_dependent_on:
-    - write_chapter_2
+    nodes_dependent_on: []
+    output_structure:
+    - description: The numerical order of the chapter within the book (e.g., 1 for
+        the first chapter).
+      key: chapter_number
+      type: int
+    - description: A concise, descriptive title for the chapter.
+      key: chapter_title
+      type: str
+    - description: The full text of the chapter, written in a witty, historically
+        accurate style with the required comedic elements.
+      key: content
+      type: str
     prompt: Write the first chapter of the book. Set the scene during the American
       Civil War, with a spirited Northern soldier protagonist navigating the chaos
       of camp life. Introduce the main characters through quick‑fire, witty dialogue,
@@ -105,8 +165,18 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_1
-    nodes_dependent_on:
-    - write_chapter_3
+    nodes_dependent_on: []
+    output_structure:
+    - description: The numerical order of the chapter.
+      key: chapter_number
+      type: int
+    - description: The title of the chapter, if any.
+      key: chapter_title
+      type: str
+    - description: The complete prose of chapter two, including dialogue, descriptions,
+        and comedic beats.
+      key: chapter_text
+      type: str
     prompt: Continue the story in chapter two, advancing the plot while keeping the
       humor rolling. The setting is the American Civil War and the protagonist is
       a spirited Union soldier. The ghost of George Washington haunts the battlefield,
@@ -121,9 +191,25 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_2
-    nodes_dependent_on:
-    - write_chapter_4
-    - fact_check
+    nodes_dependent_on: []
+    output_structure:
+    - description: The sequential number of the chapter.
+      key: chapter_number
+      type: int
+    - description: A short, descriptive title for the chapter.
+      key: chapter_title
+      type: str
+    - description: The full narrative text of the chapter.
+      key: chapter_text
+      type: str
+    - description: A brief description of the joke from Chapter 1 that is referenced
+        or twisted in this chapter.
+      key: joke_reference
+      type: str
+    - description: List of one‑liner sarcastic remarks delivered by the ghost of George
+        Washington in this chapter.
+      key: ghost_sarcasm_lines
+      type: List[str]
     prompt: Compose the third chapter of our Civil War‑era historical comedy. Show
       how the protagonist’s interactions with his squad evolve. Introduce a battlefield
       mishap that turns absurdly humorous, referencing a joke from Chapter 1 and twisting
@@ -138,8 +224,20 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_3
-    nodes_dependent_on:
-    - write_chapter_5
+    nodes_dependent_on: []
+    output_structure:
+    - description: The numeric identifier of the chapter.
+      key: chapter_number
+      type: int
+    - description: The title or subtitle of the chapter.
+      key: chapter_title
+      type: str
+    - description: Full narrative text of chapter 4.
+      key: chapter_text
+      type: str
+    - description: A concise summary of the chapter’s key events and comedic beats.
+      key: chapter_summary
+      type: str
     prompt: Write chapter 4 of the book. The protagonist faces a new Civil War skirmish
       where a Union supply convoy is hijacked by a band of sarcastic Confederate spies.
       The ghost of George Washington offers a surprisingly modern piece of military
@@ -154,8 +252,12 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_4
-    nodes_dependent_on:
-    - write_chapter_6
+    nodes_dependent_on: []
+    output_structure:
+    - description: The full, formatted text of Chapter 5, including narrative, dialogue,
+        jokes, and any necessary chapter metadata.
+      key: chapter_text
+      type: str
     prompt: Write chapter 5. The protagonist is promoted to temporary lieutenant but
       must manage a disorganized Union regiment. The ghost of George Washington appears
       as a comedic mentor, advising on how to keep morale high. Incorporate a running
@@ -169,8 +271,14 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_5
-    nodes_dependent_on:
-    - write_chapter_7
+    nodes_dependent_on: []
+    output_structure:
+    - description: Title of chapter 6
+      key: chapter_title
+      type: str
+    - description: Full narrative text of chapter 6
+      key: chapter_text
+      type: str
     prompt: Write chapter 6. During a crucial night assault, a misread signal results
       in the Union troops marching into an abandoned Confederate fort. The ghost of
       George Washington offers a sarcastic commentary on the blunder. Use the joke
@@ -184,8 +292,11 @@ nodes:
     - create_story_outline
     - develop_character_profiles
     - write_chapter_6
-    nodes_dependent_on:
-    - edit_and_revise
+    nodes_dependent_on: []
+    output_structure:
+    - description: The complete text of Chapter 7, formatted as a single string.
+      key: chapter_text
+      type: str
     prompt: Write chapter 7 to bring the story to a satisfying comedic close. The
       protagonist faces a final, absurd showdown with the ghost of George Washington
       on the battlefield, culminating in a witty resolution that ties together all
