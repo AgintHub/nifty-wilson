@@ -1,12 +1,74 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: hedge_fund_trading_strategy_workflow_with_yahoo_finance_parallel_fetch
 nodes:
   backtest_trading_strategy:
     agent: false
+    code_node_type: stub
     description: Performs a rigorous, production‑grade backtest of the fully specified
       trading strategy using the fetched Yahoo Finance data, the asset universe, and
       the signal generation logic.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingSignalLogicOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for develop_trading_signal_logic node outputs.\"\"\"\n    signal_logic_steps:\
+      \ List[str] = Field(..., description=\"Step\\u2011by\\u2011step outline of the\
+      \ logical rules that convert indicator readings into concrete BUY or SELL signals.\"\
+      )\n    used_indicators: List[str] = Field(..., description=\"Explicit list of\
+      \ technical indicator names (as provided by the parent node) that are employed\
+      \ in the signal generation algorithm.\")\n    summary: str = Field(..., description=\"\
+      A concise executive summary describing the overall methodology, key decision\
+      \ pathways, and any risk\\u2011management overlays.\")\n    is_logic_complete:\
+      \ bool = Field(..., description=\"Flag indicating whether the signal logic accounts\
+      \ for all identified indicators and fully defines buy, sell, and neutral decision\
+      \ branches.\")\n\n\nclass SpecifyAssetUniverseOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for specify_asset_universe node outputs.\"\"\"\n    asset_classes:\
+      \ List[str] = Field(..., description=\"High\\u2011level asset classes or instrument\
+      \ families to be traded (e.g., US equities, futures, commodities).\")\n    asset_tickers:\
+      \ List[str] = Field(..., description=\"Specific ticker symbols or contract identifiers\
+      \ selected from each asset class (e.g., AAPL, MSFT, ESZ2025).\")\n\n\nclass\
+      \ FetchStockDataYahooDataOutput(BaseModel):\n    \"\"\"Pydantic model for fetch_stock_data_yahoo_data\
+      \ node outputs.\"\"\"\n    tickers: List[str] = Field(..., description=\"Ordered\
+      \ list of ticker symbols for which historical data was fetched.\")\n    data_csv:\
+      \ List[str] = Field(..., description=\"CSV\\u2011formatted string of the OHLCV\
+      \ data for each ticker, preserving dates as the index; list order matches `tickers`.\"\
+      )\n    record_counts: List[int] = Field(..., description=\"Number of rows (trading\
+      \ days) retrieved for each ticker, aligned with the order of `tickers`.\")\n\
+      \n\nclass FetchStockDataYahooStatusOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for fetch_stock_data_yahoo_status node outputs.\"\"\"\n    retrieval_success:\
+      \ bool = Field(..., description=\"Indicates whether the data download from Yahoo\
+      \ Finance completed without errors for all requested tickers.\")\n    retrieval_message:\
+      \ str = Field(..., description=\"A concise human\\u2011readable confirmation\
+      \ or error summary describing the overall retrieval outcome.\")\n\n\nclass BacktestTradingStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for backtest_trading_strategy node outputs.\"\"\"\n\
+      \    total_return: float = Field(..., description=\"Cumulative return of the\
+      \ strategy over the backtest period, expressed as a decimal (e.g., 0.12 for\
+      \ 12%).\")\n    annualized_sharpe_ratio: float = Field(..., description=\"Annualized\
+      \ Sharpe ratio of the strategy, assuming a risk\\u2011free rate of 0%.\")\n\
+      \    max_drawdown: float = Field(..., description=\"Maximum drawdown observed\
+      \ during the backtest, expressed as a decimal.\")\n    number_of_trades: int\
+      \ = Field(..., description=\"Total count of executed trades (both entries and\
+      \ exits) throughout the backtest.\")\n    backtest_period_start: str = Field(...,\
+      \ description=\"ISO\\u2011format start date of the backtest period (YYYY\\u2011MM\\\
+      u2011DD).\")\n    backtest_period_end: str = Field(..., description=\"ISO\\\
+      u2011format end date of the backtest period (YYYY\\u2011MM\\u2011DD).\")\n \
+      \   success: bool = Field(..., description=\"True if the backtest completed\
+      \ without errors; false otherwise.\")\n\n\ndef backtest_trading_strategy(develop_trading_signal_logic_input:\
+      \ DevelopTradingSignalLogicOutput, specify_asset_universe_input: SpecifyAssetUniverseOutput,\
+      \ fetch_stock_data_yahoo_data_input: FetchStockDataYahooDataOutput, fetch_stock_data_yahoo_status_input:\
+      \ FetchStockDataYahooStatusOutput, **kwargs) -> BacktestTradingStrategyOutput:\n\
+      \    \"\"\"Performs a rigorous, production‑grade backtest of the fully specified\
+      \ trading strategy using the fetched Yahoo Finance data, the asset universe,\
+      \ and the signal generation logic.\n\n    Args:\n        develop_trading_signal_logic_input:\
+      \ Input from the 'develop_trading_signal_logic' node.\n        specify_asset_universe_input:\
+      \ Input from the 'specify_asset_universe' node.\n        fetch_stock_data_yahoo_data_input:\
+      \ Input from the 'fetch_stock_data_yahoo_data' node.\n        fetch_stock_data_yahoo_status_input:\
+      \ Input from the 'fetch_stock_data_yahoo_status' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        BacktestTradingStrategyOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ BacktestTradingStrategyOutput(\n        total_return=0.0,\n        annualized_sharpe_ratio=0.0,\n\
+      \        max_drawdown=0.0,\n        number_of_trades=0,\n        backtest_period_start=\"\
+      \",\n        backtest_period_end=\"\",\n        success=False,\n    )"
     name: backtest_trading_strategy
     nodes_depended_on:
     - develop_trading_signal_logic
@@ -136,11 +198,63 @@ nodes:
 
       If any step fails, set `success` to false and provide a concise error description
       in the logs (outside the defined output fields).'
+    shims: []
   compile_final_strategy_blueprint:
     agent: false
+    code_node_type: stub
     description: Synthesizes the refined trading logic, rigorously defined risk‑management
       policies, and the designated asset universe into a single, end‑to‑end blueprint
       ready for implementation, back‑testing, and deployment.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass RefineTradingStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for refine_trading_strategy node outputs.\"\"\"\n    refined_strategy_summary:\
+      \ str = Field(..., description=\"A concise narrative summarizing the refined\
+      \ trading strategy, highlighting adjusted parameters, indicator configurations,\
+      \ and risk\\u2011management rules.\")\n    parameter_adjustments: str = Field(...,\
+      \ description=\"Bullet\\u2011point list detailing each model parameter that\
+      \ was changed, including old and new values.\")\n    indicator_adjustments:\
+      \ str = Field(..., description=\"Bullet\\u2011point list of technical indicator\
+      \ modifications, specifying the indicator name, previous settings, and revised\
+      \ settings.\")\n    risk_rule_adjustments: str = Field(..., description=\"Bullet\\\
+      u2011point list of risk\\u2011management rule changes (e.g., position sizing,\
+      \ stop\\u2011loss/take\\u2011profit levels) with before/after values.\")\n \
+      \   reasoning_for_adjustments: str = Field(..., description=\"A thorough explanation\
+      \ linking each adjustment to the observed backtest shortcomings and the results\
+      \ of the sensitivity analysis.\")\n\n\nclass DefineRiskManagementRulesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_risk_management_rules node outputs.\"\"\
+      \"\n    risk_management_rules: List[str] = Field(..., description=\"Bullet\\\
+      u2011point list (3\\u20115 items) detailing the concrete risk\\u2011management\
+      \ rules such as position sizing, stop\\u2011loss, max drawdown, etc.\")\n  \
+      \  rule_count: int = Field(..., description=\"The total number of risk\\u2011management\
+      \ rules provided (must be between 3 and 5).\")\n    has_stop_loss: bool = Field(...,\
+      \ description=\"True if the list includes an explicit stop\\u2011loss rule;\
+      \ otherwise false.\")\n\n\nclass CompileFinalStrategyBlueprintOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for compile_final_strategy_blueprint node outputs.\"\
+      \"\"\n    blueprint_summary: str = Field(..., description=\"High\\u2011level\
+      \ narrative summarizing the strategy\\u2019s purpose, market thesis, target\
+      \ return\\u2011to\\u2011risk ratio, and operational cadence.\")\n    refined_strategy_details:\
+      \ str = Field(..., description=\"Technical description of the final entry/exit\
+      \ rules, indicator settings, parameter values, and any conditional logic after\
+      \ back\\u2011testing refinement.\")\n    risk_management_rules: List[str] =\
+      \ Field(..., description=\"Bullet\\u2011point list (3\\u20115 items) of risk\
+      \ controls such as position sizing formulas, stop\\u2011loss/take\\u2011profit\
+      \ levels, max draw\\u2011down limits, and portfolio exposure caps.\")\n    asset_universe:\
+      \ List[str] = Field(..., description=\"Complete list of tradable symbols, ticker\
+      \ codes, or asset\\u2011class identifiers that constitute the strategy\\u2019s\
+      \ trading scope.\")\n\n\ndef compile_final_strategy_blueprint(refine_trading_strategy_input:\
+      \ RefineTradingStrategyOutput, define_risk_management_rules_input: DefineRiskManagementRulesOutput,\
+      \ **kwargs) -> CompileFinalStrategyBlueprintOutput:\n    \"\"\"Synthesizes the\
+      \ refined trading logic, rigorously defined risk‑management policies, and the\
+      \ designated asset universe into a single, end‑to‑end blueprint ready for implementation,\
+      \ back‑testing, and deployment.\n\n    Args:\n        refine_trading_strategy_input:\
+      \ Input from the 'refine_trading_strategy' node.\n        define_risk_management_rules_input:\
+      \ Input from the 'define_risk_management_rules' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        CompileFinalStrategyBlueprintOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ CompileFinalStrategyBlueprintOutput(\n        blueprint_summary=\"\",\n  \
+      \      refined_strategy_details=\"\",\n        risk_management_rules=[],\n \
+      \       asset_universe=[],\n    )"
     name: compile_final_strategy_blueprint
     nodes_depended_on:
     - refine_trading_strategy
@@ -270,10 +384,32 @@ nodes:
 
 
       Present the information in plain‑text sections matching the output fields below.'
+    shims: []
   define_market_analysis:
     agent: false
+    code_node_type: stub
     description: Develops a detailed blueprint of all external market data feeds and
       internal analytical methods that will be leveraged by the trading strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineMarketAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_market_analysis node outputs.\"\"\"\n    market_data_sources: List[str]\
+      \ = Field(..., description=\"Primary market data providers or platforms to be\
+      \ consumed (e.g., Bloomberg, Refinitiv, Quandl, Yahoo Finance, ICE Data Services).\"\
+      )\n    analysis_techniques: List[str] = Field(..., description=\"Selected analytical\
+      \ methods, ranging from classic technical indicators to advanced sentiment and\
+      \ macro\\u2011factor models.\")\n    summary_note: str = Field(..., description=\"\
+      A concise narrative linking the chosen data sources with the analysis techniques,\
+      \ emphasizing data fidelity, licensing considerations, and estimated computational\
+      \ resource requirements.\")\n\n\ndef define_market_analysis(general_input: str,\
+      \ **kwargs) -> DefineMarketAnalysisOutput:\n    \"\"\"Develops a detailed blueprint\
+      \ of all external market data feeds and internal analytical methods that will\
+      \ be leveraged by the trading strategy.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        DefineMarketAnalysisOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return DefineMarketAnalysisOutput(\n\
+      \        market_data_sources=[],\n        analysis_techniques=[],\n        summary_note=\"\
+      \",\n    )"
     name: define_market_analysis
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -392,10 +528,37 @@ nodes:
       types, granularity, latency, licensing, and cost; list analysis techniques with
       required inputs, computational complexity, and dependencies; synthesize a summary
       linking data sources to techniques.
+    shims: []
   define_risk_management_rules:
     agent: false
+    code_node_type: stub
     description: Establishes a rigorous, quantitative risk‑management framework that
       translates the chosen trading strategy into actionable safeguards.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectTradingStrategyTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_trading_strategy_type node outputs.\"\"\"\n    strategy_type: str\
+      \ = Field(..., description=\"The chosen primary trading strategy type (e.g.,\
+      \ \\\"momentum\\\", \\\"mean reversion\\\").\")\n    rationale: str = Field(...,\
+      \ description=\"A concise one\\u2011sentence explanation of why this strategy\
+      \ type best fits the market analysis.\")\n\n\nclass DefineRiskManagementRulesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_risk_management_rules node outputs.\"\"\
+      \"\n    risk_management_rules: List[str] = Field(..., description=\"Bullet\\\
+      u2011point list (3\\u20115 items) detailing the concrete risk\\u2011management\
+      \ rules such as position sizing, stop\\u2011loss, max drawdown, etc.\")\n  \
+      \  rule_count: int = Field(..., description=\"The total number of risk\\u2011management\
+      \ rules provided (must be between 3 and 5).\")\n    has_stop_loss: bool = Field(...,\
+      \ description=\"True if the list includes an explicit stop\\u2011loss rule;\
+      \ otherwise false.\")\n\n\ndef define_risk_management_rules(select_trading_strategy_type_input:\
+      \ SelectTradingStrategyTypeOutput, **kwargs) -> DefineRiskManagementRulesOutput:\n\
+      \    \"\"\"Establishes a rigorous, quantitative risk‑management framework that\
+      \ translates the chosen trading strategy into actionable safeguards.\n\n   \
+      \ Args:\n        select_trading_strategy_type_input: Input from the 'select_trading_strategy_type'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DefineRiskManagementRulesOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DefineRiskManagementRulesOutput(\n\
+      \        risk_management_rules=[],\n        rule_count=0,\n        has_stop_loss=False,\n\
+      \    )"
     name: define_risk_management_rules
     nodes_depended_on:
     - select_trading_strategy_type
@@ -499,11 +662,42 @@ nodes:
 
 
       Present the bullet points in plain text (no markdown).'
+    shims: []
   develop_trading_signal_logic:
     agent: false
+    code_node_type: stub
     description: Transforms the set of technical indicators identified for the chosen
       strategy into a deterministic, production‑grade algorithm that emits precise
       buy and sell signals.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyTradingIndicatorsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_trading_indicators node outputs.\"\"\"\n    indicators: List[str]\
+      \ = Field(..., description=\"List of technical indicator or signal names that\
+      \ will be applied in the chosen trading strategy.\")\n    indicator_count: int\
+      \ = Field(..., description=\"Total number of indicators listed in the \\\"indicators\\\
+      \" field.\")\n\n\nclass DevelopTradingSignalLogicOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for develop_trading_signal_logic node outputs.\"\"\"\n    signal_logic_steps:\
+      \ List[str] = Field(..., description=\"Step\\u2011by\\u2011step outline of the\
+      \ logical rules that convert indicator readings into concrete BUY or SELL signals.\"\
+      )\n    used_indicators: List[str] = Field(..., description=\"Explicit list of\
+      \ technical indicator names (as provided by the parent node) that are employed\
+      \ in the signal generation algorithm.\")\n    summary: str = Field(..., description=\"\
+      A concise executive summary describing the overall methodology, key decision\
+      \ pathways, and any risk\\u2011management overlays.\")\n    is_logic_complete:\
+      \ bool = Field(..., description=\"Flag indicating whether the signal logic accounts\
+      \ for all identified indicators and fully defines buy, sell, and neutral decision\
+      \ branches.\")\n\n\ndef develop_trading_signal_logic(identify_trading_indicators_input:\
+      \ IdentifyTradingIndicatorsOutput, **kwargs) -> DevelopTradingSignalLogicOutput:\n\
+      \    \"\"\"Transforms the set of technical indicators identified for the chosen\
+      \ strategy into a deterministic, production‑grade algorithm that emits precise\
+      \ buy and sell signals.\n\n    Args:\n        identify_trading_indicators_input:\
+      \ Input from the 'identify_trading_indicators' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DevelopTradingSignalLogicOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DevelopTradingSignalLogicOutput(\n        signal_logic_steps=[],\n       \
+      \ used_indicators=[],\n        summary=\"\",\n        is_logic_complete=False,\n\
+      \    )"
     name: develop_trading_signal_logic
     nodes_depended_on:
     - identify_trading_indicators
@@ -637,11 +831,31 @@ nodes:
     prompt: Using the indicator list produced by the `identify_trading_indicators`
       node, construct a comprehensive signal‑generation algorithm. Deliver `signal_logic_steps`,
       `used_indicators`, `summary`, and `is_logic_complete` as described.
+    shims: []
   fetch_stock_data_yahoo_data:
     agent: false
+    code_node_type: stub
     description: Downloads historical OHLCV data for each ticker in the asset universe
       and returns the raw ticker list, CSV‑encoded data strings, and per‑ticker record
       counts.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass FetchStockDataYahooDataOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for fetch_stock_data_yahoo_data node outputs.\"\"\"\n    tickers: List[str]\
+      \ = Field(..., description=\"Ordered list of ticker symbols for which historical\
+      \ data was fetched.\")\n    data_csv: List[str] = Field(..., description=\"\
+      CSV\\u2011formatted string of the OHLCV data for each ticker, preserving dates\
+      \ as the index; list order matches `tickers`.\")\n    record_counts: List[int]\
+      \ = Field(..., description=\"Number of rows (trading days) retrieved for each\
+      \ ticker, aligned with the order of `tickers`.\")\n\n\ndef fetch_stock_data_yahoo_data(general_input:\
+      \ str, **kwargs) -> FetchStockDataYahooDataOutput:\n    \"\"\"Downloads historical\
+      \ OHLCV data for each ticker in the asset universe and returns the raw ticker\
+      \ list, CSV‑encoded data strings, and per‑ticker record counts.\n\n    Args:\n\
+      \        general_input: General input string for the root node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        FetchStockDataYahooDataOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ FetchStockDataYahooDataOutput(\n        tickers=[],\n        data_csv=[],\n\
+      \        record_counts=[],\n    )"
     name: fetch_stock_data_yahoo_data
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -814,10 +1028,27 @@ nodes:
       \ matching `tickers` order.\n   - `record_counts`: number of rows (trading days)\
       \ retrieved for each ticker, aligned with `tickers`.\n\nReturn only these three\
       \ fields exactly as defined in the output_structure."
+    shims: []
   fetch_stock_data_yahoo_status:
     agent: false
+    code_node_type: stub
     description: Performs the same Yahoo Finance download and reports overall success
       flag and a concise human‑readable status message.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass FetchStockDataYahooStatusOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for fetch_stock_data_yahoo_status node outputs.\"\"\
+      \"\n    retrieval_success: bool = Field(..., description=\"Indicates whether\
+      \ the data download from Yahoo Finance completed without errors for all requested\
+      \ tickers.\")\n    retrieval_message: str = Field(..., description=\"A concise\
+      \ human\\u2011readable confirmation or error summary describing the overall\
+      \ retrieval outcome.\")\n\n\ndef fetch_stock_data_yahoo_status(general_input:\
+      \ str, **kwargs) -> FetchStockDataYahooStatusOutput:\n    \"\"\"Performs the\
+      \ same Yahoo Finance download and reports overall success flag and a concise\
+      \ human‑readable status message.\n\n    Args:\n        general_input: General\
+      \ input string for the root node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        FetchStockDataYahooStatusOutput: Object containing outputs\
+      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return FetchStockDataYahooStatusOutput(\n\
+      \        retrieval_success=False,\n        retrieval_message=\"\",\n    )"
     name: fetch_stock_data_yahoo_status
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -928,11 +1159,34 @@ nodes:
 
 
       Return exactly these two fields as defined in the output_structure.'
+    shims: []
   identify_trading_indicators:
     agent: false
+    code_node_type: stub
     description: Derives a curated set of quantitative technical indicators and/or
       price‑action signals that concretely instantiate the previously chosen trading‑strategy
       type.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectTradingStrategyTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_trading_strategy_type node outputs.\"\"\"\n    strategy_type: str\
+      \ = Field(..., description=\"The chosen primary trading strategy type (e.g.,\
+      \ \\\"momentum\\\", \\\"mean reversion\\\").\")\n    rationale: str = Field(...,\
+      \ description=\"A concise one\\u2011sentence explanation of why this strategy\
+      \ type best fits the market analysis.\")\n\n\nclass IdentifyTradingIndicatorsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_trading_indicators node outputs.\"\"\"\
+      \n    indicators: List[str] = Field(..., description=\"List of technical indicator\
+      \ or signal names that will be applied in the chosen trading strategy.\")\n\
+      \    indicator_count: int = Field(..., description=\"Total number of indicators\
+      \ listed in the \\\"indicators\\\" field.\")\n\n\ndef identify_trading_indicators(select_trading_strategy_type_input:\
+      \ SelectTradingStrategyTypeOutput, **kwargs) -> IdentifyTradingIndicatorsOutput:\n\
+      \    \"\"\"Derives a curated set of quantitative technical indicators and/or\
+      \ price‑action signals that concretely instantiate the previously chosen trading‑strategy\
+      \ type.\n\n    Args:\n        select_trading_strategy_type_input: Input from\
+      \ the 'select_trading_strategy_type' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        IdentifyTradingIndicatorsOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return IdentifyTradingIndicatorsOutput(\n\
+      \        indicators=[],\n        indicator_count=0,\n    )"
     name: identify_trading_indicators
     nodes_depended_on:
     - select_trading_strategy_type
@@ -1015,10 +1269,52 @@ nodes:
     prompt: Given the selected trading‑strategy type, produce a concise, de‑duplicated
       list of technical indicators or signal formulas that will operationalize that
       strategy.
+    shims: []
   refine_trading_strategy:
     agent: false
+    code_node_type: stub
     description: Iteratively enhances the quantitative trading strategy by performing
       a data‑driven, statistically rigorous refinement cycle.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BacktestTradingStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for backtest_trading_strategy node outputs.\"\"\"\n\
+      \    total_return: float = Field(..., description=\"Cumulative return of the\
+      \ strategy over the backtest period, expressed as a decimal (e.g., 0.12 for\
+      \ 12%).\")\n    annualized_sharpe_ratio: float = Field(..., description=\"Annualized\
+      \ Sharpe ratio of the strategy, assuming a risk\\u2011free rate of 0%.\")\n\
+      \    max_drawdown: float = Field(..., description=\"Maximum drawdown observed\
+      \ during the backtest, expressed as a decimal.\")\n    number_of_trades: int\
+      \ = Field(..., description=\"Total count of executed trades (both entries and\
+      \ exits) throughout the backtest.\")\n    backtest_period_start: str = Field(...,\
+      \ description=\"ISO\\u2011format start date of the backtest period (YYYY\\u2011MM\\\
+      u2011DD).\")\n    backtest_period_end: str = Field(..., description=\"ISO\\\
+      u2011format end date of the backtest period (YYYY\\u2011MM\\u2011DD).\")\n \
+      \   success: bool = Field(..., description=\"True if the backtest completed\
+      \ without errors; false otherwise.\")\n\n\nclass RefineTradingStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for refine_trading_strategy node outputs.\"\"\"\n\
+      \    refined_strategy_summary: str = Field(..., description=\"A concise narrative\
+      \ summarizing the refined trading strategy, highlighting adjusted parameters,\
+      \ indicator configurations, and risk\\u2011management rules.\")\n    parameter_adjustments:\
+      \ str = Field(..., description=\"Bullet\\u2011point list detailing each model\
+      \ parameter that was changed, including old and new values.\")\n    indicator_adjustments:\
+      \ str = Field(..., description=\"Bullet\\u2011point list of technical indicator\
+      \ modifications, specifying the indicator name, previous settings, and revised\
+      \ settings.\")\n    risk_rule_adjustments: str = Field(..., description=\"Bullet\\\
+      u2011point list of risk\\u2011management rule changes (e.g., position sizing,\
+      \ stop\\u2011loss/take\\u2011profit levels) with before/after values.\")\n \
+      \   reasoning_for_adjustments: str = Field(..., description=\"A thorough explanation\
+      \ linking each adjustment to the observed backtest shortcomings and the results\
+      \ of the sensitivity analysis.\")\n\n\ndef refine_trading_strategy(backtest_trading_strategy_input:\
+      \ BacktestTradingStrategyOutput, **kwargs) -> RefineTradingStrategyOutput:\n\
+      \    \"\"\"Iteratively enhances the quantitative trading strategy by performing\
+      \ a data‑driven, statistically rigorous refinement cycle.\n\n    Args:\n   \
+      \     backtest_trading_strategy_input: Input from the 'backtest_trading_strategy'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       RefineTradingStrategyOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return RefineTradingStrategyOutput(\n       \
+      \ refined_strategy_summary=\"\",\n        parameter_adjustments=\"\",\n    \
+      \    indicator_adjustments=\"\",\n        risk_rule_adjustments=\"\",\n    \
+      \    reasoning_for_adjustments=\"\",\n    )"
     name: refine_trading_strategy
     nodes_depended_on:
     - backtest_trading_strategy
@@ -1156,10 +1452,36 @@ nodes:
     prompt: Ingest the full backtest report generated by **backtest_trading_strategy**,
       compare metrics against targets, conduct sensitivity analysis, adjust parameters/indicators/risk
       rules, and summarize the refined strategy.
+    shims: []
   select_trading_strategy_type:
     agent: false
+    code_node_type: stub
     description: Determines the optimal primary trading strategy category based on
       the market analysis.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineMarketAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_market_analysis node outputs.\"\"\"\n    market_data_sources: List[str]\
+      \ = Field(..., description=\"Primary market data providers or platforms to be\
+      \ consumed (e.g., Bloomberg, Refinitiv, Quandl, Yahoo Finance, ICE Data Services).\"\
+      )\n    analysis_techniques: List[str] = Field(..., description=\"Selected analytical\
+      \ methods, ranging from classic technical indicators to advanced sentiment and\
+      \ macro\\u2011factor models.\")\n    summary_note: str = Field(..., description=\"\
+      A concise narrative linking the chosen data sources with the analysis techniques,\
+      \ emphasizing data fidelity, licensing considerations, and estimated computational\
+      \ resource requirements.\")\n\n\nclass SelectTradingStrategyTypeOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for select_trading_strategy_type node outputs.\"\"\
+      \"\n    strategy_type: str = Field(..., description=\"The chosen primary trading\
+      \ strategy type (e.g., \\\"momentum\\\", \\\"mean reversion\\\").\")\n    rationale:\
+      \ str = Field(..., description=\"A concise one\\u2011sentence explanation of\
+      \ why this strategy type best fits the market analysis.\")\n\n\ndef select_trading_strategy_type(define_market_analysis_input:\
+      \ DefineMarketAnalysisOutput, **kwargs) -> SelectTradingStrategyTypeOutput:\n\
+      \    \"\"\"Determines the optimal primary trading strategy category based on\
+      \ the market analysis.\n\n    Args:\n        define_market_analysis_input: Input\
+      \ from the 'define_market_analysis' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        SelectTradingStrategyTypeOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return SelectTradingStrategyTypeOutput(\n\
+      \        strategy_type=\"\",\n        rationale=\"\",\n    )"
     name: select_trading_strategy_type
     nodes_depended_on:
     - define_market_analysis
@@ -1256,10 +1578,33 @@ nodes:
     prompt: Based on the market data sources and analysis techniques defined in the
       previous step, select the single primary trading strategy type and provide a
       one‑sentence justification.
+    shims: []
   specify_asset_universe:
     agent: false
+    code_node_type: stub
     description: Defines the full investable universe that aligns with the selected
       trading strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectTradingStrategyTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_trading_strategy_type node outputs.\"\"\"\n    strategy_type: str\
+      \ = Field(..., description=\"The chosen primary trading strategy type (e.g.,\
+      \ \\\"momentum\\\", \\\"mean reversion\\\").\")\n    rationale: str = Field(...,\
+      \ description=\"A concise one\\u2011sentence explanation of why this strategy\
+      \ type best fits the market analysis.\")\n\n\nclass SpecifyAssetUniverseOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for specify_asset_universe node outputs.\"\"\"\n \
+      \   asset_classes: List[str] = Field(..., description=\"High\\u2011level asset\
+      \ classes or instrument families to be traded (e.g., US equities, futures, commodities).\"\
+      )\n    asset_tickers: List[str] = Field(..., description=\"Specific ticker symbols\
+      \ or contract identifiers selected from each asset class (e.g., AAPL, MSFT,\
+      \ ESZ2025).\")\n\n\ndef specify_asset_universe(select_trading_strategy_type_input:\
+      \ SelectTradingStrategyTypeOutput, **kwargs) -> SpecifyAssetUniverseOutput:\n\
+      \    \"\"\"Defines the full investable universe that aligns with the selected\
+      \ trading strategy.\n\n    Args:\n        select_trading_strategy_type_input:\
+      \ Input from the 'select_trading_strategy_type' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SpecifyAssetUniverseOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return SpecifyAssetUniverseOutput(\n\
+      \        asset_classes=[],\n        asset_tickers=[],\n    )"
     name: specify_asset_universe
     nodes_depended_on:
     - select_trading_strategy_type
@@ -1350,3 +1695,4 @@ nodes:
           whether the universe generation completed without errors.'
     prompt: Based on the chosen trading strategy, delineate the complete investable
       universe, including asset classes and concrete ticker symbols.
+    shims: []
