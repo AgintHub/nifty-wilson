@@ -9,6 +9,12 @@ from .specify_asset_universe import specify_asset_universe
 from .fetch_stock_data_yahoo_data import fetch_stock_data_yahoo_data
 from .compile_final_strategy_blueprint import compile_final_strategy_blueprint
 from .fetch_stock_data_yahoo_status import fetch_stock_data_yahoo_status
+from . import _develop_trading_signal_logic
+from . import _define_risk_management_rules
+from . import _select_trading_strategy_type
+from . import _backtest_trading_strategy
+from . import _specify_asset_universe
+from . import _compile_final_strategy_blueprint
 
 
 __all__ = [
@@ -22,5 +28,11 @@ __all__ = [
     'specify_asset_universe',
     'fetch_stock_data_yahoo_data',
     'compile_final_strategy_blueprint',
-    'fetch_stock_data_yahoo_status'
+    'fetch_stock_data_yahoo_status',
+    '_develop_trading_signal_logic',
+    '_define_risk_management_rules',
+    '_select_trading_strategy_type',
+    '_backtest_trading_strategy',
+    '_specify_asset_universe',
+    '_compile_final_strategy_blueprint'
 ]

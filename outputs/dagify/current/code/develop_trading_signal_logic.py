@@ -1,3 +1,19 @@
+from ._develop_trading_signal_logic.fetch_parent_indicators import fetch_parent_indicators
+from ._develop_trading_signal_logic.deduplicate_indicators import deduplicate_indicators
+from ._develop_trading_signal_logic.create_indicator_definitions_registry import create_indicator_definitions_registry
+from ._develop_trading_signal_logic.validate_indicators_exist import validate_indicators_exist
+from ._develop_trading_signal_logic.define_buy_rule import define_buy_rule
+from ._develop_trading_signal_logic.define_sell_rule import define_sell_rule
+from ._develop_trading_signal_logic.define_hold_rule import define_hold_rule
+from ._develop_trading_signal_logic.assemble_signal_logic_steps import assemble_signal_logic_steps
+from ._develop_trading_signal_logic.generate_summary import generate_summary
+from ._develop_trading_signal_logic.compute_logic_completeness import compute_logic_completeness
+from ._develop_trading_signal_logic.handle_signal_logic_generation_error import handle_signal_logic_generation_error
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Fetch the `indicators` list from the output of the
 #   `identify_trading_indicators` node and store it in a local variable
@@ -136,14 +152,12 @@
 #           `SignalLogicGenerationError`.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class IdentifyTradingIndicatorsOutput(BaseModel):
     """Pydantic model for identify_trading_indicators node outputs."""
     indicators: List[str] = Field(..., description="List of technical indicator or signal names that will be applied in the chosen trading strategy.")
-    indicator_count: int = Field(..., description="Total number of indicators listed in the \"indicators\" field.")
+    indicator_count: int = Field(..., description="Total number of indicators listed in the "indicators" field.")
 
 
 class DevelopTradingSignalLogicOutput(BaseModel):
@@ -164,12 +178,55 @@ def develop_trading_signal_logic(identify_trading_indicators_input: IdentifyTrad
     Returns:
         DevelopTradingSignalLogicOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
-    return DevelopTradingSignalLogicOutput(
-        signal_logic_steps=[],
-        used_indicators=[],
-        summary="",
-        is_logic_complete=False,
-    )
+    try:
+        # Fetch the indicators list from the parent node output
+        parent_indicators: List[str] = fetch_parent_indicators(input_data=identify_trading_indicators_input)
+        
+        # Deduplicate indicators while preserving order
+        used_indicators: List[str] = deduplicate_indicators(indicators=parent_indicators)
+        
+        # Create indicator definitions registry
+        indicator_definitions: dict = create_indicator_definitions_registry()
+        
+        # Validate all indicators exist in definitions
+        validate_indicators_exist(indicators=used_indicators, definitions=indicator_definitions)
+        
+        # Define primary BUY rule
+        buy_rule: str = define_buy_rule(indicators=used_indicators, definitions=indicator_definitions)
+        
+        # Define primary SELL rule
+        sell_rule: str = define_sell_rule(indicators=used_indicators, definitions=indicator_definitions)
+        
+        # Define NEUTRAL/HOLD rule
+        hold_rule: str = define_hold_rule()
+        
+        # Assemble signal logic steps in order
+        signal_logic_steps: List[str] = assemble_signal_logic_steps(
+            buy_rule=buy_rule, 
+            sell_rule=sell_rule, 
+            hold_rule=hold_rule
+        )
+        
+        # Generate summary
+        summary: str = generate_summary(
+            indicators=used_indicators, 
+            logic_steps=signal_logic_steps
+        )
+        
+        # Compute logic completeness
+        is_logic_complete: bool = compute_logic_completeness(
+            parent_indicators=parent_indicators,
+            used_indicators=used_indicators,
+            signal_logic_steps=signal_logic_steps
+        )
+        
+        return DevelopTradingSignalLogicOutput(
+            signal_logic_steps=signal_logic_steps,
+            used_indicators=used_indicators,
+            summary=summary,
+            is_logic_complete=is_logic_complete
+        )
+        
+    except Exception as e:
+        handle_signal_logic_generation_error(error=e)
+        raise

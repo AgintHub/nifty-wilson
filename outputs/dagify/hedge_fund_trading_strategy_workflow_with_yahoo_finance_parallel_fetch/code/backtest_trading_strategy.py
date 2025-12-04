@@ -1,3 +1,17 @@
+from ._backtest_trading_strategy.parse_csv_to_dataframes import parse_csv_to_dataframes
+from ._backtest_trading_strategy.align_dataframes_to_master_calendar import align_dataframes_to_master_calendar
+from ._backtest_trading_strategy.create_unified_dataframe import create_unified_dataframe
+from ._backtest_trading_strategy.create_signal_function import create_signal_function
+from ._backtest_trading_strategy.generate_trading_signals import generate_trading_signals
+from ._backtest_trading_strategy.execute_backtest_simulation import execute_backtest_simulation
+from ._backtest_trading_strategy.build_equity_curve import build_equity_curve
+from ._backtest_trading_strategy.calculate_performance_metrics import calculate_performance_metrics
+from ._backtest_trading_strategy.log_backtest_error import log_backtest_error
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Parse the CSV strings from **fetch_stock_data_yahoo_data** into pandas
 #   DataFrames, enforce UTC DatetimeIndex, and ensure columns are exactly
@@ -91,8 +105,6 @@
 #           output dictionary.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class DevelopTradingSignalLogicOutput(BaseModel):
@@ -146,15 +158,74 @@ def backtest_trading_strategy(develop_trading_signal_logic_input: DevelopTrading
     Returns:
         BacktestTradingStrategyOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
-    return BacktestTradingStrategyOutput(
-        total_return=0.0,
-        annualized_sharpe_ratio=0.0,
-        max_drawdown=0.0,
-        number_of_trades=0,
-        backtest_period_start="",
-        backtest_period_end="",
-        success=False,
-    )
+    try:
+        # Parse CSV data into pandas DataFrames with UTC timezone and standard columns
+        dataframes_dict: dict = parse_csv_to_dataframes(
+            csv_strings=fetch_stock_data_yahoo_data_input.data_csv,
+            tickers=fetch_stock_data_yahoo_data_input.tickers
+        )
+        
+        # Create master business day calendar and align all ticker data
+        aligned_data: dict = align_dataframes_to_master_calendar(
+            dataframes=dataframes_dict,
+            tickers=specify_asset_universe_input.asset_tickers
+        )
+        
+        # Convert aligned data to unified multi-index DataFrame
+        unified_df: 'pd.DataFrame' = create_unified_dataframe(aligned_data=aligned_data)
+        
+        # Translate signal logic steps into executable function and generate signals
+        signal_function: callable = create_signal_function(
+            signal_logic_steps=develop_trading_signal_logic_input.signal_logic_steps,
+            used_indicators=develop_trading_signal_logic_input.used_indicators
+        )
+        
+        signals_df: 'pd.DataFrame' = generate_trading_signals(
+            unified_data=unified_df,
+            signal_function=signal_function,
+            tickers=specify_asset_universe_input.asset_tickers
+        )
+        
+        # Execute backtest with commission and slippage
+        execution_results: dict = execute_backtest_simulation(
+            price_data=unified_df,
+            signals=signals_df,
+            commission_rate=0.001,
+            slippage_rate=0.0005
+        )
+        
+        # Construct daily equity curve
+        equity_curve: 'pd.Series' = build_equity_curve(
+            cash_series=execution_results['cash'],
+            holdings_series=execution_results['holdings'],
+            price_data=unified_df
+        )
+        
+        # Calculate performance metrics
+        performance_metrics: dict = calculate_performance_metrics(
+            equity_curve=equity_curve,
+            number_of_trades=execution_results['trade_count']
+        )
+        
+        return BacktestTradingStrategyOutput(
+            total_return=performance_metrics['total_return'],
+            annualized_sharpe_ratio=performance_metrics['annualized_sharpe'],
+            max_drawdown=performance_metrics['max_drawdown'],
+            number_of_trades=performance_metrics['number_of_trades'],
+            backtest_period_start=performance_metrics['period_start'],
+            backtest_period_end=performance_metrics['period_end'],
+            success=True
+        )
+        
+    except Exception as e:
+        error_log: str = log_backtest_error(exception=e)
+        
+        return BacktestTradingStrategyOutput(
+            total_return=0.0,
+            annualized_sharpe_ratio=0.0,
+            max_drawdown=0.0,
+            number_of_trades=0,
+            backtest_period_start="",
+            backtest_period_end="",
+            success=False
+        )

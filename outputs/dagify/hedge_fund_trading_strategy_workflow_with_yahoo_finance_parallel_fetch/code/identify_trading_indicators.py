@@ -88,14 +88,14 @@ from typing import List
 
 class SelectTradingStrategyTypeOutput(BaseModel):
     """Pydantic model for select_trading_strategy_type node outputs."""
-    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., \"momentum\", \"mean reversion\").")
+    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., "momentum", "mean reversion").")
     rationale: str = Field(..., description="A concise one\u2011sentence explanation of why this strategy type best fits the market analysis.")
 
 
 class IdentifyTradingIndicatorsOutput(BaseModel):
     """Pydantic model for identify_trading_indicators node outputs."""
     indicators: List[str] = Field(..., description="List of technical indicator or signal names that will be applied in the chosen trading strategy.")
-    indicator_count: int = Field(..., description="Total number of indicators listed in the \"indicators\" field.")
+    indicator_count: int = Field(..., description="Total number of indicators listed in the "indicators" field.")
 
 
 def identify_trading_indicators(select_trading_strategy_type_input: SelectTradingStrategyTypeOutput, **kwargs) -> IdentifyTradingIndicatorsOutput:

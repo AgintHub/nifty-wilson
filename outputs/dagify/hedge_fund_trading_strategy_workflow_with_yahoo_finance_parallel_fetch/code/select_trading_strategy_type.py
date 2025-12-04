@@ -1,3 +1,14 @@
+from ._select_trading_strategy_type.classify_market_data_sources import classify_market_data_sources
+from ._select_trading_strategy_type.map_techniques_to_archetypes import map_techniques_to_archetypes
+from ._select_trading_strategy_type.compute_strategy_scores import compute_strategy_scores
+from ._select_trading_strategy_type.select_top_strategy_with_tiebreaker import select_top_strategy_with_tiebreaker
+from ._select_trading_strategy_type.generate_strategy_rationale import generate_strategy_rationale
+from ._select_trading_strategy_type.validate_output_payload import validate_output_payload
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Retrieve the complete output payload from the parent node
 #   **define_market_analysis**, specifically the three fields:
@@ -94,8 +105,6 @@
 #           non‑emptiness; log descriptive error messages.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class DefineMarketAnalysisOutput(BaseModel):
@@ -107,7 +116,7 @@ class DefineMarketAnalysisOutput(BaseModel):
 
 class SelectTradingStrategyTypeOutput(BaseModel):
     """Pydantic model for select_trading_strategy_type node outputs."""
-    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., \"momentum\", \"mean reversion\").")
+    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., "momentum", "mean reversion").")
     rationale: str = Field(..., description="A concise one\u2011sentence explanation of why this strategy type best fits the market analysis.")
 
 
@@ -121,10 +130,38 @@ def select_trading_strategy_type(define_market_analysis_input: DefineMarketAnaly
     Returns:
         SelectTradingStrategyTypeOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract inputs
+    market_data_sources: List[str] = define_market_analysis_input.market_data_sources
+    analysis_techniques: List[str] = define_market_analysis_input.analysis_techniques
+    summary_note: str = define_market_analysis_input.summary_note
+    
+    # Classify data sources by latency, granularity, and asset class coverage
+    data_classification: dict = classify_market_data_sources(sources=market_data_sources)
+    
+    # Map analysis techniques to strategy archetypes
+    technique_mapping: dict = map_techniques_to_archetypes(techniques=analysis_techniques)
+    
+    # Build weighted scoring model for candidate strategies
+    strategy_scores: dict = compute_strategy_scores(
+        data_classification=data_classification,
+        technique_mapping=technique_mapping,
+        summary_note=summary_note
+    )
+    
+    # Select strategy with highest score, applying tie-breaker if needed
+    selected_strategy: str = select_top_strategy_with_tiebreaker(scores=strategy_scores)
+    
+    # Generate rationale based on dominant factors
+    rationale_text: str = generate_strategy_rationale(
+        selected_strategy=selected_strategy,
+        data_classification=data_classification,
+        technique_mapping=technique_mapping
+    )
+    
+    # Validate output against schema requirements
+    validate_output_payload(strategy_type=selected_strategy, rationale=rationale_text)
+    
     return SelectTradingStrategyTypeOutput(
-        strategy_type="",
-        rationale="",
+        strategy_type=selected_strategy,
+        rationale=rationale_text
     )
