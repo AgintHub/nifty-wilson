@@ -1,111 +1,95 @@
 dag_type: plain_text
-description: A detailed workflow for an investor relations associate's daily tasks,
-  including responding to emails, preparing for calls, and updating records.
+description: A workflow that outlines the daily tasks of an investor relations associate,
+  from responding to emails to updating CRM and preparing for LP calls.
 name: investor_relations_associate_daily_workflow
 nodes:
   check_subscription_status:
     agent: false
-    description: Check the subscription status of another prospective LP
+    description: Check subscription status
     name: check_subscription_status
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Inquire about the status of the prospective LP's subscription.
+    prompt: Check the subscription status of another prospective LP who has been 'circling
+      back internally' for the last 8 months. Follow up with a polite inquiry.
   join_lp_call:
     agent: false
-    description: Join the LP call and address questions
+    description: Join the LP call
     name: join_lp_call
     nodes_depended_on:
     - prepare_for_lp_call
-    nodes_dependent_on:
-    - respond_to_distribution_query
-    prompt: Take notes during the call, especially on questions asked, and respond
-      accordingly.
+    nodes_dependent_on: []
+    prompt: Join the LP call and be prepared to answer questions, including walking
+      through assumptions on page 37 (even if it doesn't exist).
   prepare_for_lp_call:
     agent: false
-    description: Prepare for the LP call by reviewing the deck
+    description: Prepare for the LP call
     name: prepare_for_lp_call
     nodes_depended_on: []
-    nodes_dependent_on:
-    - join_lp_call
-    prompt: Review the LP deck and make notes on key points, especially regarding
-      fund-level tax treatment.
-  receive_portco_commentary:
+    nodes_dependent_on: []
+    prompt: Re-read the LP call deck and prepare answers to potential questions, especially
+      regarding fund-level tax treatment.
+  request_updated_portco_commentary:
     agent: false
-    description: Receive portco commentary
-    name: receive_portco_commentary
-    nodes_depended_on:
-    - request_portco_commentary
-    nodes_dependent_on:
-    - rewrite_portco_commentary
-    prompt: Collect the received commentary from portcos.
-  request_portco_commentary:
-    agent: false
-    description: Request updated portco commentary for the quarterly letter
-    name: request_portco_commentary
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - rewrite_portco_commentary
-    prompt: Send a request to portcos for updated commentary.
-  respond_to_distribution_query:
-    agent: false
-    description: Respond to an email asking about distributions
-    name: respond_to_distribution_query
+    description: Request portco commentary
+    name: request_updated_portco_commentary
     nodes_depended_on:
     - join_lp_call
     nodes_dependent_on: []
-    prompt: Draft a response to the distribution query, explaining that it's a VC
-      fund and the first distribution is expected in 10 years.
-  respond_to_prospective_lp_query:
+    prompt: Request updated portco commentary for the quarterly letter from relevant
+      teams.
+  respond_to_distribution_email:
     agent: false
-    description: Respond to a prospective LP's question about competitive differentiation
-    name: respond_to_prospective_lp_query
+    description: Respond to email about distributions
+    name: respond_to_distribution_email
+    nodes_depended_on:
+    - join_lp_call
+    nodes_dependent_on: []
+    prompt: Respond to an email asking if distributions will be 'going up this quarter'.
+      Explain that it's a VC fund and the first distribution is expected in 10 years.
+  respond_to_prospective_lp_question:
+    agent: false
+    description: Respond to prospective LP question
+    name: respond_to_prospective_lp_question
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Draft a response highlighting the fund's unique aspects without directly
-      comparing to others.
-  respond_to_quarterly_report_requests:
+    prompt: Respond to a prospective LP question about 'competitive differentiation'
+      without mentioning that everyone else does the exact same thing. Provide a nuanced
+      and positive response.
+  respond_to_quarterly_report_emails:
     agent: false
-    description: Respond to emails requesting the quarterly report
-    name: respond_to_quarterly_report_requests
-    nodes_depended_on:
-    - wake_up_and_check_emails
+    description: Respond to emails asking for the quarterly report
+    name: respond_to_quarterly_report_emails
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Draft a response to the quarterly report requests with a link or attachment
-      to the report.
+    prompt: Respond to 12 emails asking for the same quarterly report that was sent
+      last week. Provide a brief acknowledgement and a link to the previously sent
+      report.
   rewrite_portco_commentary:
     agent: false
-    description: Rewrite the portco commentary into a full narrative
+    description: Rewrite portco commentary
     name: rewrite_portco_commentary
     nodes_depended_on:
-    - receive_portco_commentary
+    - request_updated_portco_commentary
     nodes_dependent_on: []
-    prompt: Transform the received bullet points into a polished, cautious, and optimistic
-      narrative.
+    prompt: Rewrite the received portco commentary (three bullet points saying 'good
+      quarter') into a full narrative that sounds polished, cautious, and optimistic.
   send_monthly_update:
     agent: false
-    description: Send the monthly update to LPs
+    description: Send monthly update
     name: send_monthly_update
     nodes_depended_on:
     - rewrite_portco_commentary
     nodes_dependent_on: []
-    prompt: Prepare the monthly update with a focus on portfolio performance, using
-      the rewritten portco commentary.
+    prompt: 'Send the monthly update with the opener: ''We are pleased with portfolio
+      performance''. Mention that one company is on fire, two founders cannot be located,
+      and the rest are not providing meaningful updates.'
   update_crm:
     agent: false
-    description: Update the CRM with the latest interactions
+    description: Update CRM
     name: update_crm
     nodes_depended_on:
-    - respond_to_prospective_lp_query
     - check_subscription_status
+    - respond_to_prospective_lp_question
     nodes_dependent_on: []
-    prompt: Log the interactions with prospective LPs and update their status in the
-      CRM.
-  wake_up_and_check_emails:
-    agent: false
-    description: Check emails for quarterly report requests
-    name: wake_up_and_check_emails
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - respond_to_quarterly_report_requests
-    prompt: List the number of emails requesting the quarterly report and the senders'
-      names.
+    prompt: Update the CRM with the latest information about prospective LPs and their
+      status. Promise to do it 'properly' tomorrow.
