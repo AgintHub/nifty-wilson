@@ -1,177 +1,239 @@
 dag_type: plain_text
-description: A concurrent workflow to create a complete marketing plan for selling
-  a product to music studios.
-name: marketing_plan_to_music_studios
+description: Creates a detailed, step-by-step foundational plan for building a hedge
+  fund, from defining objectives through compiling the final launch blueprint.
+name: build_hedge_fund
 nodes:
-  analyze_studio_needs:
+  choose_investment_strategy:
     agent: false
-    description: Identify the key needs and pain points of each target studio type.
-    name: analyze_studio_needs
+    description: Identify the high-level investment strategy category.
+    name: choose_investment_strategy
     nodes_depended_on:
-    - identify_target_music_studios
+    - clarify_fund_objectives
     nodes_dependent_on:
-    - draft_value_proposition
-    prompt: For each studio type listed, identify the primary pain points and needs
-      related to audio equipment and services. Summarize each in one sentence.
-  assign_responsibilities:
+    - define_asset_universe
+    - set_performance_and_risk_targets
+    prompt: Select one primary hedge fund strategy category that best serves the fund
+      objectives (e.g., long/short equity, global macro). Provide a one-sentence rationale.
+  choose_legal_entity_type:
     agent: false
-    description: Allocate tasks to specific marketing roles.
-    name: assign_responsibilities
+    description: Identify legal structure for the fund vehicle.
+    name: choose_legal_entity_type
     nodes_depended_on:
-    - define_marketing_objectives
-    - select_marketing_channels
+    - select_jurisdiction
     nodes_dependent_on:
-    - create_implementation_timeline
-    prompt: Assign each marketing activity to a role (e.g., Content Creator, Social
-      Media Manager, Designer, Email Marketer). Provide a one‑line responsibility
-      for each role.
-  build_case_studies:
+    - list_service_providers
+    - outline_governance_structure
+    - identify_regulatory_requirements
+    prompt: Specify the legal entity structure (e.g., LP, LLC, SICAV) appropriate
+      for the chosen jurisdiction. Give a one-sentence explanation.
+  clarify_fund_objectives:
     agent: false
-    description: Outline case study for a relevant music studio.
-    name: build_case_studies
-    nodes_depended_on:
-    - draft_value_proposition
-    nodes_dependent_on: []
-    prompt: Generate a brief case study outline for a music studio that successfully
-      adopted a similar solution. Include problem, solution, results, and testimonial.
-  create_content_plan:
-    agent: false
-    description: Plan content assets aligned with channels and value proposition.
-    name: create_content_plan
-    nodes_depended_on:
-    - draft_value_proposition
-    - select_marketing_channels
-    nodes_dependent_on:
-    - create_social_media_schedule
-    - develop_website_landing_page
-    prompt: Develop a two‑month content calendar that includes blog posts, videos,
-      and social media posts. Align each piece with the chosen marketing channels
-      and the value proposition. Provide dates and titles.
-  create_implementation_timeline:
-    agent: false
-    description: Build a timeline for executing the marketing activities.
-    name: create_implementation_timeline
-    nodes_depended_on:
-    - assign_responsibilities
-    - establish_budget_and_resources
-    nodes_dependent_on:
-    - setup_tracking_and_metrics
-    - final_review_and_approval
-    prompt: Create a Gantt‑style timeline with key milestones over four months, linking
-      activities, responsibilities, and budget checkpoints.
-  create_social_media_schedule:
-    agent: false
-    description: Schedule social media posts for two months.
-    name: create_social_media_schedule
-    nodes_depended_on:
-    - select_marketing_channels
-    - create_content_plan
-    nodes_dependent_on: []
-    prompt: Using the content calendar, produce a detailed social media posting schedule
-      with platform, content type, and posting time.
-  define_marketing_objectives:
-    agent: false
-    description: Set clear, measurable objectives for marketing the product to music
-      studios.
-    name: define_marketing_objectives
+    description: Produce a bullet list of the hedge fund's core objectives.
+    name: clarify_fund_objectives
     nodes_depended_on: []
     nodes_dependent_on:
-    - identify_target_music_studios
-    - establish_budget_and_resources
-    - assign_responsibilities
-    - setup_tracking_and_metrics
-    prompt: List three specific, measurable marketing objectives for selling the product
-      to music studios. Each objective should include a target metric and a deadline.
-  design_email_templates:
+    - define_investor_profile
+    - select_jurisdiction
+    - choose_investment_strategy
+    prompt: State the primary business objectives for launching the hedge fund. Produce
+      a concise bullet list covering investment purpose, competitive edge, and long-term
+      vision (max 8 bullets). Focus only on objectives, do not include strategy details.
+  compile_pitch_deck_outline:
     agent: false
-    description: Write email templates for outreach.
-    name: design_email_templates
+    description: Framework for fundraising presentation.
+    name: compile_pitch_deck_outline
     nodes_depended_on:
-    - draft_value_proposition
+    - clarify_fund_objectives
+    - define_investor_profile
+    - choose_investment_strategy
+    - set_performance_and_risk_targets
+    - draft_fee_structure
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: Create a 10-slide outline (slide titles only) for an investor pitch deck
+      incorporating objectives, strategy, team, edge, risk controls, fees, and expected
+      returns.
+  create_hiring_plan:
+    agent: false
+    description: Determine initial staffing requirements.
+    name: create_hiring_plan
+    nodes_depended_on:
+    - draft_operations_workflow
+    nodes_dependent_on:
+    - develop_timeline_and_milestones
+    prompt: List essential full-time positions for launch (max 8), with one-line responsibility
+      each. Align roles with operations workflow gaps.
+  define_asset_universe:
+    agent: false
+    description: Enumerate tradable assets and instruments.
+    name: define_asset_universe
+    nodes_depended_on:
+    - choose_investment_strategy
+    nodes_dependent_on:
+    - draft_operations_workflow
+    prompt: List the specific asset classes and instruments the chosen strategy will
+      trade (e.g., US large-cap equities, S&P futures). Keep list ≤10 items.
+  define_investor_profile:
+    agent: false
+    description: Describe the target investor segment for the fund.
+    name: define_investor_profile
+    nodes_depended_on:
+    - clarify_fund_objectives
+    nodes_dependent_on:
+    - compile_pitch_deck_outline
+    prompt: 'Based on the stated fund objectives, specify the ideal target investor
+      profile (e.g., family offices, pensions). List key characteristics: typical
+      ticket size, risk tolerance, liquidity preference, and geographic focus.'
+  define_technology_stack:
+    agent: false
+    description: Specify technology tools supporting operations.
+    name: define_technology_stack
+    nodes_depended_on:
+    - draft_operations_workflow
+    nodes_dependent_on:
+    - develop_timeline_and_milestones
+    prompt: 'Identify required software and infrastructure components for each operations
+      step (e.g., OMS, EMS, risk system). Present as 2-column table: Ops Step | Tech
+      Component.'
+  design_compliance_program:
+    agent: false
+    description: Create compliance policies aligned with regulations and risk.
+    name: design_compliance_program
+    nodes_depended_on:
+    - identify_regulatory_requirements
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: 'Generate a compliance checklist mapping each regulatory requirement to
+      a specific internal policy or procedure. Table with columns: Requirement | Policy
+      Reference.'
+  design_risk_management_framework:
+    agent: false
+    description: Outline quantitative and qualitative risk controls.
+    name: design_risk_management_framework
+    nodes_depended_on:
+    - set_performance_and_risk_targets
+    nodes_dependent_on:
+    - design_compliance_program
+    - draft_operations_workflow
+    prompt: 'List core risk controls aligned with the target metrics: position limits,
+      VaR limits, stop-loss rules, liquidity thresholds. Provide 4–6 bullet points.'
+  develop_timeline_and_milestones:
+    agent: false
+    description: Create phased schedule leading to fund launch.
+    name: develop_timeline_and_milestones
+    nodes_depended_on:
+    - draft_operations_workflow
+    - define_technology_stack
+    - create_hiring_plan
+    - compile_pitch_deck_outline
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: Prepare a launch timeline with monthly milestones over the next 12 months.
+      Include regulatory filing, service provider onboarding, capital raise, tech
+      deployment, and go-live.
+  draft_fee_structure:
+    agent: false
+    description: Set management and performance fee levels.
+    name: draft_fee_structure
+    nodes_depended_on:
+    - set_performance_and_risk_targets
+    - estimate_setup_and_operating_costs
+    nodes_dependent_on:
+    - compile_pitch_deck_outline
+    prompt: Propose management and performance fee percentages that balance cost recovery
+      and competitiveness. Include incentive hurdle if relevant. Summarize in ≤3 sentences.
+  draft_operations_workflow:
+    agent: false
+    description: Map core trade and post-trade operational steps.
+    name: draft_operations_workflow
+    nodes_depended_on:
+    - define_asset_universe
+    - list_service_providers
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - define_technology_stack
+    - create_hiring_plan
+    - develop_timeline_and_milestones
+    prompt: 'Sketch the daily trade lifecycle: idea generation → order entry → execution
+      → confirmation → settlement → reconciliation. List each step with primary responsible
+      party (internal or provider).'
+  estimate_setup_and_operating_costs:
+    agent: false
+    description: Rough cost model for fund setup and operations.
+    name: estimate_setup_and_operating_costs
+    nodes_depended_on:
+    - list_service_providers
+    nodes_dependent_on:
+    - draft_fee_structure
+    prompt: 'Provide a simple annual cost estimate (in USD) for each listed service
+      provider plus overhead (office, tech). Present as two columns: Cost Item | Estimated
+      USD.'
+  identify_regulatory_requirements:
+    agent: false
+    description: Outline key regulatory filings and registrations.
+    name: identify_regulatory_requirements
+    nodes_depended_on:
+    - choose_legal_entity_type
+    nodes_dependent_on:
+    - design_compliance_program
+    prompt: List the primary registrations or filings required for the selected entity
+      and jurisdiction (e.g., SEC Form ADV). Provide citation to governing body names
+      only.
+  list_service_providers:
+    agent: false
+    description: Enumerate required third-party service provider categories.
+    name: list_service_providers
+    nodes_depended_on:
+    - choose_legal_entity_type
+    nodes_dependent_on:
+    - estimate_setup_and_operating_costs
+    - draft_operations_workflow
+    prompt: 'Generate a checklist of mandatory external service providers: prime broker,
+      fund administrator, auditor, legal counsel, compliance consultant, and custodian.
+      No descriptive text—just provider types.'
+  outline_governance_structure:
+    agent: false
+    description: Define internal governance roles and duties.
+    name: outline_governance_structure
+    nodes_depended_on:
+    - choose_legal_entity_type
     nodes_dependent_on: []
-    prompt: 'Write two email templates: an introductory email and a follow‑up email.
-      Both should reference the value proposition and include a clear call to action.'
-  develop_website_landing_page:
+    prompt: 'Draft a simple governance chart: roles of GP, investment manager, board
+      (if any). Limit to 5 roles with one-line duties each.'
+  produce_final_fund_plan_summary:
     agent: false
-    description: Draft landing page copy targeting studios.
-    name: develop_website_landing_page
+    description: Generate an all-in summary of the hedge fund plan.
+    name: produce_final_fund_plan_summary
     nodes_depended_on:
-    - draft_value_proposition
-    - create_content_plan
+    - design_compliance_program
+    - compile_pitch_deck_outline
+    - develop_timeline_and_milestones
     nodes_dependent_on: []
-    prompt: 'Write the copy for a landing page targeting music studios: headline,
-      subheadline, benefits, and CTA, all aligned with the value proposition.'
-  draft_value_proposition:
+    prompt: Synthesize prior outputs into a concise executive summary (≤400 words)
+      covering strategy, structure, risk, ops, fees, timeline. Bullet or short paragraphs
+      allowed.
+  select_jurisdiction:
     agent: false
-    description: Create a concise value proposition that addresses those needs.
-    name: draft_value_proposition
+    description: Pick fund domicile and note rationale.
+    name: select_jurisdiction
     nodes_depended_on:
-    - analyze_studio_needs
+    - clarify_fund_objectives
     nodes_dependent_on:
-    - select_marketing_channels
-    - create_content_plan
-    - design_email_templates
-    - build_case_studies
-    - develop_website_landing_page
-    prompt: Create a concise value proposition (no more than four lines) that directly
-      addresses the needs identified for music studios.
-  establish_budget_and_resources:
+    - choose_legal_entity_type
+    prompt: Choose the optimal fund domicile (e.g., Cayman, Delaware, Luxembourg)
+      considering objectives. Provide 2 pros and 2 cons for the selected jurisdiction
+      only.
+  set_performance_and_risk_targets:
     agent: false
-    description: Estimate budget and required resources per channel.
-    name: establish_budget_and_resources
+    description: Quantify return and risk goals.
+    name: set_performance_and_risk_targets
     nodes_depended_on:
-    - define_marketing_objectives
-    - select_marketing_channels
+    - choose_investment_strategy
     nodes_dependent_on:
-    - create_implementation_timeline
-    - final_review_and_approval
-    prompt: Estimate a marketing budget in USD, broken down by channel and activity.
-      Also list the human resources required for each activity.
-  final_review_and_approval:
-    agent: false
-    description: Compile all outputs into final marketing plan ready for approval.
-    name: final_review_and_approval
-    nodes_depended_on:
-    - create_implementation_timeline
-    - setup_tracking_and_metrics
-    - establish_budget_and_resources
-    nodes_dependent_on: []
-    prompt: Compile all previous outputs into a single marketing plan document. Ensure
-      all objectives, activities, budget, timeline, and KPIs are included. Mark the
-      plan ready for approval.
-  identify_target_music_studios:
-    agent: false
-    description: Specify which types of music studios to target based on the objectives.
-    name: identify_target_music_studios
-    nodes_depended_on:
-    - define_marketing_objectives
-    nodes_dependent_on:
-    - analyze_studio_needs
-    prompt: Using the marketing objectives, list the top 10 types of music studios
-      to target (e.g., residential, commercial, independent, university). Provide
-      one key characteristic for each type that aligns with the objectives.
-  select_marketing_channels:
-    agent: false
-    description: Choose the most effective marketing channels to reach music studios.
-    name: select_marketing_channels
-    nodes_depended_on:
-    - draft_value_proposition
-    nodes_dependent_on:
-    - create_content_plan
-    - create_social_media_schedule
-    - establish_budget_and_resources
-    - assign_responsibilities
-    prompt: Based on the value proposition, list the top four marketing channels to
-      reach music studios (e.g., industry trade shows, social media, email, influencer
-      partnerships). Provide a short justification for each channel.
-  setup_tracking_and_metrics:
-    agent: false
-    description: Define KPIs and reporting for each channel.
-    name: setup_tracking_and_metrics
-    nodes_depended_on:
-    - define_marketing_objectives
-    - create_implementation_timeline
-    nodes_dependent_on:
-    - final_review_and_approval
-    prompt: Define key performance indicators for each marketing channel. Provide
-      target values and reporting frequency.
+    - design_risk_management_framework
+    - draft_fee_structure
+    prompt: Define numerical annual targets for gross return, volatility (standard
+      deviation), Sharpe ratio, and maximum drawdown consistent with the chosen strategy.
+      Present as a 4-row table.
