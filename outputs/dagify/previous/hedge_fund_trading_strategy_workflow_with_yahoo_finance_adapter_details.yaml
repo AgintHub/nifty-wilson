@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A hedge‑fund trading‑strategy workflow that includes a new adapter node
-  for fetching historical stock data from Yahoo Finance.
+dag_type: typed
+description: Generated workflow from UI.
 name: hedge_fund_trading_strategy_workflow_with_yahoo_finance_adapter
 nodes:
   backtest_trading_strategy:
@@ -12,6 +11,29 @@ nodes:
     - specify_asset_universe
     - fetch_stock_data_yahoo
     nodes_dependent_on: []
+    output_structure:
+    - description: Cumulative return of the strategy over the backtest period (as
+        a decimal, e.g., 0.12 for 12%).
+      key: total_return
+      type: float
+    - description: Annualized Sharpe ratio of the strategy.
+      key: annualized_sharpe_ratio
+      type: float
+    - description: Maximum drawdown observed during the backtest (as a decimal).
+      key: max_drawdown
+      type: float
+    - description: Total number of executed trades during the backtest.
+      key: number_of_trades
+      type: int
+    - description: Start date of the backtest period (YYYY-MM-DD).
+      key: backtest_period_start
+      type: str
+    - description: End date of the backtest period (YYYY-MM-DD).
+      key: backtest_period_end
+      type: str
+    - description: Indicates whether the backtest completed successfully.
+      key: success
+      type: bool
     prompt: 'Conduct a backtest of the trading strategy using historical data. Report
       key metrics: return, Sharpe ratio, drawdown.'
   compile_final_strategy_blueprint:
@@ -22,6 +44,23 @@ nodes:
     - refine_trading_strategy
     - define_risk_management_rules
     nodes_dependent_on: []
+    output_structure:
+    - description: Comprehensive summary of the final trading strategy, including
+        objectives and overall approach.
+      key: blueprint_summary
+      type: str
+    - description: Detailed description of the refined trading logic, parameters,
+        and any adjustments made after backtesting.
+      key: refined_strategy_details
+      type: str
+    - description: Bullet‑point list of risk management rules such as position sizing,
+        stop‑loss levels, and other safeguards.
+      key: risk_management_rules
+      type: List[str]
+    - description: List of asset symbols or classes that constitute the strategy's
+        trading universe.
+      key: asset_universe
+      type: List[str]
     prompt: Synthesize the refined strategy, risk management rules, and asset universe
       into a comprehensive trading strategy blueprint. Provide a detailed summary.
   define_market_analysis:
@@ -31,6 +70,19 @@ nodes:
     name: define_market_analysis
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Primary market data providers or platforms that will be used (e.g.,
+        Bloomberg, Quandl, Yahoo Finance).
+      key: market_data_sources
+      type: List[str]
+    - description: Analysis methods to be applied to the data (e.g., technical indicators,
+        sentiment analysis, macroeconomic factor models).
+      key: analysis_techniques
+      type: List[str]
+    - description: A brief textual summary tying together the chosen data sources
+        and techniques.
+      key: summary_note
+      type: str
     prompt: List the primary market data sources (e.g., Bloomberg, Quandl) and analysis
       techniques (e.g., technical indicators, sentiment analysis) to be used in the
       trading strategy.
@@ -41,6 +93,18 @@ nodes:
     nodes_depended_on:
     - select_trading_strategy_type
     nodes_dependent_on: []
+    output_structure:
+    - description: Bullet‑point list (3‑5 items) describing the risk management rules
+        such as position sizing, stop‑loss, max drawdown limits, etc.
+      key: risk_management_rules
+      type: List[str]
+    - description: Number of risk management rules provided (should be between 3 and
+        5).
+      key: rule_count
+      type: int
+    - description: Indicates whether a stop‑loss rule is included in the list.
+      key: has_stop_loss
+      type: bool
     prompt: Outline the risk management rules (e.g., position sizing, stop‑loss levels)
       to be applied to the trading strategy. Provide 3–5 bullet points.
   develop_trading_signal_logic:
@@ -50,6 +114,21 @@ nodes:
     nodes_depended_on:
     - identify_trading_indicators
     nodes_dependent_on: []
+    output_structure:
+    - description: Step‑by‑step outline of the buy/sell signal generation logic.
+      key: signal_logic_steps
+      type: List[str]
+    - description: Names of the technical indicators identified in the parent node
+        that are incorporated into the signal logic.
+      key: used_indicators
+      type: List[str]
+    - description: A concise textual summary of the overall signal generation approach.
+      key: summary
+      type: str
+    - description: Flag indicating whether the signal logic covers all required indicators
+        and decision rules.
+      key: is_logic_complete
+      type: bool
     prompt: Describe the logic for generating buy/sell signals based on the identified
       indicators. Provide a step-by-step outline.
   fetch_stock_data_yahoo:
@@ -59,6 +138,27 @@ nodes:
     name: fetch_stock_data_yahoo
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the data download from Yahoo Finance completed
+        without errors.
+      key: retrieval_success
+      type: bool
+    - description: A short human‑readable confirmation or error message about the
+        data retrieval.
+      key: retrieval_message
+      type: str
+    - description: List of ticker symbols for which historical data was fetched.
+      key: tickers
+      type: List[str]
+    - description: CSV‑formatted string for each ticker containing the OHLCV data
+        with dates as the index. Each list element corresponds to one ticker in the
+        same order as the `tickers` list.
+      key: data_csv
+      type: List[str]
+    - description: Number of rows (trading days) retrieved for each ticker, matching
+        the order of the `tickers` list.
+      key: record_counts
+      type: List[int]
     prompt: Using the yfinance Python library, download daily historical OHLCV data
       for each ticker in the asset universe. Return the data as a pandas DataFrame
       (or a dictionary of DataFrames) with dates as the index. Include a brief note
@@ -70,6 +170,14 @@ nodes:
     nodes_depended_on:
     - select_trading_strategy_type
     nodes_dependent_on: []
+    output_structure:
+    - description: List of technical indicator or signal names that will be applied
+        in the chosen trading strategy.
+      key: indicators
+      type: List[str]
+    - description: Total number of indicators listed in the "indicators" field.
+      key: indicator_count
+      type: int
     prompt: List the specific technical indicators or trading signals (e.g., RSI,
       MACD) that will be used in the selected strategy.
   refine_trading_strategy:
@@ -79,6 +187,24 @@ nodes:
     nodes_depended_on:
     - backtest_trading_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: A summary of the refined trading strategy, including adjusted parameters,
+        indicators, and risk rules.
+      key: refined_strategy_summary
+      type: str
+    - description: List of specific parameter adjustments made during refinement.
+      key: parameter_adjustments
+      type: str
+    - description: List of specific indicator adjustments made during refinement.
+      key: indicator_adjustments
+      type: str
+    - description: List of specific risk rule adjustments made during refinement.
+      key: risk_rule_adjustments
+      type: str
+    - description: Rationale behind the adjustments made to parameters, indicators,
+        or risk rules.
+      key: reasoning_for_adjustments
+      type: str
     prompt: Analyze the backtest results and refine the trading strategy as needed.
       Adjust parameters, indicators, or risk rules.
   select_trading_strategy_type:
@@ -88,6 +214,15 @@ nodes:
     nodes_depended_on:
     - define_market_analysis
     nodes_dependent_on: []
+    output_structure:
+    - description: The chosen primary trading strategy type (e.g., "momentum", "mean
+        reversion").
+      key: strategy_type
+      type: str
+    - description: A concise one‑sentence explanation of why this strategy type best
+        fits the market analysis.
+      key: rationale
+      type: str
     prompt: Select one primary trading strategy type that best aligns with the market
       analysis. Provide a one-sentence rationale.
   specify_asset_universe:
@@ -97,5 +232,12 @@ nodes:
     nodes_depended_on:
     - select_trading_strategy_type
     nodes_dependent_on: []
+    output_structure:
+    - description: List of asset classes to be traded (e.g., US equities, futures)
+      key: asset_classes
+      type: List[str]
+    - description: List of specific asset tickers (e.g., AAPL, MSFT)
+      key: asset_tickers
+      type: List[str]
     prompt: List the specific asset classes or instruments (e.g., US equities, futures)
       to be traded under the selected strategy.
