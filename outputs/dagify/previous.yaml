@@ -1,10 +1,30 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: build_hedge_fund
 nodes:
   choose_investment_strategy:
     agent: false
+    code_node_type: stub
     description: Identify the high-level investment strategy category.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ClarifyFundObjectivesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for clarify_fund_objectives node outputs.\"\"\"\n\
+      \    objectives: str = Field(..., description=\"Bullet list of the fund's core\
+      \ objectives, each item a concise statement.\")\n    objective_count: int =\
+      \ Field(..., description=\"Number of objective bullets provided.\")\n\n\nclass\
+      \ ChooseInvestmentStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for choose_investment_strategy\
+      \ node outputs.\"\"\"\n    strategy_category: str = Field(..., description=\"\
+      Primary hedge fund strategy category selected (e.g., Long/Short Equity, Global\
+      \ Macro).\")\n    rationale: str = Field(..., description=\"One-sentence rationale\
+      \ explaining why this strategy best serves the fund objectives.\")\n\n\ndef\
+      \ choose_investment_strategy(clarify_fund_objectives_input: ClarifyFundObjectivesOutput,\
+      \ **kwargs) -> ChooseInvestmentStrategyOutput:\n    \"\"\"Identify the high-level\
+      \ investment strategy category.\n\n    Args:\n        clarify_fund_objectives_input:\
+      \ Input from the 'clarify_fund_objectives' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        ChooseInvestmentStrategyOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ChooseInvestmentStrategyOutput(\n        strategy_category=\"\",\n       \
+      \ rationale=\"\",\n    )"
     name: choose_investment_strategy
     nodes_depended_on:
     - clarify_fund_objectives
@@ -91,10 +111,37 @@ nodes:
           in the output structure.
     prompt: Select one primary hedge fund strategy category that best serves the fund
       objectives (e.g., long/short equity, global macro). Provide a one-sentence rationale.
+    shims: []
   choose_legal_entity_type:
     agent: false
+    code_node_type: stub
     description: Identify legal structure for the hedge fund vehicle based on the
       chosen domicile, balancing regulatory fit, tax efficiency, and operational simplicity.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SelectJurisdictionOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for select_jurisdiction node outputs.\"\"\"\n    jurisdiction:\
+      \ str = Field(..., description=\"The selected fund domicile jurisdiction (e.g.,\
+      \ Cayman, Delaware, Luxembourg).\")\n    pros: str = Field(..., description=\"\
+      A list of two key advantages of the selected jurisdiction.\")\n    cons: str\
+      \ = Field(..., description=\"A list of two key disadvantages of the selected\
+      \ jurisdiction.\")\n    rationale: str = Field(..., description=\"A concise\
+      \ one\\u2011sentence explanation of why this jurisdiction was chosen.\")\n\n\
+      \nclass ChooseLegalEntityTypeOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ choose_legal_entity_type node outputs.\"\"\"\n    entity_type: str = Field(...,\
+      \ description=\"The legal entity structure chosen for the hedge fund (e.g.,\
+      \ LP, LLC, SICAV).\")\n    jurisdiction: str = Field(..., description=\"The\
+      \ jurisdiction where the fund vehicle is established.\")\n    explanation: str\
+      \ = Field(..., description=\"A concise, one\\u2011sentence rationale for selecting\
+      \ this entity structure in the chosen jurisdiction.\")\n\n\ndef choose_legal_entity_type(select_jurisdiction_input:\
+      \ SelectJurisdictionOutput, **kwargs) -> ChooseLegalEntityTypeOutput:\n    \"\
+      \"\"Identify legal structure for the hedge fund vehicle based on the chosen\
+      \ domicile, balancing regulatory fit, tax efficiency, and operational simplicity.\n\
+      \n    Args:\n        select_jurisdiction_input: Input from the 'select_jurisdiction'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ChooseLegalEntityTypeOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return ChooseLegalEntityTypeOutput(\n       \
+      \ entity_type=\"\",\n        jurisdiction=\"\",\n        explanation=\"\",\n\
+      \    )"
     name: choose_legal_entity_type
     nodes_depended_on:
     - select_jurisdiction
@@ -174,9 +221,24 @@ nodes:
           output_schema to ensure compatibility with child nodes.
     prompt: Specify the legal entity structure (e.g., LP, LLC, SICAV) appropriate
       for the chosen jurisdiction. Give a one-sentence explanation.
+    shims: []
   clarify_fund_objectives:
     agent: false
+    code_node_type: stub
     description: Produce a bullet list of the hedge fund's core objectives.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ClarifyFundObjectivesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for clarify_fund_objectives node outputs.\"\"\"\n\
+      \    objectives: str = Field(..., description=\"Bullet list of the fund's core\
+      \ objectives, each item a concise statement.\")\n    objective_count: int =\
+      \ Field(..., description=\"Number of objective bullets provided.\")\n\n\ndef\
+      \ clarify_fund_objectives(general_input: str, **kwargs) -> ClarifyFundObjectivesOutput:\n\
+      \    \"\"\"Produce a bullet list of the hedge fund's core objectives.\n\n  \
+      \  Args:\n        general_input: General input string for the root node.\n \
+      \       **kwargs: Additional keyword arguments.\n\n    Returns:\n        ClarifyFundObjectivesOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ClarifyFundObjectivesOutput(\n        objectives=\"\",\n        objective_count=0,\n\
+      \    )"
     name: clarify_fund_objectives
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -240,9 +302,73 @@ nodes:
     prompt: State the primary business objectives for launching the hedge fund. Produce
       a concise bullet list covering investment purpose, competitive edge, and long‑term
       vision (max 8 bullets). Focus only on objectives, do not include strategy details.
+    shims: []
   compile_pitch_deck_outline:
     agent: false
+    code_node_type: stub
     description: Framework for fundraising presentation.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ClarifyFundObjectivesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for clarify_fund_objectives node outputs.\"\"\"\n    objectives: str = Field(...,\
+      \ description=\"Bullet list of the fund's core objectives, each item a concise\
+      \ statement.\")\n    objective_count: int = Field(..., description=\"Number\
+      \ of objective bullets provided.\")\n\n\nclass DefineInvestorProfileOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_investor_profile node outputs.\"\"\"\n\
+      \    target_investor_segment: str = Field(..., description=\"Primary type of\
+      \ investor (e.g., family office, pension, high\\u2011net\\u2011worth individual)\"\
+      )\n    typical_ticket_size_min: float = Field(..., description=\"Minimum typical\
+      \ investment amount in USD\")\n    typical_ticket_size_max: float = Field(...,\
+      \ description=\"Maximum typical investment amount in USD\")\n    risk_tolerance:\
+      \ str = Field(..., description=\"General risk tolerance level of target investors\
+      \ (e.g., high, moderate, low)\")\n    liquidity_preference: str = Field(...,\
+      \ description=\"Preferred liquidity horizon (e.g., short\\u2011term, medium\\\
+      u2011term, long\\u2011term)\")\n    geographic_focus: str = Field(..., description=\"\
+      List of preferred geographic regions or markets for the investors\")\n\n\nclass\
+      \ ChooseInvestmentStrategyOutput(BaseModel):\n    \"\"\"Pydantic model for choose_investment_strategy\
+      \ node outputs.\"\"\"\n    strategy_category: str = Field(..., description=\"\
+      Primary hedge fund strategy category selected (e.g., Long/Short Equity, Global\
+      \ Macro).\")\n    rationale: str = Field(..., description=\"One-sentence rationale\
+      \ explaining why this strategy best serves the fund objectives.\")\n\n\nclass\
+      \ SetPerformanceAndRiskTargetsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ set_performance_and_risk_targets node outputs.\"\"\"\n    gross_return: float\
+      \ = Field(..., description=\"Target annual gross return expressed as a percentage\
+      \ (e.g., 15.0 for 15%).\")\n    volatility: float = Field(..., description=\"\
+      Target annual volatility (standard deviation) expressed as a percentage.\")\n\
+      \    sharpe_ratio: float = Field(..., description=\"Target annual Sharpe ratio.\"\
+      )\n    max_drawdown: float = Field(..., description=\"Target maximum annual\
+      \ drawdown expressed as a percentage.\")\n\n\nclass DraftFeeStructureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for draft_fee_structure node outputs.\"\"\"\n    management_fee_percentage:\
+      \ float = Field(..., description=\"Annual management fee expressed as a percentage\
+      \ of assets under management.\")\n    performance_fee_percentage: float = Field(...,\
+      \ description=\"Annual performance fee expressed as a percentage of profits\
+      \ above the hurdle rate.\")\n    hurdle_rate_percentage: float = Field(...,\
+      \ description=\"Minimum annual return threshold that must be exceeded before\
+      \ performance fees are charged.\")\n    summary_sentence: str = Field(..., description=\"\
+      Concise description of the fee structure in one or two sentences.\")\n\n\nclass\
+      \ DesignRiskManagementFrameworkOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for design_risk_management_framework node outputs.\"\"\"\n    risk_controls:\
+      \ List[str] = Field(..., description=\"List of core risk control statements\
+      \ aligned with the target metrics.\")\n\n\nclass CompilePitchDeckOutlineOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for compile_pitch_deck_outline node outputs.\"\"\"\
+      \n    slide_titles: str = Field(..., description=\"An ordered list of 10 slide\
+      \ titles, each representing a key component of the pitch deck such as objectives,\
+      \ strategy, team, edge, risk controls, fees, and expected returns.\")\n\n\n\
+      def compile_pitch_deck_outline(clarify_fund_objectives_input: ClarifyFundObjectivesOutput,\
+      \ define_investor_profile_input: DefineInvestorProfileOutput, choose_investment_strategy_input:\
+      \ ChooseInvestmentStrategyOutput, set_performance_and_risk_targets_input: SetPerformanceAndRiskTargetsOutput,\
+      \ draft_fee_structure_input: DraftFeeStructureOutput, design_risk_management_framework_input:\
+      \ DesignRiskManagementFrameworkOutput, **kwargs) -> CompilePitchDeckOutlineOutput:\n\
+      \    \"\"\"Framework for fundraising presentation.\n\n    Args:\n        clarify_fund_objectives_input:\
+      \ Input from the 'clarify_fund_objectives' node.\n        define_investor_profile_input:\
+      \ Input from the 'define_investor_profile' node.\n        choose_investment_strategy_input:\
+      \ Input from the 'choose_investment_strategy' node.\n        set_performance_and_risk_targets_input:\
+      \ Input from the 'set_performance_and_risk_targets' node.\n        draft_fee_structure_input:\
+      \ Input from the 'draft_fee_structure' node.\n        design_risk_management_framework_input:\
+      \ Input from the 'design_risk_management_framework' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        CompilePitchDeckOutlineOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ CompilePitchDeckOutlineOutput(\n        slide_titles=\"\",\n    )"
     name: compile_pitch_deck_outline
     nodes_depended_on:
     - clarify_fund_objectives
@@ -321,9 +447,35 @@ nodes:
     prompt: Create a 10-slide outline (slide titles only) for an investor pitch deck
       incorporating objectives, strategy, team, edge, risk controls, fees, and expected
       returns.
+    shims: []
   create_hiring_plan:
     agent: false
+    code_node_type: stub
     description: Determine initial staffing requirements for the hedge fund launch.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DraftOperationsWorkflowOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for draft_operations_workflow node outputs.\"\"\"\n    trade_lifecycle_steps:\
+      \ str = Field(..., description=\"Ordered list of trade lifecycle steps: idea\
+      \ generation, order entry, execution, confirmation, settlement, reconciliation.\"\
+      )\n    responsible_parties: str = Field(..., description=\"Primary responsible\
+      \ party for each lifecycle step, aligned with trade_lifecycle_steps. Use values\
+      \ like 'GP', 'Prime Broker', 'Fund Administrator', 'Internal Ops'.\")\n\n\n\
+      class CreateHiringPlanOutput(BaseModel):\n    \"\"\"Pydantic model for create_hiring_plan\
+      \ node outputs.\"\"\"\n    position_titles: List[str] = Field(..., description=\"\
+      List of full-time positions required for launch (maximum 8).\")\n    responsibility_descriptions:\
+      \ List[str] = Field(..., description=\"One-line responsibility for each position,\
+      \ aligned with workflow gaps.\")\n    gap_alignment: List[str] = Field(...,\
+      \ description=\"Name of the workflow gap each position addresses.\")\n    total_positions:\
+      \ int = Field(..., description=\"Total number of positions listed.\")\n\n\n\
+      def create_hiring_plan(draft_operations_workflow_input: DraftOperationsWorkflowOutput,\
+      \ **kwargs) -> CreateHiringPlanOutput:\n    \"\"\"Determine initial staffing\
+      \ requirements for the hedge fund launch.\n\n    Args:\n        draft_operations_workflow_input:\
+      \ Input from the 'draft_operations_workflow' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        CreateHiringPlanOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return CreateHiringPlanOutput(\n\
+      \        position_titles=[],\n        responsibility_descriptions=[],\n    \
+      \    gap_alignment=[],\n        total_positions=0,\n    )"
     name: create_hiring_plan
     nodes_depended_on:
     - draft_operations_workflow
@@ -420,10 +572,32 @@ nodes:
           and update the arrays accordingly.
     prompt: List essential full-time positions for launch (max 8), with one-line responsibility
       each. Align roles with operations workflow gaps.
+    shims: []
   define_asset_universe:
     agent: false
+    code_node_type: stub
     description: Enumerate tradable assets and instruments for the selected hedge
       fund strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ChooseInvestmentStrategyOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for choose_investment_strategy node outputs.\"\"\"\n    strategy_category:\
+      \ str = Field(..., description=\"Primary hedge fund strategy category selected\
+      \ (e.g., Long/Short Equity, Global Macro).\")\n    rationale: str = Field(...,\
+      \ description=\"One-sentence rationale explaining why this strategy best serves\
+      \ the fund objectives.\")\n\n\nclass DefineAssetUniverseOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_asset_universe node outputs.\"\"\"\n  \
+      \  assets: List[str] = Field(..., description=\"List of asset classes and specific\
+      \ instruments that the strategy will trade\")\n    asset_count: int = Field(...,\
+      \ description=\"Number of items included in the assets list (should be \\u226410)\"\
+      )\n\n\ndef define_asset_universe(choose_investment_strategy_input: ChooseInvestmentStrategyOutput,\
+      \ **kwargs) -> DefineAssetUniverseOutput:\n    \"\"\"Enumerate tradable assets\
+      \ and instruments for the selected hedge fund strategy.\n\n    Args:\n     \
+      \   choose_investment_strategy_input: Input from the 'choose_investment_strategy'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DefineAssetUniverseOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DefineAssetUniverseOutput(\n        assets=[],\n\
+      \        asset_count=0,\n    )"
     name: define_asset_universe
     nodes_depended_on:
     - choose_investment_strategy
@@ -486,10 +660,40 @@ nodes:
           the `assets` field and set `asset_count` to the length of the list.'
     prompt: List the specific asset classes and instruments the chosen strategy will
       trade (e.g., US large-cap equities, S&P futures). Keep list ≤10 items.
+    shims: []
   define_investor_profile:
     agent: false
+    code_node_type: stub
     description: Describes the target investor segment for the hedge fund by extracting
       and synthesising investor characteristics from the fund’s strategic objectives.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ClarifyFundObjectivesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for clarify_fund_objectives node outputs.\"\"\"\n\
+      \    objectives: str = Field(..., description=\"Bullet list of the fund's core\
+      \ objectives, each item a concise statement.\")\n    objective_count: int =\
+      \ Field(..., description=\"Number of objective bullets provided.\")\n\n\nclass\
+      \ DefineInvestorProfileOutput(BaseModel):\n    \"\"\"Pydantic model for define_investor_profile\
+      \ node outputs.\"\"\"\n    target_investor_segment: str = Field(..., description=\"\
+      Primary type of investor (e.g., family office, pension, high\\u2011net\\u2011worth\
+      \ individual)\")\n    typical_ticket_size_min: float = Field(..., description=\"\
+      Minimum typical investment amount in USD\")\n    typical_ticket_size_max: float\
+      \ = Field(..., description=\"Maximum typical investment amount in USD\")\n \
+      \   risk_tolerance: str = Field(..., description=\"General risk tolerance level\
+      \ of target investors (e.g., high, moderate, low)\")\n    liquidity_preference:\
+      \ str = Field(..., description=\"Preferred liquidity horizon (e.g., short\\\
+      u2011term, medium\\u2011term, long\\u2011term)\")\n    geographic_focus: str\
+      \ = Field(..., description=\"List of preferred geographic regions or markets\
+      \ for the investors\")\n\n\ndef define_investor_profile(clarify_fund_objectives_input:\
+      \ ClarifyFundObjectivesOutput, **kwargs) -> DefineInvestorProfileOutput:\n \
+      \   \"\"\"Describes the target investor segment for the hedge fund by extracting\
+      \ and synthesising investor characteristics from the fund’s strategic objectives.\n\
+      \n    Args:\n        clarify_fund_objectives_input: Input from the 'clarify_fund_objectives'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DefineInvestorProfileOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DefineInvestorProfileOutput(\n       \
+      \ target_investor_segment=\"\",\n        typical_ticket_size_min=0.0,\n    \
+      \    typical_ticket_size_max=0.0,\n        risk_tolerance=\"\",\n        liquidity_preference=\"\
+      \",\n        geographic_focus=\"\",\n    )"
     name: define_investor_profile
     nodes_depended_on:
     - clarify_fund_objectives
@@ -582,9 +786,34 @@ nodes:
     prompt: 'Based on the stated fund objectives, specify the ideal target investor
       profile (e.g., family offices, pensions). List key characteristics: typical
       ticket size, risk tolerance, liquidity preference, and geographic focus.'
+    shims: []
   define_technology_stack:
     agent: false
+    code_node_type: stub
     description: Specify technology tools supporting operations.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DraftOperationsWorkflowOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for draft_operations_workflow node outputs.\"\"\"\n    trade_lifecycle_steps:\
+      \ str = Field(..., description=\"Ordered list of trade lifecycle steps: idea\
+      \ generation, order entry, execution, confirmation, settlement, reconciliation.\"\
+      )\n    responsible_parties: str = Field(..., description=\"Primary responsible\
+      \ party for each lifecycle step, aligned with trade_lifecycle_steps. Use values\
+      \ like 'GP', 'Prime Broker', 'Fund Administrator', 'Internal Ops'.\")\n\n\n\
+      class DefineTechnologyStackOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_technology_stack node outputs.\"\"\"\n    ops_steps: List[str] = Field(...,\
+      \ description=\"List of operational steps in the trade lifecycle (e.g., idea\
+      \ generation, order entry, execution, confirmation, settlement, reconciliation).\"\
+      )\n    tech_components: List[str] = Field(..., description=\"Corresponding technology\
+      \ component for each operational step (e.g., OMS, EMS, risk management system).\
+      \ The order aligns with ops_steps.\")\n\n\ndef define_technology_stack(draft_operations_workflow_input:\
+      \ DraftOperationsWorkflowOutput, **kwargs) -> DefineTechnologyStackOutput:\n\
+      \    \"\"\"Specify technology tools supporting operations.\n\n    Args:\n  \
+      \      draft_operations_workflow_input: Input from the 'draft_operations_workflow'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DefineTechnologyStackOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DefineTechnologyStackOutput(\n       \
+      \ ops_steps=[],\n        tech_components=[],\n    )"
     name: define_technology_stack
     nodes_depended_on:
     - draft_operations_workflow
@@ -679,9 +908,41 @@ nodes:
     prompt: 'Identify required software and infrastructure components for each operations
       step (e.g., OMS, EMS, risk system). Present as 2-column table: Ops Step | Tech
       Component.'
+    shims: []
   design_compliance_program:
     agent: false
+    code_node_type: stub
     description: Create compliance policies aligned with regulations and risk.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyRegulatoryRequirementsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for identify_regulatory_requirements node outputs.\"\"\"\n    filing_names:\
+      \ List[str] = Field(..., description=\"List of required filings or registrations\
+      \ for the selected legal entity and jurisdiction.\")\n    governing_bodies:\
+      \ List[str] = Field(..., description=\"List of governing body names associated\
+      \ with each filing or registration.\")\n\n\nclass DesignRiskManagementFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_risk_management_framework node outputs.\"\
+      \"\"\n    risk_controls: List[str] = Field(..., description=\"List of core risk\
+      \ control statements aligned with the target metrics.\")\n\n\nclass DesignComplianceProgramOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_compliance_program node outputs.\"\"\"\n\
+      \    compliance_requirements: str = Field(..., description=\"List of regulatory\
+      \ requirements extracted from the regulatory checklist.\")\n    policy_references:\
+      \ str = Field(..., description=\"List of internal policy or procedure references\
+      \ that correspond to each regulatory requirement.\")\n    mapping_count: int\
+      \ = Field(..., description=\"Number of requirement\\u2013policy pairs generated.\"\
+      )\n    is_consistent: bool = Field(..., description=\"Indicates whether the\
+      \ number of policy references matches the number of regulatory requirements.\"\
+      )\n\n\ndef design_compliance_program(identify_regulatory_requirements_input:\
+      \ IdentifyRegulatoryRequirementsOutput, design_risk_management_framework_input:\
+      \ DesignRiskManagementFrameworkOutput, **kwargs) -> DesignComplianceProgramOutput:\n\
+      \    \"\"\"Create compliance policies aligned with regulations and risk.\n\n\
+      \    Args:\n        identify_regulatory_requirements_input: Input from the 'identify_regulatory_requirements'\
+      \ node.\n        design_risk_management_framework_input: Input from the 'design_risk_management_framework'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DesignComplianceProgramOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DesignComplianceProgramOutput(\n     \
+      \   compliance_requirements=\"\",\n        policy_references=\"\",\n       \
+      \ mapping_count=0,\n        is_consistent=False,\n    )"
     name: design_compliance_program
     nodes_depended_on:
     - identify_regulatory_requirements
@@ -767,9 +1028,31 @@ nodes:
     prompt: 'Generate a compliance checklist mapping each regulatory requirement to
       a specific internal policy or procedure. Table with columns: Requirement | Policy
       Reference.'
+    shims: []
   design_risk_management_framework:
     agent: false
+    code_node_type: stub
     description: Outline quantitative and qualitative risk controls.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SetPerformanceAndRiskTargetsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for set_performance_and_risk_targets node outputs.\"\"\"\n    gross_return:\
+      \ float = Field(..., description=\"Target annual gross return expressed as a\
+      \ percentage (e.g., 15.0 for 15%).\")\n    volatility: float = Field(..., description=\"\
+      Target annual volatility (standard deviation) expressed as a percentage.\")\n\
+      \    sharpe_ratio: float = Field(..., description=\"Target annual Sharpe ratio.\"\
+      )\n    max_drawdown: float = Field(..., description=\"Target maximum annual\
+      \ drawdown expressed as a percentage.\")\n\n\nclass DesignRiskManagementFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_risk_management_framework node outputs.\"\
+      \"\"\n    risk_controls: List[str] = Field(..., description=\"List of core risk\
+      \ control statements aligned with the target metrics.\")\n\n\ndef design_risk_management_framework(set_performance_and_risk_targets_input:\
+      \ SetPerformanceAndRiskTargetsOutput, **kwargs) -> DesignRiskManagementFrameworkOutput:\n\
+      \    \"\"\"Outline quantitative and qualitative risk controls.\n\n    Args:\n\
+      \        set_performance_and_risk_targets_input: Input from the 'set_performance_and_risk_targets'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DesignRiskManagementFrameworkOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DesignRiskManagementFrameworkOutput(\n\
+      \        risk_controls=[],\n    )"
     name: design_risk_management_framework
     nodes_depended_on:
     - set_performance_and_risk_targets
@@ -837,9 +1120,59 @@ nodes:
           this list to the 'risk_controls' output field.
     prompt: 'List core risk controls aligned with the target metrics: position limits,
       VaR limits, stop-loss rules, liquidity thresholds. Provide 4–6 bullet points.'
+    shims: []
   develop_timeline_and_milestones:
     agent: false
+    code_node_type: stub
     description: Create phased schedule leading to fund launch.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DraftOperationsWorkflowOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for draft_operations_workflow node outputs.\"\"\"\n    trade_lifecycle_steps:\
+      \ str = Field(..., description=\"Ordered list of trade lifecycle steps: idea\
+      \ generation, order entry, execution, confirmation, settlement, reconciliation.\"\
+      )\n    responsible_parties: str = Field(..., description=\"Primary responsible\
+      \ party for each lifecycle step, aligned with trade_lifecycle_steps. Use values\
+      \ like 'GP', 'Prime Broker', 'Fund Administrator', 'Internal Ops'.\")\n\n\n\
+      class DefineTechnologyStackOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_technology_stack node outputs.\"\"\"\n    ops_steps: List[str] = Field(...,\
+      \ description=\"List of operational steps in the trade lifecycle (e.g., idea\
+      \ generation, order entry, execution, confirmation, settlement, reconciliation).\"\
+      )\n    tech_components: List[str] = Field(..., description=\"Corresponding technology\
+      \ component for each operational step (e.g., OMS, EMS, risk management system).\
+      \ The order aligns with ops_steps.\")\n\n\nclass CreateHiringPlanOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_hiring_plan node outputs.\"\"\"\n    position_titles:\
+      \ List[str] = Field(..., description=\"List of full-time positions required\
+      \ for launch (maximum 8).\")\n    responsibility_descriptions: List[str] = Field(...,\
+      \ description=\"One-line responsibility for each position, aligned with workflow\
+      \ gaps.\")\n    gap_alignment: List[str] = Field(..., description=\"Name of\
+      \ the workflow gap each position addresses.\")\n    total_positions: int = Field(...,\
+      \ description=\"Total number of positions listed.\")\n\n\nclass CompilePitchDeckOutlineOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for compile_pitch_deck_outline node outputs.\"\"\"\
+      \n    slide_titles: str = Field(..., description=\"An ordered list of 10 slide\
+      \ titles, each representing a key component of the pitch deck such as objectives,\
+      \ strategy, team, edge, risk controls, fees, and expected returns.\")\n\n\n\
+      class DevelopTimelineAndMilestonesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for develop_timeline_and_milestones node outputs.\"\"\"\n    monthly_milestones:\
+      \ str = Field(..., description=\"List of milestone descriptions for each month\
+      \ in the 12-month launch timeline. Each entry should be formatted as \\\"Month\
+      \ X: description\\\".\")\n    final_go_live_month: int = Field(..., description=\"\
+      Month number (1-12) when the fund is scheduled to go live.\")\n    overall_status:\
+      \ bool = Field(..., description=\"True if all planned milestones are scheduled\
+      \ to be completed by the go-live month; otherwise False.\")\n\n\ndef develop_timeline_and_milestones(draft_operations_workflow_input:\
+      \ DraftOperationsWorkflowOutput, define_technology_stack_input: DefineTechnologyStackOutput,\
+      \ create_hiring_plan_input: CreateHiringPlanOutput, compile_pitch_deck_outline_input:\
+      \ CompilePitchDeckOutlineOutput, **kwargs) -> DevelopTimelineAndMilestonesOutput:\n\
+      \    \"\"\"Create phased schedule leading to fund launch.\n\n    Args:\n   \
+      \     draft_operations_workflow_input: Input from the 'draft_operations_workflow'\
+      \ node.\n        define_technology_stack_input: Input from the 'define_technology_stack'\
+      \ node.\n        create_hiring_plan_input: Input from the 'create_hiring_plan'\
+      \ node.\n        compile_pitch_deck_outline_input: Input from the 'compile_pitch_deck_outline'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DevelopTimelineAndMilestonesOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DevelopTimelineAndMilestonesOutput(\n\
+      \        monthly_milestones=\"\",\n        final_go_live_month=0,\n        overall_status=False,\n\
+      \    )"
     name: develop_timeline_and_milestones
     nodes_depended_on:
     - draft_operations_workflow
@@ -927,9 +1260,47 @@ nodes:
     prompt: Prepare a launch timeline with monthly milestones over the next 12 months.
       Include regulatory filing, service provider onboarding, capital raise, tech
       deployment, and go-live.
+    shims: []
   draft_fee_structure:
     agent: false
+    code_node_type: stub
     description: Set management and performance fee levels.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SetPerformanceAndRiskTargetsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for set_performance_and_risk_targets node outputs.\"\"\"\n    gross_return:\
+      \ float = Field(..., description=\"Target annual gross return expressed as a\
+      \ percentage (e.g., 15.0 for 15%).\")\n    volatility: float = Field(..., description=\"\
+      Target annual volatility (standard deviation) expressed as a percentage.\")\n\
+      \    sharpe_ratio: float = Field(..., description=\"Target annual Sharpe ratio.\"\
+      )\n    max_drawdown: float = Field(..., description=\"Target maximum annual\
+      \ drawdown expressed as a percentage.\")\n\n\nclass EstimateSetupAndOperatingCostsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for estimate_setup_and_operating_costs node outputs.\"\
+      \"\"\n    cost_items: List[str] = Field(..., description=\"List of cost item\
+      \ names, including each service provider and overhead categories.\")\n    estimated_usd:\
+      \ List[float] = Field(..., description=\"Corresponding estimated annual cost\
+      \ in USD for each item in cost_items.\")\n    total_estimated_annual_cost: float\
+      \ = Field(..., description=\"Sum of all estimated USD values, representing the\
+      \ total annual cost.\")\n\n\nclass DraftFeeStructureOutput(BaseModel):\n   \
+      \ \"\"\"Pydantic model for draft_fee_structure node outputs.\"\"\"\n    management_fee_percentage:\
+      \ float = Field(..., description=\"Annual management fee expressed as a percentage\
+      \ of assets under management.\")\n    performance_fee_percentage: float = Field(...,\
+      \ description=\"Annual performance fee expressed as a percentage of profits\
+      \ above the hurdle rate.\")\n    hurdle_rate_percentage: float = Field(...,\
+      \ description=\"Minimum annual return threshold that must be exceeded before\
+      \ performance fees are charged.\")\n    summary_sentence: str = Field(..., description=\"\
+      Concise description of the fee structure in one or two sentences.\")\n\n\ndef\
+      \ draft_fee_structure(set_performance_and_risk_targets_input: SetPerformanceAndRiskTargetsOutput,\
+      \ estimate_setup_and_operating_costs_input: EstimateSetupAndOperatingCostsOutput,\
+      \ **kwargs) -> DraftFeeStructureOutput:\n    \"\"\"Set management and performance\
+      \ fee levels.\n\n    Args:\n        set_performance_and_risk_targets_input:\
+      \ Input from the 'set_performance_and_risk_targets' node.\n        estimate_setup_and_operating_costs_input:\
+      \ Input from the 'estimate_setup_and_operating_costs' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        DraftFeeStructureOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DraftFeeStructureOutput(\n        management_fee_percentage=0.0,\n       \
+      \ performance_fee_percentage=0.0,\n        hurdle_rate_percentage=0.0,\n   \
+      \     summary_sentence=\"\",\n    )"
     name: draft_fee_structure
     nodes_depended_on:
     - set_performance_and_risk_targets
@@ -998,10 +1369,43 @@ nodes:
           two sentences.
     prompt: Propose management and performance fee percentages that balance cost recovery
       and competitiveness. Include incentive hurdle if relevant. Summarize in ≤3 sentences.
+    shims: []
   draft_operations_workflow:
     agent: false
+    code_node_type: stub
     description: Map core trade and post-trade operational steps, assigning each lifecycle
       stage to its primary responsible party.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineAssetUniverseOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ define_asset_universe node outputs.\"\"\"\n    assets: List[str] = Field(...,\
+      \ description=\"List of asset classes and specific instruments that the strategy\
+      \ will trade\")\n    asset_count: int = Field(..., description=\"Number of items\
+      \ included in the assets list (should be \\u226410)\")\n\n\nclass ListServiceProvidersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for list_service_providers node outputs.\"\"\"\n \
+      \   service_providers: List[str] = Field(..., description=\"Checklist of mandatory\
+      \ third-party service provider categories.\")\n\n\nclass DesignRiskManagementFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_risk_management_framework node outputs.\"\
+      \"\"\n    risk_controls: List[str] = Field(..., description=\"List of core risk\
+      \ control statements aligned with the target metrics.\")\n\n\nclass DraftOperationsWorkflowOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for draft_operations_workflow node outputs.\"\"\"\n\
+      \    trade_lifecycle_steps: str = Field(..., description=\"Ordered list of trade\
+      \ lifecycle steps: idea generation, order entry, execution, confirmation, settlement,\
+      \ reconciliation.\")\n    responsible_parties: str = Field(..., description=\"\
+      Primary responsible party for each lifecycle step, aligned with trade_lifecycle_steps.\
+      \ Use values like 'GP', 'Prime Broker', 'Fund Administrator', 'Internal Ops'.\"\
+      )\n\n\ndef draft_operations_workflow(define_asset_universe_input: DefineAssetUniverseOutput,\
+      \ list_service_providers_input: ListServiceProvidersOutput, design_risk_management_framework_input:\
+      \ DesignRiskManagementFrameworkOutput, **kwargs) -> DraftOperationsWorkflowOutput:\n\
+      \    \"\"\"Map core trade and post-trade operational steps, assigning each lifecycle\
+      \ stage to its primary responsible party.\n\n    Args:\n        define_asset_universe_input:\
+      \ Input from the 'define_asset_universe' node.\n        list_service_providers_input:\
+      \ Input from the 'list_service_providers' node.\n        design_risk_management_framework_input:\
+      \ Input from the 'design_risk_management_framework' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        DraftOperationsWorkflowOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DraftOperationsWorkflowOutput(\n        trade_lifecycle_steps=\"\",\n    \
+      \    responsible_parties=\"\",\n    )"
     name: draft_operations_workflow
     nodes_depended_on:
     - define_asset_universe
@@ -1105,9 +1509,32 @@ nodes:
     prompt: 'Sketch the daily trade lifecycle: idea generation → order entry → execution
       → confirmation → settlement → reconciliation. List each step with primary responsible
       party (internal or provider).'
+    shims: []
   estimate_setup_and_operating_costs:
     agent: false
+    code_node_type: stub
     description: Rough cost model for fund setup and operations.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ListServiceProvidersOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ list_service_providers node outputs.\"\"\"\n    service_providers: List[str]\
+      \ = Field(..., description=\"Checklist of mandatory third-party service provider\
+      \ categories.\")\n\n\nclass EstimateSetupAndOperatingCostsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for estimate_setup_and_operating_costs node outputs.\"\
+      \"\"\n    cost_items: List[str] = Field(..., description=\"List of cost item\
+      \ names, including each service provider and overhead categories.\")\n    estimated_usd:\
+      \ List[float] = Field(..., description=\"Corresponding estimated annual cost\
+      \ in USD for each item in cost_items.\")\n    total_estimated_annual_cost: float\
+      \ = Field(..., description=\"Sum of all estimated USD values, representing the\
+      \ total annual cost.\")\n\n\ndef estimate_setup_and_operating_costs(list_service_providers_input:\
+      \ ListServiceProvidersOutput, **kwargs) -> EstimateSetupAndOperatingCostsOutput:\n\
+      \    \"\"\"Rough cost model for fund setup and operations.\n\n    Args:\n  \
+      \      list_service_providers_input: Input from the 'list_service_providers'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       EstimateSetupAndOperatingCostsOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return EstimateSetupAndOperatingCostsOutput(\n\
+      \        cost_items=[],\n        estimated_usd=[],\n        total_estimated_annual_cost=0.0,\n\
+      \    )"
     name: estimate_setup_and_operating_costs
     nodes_depended_on:
     - list_service_providers
@@ -1189,9 +1616,32 @@ nodes:
     prompt: 'Provide a simple annual cost estimate (in USD) for each listed service
       provider plus overhead (office, tech). Present as two columns: Cost Item | Estimated
       USD.'
+    shims: []
   identify_regulatory_requirements:
     agent: false
+    code_node_type: stub
     description: Outline key regulatory filings and registrations.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ChooseLegalEntityTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for choose_legal_entity_type node outputs.\"\"\"\n    entity_type: str = Field(...,\
+      \ description=\"The legal entity structure chosen for the hedge fund (e.g.,\
+      \ LP, LLC, SICAV).\")\n    jurisdiction: str = Field(..., description=\"The\
+      \ jurisdiction where the fund vehicle is established.\")\n    explanation: str\
+      \ = Field(..., description=\"A concise, one\\u2011sentence rationale for selecting\
+      \ this entity structure in the chosen jurisdiction.\")\n\n\nclass IdentifyRegulatoryRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_regulatory_requirements node outputs.\"\
+      \"\"\n    filing_names: List[str] = Field(..., description=\"List of required\
+      \ filings or registrations for the selected legal entity and jurisdiction.\"\
+      )\n    governing_bodies: List[str] = Field(..., description=\"List of governing\
+      \ body names associated with each filing or registration.\")\n\n\ndef identify_regulatory_requirements(choose_legal_entity_type_input:\
+      \ ChooseLegalEntityTypeOutput, **kwargs) -> IdentifyRegulatoryRequirementsOutput:\n\
+      \    \"\"\"Outline key regulatory filings and registrations.\n\n    Args:\n\
+      \        choose_legal_entity_type_input: Input from the 'choose_legal_entity_type'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       IdentifyRegulatoryRequirementsOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return IdentifyRegulatoryRequirementsOutput(\n\
+      \        filing_names=[],\n        governing_bodies=[],\n    )"
     name: identify_regulatory_requirements
     nodes_depended_on:
     - choose_legal_entity_type
@@ -1252,9 +1702,30 @@ nodes:
     prompt: List the primary registrations or filings required for the selected entity
       and jurisdiction (e.g., SEC Form ADV). Provide citation to governing body names
       only.
+    shims: []
   list_service_providers:
     agent: false
+    code_node_type: stub
     description: Enumerate required third-party service provider categories.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ChooseLegalEntityTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for choose_legal_entity_type node outputs.\"\"\"\n    entity_type: str = Field(...,\
+      \ description=\"The legal entity structure chosen for the hedge fund (e.g.,\
+      \ LP, LLC, SICAV).\")\n    jurisdiction: str = Field(..., description=\"The\
+      \ jurisdiction where the fund vehicle is established.\")\n    explanation: str\
+      \ = Field(..., description=\"A concise, one\\u2011sentence rationale for selecting\
+      \ this entity structure in the chosen jurisdiction.\")\n\n\nclass ListServiceProvidersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for list_service_providers node outputs.\"\"\"\n \
+      \   service_providers: List[str] = Field(..., description=\"Checklist of mandatory\
+      \ third-party service provider categories.\")\n\n\ndef list_service_providers(choose_legal_entity_type_input:\
+      \ ChooseLegalEntityTypeOutput, **kwargs) -> ListServiceProvidersOutput:\n  \
+      \  \"\"\"Enumerate required third-party service provider categories.\n\n   \
+      \ Args:\n        choose_legal_entity_type_input: Input from the 'choose_legal_entity_type'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ListServiceProvidersOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return ListServiceProvidersOutput(\n        service_providers=[],\n\
+      \    )"
     name: list_service_providers
     nodes_depended_on:
     - choose_legal_entity_type
@@ -1309,11 +1780,35 @@ nodes:
     prompt: 'Generate a checklist of mandatory external service providers: prime broker,
       fund administrator, auditor, legal counsel, compliance consultant, and custodian.
       No descriptive text—just provider types.'
+    shims: []
   outline_governance_structure:
     agent: false
+    code_node_type: stub
     description: Define internal governance roles and duties for the hedge fund, limited
       to a maximum of five roles. Each role should have a concise one‑sentence duty
       description.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ChooseLegalEntityTypeOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for choose_legal_entity_type node outputs.\"\"\"\n    entity_type: str = Field(...,\
+      \ description=\"The legal entity structure chosen for the hedge fund (e.g.,\
+      \ LP, LLC, SICAV).\")\n    jurisdiction: str = Field(..., description=\"The\
+      \ jurisdiction where the fund vehicle is established.\")\n    explanation: str\
+      \ = Field(..., description=\"A concise, one\\u2011sentence rationale for selecting\
+      \ this entity structure in the chosen jurisdiction.\")\n\n\nclass OutlineGovernanceStructureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for outline_governance_structure node outputs.\"\"\
+      \"\n    role_names: List[str] = Field(..., description=\"Names of governance\
+      \ roles (e.g., GP, investment manager, board) up to five.\")\n    role_duties:\
+      \ List[str] = Field(..., description=\"One\\u2011line duties for each role,\
+      \ corresponding to role_names in order.\")\n\n\ndef outline_governance_structure(choose_legal_entity_type_input:\
+      \ ChooseLegalEntityTypeOutput, **kwargs) -> OutlineGovernanceStructureOutput:\n\
+      \    \"\"\"Define internal governance roles and duties for the hedge fund, limited\
+      \ to a maximum of five roles. Each role should have a concise one‑sentence duty\
+      \ description.\n\n    Args:\n        choose_legal_entity_type_input: Input from\
+      \ the 'choose_legal_entity_type' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        OutlineGovernanceStructureOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return OutlineGovernanceStructureOutput(\n\
+      \        role_names=[],\n        role_duties=[],\n    )"
     name: outline_governance_structure
     nodes_depended_on:
     - choose_legal_entity_type
@@ -1375,11 +1870,53 @@ nodes:
           the output structure, with no extraneous whitespace or formatting.
     prompt: 'Draft a simple governance chart: roles of GP, investment manager, board
       (if any). Limit to 5 roles with one-line duties each.'
+    shims: []
   produce_final_fund_plan_summary:
     agent: false
+    code_node_type: stub
     description: Generate an all-in, concise executive summary of the hedge fund plan
       by integrating key outputs from the compliance program, pitch deck outline,
       and launch timeline.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DesignComplianceProgramOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_compliance_program node outputs.\"\"\"\n\
+      \    compliance_requirements: str = Field(..., description=\"List of regulatory\
+      \ requirements extracted from the regulatory checklist.\")\n    policy_references:\
+      \ str = Field(..., description=\"List of internal policy or procedure references\
+      \ that correspond to each regulatory requirement.\")\n    mapping_count: int\
+      \ = Field(..., description=\"Number of requirement\\u2013policy pairs generated.\"\
+      )\n    is_consistent: bool = Field(..., description=\"Indicates whether the\
+      \ number of policy references matches the number of regulatory requirements.\"\
+      )\n\n\nclass CompilePitchDeckOutlineOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for compile_pitch_deck_outline node outputs.\"\"\"\n    slide_titles: str\
+      \ = Field(..., description=\"An ordered list of 10 slide titles, each representing\
+      \ a key component of the pitch deck such as objectives, strategy, team, edge,\
+      \ risk controls, fees, and expected returns.\")\n\n\nclass DevelopTimelineAndMilestonesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for develop_timeline_and_milestones node outputs.\"\
+      \"\"\n    monthly_milestones: str = Field(..., description=\"List of milestone\
+      \ descriptions for each month in the 12-month launch timeline. Each entry should\
+      \ be formatted as \\\"Month X: description\\\".\")\n    final_go_live_month:\
+      \ int = Field(..., description=\"Month number (1-12) when the fund is scheduled\
+      \ to go live.\")\n    overall_status: bool = Field(..., description=\"True if\
+      \ all planned milestones are scheduled to be completed by the go-live month;\
+      \ otherwise False.\")\n\n\nclass ProduceFinalFundPlanSummaryOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for produce_final_fund_plan_summary node outputs.\"\
+      \"\"\n    executive_summary: str = Field(..., description=\"Concise executive\
+      \ summary of the hedge fund plan, limited to 400 words.\")\n    word_count:\
+      \ int = Field(..., description=\"Number of words in the executive summary.\"\
+      )\n\n\ndef produce_final_fund_plan_summary(design_compliance_program_input:\
+      \ DesignComplianceProgramOutput, compile_pitch_deck_outline_input: CompilePitchDeckOutlineOutput,\
+      \ develop_timeline_and_milestones_input: DevelopTimelineAndMilestonesOutput,\
+      \ **kwargs) -> ProduceFinalFundPlanSummaryOutput:\n    \"\"\"Generate an all-in,\
+      \ concise executive summary of the hedge fund plan by integrating key outputs\
+      \ from the compliance program, pitch deck outline, and launch timeline.\n\n\
+      \    Args:\n        design_compliance_program_input: Input from the 'design_compliance_program'\
+      \ node.\n        compile_pitch_deck_outline_input: Input from the 'compile_pitch_deck_outline'\
+      \ node.\n        develop_timeline_and_milestones_input: Input from the 'develop_timeline_and_milestones'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ProduceFinalFundPlanSummaryOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return ProduceFinalFundPlanSummaryOutput(\n\
+      \        executive_summary=\"\",\n        word_count=0,\n    )"
     name: produce_final_fund_plan_summary
     nodes_depended_on:
     - design_compliance_program
@@ -1474,9 +2011,32 @@ nodes:
     prompt: Synthesize prior outputs into a concise executive summary (≤400 words)
       covering strategy, structure, risk, ops, fees, timeline. Bullet or short paragraphs
       allowed.
+    shims: []
   select_jurisdiction:
     agent: false
+    code_node_type: stub
     description: Pick fund domicile and note rationale.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ClarifyFundObjectivesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for clarify_fund_objectives node outputs.\"\"\"\n\
+      \    objectives: str = Field(..., description=\"Bullet list of the fund's core\
+      \ objectives, each item a concise statement.\")\n    objective_count: int =\
+      \ Field(..., description=\"Number of objective bullets provided.\")\n\n\nclass\
+      \ SelectJurisdictionOutput(BaseModel):\n    \"\"\"Pydantic model for select_jurisdiction\
+      \ node outputs.\"\"\"\n    jurisdiction: str = Field(..., description=\"The\
+      \ selected fund domicile jurisdiction (e.g., Cayman, Delaware, Luxembourg).\"\
+      )\n    pros: str = Field(..., description=\"A list of two key advantages of\
+      \ the selected jurisdiction.\")\n    cons: str = Field(..., description=\"A\
+      \ list of two key disadvantages of the selected jurisdiction.\")\n    rationale:\
+      \ str = Field(..., description=\"A concise one\\u2011sentence explanation of\
+      \ why this jurisdiction was chosen.\")\n\n\ndef select_jurisdiction(clarify_fund_objectives_input:\
+      \ ClarifyFundObjectivesOutput, **kwargs) -> SelectJurisdictionOutput:\n    \"\
+      \"\"Pick fund domicile and note rationale.\n\n    Args:\n        clarify_fund_objectives_input:\
+      \ Input from the 'clarify_fund_objectives' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SelectJurisdictionOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return SelectJurisdictionOutput(\n\
+      \        jurisdiction=\"\",\n        pros=\"\",\n        cons=\"\",\n      \
+      \  rationale=\"\",\n    )"
     name: select_jurisdiction
     nodes_depended_on:
     - clarify_fund_objectives
@@ -1558,9 +2118,32 @@ nodes:
     prompt: Choose the optimal fund domicile (e.g., Cayman, Delaware, Luxembourg)
       considering objectives. Provide 2 pros and 2 cons for the selected jurisdiction
       only.
+    shims: []
   set_performance_and_risk_targets:
     agent: false
+    code_node_type: stub
     description: Quantify return and risk goals.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ChooseInvestmentStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for choose_investment_strategy node outputs.\"\"\"\
+      \n    strategy_category: str = Field(..., description=\"Primary hedge fund strategy\
+      \ category selected (e.g., Long/Short Equity, Global Macro).\")\n    rationale:\
+      \ str = Field(..., description=\"One-sentence rationale explaining why this\
+      \ strategy best serves the fund objectives.\")\n\n\nclass SetPerformanceAndRiskTargetsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for set_performance_and_risk_targets node outputs.\"\
+      \"\"\n    gross_return: float = Field(..., description=\"Target annual gross\
+      \ return expressed as a percentage (e.g., 15.0 for 15%).\")\n    volatility:\
+      \ float = Field(..., description=\"Target annual volatility (standard deviation)\
+      \ expressed as a percentage.\")\n    sharpe_ratio: float = Field(..., description=\"\
+      Target annual Sharpe ratio.\")\n    max_drawdown: float = Field(..., description=\"\
+      Target maximum annual drawdown expressed as a percentage.\")\n\n\ndef set_performance_and_risk_targets(choose_investment_strategy_input:\
+      \ ChooseInvestmentStrategyOutput, **kwargs) -> SetPerformanceAndRiskTargetsOutput:\n\
+      \    \"\"\"Quantify return and risk goals.\n\n    Args:\n        choose_investment_strategy_input:\
+      \ Input from the 'choose_investment_strategy' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SetPerformanceAndRiskTargetsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ SetPerformanceAndRiskTargetsOutput(\n        gross_return=0.0,\n        volatility=0.0,\n\
+      \        sharpe_ratio=0.0,\n        max_drawdown=0.0,\n    )"
     name: set_performance_and_risk_targets
     nodes_depended_on:
     - choose_investment_strategy
@@ -1659,3 +2242,4 @@ nodes:
     prompt: Define numerical annual targets for gross return, volatility (standard
       deviation), Sharpe ratio, and maximum drawdown consistent with the chosen strategy.
       Present as a 4-row table.
+    shims: []
