@@ -1,9 +1,8 @@
 dag_type: plain_text
-description: Creates a complete, data‑driven trading strategy that compares Meta and
-  Google stocks using the last three months of data. The workflow fetches market data,
-  cleans and processes it, engineers features, designs a statistical strategy, backtests
-  it, evaluates performance, and compiles a report.
-name: meta_vs_google_trading_strategy
+description: A workflow that fetches and merges Meta, Google, and Nvidia stock data,
+  computes returns and statistics, designs a pairwise statistical arbitrage strategy,
+  backtests it, evaluates performance, and generates a final report.
+name: meta_google_nvidia_trading_strategy
 nodes:
   backtest_strategy:
     agent: false
@@ -31,16 +30,17 @@ nodes:
       and average trade duration. Return a JSON with these metrics.'
   compute_daily_returns:
     agent: false
-    description: Calculates daily log returns for each stock.
+    description: Calculates daily log returns for Meta, Google, and Nvidia.
     name: compute_daily_returns
     nodes_depended_on:
     - preprocess_data
     nodes_dependent_on:
     - compute_statistics
     - perform_pairwise_correlation
-    prompt: 'Add two new columns to the preprocessed dataset: META_Return and GOOGL_Return,
-      calculated as the daily log‑return of Close price. Return the dataset with the
-      new columns.'
+    - generate_features
+    prompt: 'Add three new columns to the preprocessed dataset: META_Return, GOOGL_Return,
+      NVDA_Return, calculated as the daily log‑return of each stock''s Close price.
+      Return the dataset with the new columns.'
   compute_statistics:
     agent: false
     description: Generates summary statistics of returns.
@@ -49,9 +49,9 @@ nodes:
     - compute_daily_returns
     nodes_dependent_on:
     - design_trading_strategy
-    prompt: 'For META_Return and GOOGL_Return, compute the following statistics: mean,
-      standard deviation, correlation with each other, and skewness. Return a JSON
-      object with these metrics.'
+    prompt: 'For META_Return, GOOGL_Return, and NVDA_Return, compute the following
+      statistics: mean, standard deviation, correlation with each other, and skewness.
+      Return a JSON object with these metrics.'
   design_trading_strategy:
     agent: false
     description: Formulates the trading strategy logic.
@@ -62,6 +62,7 @@ nodes:
     - perform_pairwise_correlation
     nodes_dependent_on:
     - backtest_strategy
+    - generate_strategy_report
     prompt: 'Based on the computed statistics and engineered features, propose a simple
       statistical arbitrage strategy that trades the pair Meta and Google. The strategy
       should specify entry and exit rules using the rolling correlation and moving
@@ -69,7 +70,7 @@ nodes:
       PositionSizeRule.'
   fetch_google_stock_data:
     agent: false
-    description: Collects Google stock price data for the past three months.
+    description: Collects Google stock price data for the last 90 days.
     name: fetch_google_stock_data
     nodes_depended_on: []
     nodes_dependent_on:
@@ -79,12 +80,22 @@ nodes:
       Low, Close, Volume, sorted ascending by Date.'
   fetch_meta_stock_data:
     agent: false
-    description: Collects Meta stock price data for the past three months.
+    description: Collects Meta stock price data for the last 90 days.
     name: fetch_meta_stock_data
     nodes_depended_on: []
     nodes_dependent_on:
     - merge_stock_datasets
     prompt: 'Retrieve the last 90 days of daily OHLCV data for Meta (ticker: META)
+      from a reliable public source. Return a CSV with columns: Date, Open, High,
+      Low, Close, Volume, sorted ascending by Date.'
+  fetch_nvidia_stock_data:
+    agent: false
+    description: Collects Nvidia stock price data for the last 90 days.
+    name: fetch_nvidia_stock_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - merge_stock_datasets_nvidia
+    prompt: 'Retrieve the last 90 days of daily OHLCV data for Nvidia (ticker: NVDA)
       from a reliable public source. Return a CSV with columns: Date, Open, High,
       Low, Close, Volume, sorted ascending by Date.'
   generate_features:
@@ -97,6 +108,7 @@ nodes:
     - design_trading_strategy
     prompt: 'From the cleaned dataset, create the following feature columns:
 
+
       - META_MovingAvg_10: 10‑day simple moving average of Meta Close.
 
       - GOOGL_MovingAvg_10: 10‑day simple moving average of Google Close.
@@ -104,6 +116,7 @@ nodes:
       - META_Std_5: 5‑day rolling standard deviation of Meta Close.
 
       - GOOGL_Std_5: 5‑day rolling standard deviation of Google Close.
+
 
       Return the dataset with the new feature columns added.'
   generate_strategy_report:
@@ -116,28 +129,44 @@ nodes:
     nodes_dependent_on: []
     prompt: 'Compose a concise strategy report summarizing:
 
+
       1. Strategy description.
 
       2. Key statistical insights used.
 
       3. Backtest performance metrics.
 
-      4. Recommendations for next steps. Present the report as markdown text.'
+      4. Recommendations for next steps.
+
+      Present the report as markdown text.'
   merge_stock_datasets:
     agent: false
-    description: Creates a unified dataset containing both Meta and Google OHLCV data.
+    description: Creates a unified dataset containing Meta and Google OHLCV data.
     name: merge_stock_datasets
     nodes_depended_on:
     - fetch_meta_stock_data
     - fetch_google_stock_data
     nodes_dependent_on:
-    - preprocess_data
+    - merge_stock_datasets_nvidia
     prompt: Merge the two CSV datasets from Meta and Google on the Date column. Keep
       rows that have dates present in both datasets. Prefix columns with META_ or
       GOOGL_ as appropriate. Return a single CSV with all columns sorted by Date.
+  merge_stock_datasets_nvidia:
+    agent: false
+    description: Extends the merged dataset to include Nvidia OHLCV data.
+    name: merge_stock_datasets_nvidia
+    nodes_depended_on:
+    - merge_stock_datasets
+    - fetch_nvidia_stock_data
+    nodes_dependent_on:
+    - preprocess_data
+    prompt: Take the CSV output from merge_stock_datasets and the CSV from fetch_nvidia_stock_data.
+      Merge them on the Date column, keeping only rows with dates present in all three
+      datasets. Prefix Nvidia columns with NVDA_. Return a single CSV with all columns
+      sorted by Date.
   perform_pairwise_correlation:
     agent: false
-    description: Generates a rolling correlation feature.
+    description: Generates a rolling correlation feature between Meta and Google returns.
     name: perform_pairwise_correlation
     nodes_depended_on:
     - compute_daily_returns
@@ -150,16 +179,17 @@ nodes:
     description: Cleans and normalizes the merged dataset.
     name: preprocess_data
     nodes_depended_on:
-    - merge_stock_datasets
+    - merge_stock_datasets_nvidia
     nodes_dependent_on:
     - compute_daily_returns
-    - generate_features
     prompt: 'For the merged dataset, perform the following preprocessing steps:
+
 
       1. Convert Date column to ISO format.
 
       2. Fill any missing numeric values using forward‑fill.
 
       3. Remove rows where both Meta and Google have missing Close values.
+
 
       Return the cleaned dataset as a CSV.'
