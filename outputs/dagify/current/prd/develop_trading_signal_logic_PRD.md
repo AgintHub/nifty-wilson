@@ -1,0 +1,115 @@
+# develop_trading_signal_logic PRD
+
+## Description
+Transforms the set of technical indicators identified for the chosen strategy into a deterministic, production‑grade algorithm that emits precise buy and sell signals.
+
+
+## Implementation Plan
+
+### 1. Fetch the `indicators` list from the output of the `identify_trading_indicators` node and store it in a local variable `parent_indicators`.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Provides the authoritative source of which technical measures the strategy is allowed to use. |
+| **Impact** | HIGH |
+| **Complexity** | LOW |
+| **Method** | Execute a JSON read of the parent node's output; assert the field exists and is a non‑empty List[str]; raise a meaningful error if missing. |
+
+### 2. Deduplicate `parent_indicators` while preserving order and assign the result to `used_indicators`.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Ensures deterministic behaviour and matches the required output field exactly. |
+| **Impact** | MEDIUM |
+| **Complexity** | LOW |
+| **Method** | Iterate through `parent_indicators`, add each unique entry to a new list; use a set for O(1) membership checks. |
+
+### 3. Create a registry (dictionary) named `indicator_definitions` that maps each indicator name to a pre‑defined calculation template, default parameters, and signal direction (e.g., bullish when value > threshold).
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Encapsulates domain expertise for each technical indicator, making later rule composition straightforward and auditable. |
+| **Impact** | HIGH |
+| **Complexity** | MEDIUM |
+| **Method** | Populate the dictionary manually for common indicators (e.g., SMA, EMA, RSI, MACD, Bollinger Bands). Include keys: `calc_expression`, `lookback`, `upper_thresh`, `lower_thresh`, `type` (trend/momentum/volatility). |
+
+### 4. Validate that every entry in `used_indicators` exists in `indicator_definitions`; if any are missing, abort with a clear message listing unsupported indicators.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Prevents runtime failures during back‑test when an undefined indicator would be referenced. |
+| **Impact** | HIGH |
+| **Complexity** | LOW |
+| **Method** | Loop over `used_indicators`; raise Exception if `indicator not in indicator_definitions`. |
+
+### 5. Define the primary BUY rule: combine one or more bullish conditions using logical AND/OR as dictated by typical strategy patterns (e.g., SMA_fast > SMA_slow AND RSI < 30).
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Establishes the core entry logic which must be explicit and deterministic. |
+| **Impact** | HIGH |
+| **Complexity** | MEDIUM |
+| **Method** | For each indicator, substitute its `calc_expression` into a templated condition string; concatenate conditions with `and`/`or` based on a configurable `combination_map` (hard‑coded for this PRD). |
+
+### 6. Define the primary SELL rule: mirror the BUY rule but with opposite (bearish) thresholds (e.g., SMA_fast < SMA_slow OR RSI > 70).
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Provides an equally clear exit logic, ensuring symmetric treatment of opposite market signals. |
+| **Impact** | HIGH |
+| **Complexity** | MEDIUM |
+| **Method** | Reuse `indicator_definitions` with opposite threshold values; generate condition strings analogous to BUY rule. |
+
+### 7. Define a NEUTRAL/HOLD rule that activates when neither BUY nor SELL conditions are satisfied; this rule typically results in maintaining the current position.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Guarantees that every possible market state maps to a deterministic output (BUY, SELL, or HOLD). |
+| **Impact** | MEDIUM |
+| **Complexity** | LOW |
+| **Method** | Create a third step: `else: HOLD` and document it as a logical fallback. |
+
+### 8. Assemble the three rule strings into an ordered list `signal_logic_steps` following the sequence: 1) BUY condition, 2) SELL condition, 3) HOLD fallback.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Matches the required output format and provides an intuitive, readable rule set for downstream consumption. |
+| **Impact** | HIGH |
+| **Complexity** | LOW |
+| **Method** | Create a List[str] where each element is a plain‑English description of the condition plus the action (e.g., "If SMA_20 > SMA_50 AND RSI < 30 → BUY"). |
+
+### 9. Generate the `summary` field: a concise paragraph (≤ 3 sentences) that outlines the overall methodology (indicator combination, hierarchy, risk overlay), key decision pathways (BUY → SELL → HOLD), and any built‑in risk‑management overlay (e.g., maximum exposure check).
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Provides stakeholders with a quick high‑level view of the signal engine without digging into the step list. |
+| **Impact** | MEDIUM |
+| **Complexity** | LOW |
+| **Method** | Compose a string using f‑string interpolation of the indicator set and rule count; mention deterministic nature and that all indicators are used. |
+
+### 10. Compute `is_logic_complete` as `True` only if (a) every indicator in `parent_indicators` appears in `used_indicators` and (b) BUY, SELL, and HOLD branches are all explicitly defined in `signal_logic_steps`; otherwise set to `False`.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Explicitly signals to downstream nodes whether the signal definition is exhaustive, enabling error‑handling before back‑testing. |
+| **Impact** | HIGH |
+| **Complexity** | LOW |
+| **Method** | Boolean check: `all(i in used_indicators for i in parent_indicators) and len(signal_logic_steps) == 3`. |
+
+### 11. Package the four outputs (`signal_logic_steps`, `used_indicators`, `summary`, `is_logic_complete`) into a JSON object matching the declared `output_structure` and return it.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Conforms to the workflow contract so that subsequent nodes can reliably consume the data. |
+| **Impact** | HIGH |
+| **Complexity** | LOW |
+| **Method** | Serialize the constructed Python dict using `json.dumps` with ensure_ascii=False; no extra fields. |
+
+### 12. Include defensive error handling: if any step fails (e.g., missing indicator definition, malformed parameter), raise a descriptive exception so that the orchestrator can capture the failure and mark downstream `success` flags accordingly.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Improves robustness of the pipeline and aids debugging in production. |
+| **Impact** | MEDIUM |
+| **Complexity** | MEDIUM |
+| **Method** | Wrap the entire generation logic in a try/except block; on exception, log the stack trace and re‑raise a custom `SignalLogicGenerationError`. |
