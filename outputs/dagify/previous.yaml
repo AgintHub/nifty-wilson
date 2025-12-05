@@ -1,194 +1,243 @@
-dag_type: typed
-description: Generated workflow from UI.
-name: generated_workflow_from_ui
+dag_type: plain_text
+description: Creates a detailed, step-by-step foundational plan for building a hedge
+  fund, from defining objectives through compiling the final launch blueprint.
+name: build_hedge_fund
 nodes:
-  compare_to_theoretical_value:
+  choose_investment_strategy:
     agent: false
-    description: Recall the analytical value of the integral (‑γ, where γ ≈ 0.5772156649)
-      and compute the absolute difference between the Monte‑Carlo estimate and this
-      theoretical constant.
-    name: compare_to_theoretical_value
+    description: Identify the high-level investment strategy category.
+    name: choose_investment_strategy
     nodes_depended_on:
-    - compute_monte_carlo_estimate
-    nodes_dependent_on: []
-    output_structure:
-    - description: The analytical value of the integral, which is -γ (≈ -0.5772156649).
-      key: theoretical_value
-      type: float
-    - description: The Monte‑Carlo estimate of the integral obtained from the parent
-        node.
-      key: monte_carlo_estimate
-      type: float
-    - description: The absolute difference between the Monte‑Carlo estimate and the
-        theoretical value.
-      key: absolute_difference
-      type: float
-    prompt: State the theoretical value of the integral, which is the negative Euler–Mascheroni
-      constant (‑γ ≈ -0.5772156649). Compute and report the absolute difference between
-      the Monte‑Carlo estimate and this value.
-  compute_log_of_samples:
+    - clarify_fund_objectives
+    nodes_dependent_on:
+    - define_asset_universe
+    - set_performance_and_risk_targets
+    prompt: Select one primary hedge fund strategy category that best serves the fund
+      objectives (e.g., long/short equity, global macro). Provide a one-sentence rationale.
+  choose_legal_entity_type:
     agent: false
-    description: Compute the natural logarithm of each sampled value t_i, i.e., ln(t_i).
-    name: compute_log_of_samples
+    description: Identify legal structure for the fund vehicle.
+    name: choose_legal_entity_type
     nodes_depended_on:
-    - generate_exponential_samples
-    nodes_dependent_on: []
-    output_structure:
-    - description: Natural logarithm of each sampled value t_i.
-      key: log_samples
-      type: List[float]
-    prompt: For each sample t_i generated previously, calculate ln(t_i). Return an
-      array of the resulting logarithm values.
-  compute_monte_carlo_estimate:
+    - select_jurisdiction
+    nodes_dependent_on:
+    - identify_regulatory_requirements
+    - list_service_providers
+    - outline_governance_structure
+    prompt: Specify the legal entity structure (e.g., LP, LLC, SICAV) appropriate
+      for the chosen jurisdiction. Give a one-sentence explanation.
+  clarify_fund_objectives:
     agent: false
-    description: Calculate the Monte‑Carlo estimate of the integral as the arithmetic
-      mean of the ln(t_i) values.
-    name: compute_monte_carlo_estimate
-    nodes_depended_on:
-    - compute_log_of_samples
-    nodes_dependent_on: []
-    output_structure:
-    - description: Arithmetic mean of the ln(t_i) values; the Monte‑Carlo estimate
-        of the integral.
-      key: monte_carlo_estimate
-      type: float
-    prompt: Take the array of ln(t_i) values and compute their average. Report this
-      average as the Monte‑Carlo estimate of the integral.
-  compute_standard_error:
-    agent: false
-    description: Determine the standard error of the Monte‑Carlo estimator using the
-      sample standard deviation of ln(t_i) divided by √N.
-    name: compute_standard_error
-    nodes_depended_on:
-    - compute_log_of_samples
-    - set_number_of_samples
-    nodes_dependent_on: []
-    output_structure:
-    - description: The computed standard error of the Monte‑Carlo estimator (sample
-        standard deviation divided by sqrt(N)).
-      key: standard_error
-      type: float
-    - description: The sample standard deviation of the ln(t_i) values.
-      key: sample_standard_deviation
-      type: float
-    - description: The number of Monte‑Carlo samples N used in the estimation.
-      key: num_samples
-      type: int
-    prompt: Calculate the sample standard deviation of the ln(t_i) array, then divide
-      it by the square root of N (the number of samples). Output the resulting standard
-      error.
-  generate_exponential_samples:
-    agent: false
-    description: Generate N independent samples from Exp(1) using a standard pseudo‑random
-      generator.
-    name: generate_exponential_samples
-    nodes_depended_on:
-    - set_number_of_samples
-    - select_importance_sampling_distribution
-    nodes_dependent_on: []
-    output_structure:
-    - description: Array containing the N generated random numbers from the exponential
-        distribution with rate 1.
-      key: samples
-      type: List[float]
-    - description: The number of samples N that were generated (should match the value
-        provided by the set_number_of_samples node).
-      key: sample_count
-      type: int
-    prompt: Produce a list of N random numbers drawn from an exponential distribution
-      with rate 1. Output the list in a machine‑readable format (e.g., JSON array).
-  select_importance_sampling_distribution:
-    agent: false
-    description: Identify the importance‑sampling probability distribution that matches
-      the e^{-t} factor, namely an exponential distribution with rate λ=1.
-    name: select_importance_sampling_distribution
-    nodes_depended_on:
-    - set_integration_bounds
-    nodes_dependent_on: []
-    output_structure:
-    - description: The type of the importance sampling distribution (e.g., 'exponential').
-      key: distribution_type
-      type: str
-    - description: The rate parameter (lambda) of the exponential distribution.
-      key: distribution_rate
-      type: float
-    - description: Brief explanation of why choosing this distribution simplifies
-        the estimator.
-      key: simplification_explanation
-      type: str
-    prompt: Specify the importance‑sampling distribution to use for the integral,
-      including its type (exponential) and rate parameter (λ=1). Explain briefly why
-      this choice simplifies the estimator.
-  set_integration_bounds:
-    agent: false
-    description: Specify the integration domain for the integral (lower bound 0, upper
-      bound ∞) and note that importance sampling will be used to handle the infinite
-      limit.
-    name: set_integration_bounds
+    description: Produce a bullet list of the hedge fund's core objectives.
+    name: clarify_fund_objectives
     nodes_depended_on: []
-    nodes_dependent_on: []
-    output_structure:
-    - description: Numerical lower limit of the integral (0.0).
-      key: lower_bound
-      type: float
-    - description: Representation of the upper limit of the integral; use the string
-        "infinity" to denote \(\infty\).
-      key: upper_bound
-      type: str
-    - description: Name and parameters of the importance‑sampling distribution chosen
-        to handle the infinite domain (e.g., "Exponential(rate=1)").
-      key: importance_sampling_distribution
-      type: str
-    - description: Brief textual explanation of why importance sampling with the exponential
-        distribution resolves the infinite upper bound.
-      key: explanation
-      type: str
-    prompt: State the lower and upper limits of the integral \(\int_{0}^{\infty} e^{-t}\,\ln(t)\,dt\)
-      and explain that the infinite upper bound will be addressed via importance sampling
-      with an exponential distribution.
-  set_number_of_samples:
+    nodes_dependent_on:
+    - define_investor_profile
+    - choose_investment_strategy
+    - select_jurisdiction
+    prompt: State the primary business objectives for launching the hedge fund. Produce
+      a concise bullet list covering investment purpose, competitive edge, and long-term
+      vision (max 8 bullets). Focus only on objectives, do not include strategy details.
+  compile_pitch_deck_outline:
     agent: false
-    description: Choose a concrete number of Monte‑Carlo samples (e.g., 1,000,000)
-      to use for the empirical estimate.
-    name: set_number_of_samples
-    nodes_depended_on: []
-    nodes_dependent_on: []
-    output_structure:
-    - description: The number of Monte‑Carlo samples (N) to generate.
-      key: sample_count
-      type: int
-    prompt: Select an integer N representing the number of random samples to draw
-      for the Monte‑Carlo simulation. Provide the chosen value.
-  summarize_results:
-    agent: false
-    description: Produce a concise summary containing the Monte‑Carlo estimate, its
-      standard error, the theoretical value, and the difference between them.
-    name: summarize_results
+    description: Framework for fundraising presentation.
+    name: compile_pitch_deck_outline
     nodes_depended_on:
-    - compute_monte_carlo_estimate
-    - compute_standard_error
-    - compare_to_theoretical_value
+    - clarify_fund_objectives
+    - define_investor_profile
+    - choose_investment_strategy
+    - set_performance_and_risk_targets
+    - draft_fee_structure
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: Create a 10-slide outline (slide titles only) for an investor pitch deck
+      incorporating objectives, strategy, team, edge, risk controls, fees, and expected
+      returns.
+  create_hiring_plan:
+    agent: false
+    description: Determine initial staffing requirements.
+    name: create_hiring_plan
+    nodes_depended_on:
+    - draft_operations_workflow
+    nodes_dependent_on:
+    - develop_timeline_and_milestones
+    prompt: List essential full-time positions for launch (max 8), with one-line responsibility
+      each. Align roles with operations workflow gaps.
+  define_asset_universe:
+    agent: false
+    description: Enumerate tradable assets and instruments.
+    name: define_asset_universe
+    nodes_depended_on:
+    - choose_investment_strategy
+    nodes_dependent_on:
+    - draft_operations_workflow
+    prompt: List the specific asset classes and instruments the chosen strategy will
+      trade (e.g., US large-cap equities, S&P futures). Keep list ≤10 items.
+  define_investor_profile:
+    agent: false
+    description: Describe the target investor segment for the fund.
+    name: define_investor_profile
+    nodes_depended_on:
+    - clarify_fund_objectives
+    nodes_dependent_on:
+    - compile_pitch_deck_outline
+    prompt: 'Based on the stated fund objectives, specify the ideal target investor
+      profile (e.g., family offices, pensions). List key characteristics: typical
+      ticket size, risk tolerance, liquidity preference, and geographic focus.'
+  define_technology_stack:
+    agent: false
+    description: Specify technology tools supporting operations.
+    name: define_technology_stack
+    nodes_depended_on:
+    - draft_operations_workflow
+    nodes_dependent_on:
+    - develop_timeline_and_milestones
+    prompt: 'Identify required software and infrastructure components for each operations
+      step (e.g., OMS, EMS, risk system). Present as 2-column table: Ops Step | Tech
+      Component.'
+  design_compliance_program:
+    agent: false
+    description: Create compliance policies aligned with regulations and risk.
+    name: design_compliance_program
+    nodes_depended_on:
+    - identify_regulatory_requirements
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: 'Generate a compliance checklist mapping each regulatory requirement to
+      a specific internal policy or procedure. Table with columns: Requirement | Policy
+      Reference.'
+  design_risk_management_framework:
+    agent: false
+    description: Outline quantitative and qualitative risk controls.
+    name: design_risk_management_framework
+    nodes_depended_on:
+    - set_performance_and_risk_targets
+    nodes_dependent_on:
+    - draft_operations_workflow
+    - design_compliance_program
+    - compile_pitch_deck_outline
+    prompt: 'List core risk controls aligned with the target metrics: position limits,
+      VaR limits, stop-loss rules, liquidity thresholds. Provide 4–6 bullet points.'
+  develop_timeline_and_milestones:
+    agent: false
+    description: Create phased schedule leading to fund launch.
+    name: develop_timeline_and_milestones
+    nodes_depended_on:
+    - draft_operations_workflow
+    - define_technology_stack
+    - create_hiring_plan
+    - compile_pitch_deck_outline
+    nodes_dependent_on:
+    - produce_final_fund_plan_summary
+    prompt: Prepare a launch timeline with monthly milestones over the next 12 months.
+      Include regulatory filing, service provider onboarding, capital raise, tech
+      deployment, and go-live.
+  draft_fee_structure:
+    agent: false
+    description: Set management and performance fee levels.
+    name: draft_fee_structure
+    nodes_depended_on:
+    - set_performance_and_risk_targets
+    - estimate_setup_and_operating_costs
+    nodes_dependent_on:
+    - compile_pitch_deck_outline
+    prompt: Propose management and performance fee percentages that balance cost recovery
+      and competitiveness. Include incentive hurdle if relevant. Summarize in ≤3 sentences.
+  draft_operations_workflow:
+    agent: false
+    description: Map core trade and post-trade operational steps.
+    name: draft_operations_workflow
+    nodes_depended_on:
+    - define_asset_universe
+    - list_service_providers
+    - design_risk_management_framework
+    nodes_dependent_on:
+    - define_technology_stack
+    - create_hiring_plan
+    - develop_timeline_and_milestones
+    prompt: 'Sketch the daily trade lifecycle: idea generation → order entry → execution
+      → confirmation → settlement → reconciliation. List each step with primary responsible
+      party (internal or provider).'
+  estimate_setup_and_operating_costs:
+    agent: false
+    description: Rough cost model for fund setup and operations.
+    name: estimate_setup_and_operating_costs
+    nodes_depended_on:
+    - list_service_providers
+    nodes_dependent_on:
+    - draft_fee_structure
+    prompt: 'Provide a simple annual cost estimate (in USD) for each listed service
+      provider plus overhead (office, tech). Present as two columns: Cost Item | Estimated
+      USD.'
+  identify_regulatory_requirements:
+    agent: false
+    description: Outline key regulatory filings and registrations.
+    name: identify_regulatory_requirements
+    nodes_depended_on:
+    - choose_legal_entity_type
+    nodes_dependent_on:
+    - design_compliance_program
+    prompt: List the primary registrations or filings required for the selected entity
+      and jurisdiction (e.g., SEC Form ADV). Provide citation to governing body names
+      only.
+  list_service_providers:
+    agent: false
+    description: Enumerate required third-party service provider categories.
+    name: list_service_providers
+    nodes_depended_on:
+    - choose_legal_entity_type
+    nodes_dependent_on:
+    - draft_operations_workflow
+    - estimate_setup_and_operating_costs
+    prompt: 'Generate a checklist of mandatory external service providers: prime broker,
+      fund administrator, auditor, legal counsel, compliance consultant, and custodian.
+      No descriptive text—just provider types.'
+  outline_governance_structure:
+    agent: false
+    description: Define internal governance roles and duties.
+    name: outline_governance_structure
+    nodes_depended_on:
+    - choose_legal_entity_type
     nodes_dependent_on: []
-    output_structure:
-    - description: The Monte-Carlo estimate of the integral.
-      key: monte_carlo_estimate
-      type: float
-    - description: The standard error of the Monte-Carlo estimate.
-      key: standard_error
-      type: float
-    - description: The analytical value (-γ).
-      key: theoretical_value
-      type: float
-    - description: The absolute difference between the estimate and the analytical
-        value.
-      key: absolute_difference
-      type: float
-    - description: A one-sentence interpretation of the result (e.g., whether the
-        estimate is within expected statistical error).
-      key: interpretation
-      type: str
-    prompt: 'Create a short report (plain text) that lists: (1) the Monte‑Carlo estimate
-      of the integral, (2) the standard error, (3) the analytical value (‑γ), and
-      (4) the absolute difference between the estimate and the analytical value. Include
-      a one‑sentence interpretation of the result (e.g., whether the estimate is within
-      expected statistical error).'
+    prompt: 'Draft a simple governance chart: roles of GP, investment manager, board
+      (if any). Limit to 5 roles with one-line duties each.'
+  produce_final_fund_plan_summary:
+    agent: false
+    description: Generate an all-in summary of the hedge fund plan.
+    name: produce_final_fund_plan_summary
+    nodes_depended_on:
+    - design_compliance_program
+    - compile_pitch_deck_outline
+    - develop_timeline_and_milestones
+    nodes_dependent_on: []
+    prompt: Synthesize prior outputs into a concise executive summary (≤400 words)
+      covering strategy, structure, risk, ops, fees, timeline. Bullet or short paragraphs
+      allowed.
+  select_jurisdiction:
+    agent: false
+    description: Pick fund domicile and note rationale.
+    name: select_jurisdiction
+    nodes_depended_on:
+    - clarify_fund_objectives
+    nodes_dependent_on:
+    - choose_legal_entity_type
+    - identify_regulatory_requirements
+    - list_service_providers
+    - outline_governance_structure
+    prompt: Choose the optimal fund domicile (e.g., Cayman, Delaware, Luxembourg)
+      considering objectives. Provide 2 pros and 2 cons for the selected jurisdiction
+      only.
+  set_performance_and_risk_targets:
+    agent: false
+    description: Quantify return and risk goals.
+    name: set_performance_and_risk_targets
+    nodes_depended_on:
+    - choose_investment_strategy
+    nodes_dependent_on:
+    - design_risk_management_framework
+    - draft_fee_structure
+    prompt: Define numerical annual targets for gross return, volatility (standard
+      deviation), Sharpe ratio, and maximum drawdown consistent with the chosen strategy.
+      Present as a 4-row table.
