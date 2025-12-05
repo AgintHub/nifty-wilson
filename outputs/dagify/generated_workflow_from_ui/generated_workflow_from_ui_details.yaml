@@ -1,10 +1,6 @@
-dag_type: plain_text
-description: Computes an empirical estimate of the integral ∫₀^∞ e^{-t} ln(t) dt using
-  Monte‑Carlo importance sampling with an exponential distribution. The workflow defines
-  parameters, generates random samples, evaluates the integrand, calculates the estimate
-  and its standard error, compares to the theoretical value (‑γ), and summarizes the
-  results.
-name: empirical_integral_estimate_exp_minus_t_ln_t
+dag_type: typed
+description: Generated workflow from UI.
+name: generated_workflow_from_ui
 nodes:
   compare_to_theoretical_value:
     agent: false
@@ -15,6 +11,18 @@ nodes:
     nodes_depended_on:
     - compute_monte_carlo_estimate
     nodes_dependent_on: []
+    output_structure:
+    - description: The analytical value of the integral, which is -γ (≈ -0.5772156649).
+      key: theoretical_value
+      type: float
+    - description: The Monte‑Carlo estimate of the integral obtained from the parent
+        node.
+      key: monte_carlo_estimate
+      type: float
+    - description: The absolute difference between the Monte‑Carlo estimate and the
+        theoretical value.
+      key: absolute_difference
+      type: float
     prompt: State the theoretical value of the integral, which is the negative Euler–Mascheroni
       constant (‑γ ≈ -0.5772156649). Compute and report the absolute difference between
       the Monte‑Carlo estimate and this value.
@@ -25,6 +33,10 @@ nodes:
     nodes_depended_on:
     - generate_exponential_samples
     nodes_dependent_on: []
+    output_structure:
+    - description: Natural logarithm of each sampled value t_i.
+      key: log_samples
+      type: List[float]
     prompt: For each sample t_i generated previously, calculate ln(t_i). Return an
       array of the resulting logarithm values.
   compute_monte_carlo_estimate:
@@ -35,6 +47,11 @@ nodes:
     nodes_depended_on:
     - compute_log_of_samples
     nodes_dependent_on: []
+    output_structure:
+    - description: Arithmetic mean of the ln(t_i) values; the Monte‑Carlo estimate
+        of the integral.
+      key: monte_carlo_estimate
+      type: float
     prompt: Take the array of ln(t_i) values and compute their average. Report this
       average as the Monte‑Carlo estimate of the integral.
   compute_standard_error:
@@ -46,6 +63,17 @@ nodes:
     - compute_log_of_samples
     - set_number_of_samples
     nodes_dependent_on: []
+    output_structure:
+    - description: The computed standard error of the Monte‑Carlo estimator (sample
+        standard deviation divided by sqrt(N)).
+      key: standard_error
+      type: float
+    - description: The sample standard deviation of the ln(t_i) values.
+      key: sample_standard_deviation
+      type: float
+    - description: The number of Monte‑Carlo samples N used in the estimation.
+      key: num_samples
+      type: int
     prompt: Calculate the sample standard deviation of the ln(t_i) array, then divide
       it by the square root of N (the number of samples). Output the resulting standard
       error.
@@ -58,6 +86,15 @@ nodes:
     - set_number_of_samples
     - select_importance_sampling_distribution
     nodes_dependent_on: []
+    output_structure:
+    - description: Array containing the N generated random numbers from the exponential
+        distribution with rate 1.
+      key: samples
+      type: List[float]
+    - description: The number of samples N that were generated (should match the value
+        provided by the set_number_of_samples node).
+      key: sample_count
+      type: int
     prompt: Produce a list of N random numbers drawn from an exponential distribution
       with rate 1. Output the list in a machine‑readable format (e.g., JSON array).
   select_importance_sampling_distribution:
@@ -68,6 +105,17 @@ nodes:
     nodes_depended_on:
     - set_integration_bounds
     nodes_dependent_on: []
+    output_structure:
+    - description: The type of the importance sampling distribution (e.g., 'exponential').
+      key: distribution_type
+      type: str
+    - description: The rate parameter (lambda) of the exponential distribution.
+      key: distribution_rate
+      type: float
+    - description: Brief explanation of why choosing this distribution simplifies
+        the estimator.
+      key: simplification_explanation
+      type: str
     prompt: Specify the importance‑sampling distribution to use for the integral,
       including its type (exponential) and rate parameter (λ=1). Explain briefly why
       this choice simplifies the estimator.
@@ -79,7 +127,23 @@ nodes:
     name: set_integration_bounds
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: State the lower and upper limits of the integral ∫₀^∞ e^{-t} ln(t) dt
+    output_structure:
+    - description: Numerical lower limit of the integral (0.0).
+      key: lower_bound
+      type: float
+    - description: Representation of the upper limit of the integral; use the string
+        "infinity" to denote \(\infty\).
+      key: upper_bound
+      type: str
+    - description: Name and parameters of the importance‑sampling distribution chosen
+        to handle the infinite domain (e.g., "Exponential(rate=1)").
+      key: importance_sampling_distribution
+      type: str
+    - description: Brief textual explanation of why importance sampling with the exponential
+        distribution resolves the infinite upper bound.
+      key: explanation
+      type: str
+    prompt: State the lower and upper limits of the integral \(\int_{0}^{\infty} e^{-t}\,\ln(t)\,dt\)
       and explain that the infinite upper bound will be addressed via importance sampling
       with an exponential distribution.
   set_number_of_samples:
@@ -89,6 +153,10 @@ nodes:
     name: set_number_of_samples
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: The number of Monte‑Carlo samples (N) to generate.
+      key: sample_count
+      type: int
     prompt: Select an integer N representing the number of random samples to draw
       for the Monte‑Carlo simulation. Provide the chosen value.
   summarize_results:
@@ -101,6 +169,24 @@ nodes:
     - compute_standard_error
     - compare_to_theoretical_value
     nodes_dependent_on: []
+    output_structure:
+    - description: The Monte-Carlo estimate of the integral.
+      key: monte_carlo_estimate
+      type: float
+    - description: The standard error of the Monte-Carlo estimate.
+      key: standard_error
+      type: float
+    - description: The analytical value (-γ).
+      key: theoretical_value
+      type: float
+    - description: The absolute difference between the estimate and the analytical
+        value.
+      key: absolute_difference
+      type: float
+    - description: A one-sentence interpretation of the result (e.g., whether the
+        estimate is within expected statistical error).
+      key: interpretation
+      type: str
     prompt: 'Create a short report (plain text) that lists: (1) the Monte‑Carlo estimate
       of the integral, (2) the standard error, (3) the analytical value (‑γ), and
       (4) the absolute difference between the estimate and the analytical value. Include
