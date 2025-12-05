@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: build_aquant_trading_strategy_statarb
 nodes:
@@ -41,6 +41,97 @@ nodes:
     - description: Concise summary of key backtest results
       key: report_summary
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use pandas’ `merge_asof` or `reindex` to align timestamps; validate
+          alignment by checking the number of matched rows against expected signal
+          counts.
+        reason: Accurate alignment guarantees that signals are evaluated on the correct
+          price data and that trade execution times correspond to the intended market
+          events.
+        text: Load and merge the cleaned historical price series with the generated
+          signal timestamps ensuring time alignment across all asset pairs.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: For each signal, compute trade size using `position_sizing_rule`;
+          calculate stop‑loss price as `entry_price * (1 ± stop_loss_percent/100)`;
+          store these in a structured dataframe for downstream simulation.
+        reason: Pre‑computing positions and risk limits ensures that every simulated
+          trade adheres to the predefined constraints, preventing unrealistic P&L
+          estimates.
+        text: Apply the risk‑management rules to each signal to compute position sizing
+          and stop‑loss thresholds before any trade execution.
+      - complexity: HIGH
+        impact: HIGH
+        method: Iterate over the sorted signal dataframe; on each new day, update
+          unrealized PnL for open positions, close positions at stop‑loss if triggered,
+          and record realized PnL; maintain a rolling equity curve.
+        reason: Day‑by‑day simulation captures intraday volatility, ensures correct
+          PnL accumulation, and respects stop‑loss and max drawdown limits.
+        text: Simulate trade execution by stepping through each trading day, applying
+          all active positions, and updating portfolio equity based on price changes.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Compute peak equity; if current equity < peak * (1 - max_drawdown_percent/100),
+          set a flag to stop opening new positions until equity recovers or simulation
+          ends.
+        reason: This prevents the backtest from continuing in a regime that would
+          violate the strategy’s risk tolerance, mirroring real‑world portfolio constraints.
+        text: Enforce the maximum drawdown constraint by monitoring the equity curve
+          and halting new positions once the drawdown exceeds `max_drawdown_percent`.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: 'Maintain two lists: `wins` and `losses`; append trade PnL to the
+          appropriate list; compute means after simulation.'
+        reason: Separating wins and losses provides granular insight into trade quality
+          and assists in refining signal thresholds.
+        text: Calculate realized and unrealized profit‑and‑loss per trade, distinguishing
+          winning and losing trades to compute `average_profit_per_trade` and `average_loss_per_trade`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use numpy to calculate total return as last equity / initial equity
+          - 1; annualize using `(1+total_return)**(252/num_days)-1`; Sharpe = mean(returns)/std(returns)
+          * sqrt(252); drawdown = (cumulative max - equity)/cumulative max.
+        reason: These metrics are industry standard for assessing strategy performance
+          and risk‑adjusted returns.
+        text: Compute cumulative return, annualized return, Sharpe ratio, and maximum
+          drawdown from the equity curve.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Count entries in the trade log; compute win rate by dividing number
+          of trades where PnL > 0 by total trades.
+        reason: Trade count and win rate are key performance indicators that influence
+          risk‑adjusted metrics and inform strategy robustness.
+        text: Determine the total number of executed trades and calculate the winning
+          trade rate as the ratio of winning trades to total trades.
+      - complexity: LOW
+        impact: LOW
+        method: Use string interpolation to format the metrics into a one‑sentence
+          paragraph.
+        reason: A quick textual summary aids stakeholders in grasping performance
+          without parsing all numeric fields.
+        text: Generate a concise `report_summary` string summarizing the key results
+          (e.g., total return, Sharpe, max drawdown, win rate).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Wrap the entire simulation in try/except; on any exception, set flag
+          to False and log error details.
+        reason: Clear success indicator ensures downstream nodes can safely proceed
+          or trigger error handling.
+        text: Set the `backtest_success` flag to `True` only if the simulation completes
+          without unhandled exceptions, missing data issues, or violation of critical
+          constraints.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use assert statements or custom validation functions; if validation
+          fails, raise descriptive error.
+        reason: Type and range validation protects downstream processes from corrupt
+          or malformed data, improving system robustness.
+        text: Validate all output fields against expected ranges (e.g., winning_trade_rate
+          ∈ [0,1], max_drawdown_pct ≥ 0) and assert type consistency before returning
+          results.
     prompt: Simulate the strategy's performance over the historical data period, using
       the developed trading signals and risk management rules.
   clean_and_preprocess_data:
@@ -65,32 +156,215 @@ nodes:
       type: float
     - description: List of column names that were processed during cleaning.
       key: processed_columns
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Check `success` in parent output; if false, set all outputs to default
+          failure values and return.
+        reason: Ensures the node only operates on valid data, preventing cascading
+          errors downstream.
+        text: Validate the success flag from collect_historical_data; abort cleaning
+          if the flag is false to avoid processing invalid datasets.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Read CSV/JSON files into DataFrames, set `date` as the first index
+          level and `symbol` as the second; ensure datetime dtype.
+        reason: A multi‑index allows column‑wise operations across all assets while
+          preserving date alignment.
+        text: Load raw historical data into a Pandas DataFrame, using asset symbols
+          as keys to create a multi‑index (date, symbol) structure for efficient manipulation.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `DataFrame.size` for total cells and `DataFrame.isna().sum().sum()`
+          for missing count; calculate ratio as missing/total.
+        reason: Provides a quantitative baseline of data quality before any imputation.
+        text: Compute the total number of cells and the total number of missing cells
+          across all numeric columns to derive the missing data ratio.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Apply `DataFrame.drop_duplicates()` with `subset=['date', 'symbol']`.
+        reason: Duplicates can bias statistical tests and cointegration analysis.
+        text: Identify and remove duplicate rows based on the multi‑index to ensure
+          each date‑symbol combination is unique.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Chain `DataFrame.fillna(method='ffill').fillna(method='bfill').interpolate(method='linear')`.
+        reason: Combines robust edge‑handling with smoothness for time‑series data.
+        text: Apply forward‑fill (`ffill`) then backward‑fill (`bfill`) to propagate
+          existing observations into missing slots, followed by linear interpolation
+          for remaining gaps.
+      - complexity: LOW
+        impact: LOW
+        method: Subtract pre‑imputation missing count from post‑imputation missing
+          count.
+        reason: Provides transparency about the extent of imputation performed.
+        text: Count the number of missing values that were actually filled during
+          imputation to populate `missing_values_count`.
+      - complexity: LOW
+        impact: LOW
+        method: 'Use `DataFrame.rename(columns=lambda x: re.sub(r''[^a-z0-9]'', ''_'',
+          x.lower()))`.'
+        reason: Ensures consistent column references in downstream modules.
+        text: Standardize column names by converting all to lowercase and replacing
+          spaces or special characters with underscores.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: For each column, compute Q1, Q3, IQR = Q3−Q1; flag rows where value
+          < Q1−1.5×IQR or > Q3+1.5×IQR.
+        reason: IQR is robust to extreme values and preserves the bulk of the distribution.
+        text: Detect outliers in price‑related columns (`open`, `high`, `low`, `close`)
+          using the Inter‑Quartile Range (IQR) method with a 1.5× multiplier.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use boolean indexing to drop flagged rows; sum the number of dropped
+          rows.
+        reason: Outliers can distort statistical relationships and lead to spurious
+          cointegration signals.
+        text: Remove all flagged outlier rows from the DataFrame, and record the count
+          in `outliers_removed_count`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Apply `DataFrame.dtypes` check and cast columns using `astype` where
+          necessary.
+        reason: Prevents type‑related errors in subsequent statistical analyses.
+        text: Confirm that all remaining missing values are resolved and that data
+          types are correct (e.g., numeric for price columns, integer for volume).
+      - complexity: LOW
+        impact: LOW
+        method: Maintain a set of column names during each transformation step and
+          output as a list.
+        reason: Provides a traceable record of what was altered, useful for audit
+          and debugging.
+        text: Generate the `processed_columns` list by extracting the names of all
+          columns that underwent cleaning or transformation.
+      - complexity: LOW
+        impact: LOW
+        method: Use `DataFrame.to_parquet('cleaned_data.parquet')`.
+        reason: Parquet offers columnar storage and compression, speeding up downstream
+          reads.
+        text: Persist the cleaned DataFrame to a standardized file format (e.g., Parquet)
+          for efficient I/O during cointegration analysis.
+      - complexity: LOW
+        impact: HIGH
+        method: Wrap entire pipeline in try/except; on exception, log error and return
+          failure flags.
+        reason: Clear success indicator for downstream nodes.
+        text: Set `cleaned_data_available` to true upon successful completion of all
+          steps; otherwise, set to false and populate remaining outputs with sentinel
+          values.
     prompt: Handle missing values, outliers, and other data inconsistencies, and perform
       necessary transformations to prepare the data for analysis.
   collect_historical_data:
     agent: false
-    description: Gather historical data for the selected universe of assets
+    description: Gather raw historical market data for each asset in the selected
+      universe, ensuring the dataset is complete, accurate, and formatted for downstream
+      preprocessing.
     name: collect_historical_data
     nodes_depended_on:
     - select_universe_of_assets
     nodes_dependent_on: []
     output_structure:
-    - description: List of asset symbols for which data was retrieved
+    - description: List of ticker symbols for which data was retrieved.
       key: asset_symbols
       type: List[str]
-    - description: Start date of the retrieved data period
+    - description: Start date of the retrieved data period in ISO 8601 format (YYYY‑MM‑DD).
       key: data_start_date
       type: str
-    - description: End date of the retrieved data period
+    - description: End date of the retrieved data period in ISO 8601 format (YYYY‑MM‑DD).
       key: data_end_date
       type: str
-    - description: Number of data points retrieved for each asset
+    - description: Number of data points retrieved for each asset, aligned with asset_symbols.
       key: data_points_per_asset
       type: List[int]
-    - description: Indicates whether the data retrieval was successful
+    - description: Indicates whether the data retrieval was successful for all assets.
       key: success
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Use Python set and strip operations; apply .upper() to each symbol;
+          remove duplicates.
+        reason: Prevents downstream API failures caused by malformed tickers.
+        text: Validate and normalise the input asset list from the parent node, ensuring
+          no empty strings and all symbols are upper‑case.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Convert `strategy_horizon_months` to days, subtract from current date
+          to get `data_start_date`; set `data_end_date` to today's date.
+        reason: Guarantees enough data for cointegration tests while mitigating edge
+          effects.
+        text: Derive the historical time window required for statistical analysis
+          by reading the strategy horizon from `define_strategy_objectives` via the
+          `select_universe_of_assets` node’s output, adding an additional safety buffer
+          of 30 days to account for missing data.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement a wrapper class that abstracts provider specifics; use exponential
+          backoff for retry logic.
+        reason: Different providers offer varying data coverage and latency; a robust
+          client ensures consistent retrieval.
+        text: Choose a reliable public or commercial data provider API (e.g., Yahoo
+          Finance via `yfinance`, Alpha Vantage, or Bloomberg) and instantiate a client
+          with appropriate API keys and rate‑limit handling.
+      - complexity: HIGH
+        impact: HIGH
+        method: For `yfinance`, use `download(tickers=asset_list, start=start_date,
+          end=end_date, interval='1d')`; otherwise, parallelise with `concurrent.futures`
+          and sleep between requests.
+        reason: Maximises throughput and reduces total runtime while avoiding API
+          throttling.
+        text: Batch download historical OHLCV data for all assets simultaneously where
+          the provider supports bulk requests; otherwise loop with a controlled delay
+          to respect rate limits.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Apply `.reset_index()`; rename columns to lowercase; convert `date`
+          to datetime; fill missing columns with NaN.
+        reason: Uniform structure simplifies downstream preprocessing steps.
+        text: 'Parse the returned dataset into a standardized pandas DataFrame, ensuring
+          columns: `date`, `open`, `high`, `low`, `close`, `volume`, and any provider‑specific
+          metadata.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `.asfreq('D')` to resample daily, then `.ffill()` for price, `.fillna(0)`
+          for volume; log the count of filled rows.
+        reason: Missing data can skew statistical tests and signal generation.
+        text: Validate data integrity by checking for missing dates (e.g., weekends,
+          holidays) and missing values; if missing, attempt forward‑fill for price
+          columns and zero‑fill for volume.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Group by asset ticker; apply `.count()` on close price.
+        reason: Ensures each asset contributes sufficient data for robust analysis.
+        text: Compute `data_points_per_asset` by counting non‑NaN close prices per
+          asset, and verify that each asset has at least 90% of the expected daily
+          observations.
+      - complexity: LOW
+        impact: HIGH
+        method: Maintain a boolean accumulator across assets; update to false on any
+          failure.
+        reason: Provides downstream nodes with an explicit success indicator.
+        text: Set the `success` flag to true only if all assets have retrieved data,
+          the data window covers the full required period, and no critical errors
+          were encountered during fetch or parsing.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use `to_parquet` with compression `snappy`; maintain a metadata manifest
+          JSON.
+        reason: Facilitates audit trails and allows later steps to load data without
+          re‑fetching.
+        text: Persist the raw data to a local or cloud storage location (e.g., Parquet
+          or CSV) with filenames encoded as `<symbol>_<start>_<end>.parquet` for future
+          reproducibility.
+      - complexity: LOW
+        impact: LOW
+        method: Use Python’s `logging` module at INFO level.
+        reason: Eases debugging and provides auditability.
+        text: Log a summary of the operation (asset count, date range, total records,
+          errors) to a central logging service or console for traceability.
     prompt: Retrieve historical price, volume, and other relevant data for the chosen
       assets, covering a sufficient time period for statistical analysis.
   define_risk_management_rules:
@@ -124,6 +398,91 @@ nodes:
         limits, market‑volatility filters).
       key: risk_control_description
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Check boolean flag; use conditional logic to assign defaults.
+        reason: Ensures that risk rules are only generated when reliable trading signals
+          exist, preventing the propagation of erroneous risk settings.
+        text: Validate the input from develop_trading_signals – check the `is_valid`
+          flag and ensure that at least one signal is available. If the signals are
+          invalid, default to conservative risk parameters (e.g., risk_per_trade_percent
+          = 0.5%, stop_loss_percent = 5%).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Apply min(num_signals, 10) to compute max_positions.
+        reason: Balances trade execution volume against portfolio risk limits and
+          prevents over‑concentration.
+        text: Determine the maximum number of simultaneous positions (`max_positions`)
+          by taking the minimum of the number of generated signals (`num_signals`)
+          and a hard‑coded portfolio capacity limit (e.g., 10). This caps exposure
+          and encourages diversification.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use simple arithmetic; fallback to default if missing.
+        reason: Aligns trade risk with the overall strategy risk tolerance, making
+          the rule adjustable to different risk profiles.
+        text: Compute the base risk‑per‑trade percentage by scaling a default risk
+          appetite (1%) with the strategy’s risk tolerance level. For example, `risk_per_trade_percent
+          = 1.0 * (risk_tolerance_level / 10)`. If the risk_tolerance_level is not
+          available, default to 1.0%.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Run a volatility rolling window calculation, apply scaling, enforce
+          upper bound.
+        reason: Dynamic stop‑loss sizing protects against both low‑ and high‑volatility
+          regimes, improving risk‑adjusted performance.
+        text: Calculate the stop‑loss threshold (`stop_loss_percent`) as a function
+          of the asset’s historical volatility. Compute a 30‑day rolling volatility
+          of the asset’s returns, convert to a daily volatility, then set `stop_loss_percent
+          = 2.0 + (daily_vol * 100 * 0.5)`. Cap the value at 5% to avoid overly tight
+          stops during high‑volatility periods.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Multiply objective_max_drawdown by 0.75; fallback to default.
+        reason: Ensures portfolio drawdown remains within acceptable bounds, protecting
+          capital during adverse market movements.
+        text: Set the maximum drawdown limit (`max_drawdown_percent`) to a conservative
+          fraction (e.g., 75%) of the strategy objective’s maximum drawdown. If the
+          objective maximum drawdown is unavailable, default to 10.0%. This provides
+          a hard stop that aligns with strategic goals.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement the formula; generate description string.
+        reason: Volatility‑based sizing adapts trade size to market conditions and
+          ensures consistent risk exposure per trade.
+        text: 'Define the position sizing rule (`position_sizing_rule`) as a volatility‑based
+          approach: `position_size = (portfolio_equity * risk_per_trade_percent /
+          100) / (stop_loss_percent / 100 * entry_price)`. Store a textual description
+          of this methodology.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Concatenate predefined control statements into a single string.
+        reason: Documenting all supplementary controls ensures transparency and auditability
+          for the strategy.
+        text: 'Compile additional risk controls into `risk_control_description`: include
+          diversification limits (no single asset pair >20% of portfolio), a market‑volatility
+          filter (skip trades if implied volatility > 30%), daily position limit enforcement,
+          and a mandatory stop‑loss audit. Provide a concise paragraph summarizing
+          these controls.'
+      - complexity: LOW
+        impact: HIGH
+        method: Apply boundary conditions; log adjustments.
+        reason: Prevents unrealistic or unsafe risk parameters that could jeopardize
+          portfolio stability.
+        text: 'Perform consistency checks: ensure that `stop_loss_percent` is between
+          1% and 5%, `risk_per_trade_percent` between 0.1% and 3%, and `max_drawdown_percent`
+          not exceeding 20%. If any value falls outside these bounds, adjust to nearest
+          permissible limit and record a warning in the `risk_control_description`.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Cast values to required types; serialize to JSON.
+        reason: Guarantees that downstream nodes receive data in the expected format
+          for accurate backtesting.
+        text: 'Output all computed fields in the specified schema, ensuring type correctness:
+          convert percentages to float, integer fields to int, and descriptions to
+          string.'
     prompt: Specify position sizing, stop-loss levels, and other risk controls to
       mitigate potential losses and manage overall portfolio risk.
   define_strategy_objectives:
@@ -157,6 +516,80 @@ nodes:
     - description: Average number of trades per day the strategy intends to execute.
       key: trade_frequency_per_day
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a standardized interview guide, record responses in a shared spreadsheet,
+          and tag each goal with the originating stakeholder.
+        reason: Ensures that the objectives are rooted in real business intent and
+          not just theoretical constructs.
+        text: Gather high‑level business and stakeholder goals through structured
+          interviews and questionnaires, capturing desired return targets, acceptable
+          risk levels, and investment horizon preferences.
+      - complexity: LOW
+        impact: HIGH
+        method: Apply simple arithmetic (e.g., 12% → 0.12) and a mapping table for
+          risk tolerance levels.
+        reason: Quantification is required for downstream modeling and risk‑management
+          alignment.
+        text: 'Translate qualitative goals into quantitative metrics: convert requested
+          return percentages into decimal form, define drawdown as a decimal, and
+          map qualitative risk appetite to a 1‑10 scale.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Query a market data repository, apply filters, and generate a CSV
+          of markets with key metrics.
+        reason: Market selection directly affects transaction costs, slippage, and
+          the ability to identify mean‑reverting pairs.
+        text: Define target markets by evaluating liquidity, volatility, and historical
+          cointegration potential across candidate asset classes; produce a ranked
+          list of markets that meet a minimum liquidity threshold (e.g., average daily
+          volume > $10M).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Perform a rolling window statistical analysis of historical pair spreads
+          and calculate average cycle duration.
+        reason: Horizon decisions impact backtest length, risk metrics, and capital
+          allocation.
+        text: Determine strategy horizon months by analyzing typical mean‑reversion
+          cycle lengths and aligning them with the intended capital deployment schedule;
+          recommend a horizon that covers at least 3–5 full cycles.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Use cost‑to‑trade formulas: trade_size ≥ (average_spread * transaction_cost_factor)
+          / expected_profit_per_share.'
+        reason: Avoids trade execution that is dominated by cost and ensures meaningful
+          signal validation.
+        text: Set minimum trade size based on the average bid‑ask spread, slippage
+          tolerance, and transaction cost model; compute a conservative size that
+          ensures a minimum spread capture relative to cost.
+      - complexity: MEDIUM
+        impact: LOW
+        method: Run a back‑test kernel on a 30‑day window, record signal count, and
+          calculate the mean.
+        reason: Provides a realistic expectation for infrastructure load and risk‑management
+          bandwidth.
+        text: Estimate trade frequency per day by simulating the signal generation
+          logic on a sample of recent data and counting the average number of valid
+          signals per trading day.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Cross‑reference numerical thresholds and, if necessary, iterate with
+          the risk‑management node to reconcile.
+        reason: Ensures coherence across strategy definition and risk controls.
+        text: Validate that the maximum drawdown and risk tolerance level are consistent
+          with the risk‑management rule set produced in define_risk_management_rules;
+          adjust if any conflicts exist.
+      - complexity: LOW
+        impact: LOW
+        method: Auto‑generate a markdown template and populate fields using the results
+          from previous bullets.
+        reason: Facilitates traceability and allows stakeholders to review the objective
+          setting process.
+        text: Document all assumptions, source data, and decision rationales in a
+          single markdown file that will feed into select_universe_of_assets for transparency
+          and future audits.
     prompt: Specify the main goals of the statistical arbitrage strategy, such as
       target markets, expected returns, and risk tolerance.
   develop_trading_signals:
@@ -186,42 +619,147 @@ nodes:
         output
       key: is_valid
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Simple length check and conditional comparison of p-value; raise a
+          descriptive exception if invalid.
+        reason: Early validation prevents downstream errors and guarantees that only
+          statistically significant relationships are used for signal generation.
+        text: 'Validate the input from perform_cointegration_analysis: ensure ''cointegrated_pairs''
+          is a non-empty list and that ''johansen_p_value'' is below the significance
+          threshold (e.g., 0.05). If validation fails, set ''is_valid'' to false and
+          terminate early.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a for‑loop with a dictionary lookup or SQL query to pull the two
+          series; store them in a pandas DataFrame for vectorized operations.
+        reason: Signal generation requires real price data; iterating allows pair‑wise
+          processing.
+        text: Iterate over each pair in 'cointegrated_pairs' and retrieve the corresponding
+          time series of asset prices from the preprocessed dataset (assumed available
+          globally or passed via context).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Leverage statsmodels' OLS; handle singular matrix exceptions; normalize
+          β to account for scale differences.
+        reason: Hedge ratio defines the linear relationship that should hold under
+          equilibrium; accurate β is critical for mean‑reversion detection.
+        text: 'Compute the hedge ratio (β) for each pair using ordinary least squares
+          (OLS) regression of AssetB on AssetA. Store β to construct the spread series:
+          spread = price_B - β * price_A.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use pandas' rolling().mean() and rolling().std(); ensure min_periods=window
+          to avoid NaNs.
+        reason: Z‑score normalizes the spread, enabling threshold‑based signal decisions
+          irrespective of absolute price levels.
+        text: 'Calculate the rolling mean and rolling standard deviation of the spread
+          using a fixed window (e.g., 30 days). Compute the Z‑score: z = (spread -
+          mean_spread) / std_spread.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Vectorized comparison; maintain a position flag per pair to avoid
+          duplicate signals; use pandas' where() to label signals.
+        reason: Thresholds translate statistical deviations into actionable trade
+          decisions and help control risk exposure.
+        text: 'Define entry and exit thresholds for mean‑reversion: e.g., entry at
+          |z| > 1.5 and exit at |z| < 0.5. For each timestamp, generate a ''long''
+          signal when z < -entry_threshold and a ''short'' when z > entry_threshold;
+          close positions when z crosses the exit threshold.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Compute max_z once per pair; divide; use numpy.clip.
+        reason: Provides a continuous confidence metric that can be used for position
+          sizing or risk weighting.
+        text: Calculate signal strength as the absolute Z‑score normalized by a maximum
+          observed Z‑score across all pairs and time points (strength = |z| / max_z).
+          Clip values to the [0,1] range.
+      - complexity: LOW
+        impact: HIGH
+        method: Append to lists in the loop; after loop, compute length; convert to
+          appropriate types.
+        reason: Matches the required output schema and ensures completeness of the
+          signal set.
+        text: 'Aggregate results into three lists: ''pair_ids'' (pair string), ''signal_type''
+          (list of ''long''/''short''), and ''signal_strength'' (list of floats).
+          Count total signals to set ''num_signals'' and set ''is_valid'' to true
+          if lists are non‑empty.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use pandas Series.isna().sum() to count; compare to threshold; use
+          Python logging.
+        reason: Avoids generating misleading signals from incomplete data which could
+          harm backtest fidelity.
+        text: 'Implement error handling for missing data: if a pair’s price series
+          contains NaNs beyond a tolerance threshold (e.g., >10%), discard the pair
+          and log the exclusion with a warning.'
+      - complexity: LOW
+        impact: LOW
+        method: Set numpy.random.seed(42) at the start of the module.
+        reason: Statistical arbitrage strategies must be reproducible for debugging
+          and audit purposes.
+        text: Create a deterministic seed for any random components (e.g., if simulating
+          stochastic thresholds) to ensure reproducibility of signals across runs.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Group signals by date; if len > max, sort by strength descending and
+          slice.
+        reason: Prevents over‑trading and ensures compliance with market microstructure
+          constraints.
+        text: Validate that the total number of generated signals does not exceed
+          a predefined maximum per day (e.g., 20) to respect trading capacity constraints;
+          if exceeded, rank signals by strength and retain top N.
+      - complexity: LOW
+        impact: LOW
+        method: Use json.dumps() with a custom encoder or cast explicitly before assignment.
+        reason: Compatibility with downstream nodes that expect pure Python primitives.
+        text: Serialize the output dictionaries into the specified JSON format, ensuring
+          data types match the schema (e.g., convert numpy types to native Python
+          types).
+      - complexity: LOW
+        impact: LOW
+        method: Python logging at INFO level.
+        reason: Provides transparency for debugging and audit trails.
+        text: 'Log a summary of signal generation: number of pairs processed, average
+          signal strength, and any pairs discarded for data quality reasons.'
     prompt: Create rules or models that generate buy/sell signals based on the identified
       cointegrated relationships and their deviations from equilibrium.
   evaluate_backtest_results:
     agent: false
-    description: Evaluate the results of the backtest
+    description: Evaluates the backtest output by transforming raw metrics into standardized,
+      decimal‑based figures, computing derived statistics such as profit factor and
+      average trade PnL, benchmarking against a reference return, and flagging viability
+      against predefined thresholds. The result is a concise, human‑readable summary
+      of strengths, weaknesses, and suggested improvements.
     name: evaluate_backtest_results
     nodes_depended_on:
     - backtest_strategy
     nodes_dependent_on: []
     output_structure:
-    - description: Cumulative return of the strategy over the backtest period (expressed
-        as a decimal, e.g., 0.15 for 15%)
+    - description: Cumulative return of the strategy over the backtest period (decimal)
       key: total_return
       type: float
     - description: Risk‑adjusted performance metric (return divided by volatility)
       key: sharpe_ratio
       type: float
-    - description: Maximum peak‑to‑trough decline during the backtest period (expressed
-        as a decimal, e.g., 0.08 for 8%)
+    - description: Maximum peak‑to‑trough decline during the backtest period (decimal)
       key: max_drawdown
       type: float
     - description: Total number of executed trades during the backtest
       key: num_trades
       type: int
-    - description: Proportion of profitable trades (between 0 and 1)
+    - description: Proportion of profitable trades (0–1)
       key: win_rate
       type: float
-    - description: Average profit or loss per trade (expressed as a decimal relative
-        to initial capital)
+    - description: Average profit or loss per trade (decimal relative to initial capital)
       key: avg_trade_pnl
       type: float
-    - description: Ratio of gross profit to gross loss (greater than 1 indicates a
-        profitable strategy)
+    - description: Ratio of gross profit to gross loss
       key: profit_factor
       type: float
-    - description: Return of the chosen benchmark over the same period for comparison
+    - description: Return of the chosen benchmark over the same period (decimal)
       key: benchmark_return
       type: float
     - description: Whether the backtest performance meets predefined viability criteria
@@ -230,7 +768,85 @@ nodes:
     - description: Concise bullet‑point notes highlighting strengths, weaknesses,
         and suggested improvements
       key: summary_notes
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Check presence of keys ['total_return_pct', 'sharpe_ratio', 'max_drawdown_pct',
+          'trade_count', 'winning_trade_rate', 'average_profit_per_trade', 'average_loss_per_trade']
+          and that each value is a float or int; raise informative error if validation
+          fails.
+        reason: Early validation prevents downstream errors and guarantees that all
+          metrics exist for conversion and calculation.
+        text: Validate the backtest_strategy output to ensure all required fields
+          are present and numeric before proceeding.
+      - complexity: LOW
+        impact: HIGH
+        method: total_return = total_return_pct / 100.0; max_drawdown = max_drawdown_pct
+          / 100.0; benchmark_return = benchmark_pct / 100.0 (if benchmark_pct is available).
+        reason: Standardizes units across all outputs and aligns with the expected
+          output format for total_return, max_drawdown, and benchmark_return.
+        text: Convert percentage‑based metrics from backtest_strategy into decimal
+          form (divide by 100).
+      - complexity: LOW
+        impact: LOW
+        method: sharpe_ratio = backtest_strategy['sharpe_ratio'].
+        reason: Sharpe ratio is already expressed in standard decimal form and does
+          not require scaling.
+        text: Directly map the Sharpe ratio from backtest_strategy to the output field.
+      - complexity: LOW
+        impact: LOW
+        method: num_trades = int(backtest_strategy['trade_count']); win_rate = float(backtest_strategy['winning_trade_rate']).
+        reason: These metrics already match the desired output types and represent
+          core performance indicators.
+        text: Assign the trade count and win rate from backtest_strategy to num_trades
+          and win_rate.
+      - complexity: LOW
+        impact: MEDIUM
+        method: avg_trade_pnl = float(backtest_strategy['average_profit_per_trade'])
+          - float(backtest_strategy['average_loss_per_trade']).
+        reason: Provides a clear per‑trade profitability metric that is independent
+          of capital size.
+        text: Calculate avg_trade_pnl as the net average per trade by subtracting
+          the average loss from the average profit and normalizing by initial capital
+          of 1.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: '[gross_profit = avg_profit_per_trade * win_rate * num_trades, gross_loss
+          = avg_loss_per_trade * (1 - win_rate) * num_trades, profit_factor = gross_profit
+          / gross_loss if gross_loss > 0 else float(''inf'')]'
+        reason: Profit factor is a key risk‑adjusted metric; calculating it from backtest
+          averages yields an interpretable figure.
+        text: Derive profit_factor using gross profit and gross loss totals.
+      - complexity: MEDIUM
+        impact: LOW
+        method: If external function get_benchmark_return(start_date, end_date) returns
+          decimal, assign it; otherwise set benchmark_return = 0.0.
+        reason: Benchmark comparison contextualizes performance.
+        text: Determine benchmark_return by retrieving the benchmark's cumulative
+          return for the same date range (assumed available via an external lookup).
+      - complexity: LOW
+        impact: HIGH
+        method: is_acceptable = all([sharpe_ratio > 1.0, max_drawdown < 0.10, win_rate
+          > 0.40, profit_factor > 1.5]).
+        reason: Automates decision‑making for strategy refinement and aligns with
+          common risk‑return trade‑offs.
+        text: Apply predefined viability thresholds (e.g., Sharpe > 1.0, max_drawdown
+          < 0.10, win_rate > 0.40, profit_factor > 1.5) to set is_acceptable.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: '[notes = [], if sharpe_ratio < 1.0: notes.append(''- Sharpe ratio
+          below target; consider tightening stop‑loss or improving signal precision.''),
+          if max_drawdown >= 0.10: notes.append(''- Drawdown exceeds acceptable limit;
+          review position sizing and risk controls.''), if win_rate < 0.40: notes.append(''-
+          Low win rate; examine entry/exit thresholds or incorporate additional filters.''),
+          if profit_factor <= 1.5: notes.append(''- Profit factor low; investigate
+          slippage or execution quality.''), if not notes: notes.append(''- Strategy
+          meets all viability criteria; ready for deployment.'')]'
+        reason: Provides actionable insight for stakeholders and the refinement step.
+        text: Generate summary_notes by evaluating each metric against threshold ranges
+          and producing bullet‑point feedback.
     prompt: Analyze key performance metrics (e.g., return, Sharpe ratio, drawdown)
       to assess the strategy's viability and identify areas for improvement.
   implement_strategy:
@@ -244,7 +860,7 @@ nodes:
     output_structure:
     - description: List of file paths containing the implemented strategy code.
       key: code_file_paths
-      type: List[str]
+      type: str
     - description: Status of deployment to the trading platform ('Success', 'Failure',
         'Pending').
       key: deployment_status
@@ -259,6 +875,103 @@ nodes:
     - description: ISO 8601 timestamp of the last deployment.
       key: last_deployment_timestamp
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a Python module `config.py` that reads a JSON/YAML file generated
+          by `refine_strategy`. Use dataclasses for type safety; populate fields such
+          as `PARAMETER_ADJUSTMENTS`, `SIGNAL_RULE_CHANGES`, `RISK_RULE_UPDATES`.
+        reason: Centralizes all adjustments in a single, reusable configuration module,
+          ensuring consistency between the refined strategy and the production implementation.
+        text: Extract refined strategy parameters, signal rules, and risk updates
+          from the `refine_strategy` node and map them to code‑ready constants and
+          configuration objects.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement a `SignalGenerator` class that accepts a `Pair` object and
+          a `SignalRule` dataclass. Use vectorized NumPy/Pandas operations for real‑time
+          performance. Validate output with unit tests against historical backtests.
+        reason: Keeps the signal logic decoupled from static code, allowing future
+          rule changes without code redeployment.
+        text: Design the signal generation engine to consume the configuration constants
+          and apply the refined signal rules on incoming market data streams.
+      - complexity: HIGH
+        impact: HIGH
+        method: Create a `RiskManager` class that calculates trade size based on `risk_per_trade_percent`,
+          `max_drawdown_percent`, and `max_positions`. Use a rolling volatility estimator
+          (e.g., ATR or standard deviation) to adjust size dynamically. Include stop‑loss
+          and take‑profit triggers derived from `stop_loss_percent` and new thresholds.
+        reason: Guarantees that the live strategy enforces the same risk limits refined
+          from backtests.
+        text: Implement the position sizing and risk control logic using the updated
+          `RISK_RULE_UPDATES` from the parent node, referencing original risk definitions
+          from `define_risk_management_rules` when necessary.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement an `OrderExecutor` that uses the broker's REST/WebSocket
+          SDK. Abstract connection details in a config file; implement order lifecycle
+          callbacks (order sent, filled, canceled). Handle partial fills and slippage
+          modeling.
+        reason: Provides the necessary bridge between strategy logic and real‑time
+          order execution.
+        text: Wrap the signal and risk modules into a trade execution handler that
+          interfaces with the chosen broker API (e.g., Interactive Brokers, Alpaca,
+          or a proprietary engine).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use structured logging (JSON) to a central log store. Push key metrics
+          to a monitoring dashboard (Prometheus + Grafana). Set alert rules for breaches
+          of `max_drawdown_percent` and `risk_per_trade_percent`.
+        reason: Facilitates rapid detection of anomalies and ensures compliance with
+          risk thresholds.
+        text: Implement comprehensive logging, monitoring, and alerting to track strategy
+          performance and risk metrics in real time.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use pytest with fixtures that mock broker responses. Verify that orders
+          are not placed if risk limits are exceeded. Capture logs to confirm `risk_control_compliance`
+          flag is true.
+        reason: Detects integration issues before live deployment.
+        text: Write integration tests that deploy the strategy into a sandbox environment,
+          validate order execution, and confirm risk control enforcement.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Use GitHub Actions or Jenkins. Define jobs: lint → test → build →
+          deploy. On successful deploy, push `code_file_paths`, set `deployment_status=''Success''`,
+          record `last_deployment_timestamp` via `datetime.utcnow().isoformat()`.
+          If deployment fails, set status to ''Failure'' and log error.'
+        reason: Ensures repeatable, auditable deployments and automatic tracking of
+          deployment history.
+        text: Create a CI/CD pipeline that builds, tests, packages, and deploys the
+          strategy code to the live environment, automatically updating `code_file_paths`
+          and recording deployment timestamps.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Collect notes during the implementation phase; store them in a markdown
+          file and reference the path in the `integration_notes` output.
+        reason: Provides maintainers with quick reference to platform integration
+          details.
+        text: Generate `integration_notes` summarizing platform specifics (API endpoints,
+          authentication, order types) and any platform‑specific quirks (e.g., quote
+          currency, lot size limits).
+      - complexity: HIGH
+        impact: HIGH
+        method: Execute a series of simulated orders in a paper trading account. Capture
+          risk metrics (drawdown, position size). If all limits are respected and
+          no violations occur, set the compliance flag to true; otherwise, log detailed
+          failure reasons.
+        reason: Validates that the strategy behaves correctly in a live market and
+          meets the defined risk thresholds.
+        text: After deployment, run a short live test to confirm that orders are executed
+          and risk controls trigger as expected, then set `risk_control_compliance=True`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create README.md, API documentation (e.g., using Sphinx or MkDocs),
+          and a `docs/` folder with architecture diagrams.
+        reason: Facilitates knowledge transfer and future maintenance.
+        text: Document the entire codebase, including module responsibilities, configuration
+          schemas, and deployment instructions, and store it in a centralized repository.
     prompt: Translate the strategy into executable code, integrating it with a trading
       platform or system, and ensuring proper risk controls are in place.
   monitor_and_adjust_strategy:
@@ -302,32 +1015,212 @@ nodes:
     - description: Number of days until the next scheduled monitoring check
       key: next_check_in_days
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: If implement_strategy.deployment_status == 'Success' then monitoring_active
+          = True else monitoring_active = False
+        reason: The monitoring process should only run for actively deployed strategies
+          to avoid unnecessary computation on failed or pending deployments.
+        text: Activate the monitoring flag by setting `monitoring_active` to true
+          when the strategy is in a deployed state (i.e., `deployment_status` equals
+          'Success').
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use authenticated HTTP requests to the broker's /portfolio endpoint,
+          filter by strategy_id and timestamp >= last_deployment_timestamp, parse
+          JSON into a pandas DataFrame
+        reason: Performance metrics must reflect the live state of the strategy after
+          the last deployment, ensuring metrics are up‑to‑date.
+        text: Retrieve the most recent trade and portfolio snapshot from the broker's
+          REST API or database using the `last_deployment_timestamp` as a reference
+          point.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement calculation in Python using numpy/pandas; ensure handling
+          of zero variance cases and missing data
+        reason: These metrics provide quantitative indicators of the strategy’s performance
+          and risk profile needed for decision making.
+        text: 'Compute `latest_annualized_return`, `latest_sharpe_ratio`, and `latest_max_drawdown`
+          from the fetched trade history using standard formulas: annualized_return
+          = (final_portfolio_value / initial_value)^(252/total_trading_days) - 1;
+          sharpe = mean(return) / std(return) * sqrt(252); max_drawdown = (peak_portfolio_value
+          - trough_value) / peak_portfolio_value.'
+      - complexity: LOW
+        impact: LOW
+        method: Use pandas groupby on 'timestamp' and count 'trade_id'
+        reason: The number of trades indicates market activity and can trigger parameter
+          adjustment thresholds.
+        text: Count `trades_executed_since_last_check` by grouping the trade history
+          by timestamp and summing trades between the last check timestamp and now.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement a rule engine or simple if/else logic comparing metrics
+          to stored config values
+        reason: Thresholds provide an objective basis for when to intervene, ensuring
+          the strategy remains within risk tolerance.
+        text: 'Evaluate adjustment criteria: if `latest_sharpe_ratio` falls below
+          a predefined threshold (e.g., 0.5) or `latest_max_drawdown` exceeds the
+          maximum allowed (from `define_risk_management_rules.max_drawdown_percent`),
+          set `adjustments_made` to true and trigger a parameter update cycle.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read config JSON, apply incremental updates, serialize back; increment
+          counter for each field modified
+        reason: Parameter adjustments must be transparent and auditable to maintain
+          compliance and reproducibility.
+        text: If adjustments are triggered, load the current strategy configuration
+          (e.g., from a JSON config file), modify relevant fields such as position
+          sizing multiplier or stop‑loss percent, and record each change in a list
+          for `parameter_change_count`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use platform's config API or SCP to server; append a human‑readable
+          description to a changelog file
+        reason: Persisting ensures the new parameters are actively used in subsequent
+          trades; logging aids future audits.
+        text: Persist the updated configuration back to the deployment environment
+          (e.g., upload to a configuration server or re‑deploy the strategy code)
+          and log the `adjustment_description` summarizing the changes made.
+      - complexity: LOW
+        impact: LOW
+        method: datetime.utcnow().isoformat() + 'Z'
+        reason: A timestamp is required for audit trails and to calculate `next_check_in_days`
+          accurately.
+        text: Update `last_adjustment_timestamp` with the current UTC timestamp in
+          ISO 8601 format immediately after persisting changes.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: If VIX > threshold then next_check_in_days = 0 else next_check_in_days
+          = 1
+        reason: Adaptive check frequency ensures timely reaction to market changes
+          while conserving resources during stable periods.
+        text: Calculate `next_check_in_days` by adding a configurable monitoring interval
+          (e.g., 1 day) to the current date, or dynamically adjusting the interval
+          based on volatility metrics (e.g., increase frequency during high volatility).
+      - complexity: LOW
+        impact: LOW
+        method: Use json.dumps with type casting; apply round() for numeric fields
+        reason: Consistent data serialization facilitates downstream ingestion and
+          monitoring dashboards.
+        text: Export all computed fields into the defined output structure as JSON,
+          ensuring type compliance (e.g., floats rounded to 4 decimals, integers cast
+          appropriately).
     prompt: Regularly review the strategy's performance, updating models, rules, or
       parameters as needed to maintain its effectiveness and adapt to changing market
       conditions.
   perform_cointegration_analysis:
     agent: false
-    description: Conduct cointegration analysis on the preprocessed data
+    description: Conduct cointegration analysis on the preprocessed data to discover
+      statistically meaningful long‑term equilibrium relationships among asset prices.
     name: perform_cointegration_analysis
     nodes_depended_on:
     - clean_and_preprocess_data
     nodes_dependent_on: []
     output_structure:
-    - description: List of identified cointegrated asset pairs in the format 'AssetA-AssetB'
+    - description: List of identified cointegrated asset pairs in the format 'AssetA-AssetB'.
       key: cointegrated_pairs
       type: List[str]
-    - description: Johansen trace statistic value for the cointegration test
+    - description: Johansen trace statistic value for the cointegration test.
       key: johansen_trace_statistic
       type: float
-    - description: P-value associated with the Johansen trace statistic
+    - description: P‑value associated with the Johansen trace statistic.
       key: johansen_p_value
       type: float
-    - description: Whether the cointegration test indicates significant cointegration
+    - description: Whether the cointegration test indicates significant cointegration.
       key: is_significant
       type: bool
-    - description: Number of cointegrated pairs identified
+    - description: Number of cointegrated pairs identified.
       key: num_pairs
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: 'If cleaned_data_available == False: return outputs with defaults.'
+        reason: Avoid downstream failures caused by attempting statistical tests on
+          missing or incomplete data.
+        text: Validate that the parent node produced a usable cleaned dataset by checking
+          the 'cleaned_data_available' flag. If false, set all outputs to safe defaults
+          (empty list, 0.0, false, 0) and exit.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use pandas.read_csv or a global variable. Validate date range consistency
+          across assets.
+        reason: The Johansen test requires a clean, aligned multivariate time series.
+        text: Retrieve the cleaned price matrix from shared storage (e.g., a CSV file
+          or in‑memory DataFrame). Ensure columns correspond to asset tickers and
+          that the DataFrame is indexed by date with no missing rows.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Select columns where dtype is numeric and not in a blacklist.
+        reason: Focus the test only on relevant price series and avoid including non‑numeric
+          or auxiliary columns.
+        text: Determine the list of asset symbols to test by filtering columns that
+          contain price data (e.g., close prices). Use the 'processed_columns' from
+          the parent node to confirm these columns.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use statsmodels.tsa.vector_ar.vecm.coint_johansen on the 2‑column
+          data. Set det_order=0 to test for a cointegrating relationship without deterministic
+          trend.
+        reason: Pair‑wise testing captures specific long‑run relationships needed
+          for statistical arbitrage signals.
+        text: For each unordered asset pair (A,B), construct a 2‑column sub‑DataFrame
+          and apply the Johansen cointegration test with lag order 1 (or determine
+          optimal lag using AIC/BIC on the full multivariate system).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use results.lr1 for trace stats and results.cvt for critical values;
+          compute p-value with scipy.stats.chi2.sf(trace_stat, df).
+        reason: The trace statistic indicates the number of cointegrating vectors;
+          p‑value quantifies significance.
+        text: Extract the trace statistic and critical values from the test results.
+          Compute the p‑value by comparing the trace statistic to the asymptotic chi‑square
+          distribution using the eigenvalues provided by the library.
+      - complexity: LOW
+        impact: HIGH
+        method: Compare trace_stat > results.cvt[0, 4] (5% level).
+        reason: Ensures only statistically robust relationships are used downstream.
+        text: Declare a pair as cointegrated if the trace statistic exceeds the 5%
+          critical value (or any user‑defined significance level). Append the pair
+          in 'AssetA-AssetB' format to 'cointegrated_pairs'.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Run coint_johansen on the full DataFrame, use the largest eigenvalue
+          statistic as overall trace.
+        reason: Provides a global metric of cointegration strength across the selected
+          assets.
+        text: After iterating over all pairs, compute the overall Johansen trace statistic
+          for the full asset universe by running the test on the full cleaned DataFrame
+          and aggregating the trace statistics for each possible cointegrating rank.
+      - complexity: LOW
+        impact: MEDIUM
+        method: p_value = scipy.stats.chi2.sf(max_trace, df).
+        reason: Allows downstream components to gauge overall market integration.
+        text: Calculate a single overall p‑value by assessing the significance of
+          the largest trace statistic against its chi‑square distribution with df
+          equal to the number of assets minus one.
+      - complexity: LOW
+        impact: MEDIUM
+        method: is_significant = len(cointegrated_pairs) > 0.
+        reason: Provides a quick flag for the trading signals module.
+        text: Set 'is_significant' to True if at least one pair passed the significance
+          test; otherwise False.
+      - complexity: LOW
+        impact: LOW
+        method: num_pairs = len(cointegrated_pairs).
+        reason: Facilitates downstream reporting and threshold checks.
+        text: Populate 'num_pairs' with the length of the 'cointegrated_pairs' list.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use warnings.catch_warnings, filterwarnings('error'), and log exceptions.
+        reason: Robustness against edge cases like singular covariance matrices or
+          insufficient data.
+        text: Wrap the entire procedure in a try/except block to catch statistical
+          convergence warnings or data issues. On exception, log the error, return
+          safe defaults, and set 'is_significant' to False.
     prompt: Apply statistical tests (e.g., Johansen test) to identify cointegrated
       pairs or groups of assets, which are crucial for statistical arbitrage.
   refine_strategy:
@@ -357,6 +1250,78 @@ nodes:
     - description: Projected reduction in maximum drawdown percentage after the refinements
       key: expected_drawdown_reduction
       type: float
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: 'Read the JSON fields: total_return, sharpe_ratio, max_drawdown, win_rate,
+          avg_trade_pnl, profit_factor, benchmark_return, and is_acceptable. Store
+          them in a local dictionary for subsequent calculations.'
+        reason: The baseline metrics are required to assess gaps relative to strategy
+          objectives and to guide parameter tuning.
+        text: Extract all numeric performance metrics from the `evaluate_backtest_results`
+          output to establish a baseline for refinement.
+      - complexity: LOW
+        impact: HIGH
+        method: If sharpe_ratio < 1.0 or max_drawdown > 0.1 or win_rate < 0.4, flag
+          the metric as needing improvement. Compute delta values for each flagged
+          metric.
+        reason: Identifying quantitative shortfalls enables a focused refinement of
+          parameters that directly affect these metrics.
+        text: Compare the backtest Sharpe ratio, maximum drawdown, and win‑rate against
+          the target thresholds derived from `define_strategy_objectives` and risk‑tolerance
+          settings.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Create a decision table: if max_drawdown > target, add "Reduce stop‑loss
+          to X%"; if win_rate < target, add "Increase entry threshold from Y to Z";
+          if avg_trade_pnl low, add "Increase trade frequency by N trades/day". Append
+          each suggested tweak to `parameter_adjustments`.'
+        reason: Rule‑based mapping provides a systematic, reproducible way to alter
+          strategy inputs that influence performance.
+        text: Generate a list of parameter adjustments by mapping identified metric
+          gaps to concrete tweak rules (e.g., reducing the entry z‑score threshold,
+          shortening the look‑back period, or lowering the position sizing factor).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Analyse the `signal_strength` distribution; propose new thresholds
+          (e.g., only act when signal_strength > 0.8). Also suggest adding a momentum
+          filter: only trade when the underlying spread’s recent slope is > 0.2. Record
+          each rule change in `signal_rule_changes`.'
+        reason: Reducing signal noise improves win‑rate and Sharpe ratio without significantly
+          impacting return.
+        text: Formulate signal rule changes that refine trade entry and exit logic
+          by tightening confidence filters and adding trend‑filter conditions.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: If stop‑loss percent was lowered, also reduce `max_drawdown_percent`
+          by 2%. If position sizing was increased, adjust `risk_per_trade_percent`
+          downward to keep total risk capped. Log each adjustment in `risk_rule_updates`.
+        reason: Risk controls must adapt to the modified strategy to maintain overall
+          portfolio safety.
+        text: Update risk‑management rules to align with new parameter and signal
+          settings, ensuring that position sizing, stop‑loss levels, and maximum drawdown
+          limits remain coherent.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Compute `expected_sharpe_increase` = sharpe_ratio * 0.20; compute
+          `expected_annual_return_increase` = benchmark_return * 0.01 (or 0.02 if
+          current return < benchmark); compute `expected_drawdown_reduction` = max_drawdown
+          * 0.10. Round each to four decimal places.
+        reason: Providing quantified expectations helps stakeholders assess the value
+          of the refinements and informs the next deployment.
+        text: 'Estimate projected performance improvements using heuristic multipliers:
+          assume a 20% relative increase in Sharpe ratio, 1–2% absolute increase in
+          annualized return, and a 1–2% absolute reduction in max drawdown for the
+          refined strategy.'
+      - complexity: LOW
+        impact: HIGH
+        method: Create a result dictionary matching the output structure and serialize
+          it to JSON.
+        reason: Ensures the node’s output conforms exactly to the defined output structure.
+        text: Populate all output lists (`parameter_adjustments`, `signal_rule_changes`,
+          `risk_rule_updates`) with the strings generated in the previous steps, then
+          assign the projected improvement values to the numeric output fields.
     prompt: Adjust parameters, trading signals, or risk management rules as needed
       to enhance the strategy's performance and robustness.
   select_universe_of_assets:
@@ -381,5 +1346,69 @@ nodes:
     - description: Total number of assets selected.
       key: number_of_assets
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a structured mapping table that links target market strings (e.g.,
+          'US Equity', 'EM Equity', 'US ETF') to canonical asset classes. Apply risk
+          tolerance to exclude over‑volatile classes if risk_tolerance_level < 5,
+          and filter out low‑return markets if expected_annual_return > 0.15.
+        reason: The objective definitions (target markets, risk tolerance, expected
+          return, trade frequency) directly constrain which asset classes are suitable
+          for a statistical arbitrage approach.
+        text: Parse the outputs from **define_strategy_objectives** to build a high‑level
+          asset‑class preference map.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: "Compute required daily volume as: \n- RequiredShares = minimum_trade_size\
+          \ * trade_frequency_per_day\n- For each candidate ticker, retrieve average\
+          \ daily volume (ADV) over the past 6 months. Keep tickers where ADV >= 10\
+          \ * RequiredShares to provide a safety margin."
+        reason: High trade frequency necessitates sufficient daily trading volume;
+          otherwise transaction costs erode profitability.
+        text: Translate trade_frequency_per_day and strategy_horizon_months into a
+          dynamic liquidity requirement.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Calculate the 30‑day rolling standard deviation for each ticker.
+          Compute an adjusted volatility score = StdDev / sqrt(annualization_factor).
+          Keep tickers with adjusted volatility below a threshold derived from maximum_drawdown:
+          Threshold = max_drawdown * 1.5. This ensures that the expected drawdown
+          stays within specification.'
+        reason: Statistical arbitrage relies on mean‑reverting relationships; overly
+          volatile pairs can increase drawdown risk.
+        text: Rank candidates by historical volatility and filter to match the specified
+          maximum_drawdown and risk_tolerance_level.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Calculate MaxPositions = strategy_horizon_months * trade_frequency_per_day.
+          If the filtered list exceeds MaxPositions, truncate to the top‑ranked (lowest
+          volatility, highest liquidity) tickers up to MaxPositions.
+        reason: An overly large universe increases data latency, computational cost,
+          and can dilute the statistical signal.
+        text: Enforce a universe size cap based on the strategy horizon to avoid over‑diversification
+          and maintain manageable backtest granularity.
+      - complexity: HIGH
+        impact: HIGH
+        method: 'Implement a batched API request pipeline with retry logic. For each
+          ticker, extract: symbol, market, primary asset class, and any relevant sector
+          tags. Store results in a temporary data frame and validate against the filter
+          criteria (e.g., no missing fields).'
+        reason: Accurate identifiers and metadata are required for downstream data
+          collection and signal generation.
+        text: Query a reliable financial data provider (Yahoo Finance, Bloomberg,
+          or Refinitiv) to resolve ticker symbols and asset class metadata for each
+          shortlisted candidate.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Convert the validated DataFrame to a list of symbols for selected_assets;
+          deduplicate asset_classes; format selection_criteria as: "Selected {len}
+          {asset_classes} based on liquidity ≥ 10× required shares, volatility ≤ {max_drawdown*1.5},
+          and risk tolerance ≤ {risk_tolerance_level}."; set number_of_assets to len(selected_assets).'
+        reason: The downstream node **collect_historical_data** expects a clean, validated
+          list of symbols.
+        text: 'Aggregate final outputs: assemble the selected_assets list, asset_classes
+          set, compose a concise selection_criteria string, and compute number_of_assets.'
     prompt: Identify the specific asset classes, sectors, or individual securities
       that the strategy will focus on, based on the defined objectives.
