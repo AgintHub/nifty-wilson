@@ -1,127 +1,358 @@
 dag_type: plain_text
-description: A highly sophisticated workflow for building a market neutral high Sharpe
-  equities portfolio quant trading strategy.
-name: build_quant_trading_strategy
+description: Step‑by‑step workflow to create a sophisticated market‑neutral equities
+  strategy that targets a high Sharpe ratio, covering universe definition, data pipelines,
+  factor engineering, risk modeling, portfolio optimization, backtesting, validation,
+  deployment and monitoring.
+name: quant_market_neutral_strategy_build
 nodes:
-  analyze_backtest_results:
+  assess_transaction_costs:
     agent: false
-    description: Analyze the results of the backtest.
-    name: analyze_backtest_results
+    description: Quantify average cost per trade and impact on net Sharpe.
+    name: assess_transaction_costs
     nodes_depended_on:
-    - backtest_strategy
+    - simulate_trade_execution
     nodes_dependent_on: []
-    prompt: Examine the backtest results to assess the strategy's viability, focusing
-      on key metrics, risk factors, and areas for improvement.
-  backtest_strategy:
+    prompt: From the adjusted return series, calculate the average transaction cost
+      per trade (bps), the percentage reduction in Sharpe, and the net Sharpe after
+      costs. Return these three numbers as JSON.
+  build_statistical_factor_models:
     agent: false
-    description: Backtest the strategy using the testing data.
-    name: backtest_strategy
+    description: Estimate factor covariance and idiosyncratic risk from exposure data.
+    name: build_statistical_factor_models
     nodes_depended_on:
-    - validate_model
-    - split_data
+    - calculate_factor_exposures
     nodes_dependent_on: []
-    prompt: Conduct a backtest of the strategy on the testing dataset, simulating
-      trades and calculating performance metrics such as returns, Sharpe ratio, and
-      drawdowns.
-  define_strategy_objectives:
+    prompt: Using the daily exposure matrices, compute (a) the factor covariance matrix
+      (annualized) and (b) each ticker’s idiosyncratic variance. Return both as JSON
+      objects.
+  calculate_factor_exposures:
     agent: false
-    description: Define the primary objectives for the quant trading strategy.
-    name: define_strategy_objectives
-    nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: List the core objectives for the quant trading strategy, including target
-      returns, risk tolerance, and any specific constraints.
-  feature_engineering:
-    agent: false
-    description: Create relevant features from historical data.
-    name: feature_engineering
+    description: Compute each stock’s exposure to the factor library (factor loadings)
+      using cross‑sectional regression.
+    name: calculate_factor_exposures
     nodes_depended_on:
-    - fetch_historical_data
+    - construct_factor_library
     nodes_dependent_on: []
-    prompt: Generate a set of features that could be predictive for the strategy,
-      including technical indicators, statistical measures, and any other relevant
-      signals.
-  fetch_historical_data:
+    prompt: For each trading day, regress the cross‑section of stock returns on the
+      factor matrix to obtain factor loadings per ticker. Output a JSON of daily exposure
+      matrices (ticker × factor).
+  clean_alternative_data:
     agent: false
-    description: Retrieve historical market data for the selected universe.
-    name: fetch_historical_data
+    description: Normalize alternative signals, handle outliers, and align to the
+      daily price calendar.
+    name: clean_alternative_data
     nodes_depended_on:
-    - select_universe
+    - gather_alternative_data
     nodes_dependent_on: []
-    prompt: Collect historical price, volume, and other relevant data for the selected
-      equities universe, ensuring data is clean and normalized.
-  finalize_strategy:
+    prompt: Normalize each alternative data series (z‑score per ticker) and align
+      them to the daily dates present in the price data. Return the cleaned alternative
+      data as JSON keyed by ticker.
+  clean_fundamental_data:
     agent: false
-    description: Finalize the quant trading strategy.
-    name: finalize_strategy
+    description: Standardize quarterly reports, forward‑fill missing quarters, and
+      align fiscal calendars.
+    name: clean_fundamental_data
     nodes_depended_on:
-    - implement_risk_management
+    - gather_fundamental_data
     nodes_dependent_on: []
-    prompt: Compile the final version of the quant trading strategy, incorporating
-      all refined elements, risk controls, and operational considerations.
-  implement_risk_management:
+    prompt: Process the raw fundamental JSON to ensure each ticker has a complete
+      quarterly series for all metrics; forward‑fill any missing values. Output the
+      cleaned fundamentals in the same JSON format.
+  clean_price_data:
     agent: false
-    description: Implement risk management measures for the strategy.
-    name: implement_risk_management
+    description: Adjust price series for splits, dividends, and remove missing days;
+      align timestamps across tickers.
+    name: clean_price_data
     nodes_depended_on:
-    - refine_strategy
+    - gather_historical_price_data
     nodes_dependent_on: []
-    prompt: Integrate risk management techniques, such as position sizing, stop-loss
-      rules, and portfolio hedging, to mitigate potential downsides and align with
-      the strategy's risk tolerance.
-  model_selection:
+    prompt: Take the raw price data JSON and output a cleaned version where each ticker
+      has a continuous time series of adjusted close and volume with no missing dates
+      (fill forward if needed). Return the cleaned data in the same JSON structure.
+  compile_universe_list:
     agent: false
-    description: Choose a suitable machine learning model for the strategy.
-    name: model_selection
+    description: Generate the list of tickers that satisfy the universe criteria.
+    name: compile_universe_list
     nodes_depended_on:
-    - split_data
+    - select_universe_criteria
     nodes_dependent_on: []
-    prompt: Select an appropriate machine learning or statistical model that aligns
-      with the strategy's objectives and the characteristics of the prepared data.
-  refine_strategy:
+    prompt: Using the screening criteria, produce a CSV‑style list of tickers (ticker,
+      exchange) that belong to the investable universe. Return only the list, no commentary.
+  construct_execution_strategy:
     agent: false
-    description: Refine the strategy based on backtest analysis.
-    name: refine_strategy
+    description: Define order slicing, execution venues, and transaction cost model.
+    name: construct_execution_strategy
     nodes_depended_on:
-    - analyze_backtest_results
+    - design_portfolio_optimization
     nodes_dependent_on: []
-    prompt: Iterate on the strategy, making adjustments as needed based on insights
-      from the backtest analysis, to enhance performance and robustness.
-  select_universe:
+    prompt: 'Specify a realistic execution algorithm: split each target position into
+      10 equal child orders, schedule over the trading day using VWAP, assign to two
+      venues with known spread. Provide the transaction cost model (fixed + variable)
+      in JSON.'
+  construct_factor_library:
     agent: false
-    description: Identify the universe of equities to trade.
-    name: select_universe
+    description: Combine all engineered features into a unified factor matrix for
+      the universe.
+    name: construct_factor_library
+    nodes_depended_on:
+    - engineer_price_features
+    - engineer_fundamental_features
+    - engineer_alternative_features
+    nodes_dependent_on: []
+    prompt: 'Merge the three feature JSON objects into a single factor table: rows
+      = dates, columns = (ticker, factor). Ensure all factors are aligned temporally.
+      Return the combined table as JSON.'
+  create_monitoring_dashboard:
+    agent: false
+    description: Build a live dashboard to track performance, risk metrics, and execution
+      quality.
+    name: create_monitoring_dashboard
+    nodes_depended_on:
+    - develop_deployment_pipeline
+    nodes_dependent_on: []
+    prompt: Specify the key widgets for a real‑time monitoring dashboard (daily P&L,
+      exposure heatmap, turnover, transaction cost variance). Provide a JSON layout
+      schema (rows, columns, widget type).
+  define_market_neutral_constraints:
+    agent: false
+    description: Specify the constraints required to achieve market neutrality (beta,
+      sector, factor exposures, leverage limits).
+    name: define_market_neutral_constraints
     nodes_depended_on:
     - define_strategy_objectives
     nodes_dependent_on: []
-    prompt: Based on the strategy objectives, specify the universe of equities to
-      be considered for trading, including any relevant filters or criteria.
-  split_data:
+    prompt: Enumerate the quantitative constraints that enforce market neutrality
+      for the strategy (e.g., portfolio beta ≈ 0, sector exposure deviation ≤ 5%,
+      max gross leverage ≤ 1.0). Provide each constraint on a separate line.
+  define_risk_model:
     agent: false
-    description: Split the data into training, validation, and testing sets.
-    name: split_data
+    description: Assemble a full risk model (factor + specific) respecting market‑neutral
+      constraints.
+    name: define_risk_model
     nodes_depended_on:
-    - feature_engineering
+    - build_statistical_factor_models
+    - define_market_neutral_constraints
     nodes_dependent_on: []
-    prompt: Divide the prepared dataset into training, validation, and testing subsets,
-      ensuring proper chronological ordering and no data leakage.
-  train_model:
+    prompt: Combine the factor covariance and specific risk into a complete risk model.
+      Incorporate the beta‑neutral and sector‑neutral constraints as linear restrictions.
+      Output the risk model specifications (matrices, constraint matrices) as JSON.
+  define_strategy_objectives:
     agent: false
-    description: Train the selected model on the training data.
-    name: train_model
-    nodes_depended_on:
-    - model_selection
-    - split_data
+    description: State the quantitative objectives of the strategy (e.g., target annual
+      Sharpe > 2, market‑neutral beta ~0, minimum assets under management).
+    name: define_strategy_objectives
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Train the chosen model using the training dataset, optimizing hyperparameters
-      as necessary to improve performance.
-  validate_model:
+    prompt: List the explicit performance, risk and operational objectives for a market‑neutral
+      equities portfolio. Limit to five bullet points, each no longer than one sentence.
+  design_portfolio_optimization:
     agent: false
-    description: Validate the trained model on the validation data.
-    name: validate_model
+    description: Formulate the objective (maximize Sharpe) and constraints for a quadratic
+      optimizer.
+    name: design_portfolio_optimization
     nodes_depended_on:
-    - train_model
-    - split_data
+    - calculate_factor_exposures
+    - define_risk_model
+    - define_market_neutral_constraints
     nodes_dependent_on: []
-    prompt: Evaluate the trained model on the validation dataset to assess its performance
-      and make any necessary adjustments to the model or its parameters.
+    prompt: 'Write the mathematical formulation of the portfolio optimization problem:
+      maximize expected return–risk trade‑off subject to (i) beta ≈ 0, (ii) sector
+      exposure limits, (iii) gross leverage ≤1, (iv) position size caps. Provide the
+      objective function and constraint matrix representations in JSON.'
+  develop_deployment_pipeline:
+    agent: false
+    description: Create an automated workflow to generate daily signals, run optimization,
+      and output orders.
+    name: develop_deployment_pipeline
+    nodes_depended_on:
+    - finalize_model_selection
+    nodes_dependent_on: []
+    prompt: Design a step‑by‑step automated pipeline (data ingest → feature build
+      → risk model → optimizer → order file) including scheduling (e.g., cron at 15:00
+      EST) and technology stack (Python, Pandas, CVXOPT). Return the pipeline description
+      as a markdown list.
+  document_strategy:
+    agent: false
+    description: Produce a comprehensive strategy whitepaper covering methodology,
+      backtest results, risk controls, and operations.
+    name: document_strategy
+    nodes_depended_on:
+    - finalize_model_selection
+    - develop_deployment_pipeline
+    nodes_dependent_on: []
+    prompt: Write a concise whitepaper (≈1500 words) that includes strategy overview,
+      factor definitions, optimization formulation, backtest performance, out‑of‑sample
+      validation, transaction cost analysis, and operational workflow. Return the
+      text as markdown.
+  engineer_alternative_features:
+    agent: false
+    description: Transform alternative signals into quantitative features (sentiment
+      score, ESG rank, social momentum).
+    name: engineer_alternative_features
+    nodes_depended_on:
+    - clean_alternative_data
+    nodes_dependent_on: []
+    prompt: 'Convert each alternative data series into daily numeric features: normalized
+      sentiment, standardized ESG percentile, and scaled social media momentum. Output
+      a JSON of these features per ticker.'
+  engineer_fundamental_features:
+    agent: false
+    description: Derive fundamental factors (value, quality, growth) from cleaned
+      fundamentals.
+    name: engineer_fundamental_features
+    nodes_depended_on:
+    - clean_fundamental_data
+    nodes_dependent_on: []
+    prompt: 'Create per‑ticker fundamental factor values: book‑to‑price, earnings‑yield,
+      ROE, earnings‑revisions, and cash‑flow‑yield. Use the most recent quarter for
+      each date in the price calendar (forward‑fill). Return as JSON keyed by ticker.'
+  engineer_price_features:
+    agent: false
+    description: Compute technical features (momentum, volatility, mean‑reversion)
+      from cleaned price data.
+    name: engineer_price_features
+    nodes_depended_on:
+    - clean_price_data
+    nodes_dependent_on: []
+    prompt: 'From the cleaned daily price series, calculate for each ticker: 1‑month
+      momentum, 3‑month rolling volatility, 10‑day mean‑reversion signal, and 20‑day
+      moving average. Return a JSON of feature vectors per ticker.'
+  evaluate_backtest_performance:
+    agent: false
+    description: Calculate performance metrics (annualized return, volatility, Sharpe,
+      max drawdown, turnover).
+    name: evaluate_backtest_performance
+    nodes_depended_on:
+    - run_backtest_simulation
+    nodes_dependent_on: []
+    prompt: From the backtest return series, compute (i) annualized CAGR, (ii) annualized
+      volatility, (iii) Sharpe ratio (risk‑free 0%), (iv) maximum drawdown, (v) average
+      daily turnover (%). Return these metrics as a JSON object.
+  finalize_model_selection:
+    agent: false
+    description: Choose the best configuration balancing Sharpe, turnover, and cost.
+    name: finalize_model_selection
+    nodes_depended_on:
+    - evaluate_backtest_performance
+    - perform_out_of_sample_validation
+    - assess_transaction_costs
+    nodes_dependent_on: []
+    prompt: Based on in‑sample Sharpe, out‑of‑sample Sharpe, turnover, and transaction
+      cost impact, select the optimal hyperparameter set. Provide the chosen parameters
+      and the final expected net Sharpe as JSON.
+  finalize_strategy_package:
+    agent: false
+    description: Assemble all deliverables into a single package ready for launch.
+    name: finalize_strategy_package
+    nodes_depended_on:
+    - document_strategy
+    - create_monitoring_dashboard
+    - prepare_compliance_checklist
+    nodes_dependent_on: []
+    prompt: List all files that should be included in the final strategy launch package
+      (e.g., whitepaper.pdf, risk_model.json, deployment_script.sh, compliance_checklist.md,
+      dashboard_spec.json). Return the list as plain text, one filename per line.
+  gather_alternative_data:
+    agent: false
+    description: Fetch alternative signals (news sentiment, social media volume, ESG
+      scores) for the universe.
+    name: gather_alternative_data
+    nodes_depended_on:
+    - compile_universe_list
+    nodes_dependent_on: []
+    prompt: Collect daily alternative data series (e.g., news sentiment score, Twitter
+      volume, ESG rating) for each ticker over the last 10 years. Provide the data
+      in JSON format keyed by ticker.
+  gather_fundamental_data:
+    agent: false
+    description: Collect quarterly fundamentals (earnings, book value, cash flow,
+      analyst estimates) for the universe.
+    name: gather_fundamental_data
+    nodes_depended_on:
+    - compile_universe_list
+    nodes_dependent_on: []
+    prompt: Obtain quarterly fundamental metrics (e.g., EPS, book‑to‑price, ROE, forward
+      EPS estimate) for each ticker in the universe for the last 10 years. Return
+      as a JSON object keyed by ticker.
+  gather_historical_price_data:
+    agent: false
+    description: Download daily adjusted close, volume, and corporate actions for
+      all universe tickers over the past 10 years.
+    name: gather_historical_price_data
+    nodes_depended_on:
+    - compile_universe_list
+    nodes_dependent_on: []
+    prompt: Retrieve daily OHLCV and split‑adjusted close prices for every ticker
+      in the universe for the last 10 years. Present the data as a JSON object keyed
+      by ticker, each containing an array of date‑price‑volume records.
+  optimize_hyperparameters:
+    agent: false
+    description: Search over model hyperparameters (look‑back length, factor shrinkage,
+      turnover limit) to improve Sharpe.
+    name: optimize_hyperparameters
+    nodes_depended_on:
+    - evaluate_backtest_performance
+    nodes_dependent_on: []
+    prompt: 'Perform a grid search over the following hyperparameters: look‑back window
+      (180, 252, 360 days), factor shrinkage intensity (0.0, 0.1, 0.3), max turnover
+      (10%, 20%, 30%). For each combination, report the Sharpe ratio. Return the top‑3
+      configurations as JSON.'
+  perform_out_of_sample_validation:
+    agent: false
+    description: Validate the top configurations on a forward‑rolling out‑of‑sample
+      period.
+    name: perform_out_of_sample_validation
+    nodes_depended_on:
+    - optimize_hyperparameters
+    nodes_dependent_on: []
+    prompt: Using the three best hyperparameter sets, run a separate backtest on the
+      most recent 2‑year window (not used in training). Report Sharpe, turnover, and
+      drawdown for each. Return results as JSON.
+  prepare_compliance_checklist:
+    agent: false
+    description: List regulatory and compliance items required for a market‑neutral
+      equities fund.
+    name: prepare_compliance_checklist
+    nodes_depended_on:
+    - define_market_neutral_constraints
+    nodes_dependent_on: []
+    prompt: Create a checklist of compliance requirements (e.g., SEC registration,
+      NFA rules, risk‑limit reporting, ESG disclosure) relevant to a market‑neutral
+      long/short equity strategy. Provide each item as a bullet point.
+  run_backtest_simulation:
+    agent: false
+    description: Execute a rolling‑window backtest using the optimizer on historical
+      data.
+    name: run_backtest_simulation
+    nodes_depended_on:
+    - design_portfolio_optimization
+    - clean_price_data
+    nodes_dependent_on: []
+    prompt: 'Perform a daily rolling backtest over the last 8 years with a 252‑day
+      look‑back window: each day solve the optimization, record portfolio weights,
+      compute daily P&L. Return a time series of portfolio returns and weight snapshots
+      (JSON).'
+  select_universe_criteria:
+    agent: false
+    description: Define screening rules to build the investable equity universe (liquidity,
+      market cap, country, free float).
+    name: select_universe_criteria
+    nodes_depended_on:
+    - define_market_neutral_constraints
+    nodes_dependent_on: []
+    prompt: Create a list of screening criteria (e.g., avg daily volume > 500k, market
+      cap > $1B, headquartered in US) that will be used to generate the ticker universe.
+      One criterion per line.
+  simulate_trade_execution:
+    agent: false
+    description: Apply the execution strategy to the backtest weights to estimate
+      realized costs.
+    name: simulate_trade_execution
+    nodes_depended_on:
+    - construct_execution_strategy
+    - clean_price_data
+    nodes_dependent_on: []
+    prompt: Take the daily target weights from the backtest and simulate order execution
+      using the VWAP slicing rules and cost model. Produce a revised return series
+      that includes estimated slippage and commissions. Return the adjusted returns
+      as JSON.
