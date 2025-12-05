@@ -1,3 +1,15 @@
+from ._define_risk_management_rules.normalize_strategy_type import normalize_strategy_type
+from ._define_risk_management_rules.create_rule_templates_mapping import create_rule_templates_mapping
+from ._define_risk_management_rules.select_rule_templates import select_rule_templates
+from ._define_risk_management_rules.substitute_rule_placeholders import substitute_rule_placeholders
+from ._define_risk_management_rules.validate_rule_count import validate_rule_count
+from ._define_risk_management_rules.detect_stop_loss_rule import detect_stop_loss_rule
+from ._define_risk_management_rules.log_rule_generation_summary import log_rule_generation_summary
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Extract the `strategy_type` string from the output of the parent node
 #   **select_trading_strategy_type** and normalize it to lower‑case for
@@ -97,13 +109,11 @@
 #           {has_stop_loss}")`.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class SelectTradingStrategyTypeOutput(BaseModel):
     """Pydantic model for select_trading_strategy_type node outputs."""
-    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., \"momentum\", \"mean reversion\").")
+    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., "momentum", "mean reversion").")
     rationale: str = Field(..., description="A concise one\u2011sentence explanation of why this strategy type best fits the market analysis.")
 
 
@@ -124,11 +134,29 @@ def define_risk_management_rules(select_trading_strategy_type_input: SelectTradi
     Returns:
         DefineRiskManagementRulesOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract and normalize strategy type
+    strategy: str = normalize_strategy_type(strategy_type=select_trading_strategy_type_input.strategy_type)
+    
+    # Create static mapping of strategy types to rule templates
+    rule_templates: dict = create_rule_templates_mapping()
+    
+    # Select appropriate rule list with fallback
+    selected_rules: List[str] = select_rule_templates(strategy=strategy, templates=rule_templates)
+    
+    # Perform placeholder substitution for strategy-specific parameters
+    finalized_rules: List[str] = substitute_rule_placeholders(rules=selected_rules)
+    
+    # Validate rule count is within required range [3,5]
+    rule_count: int = validate_rule_count(rules=finalized_rules)
+    
+    # Determine if stop-loss rule is present
+    has_stop_loss: bool = detect_stop_loss_rule(rules=finalized_rules)
+    
+    # Log summary for auditability
+    log_rule_generation_summary(strategy=strategy, rules=finalized_rules, count=rule_count, has_stop_loss=has_stop_loss)
+    
     return DefineRiskManagementRulesOutput(
-        risk_management_rules=[],
-        rule_count=0,
-        has_stop_loss=False,
+        risk_management_rules=finalized_rules,
+        rule_count=rule_count,
+        has_stop_loss=has_stop_loss
     )

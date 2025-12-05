@@ -1,3 +1,14 @@
+from ._compile_final_strategy_blueprint.extract_and_concatenate_strategy_details import extract_and_concatenate_strategy_details
+from ._compile_final_strategy_blueprint.validate_risk_management_rules import validate_risk_management_rules
+from ._compile_final_strategy_blueprint.get_asset_universe_from_context import get_asset_universe_from_context
+from ._compile_final_strategy_blueprint.craft_blueprint_summary import craft_blueprint_summary
+from ._compile_final_strategy_blueprint.generate_implementation_checklist import generate_implementation_checklist
+from ._compile_final_strategy_blueprint.validate_output_types import validate_output_types
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Extract the full refined‑strategy payload from the
 #   **refine_trading_strategy** node – specifically the fields
@@ -96,8 +107,6 @@
 #           the platform's `return` routine.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class RefineTradingStrategyOutput(BaseModel):
@@ -135,12 +144,44 @@ def compile_final_strategy_blueprint(refine_trading_strategy_input: RefineTradin
     Returns:
         CompileFinalStrategyBlueprintOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract and concatenate refined strategy details
+    refined_details: str = extract_and_concatenate_strategy_details(
+        summary=refine_trading_strategy_input.refined_strategy_summary,
+        parameter_adjustments=refine_trading_strategy_input.parameter_adjustments,
+        indicator_adjustments=refine_trading_strategy_input.indicator_adjustments,
+        risk_rule_adjustments=refine_trading_strategy_input.risk_rule_adjustments
+    )
+    
+    # Validate risk management rules
+    validated_rules: List[str] = validate_risk_management_rules(
+        rules=define_risk_management_rules_input.risk_management_rules,
+        has_stop_loss=define_risk_management_rules_input.has_stop_loss
+    )
+    
+    # Get asset universe from specify_asset_universe node
+    asset_tickers: List[str] = get_asset_universe_from_context(**kwargs)
+    
+    # Generate blueprint summary
+    blueprint_summary: str = craft_blueprint_summary(
+        strategy_summary=refine_trading_strategy_input.refined_strategy_summary,
+        **kwargs
+    )
+    
+    # Generate implementation checklist (internal documentation)
+    implementation_checklist: List[str] = generate_implementation_checklist()
+    
+    # Validate output types
+    validate_output_types(
+        blueprint_summary=blueprint_summary,
+        refined_strategy_details=refined_details,
+        risk_management_rules=validated_rules,
+        asset_universe=asset_tickers
+    )
+    
+    # Return final blueprint
     return CompileFinalStrategyBlueprintOutput(
-        blueprint_summary="",
-        refined_strategy_details="",
-        risk_management_rules=[],
-        asset_universe=[],
+        blueprint_summary=blueprint_summary,
+        refined_strategy_details=refined_details,
+        risk_management_rules=validated_rules,
+        asset_universe=asset_tickers
     )

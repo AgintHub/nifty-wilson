@@ -1,3 +1,15 @@
+from ._specify_asset_universe.extract_strategy_type import extract_strategy_type
+from ._specify_asset_universe.create_strategy_asset_mapping import create_strategy_asset_mapping
+from ._specify_asset_universe.lookup_strategy_mapping import lookup_strategy_mapping
+from ._specify_asset_universe.generate_candidate_tickers import generate_candidate_tickers
+from ._specify_asset_universe.validate_tickers_yahoo_finance import validate_tickers_yahoo_finance
+from ._specify_asset_universe.assemble_asset_classes import assemble_asset_classes
+from ._specify_asset_universe.assemble_asset_tickers import assemble_asset_tickers
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Extract the `strategy_type` string from the output of
 #   `select_trading_strategy_type` and store it in a local variable.
@@ -89,13 +101,11 @@
 #           present; raise an exception only if serialization fails.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class SelectTradingStrategyTypeOutput(BaseModel):
     """Pydantic model for select_trading_strategy_type node outputs."""
-    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., \"momentum\", \"mean reversion\").")
+    strategy_type: str = Field(..., description="The chosen primary trading strategy type (e.g., "momentum", "mean reversion").")
     rationale: str = Field(..., description="A concise one\u2011sentence explanation of why this strategy type best fits the market analysis.")
 
 
@@ -115,10 +125,26 @@ def specify_asset_universe(select_trading_strategy_type_input: SelectTradingStra
     Returns:
         SpecifyAssetUniverseOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract the strategy type from input
+    strategy_type: str = extract_strategy_type(input_data=select_trading_strategy_type_input)
+    
+    # Create static mapping table linking strategy types to asset classes
+    strategy_mapping: dict = create_strategy_asset_mapping()
+    
+    # Lookup strategy type in mapping table with validation
+    compatible_asset_classes: List[str] = lookup_strategy_mapping(strategy_type=strategy_type, mapping=strategy_mapping)
+    
+    # Generate candidate tickers for each selected asset class using rule-based selection
+    candidate_tickers: List[str] = generate_candidate_tickers(asset_classes=compatible_asset_classes)
+    
+    # Validate ticker symbols for syntactic correctness and Yahoo Finance availability
+    validated_tickers: List[str] = validate_tickers_yahoo_finance(candidate_tickers=candidate_tickers)
+    
+    # Assemble final lists with consistent ordering
+    final_asset_classes: List[str] = assemble_asset_classes(asset_classes=compatible_asset_classes)
+    final_asset_tickers: List[str] = assemble_asset_tickers(validated_tickers=validated_tickers)
+    
     return SpecifyAssetUniverseOutput(
-        asset_classes=[],
-        asset_tickers=[],
+        asset_classes=final_asset_classes,
+        asset_tickers=final_asset_tickers,
     )
