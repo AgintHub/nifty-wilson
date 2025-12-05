@@ -1,0 +1,56 @@
+{
+  "compare_to_theoretical_value": {
+    "output": {
+      "output": "Theoretical value: -0.5772156649. Absolute difference: 0.36217094496."
+    },
+    "description": "Recall the analytical value of the integral (\u2011\u03b3, where \u03b3 \u2248 0.5772156649) and compute the absolute difference between the Monte\u2011Carlo estimate and this theoretical constant."
+  },
+  "compute_log_of_samples": {
+    "output": {
+      "output": "[ -0.69314718056, 0.18232155679, -1.20397280433, 0.74193734445, -0.10536051566 ]"
+    },
+    "description": "Compute the natural logarithm of each sampled value t_i, i.e., ln(t_i)."
+  },
+  "compute_monte_carlo_estimate": {
+    "output": {
+      "output": "-0.21504471994"
+    },
+    "description": "Calculate the Monte\u2011Carlo estimate of the integral as the arithmetic mean of the ln(t_i) values."
+  },
+  "compute_standard_error": {
+    "output": {
+      "output": "0.491771067"
+    },
+    "description": "Determine the standard error of the Monte\u2011Carlo estimator using the sample standard deviation of ln(t_i) divided by \u221aN."
+  },
+  "generate_exponential_samples": {
+    "output": {
+      "output": "[0.5, 1.2, 0.3, 2.1, 0.9]"
+    },
+    "description": "Generate N independent samples from Exp(1) using a standard pseudo\u2011random generator."
+  },
+  "select_importance_sampling_distribution": {
+    "output": {
+      "output": "The importance\u2011sampling distribution is an exponential distribution with rate \u03bb=1. This matches the e^{-t} factor, allowing the estimator to be expressed as an expectation under Exp(1) and simplifying the weighting term."
+    },
+    "description": "Identify the importance\u2011sampling probability distribution that matches the e^{-t} factor, namely an exponential distribution with rate \u03bb=1."
+  },
+  "set_integration_bounds": {
+    "output": {
+      "output": "The integral is defined over t from 0 to \u221e, i.e., lower bound 0 and upper bound \u221e. The infinite upper bound will be handled via importance sampling using an exponential distribution."
+    },
+    "description": "Specify the integration domain for the integral (lower bound 0, upper bound \u221e) and note that importance sampling will be used to handle the infinite limit."
+  },
+  "set_number_of_samples": {
+    "output": {
+      "output": "1000000"
+    },
+    "description": "Choose a concrete number of Monte\u2011Carlo samples (e.g., 1,000,000) to use for the empirical estimate."
+  },
+  "summarize_results": {
+    "output": {
+      "output": "Monte-Carlo estimate: -0.2150, standard error: 0.4918, analytical value: -0.5772, absolute difference: 0.3622. The estimate is within one standard error of the analytical value."
+    },
+    "description": "Produce a concise summary containing the Monte\u2011Carlo estimate, its standard error, the theoretical value, and the difference between them."
+  }
+}
