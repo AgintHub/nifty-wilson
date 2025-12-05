@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: A workflow for building a statistical arbitrage trading strategy for
-  quantitative trading
+dag_type: typed
+description: Generated workflow from UI.
 name: build_aquant_trading_strategy_statarb
 nodes:
   backtest_strategy:
@@ -11,6 +10,37 @@ nodes:
     - develop_trading_signals
     - define_risk_management_rules
     nodes_dependent_on: []
+    output_structure:
+    - description: Cumulative return of the strategy expressed as a percentage
+      key: total_return_pct
+      type: float
+    - description: Annualized return of the strategy expressed as a percentage
+      key: annualized_return_pct
+      type: float
+    - description: Sharpe ratio of the strategy
+      key: sharpe_ratio
+      type: float
+    - description: Maximum drawdown of the strategy expressed as a percentage
+      key: max_drawdown_pct
+      type: float
+    - description: Total number of trades executed during the backtest
+      key: trade_count
+      type: int
+    - description: Proportion of winning trades (between 0 and 1)
+      key: winning_trade_rate
+      type: float
+    - description: Average profit per trade (positive if profitable)
+      key: average_profit_per_trade
+      type: float
+    - description: Average loss per trade (positive if loss)
+      key: average_loss_per_trade
+      type: float
+    - description: Whether the backtest ran successfully without critical errors
+      key: backtest_success
+      type: bool
+    - description: Concise summary of key backtest results
+      key: report_summary
+      type: str
     prompt: Simulate the strategy's performance over the historical data period, using
       the developed trading signals and risk management rules.
   clean_and_preprocess_data:
@@ -20,6 +50,22 @@ nodes:
     nodes_depended_on:
     - collect_historical_data
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether cleaned data is successfully produced.
+      key: cleaned_data_available
+      type: bool
+    - description: Total number of missing values filled during preprocessing.
+      key: missing_values_count
+      type: int
+    - description: Total number of outlier records removed during preprocessing.
+      key: outliers_removed_count
+      type: int
+    - description: Proportion of missing data in the original dataset before cleaning.
+      key: missing_data_ratio
+      type: float
+    - description: List of column names that were processed during cleaning.
+      key: processed_columns
+      type: List[str]
     prompt: Handle missing values, outliers, and other data inconsistencies, and perform
       necessary transformations to prepare the data for analysis.
   collect_historical_data:
@@ -29,6 +75,22 @@ nodes:
     nodes_depended_on:
     - select_universe_of_assets
     nodes_dependent_on: []
+    output_structure:
+    - description: List of asset symbols for which data was retrieved
+      key: asset_symbols
+      type: List[str]
+    - description: Start date of the retrieved data period
+      key: data_start_date
+      type: str
+    - description: End date of the retrieved data period
+      key: data_end_date
+      type: str
+    - description: Number of data points retrieved for each asset
+      key: data_points_per_asset
+      type: List[int]
+    - description: Indicates whether the data retrieval was successful
+      key: success
+      type: bool
     prompt: Retrieve historical price, volume, and other relevant data for the chosen
       assets, covering a sufficient time period for statistical analysis.
   define_risk_management_rules:
@@ -38,6 +100,30 @@ nodes:
     nodes_depended_on:
     - develop_trading_signals
     nodes_dependent_on: []
+    output_structure:
+    - description: Description of the position sizing methodology (e.g., fixed dollar,
+        volatility‑based, Kelly criterion).
+      key: position_sizing_rule
+      type: str
+    - description: Maximum acceptable drawdown of the portfolio expressed as a percentage
+        (e.g., 10.0 for 10%).
+      key: max_drawdown_percent
+      type: float
+    - description: Stop‑loss threshold for individual trades expressed as a percentage
+        of entry price (e.g., 2.5 for 2.5%).
+      key: stop_loss_percent
+      type: float
+    - description: Maximum risk per trade as a percentage of portfolio equity (e.g.,
+        1.0 for 1%).
+      key: risk_per_trade_percent
+      type: float
+    - description: Maximum number of simultaneous open positions allowed.
+      key: max_positions
+      type: int
+    - description: Additional textual description of other risk controls (e.g., diversification
+        limits, market‑volatility filters).
+      key: risk_control_description
+      type: str
     prompt: Specify position sizing, stop-loss levels, and other risk controls to
       mitigate potential losses and manage overall portfolio risk.
   define_strategy_objectives:
@@ -46,6 +132,31 @@ nodes:
     name: define_strategy_objectives
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: List of asset markets or sectors that the strategy will focus on.
+      key: target_markets
+      type: List[str]
+    - description: Target expected annual return expressed as a decimal (e.g., 0.12
+        for 12%).
+      key: expected_annual_return
+      type: float
+    - description: Maximum acceptable drawdown expressed as a decimal (e.g., 0.15
+        for 15%).
+      key: maximum_drawdown
+      type: float
+    - description: Risk tolerance level on a scale from 1 (low) to 10 (high).
+      key: risk_tolerance_level
+      type: int
+    - description: Investment horizon in months for which the strategy is designed.
+      key: strategy_horizon_months
+      type: int
+    - description: Minimum position size in units of the underlying asset or in monetary
+        value.
+      key: minimum_trade_size
+      type: float
+    - description: Average number of trades per day the strategy intends to execute.
+      key: trade_frequency_per_day
+      type: int
     prompt: Specify the main goals of the statistical arbitrage strategy, such as
       target markets, expected returns, and risk tolerance.
   develop_trading_signals:
@@ -55,6 +166,26 @@ nodes:
     nodes_depended_on:
     - perform_cointegration_analysis
     nodes_dependent_on: []
+    output_structure:
+    - description: Identifiers of the cointegrated asset pairs or groups used for
+        signal generation
+      key: pair_ids
+      type: List[str]
+    - description: Type of each signal (e.g., 'long', 'short') corresponding to the
+        asset pair
+      key: signal_type
+      type: List[str]
+    - description: Confidence or strength metric of each generated signal, ranging
+        from 0 to 1
+      key: signal_strength
+      type: List[float]
+    - description: Total number of trading signals generated
+      key: num_signals
+      type: int
+    - description: Indicates whether the signal generation process produced valid
+        output
+      key: is_valid
+      type: bool
     prompt: Create rules or models that generate buy/sell signals based on the identified
       cointegrated relationships and their deviations from equilibrium.
   evaluate_backtest_results:
@@ -64,6 +195,42 @@ nodes:
     nodes_depended_on:
     - backtest_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Cumulative return of the strategy over the backtest period (expressed
+        as a decimal, e.g., 0.15 for 15%)
+      key: total_return
+      type: float
+    - description: Risk‑adjusted performance metric (return divided by volatility)
+      key: sharpe_ratio
+      type: float
+    - description: Maximum peak‑to‑trough decline during the backtest period (expressed
+        as a decimal, e.g., 0.08 for 8%)
+      key: max_drawdown
+      type: float
+    - description: Total number of executed trades during the backtest
+      key: num_trades
+      type: int
+    - description: Proportion of profitable trades (between 0 and 1)
+      key: win_rate
+      type: float
+    - description: Average profit or loss per trade (expressed as a decimal relative
+        to initial capital)
+      key: avg_trade_pnl
+      type: float
+    - description: Ratio of gross profit to gross loss (greater than 1 indicates a
+        profitable strategy)
+      key: profit_factor
+      type: float
+    - description: Return of the chosen benchmark over the same period for comparison
+      key: benchmark_return
+      type: float
+    - description: Whether the backtest performance meets predefined viability criteria
+      key: is_acceptable
+      type: bool
+    - description: Concise bullet‑point notes highlighting strengths, weaknesses,
+        and suggested improvements
+      key: summary_notes
+      type: List[str]
     prompt: Analyze key performance metrics (e.g., return, Sharpe ratio, drawdown)
       to assess the strategy's viability and identify areas for improvement.
   implement_strategy:
@@ -74,6 +241,24 @@ nodes:
     nodes_depended_on:
     - refine_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: List of file paths containing the implemented strategy code.
+      key: code_file_paths
+      type: List[str]
+    - description: Status of deployment to the trading platform ('Success', 'Failure',
+        'Pending').
+      key: deployment_status
+      type: str
+    - description: Whether the implemented strategy complies with defined risk control
+        rules.
+      key: risk_control_compliance
+      type: bool
+    - description: Notes on platform integration details.
+      key: integration_notes
+      type: str
+    - description: ISO 8601 timestamp of the last deployment.
+      key: last_deployment_timestamp
+      type: str
     prompt: Translate the strategy into executable code, integrating it with a trading
       platform or system, and ensuring proper risk controls are in place.
   monitor_and_adjust_strategy:
@@ -83,6 +268,40 @@ nodes:
     nodes_depended_on:
     - implement_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Whether the monitoring process is currently active
+      key: monitoring_active
+      type: bool
+    - description: Annualized return of the strategy as of the last monitoring check
+      key: latest_annualized_return
+      type: float
+    - description: Sharpe ratio of the strategy as of the last monitoring check
+      key: latest_sharpe_ratio
+      type: float
+    - description: Maximum drawdown experienced by the strategy up to the last monitoring
+        check
+      key: latest_max_drawdown
+      type: float
+    - description: Number of trades executed since the last monitoring check
+      key: trades_executed_since_last_check
+      type: int
+    - description: Whether any adjustments were made during the last monitoring cycle
+      key: adjustments_made
+      type: bool
+    - description: Number of strategy parameters updated during the last monitoring
+        cycle
+      key: parameter_change_count
+      type: int
+    - description: Brief description of the adjustments made during the last monitoring
+        cycle
+      key: adjustment_description
+      type: str
+    - description: Timestamp of the most recent adjustment
+      key: last_adjustment_timestamp
+      type: str
+    - description: Number of days until the next scheduled monitoring check
+      key: next_check_in_days
+      type: int
     prompt: Regularly review the strategy's performance, updating models, rules, or
       parameters as needed to maintain its effectiveness and adapt to changing market
       conditions.
@@ -93,6 +312,22 @@ nodes:
     nodes_depended_on:
     - clean_and_preprocess_data
     nodes_dependent_on: []
+    output_structure:
+    - description: List of identified cointegrated asset pairs in the format 'AssetA-AssetB'
+      key: cointegrated_pairs
+      type: List[str]
+    - description: Johansen trace statistic value for the cointegration test
+      key: johansen_trace_statistic
+      type: float
+    - description: P-value associated with the Johansen trace statistic
+      key: johansen_p_value
+      type: float
+    - description: Whether the cointegration test indicates significant cointegration
+      key: is_significant
+      type: bool
+    - description: Number of cointegrated pairs identified
+      key: num_pairs
+      type: int
     prompt: Apply statistical tests (e.g., Johansen test) to identify cointegrated
       pairs or groups of assets, which are crucial for statistical arbitrage.
   refine_strategy:
@@ -102,6 +337,26 @@ nodes:
     nodes_depended_on:
     - evaluate_backtest_results
     nodes_dependent_on: []
+    output_structure:
+    - description: List of specific parameter changes made to the strategy
+      key: parameter_adjustments
+      type: List[str]
+    - description: List of modifications to the trading signal generation rules
+      key: signal_rule_changes
+      type: List[str]
+    - description: List of updates to risk management rules (e.g., position sizing,
+        stop‑loss adjustments)
+      key: risk_rule_updates
+      type: List[str]
+    - description: Projected increase in Sharpe ratio after the refinements
+      key: expected_sharpe_increase
+      type: float
+    - description: Projected increase in annualized return percentage after the refinements
+      key: expected_annual_return_increase
+      type: float
+    - description: Projected reduction in maximum drawdown percentage after the refinements
+      key: expected_drawdown_reduction
+      type: float
     prompt: Adjust parameters, trading signals, or risk management rules as needed
       to enhance the strategy's performance and robustness.
   select_universe_of_assets:
@@ -111,5 +366,20 @@ nodes:
     nodes_depended_on:
     - define_strategy_objectives
     nodes_dependent_on: []
+    output_structure:
+    - description: List of ticker symbols or identifiers for assets selected for the
+        strategy.
+      key: selected_assets
+      type: List[str]
+    - description: Asset classes (e.g., equities, ETFs, futures) included in the universe.
+      key: asset_classes
+      type: List[str]
+    - description: Textual description of the criteria used to select the universe,
+        derived from strategy objectives.
+      key: selection_criteria
+      type: str
+    - description: Total number of assets selected.
+      key: number_of_assets
+      type: int
     prompt: Identify the specific asset classes, sectors, or individual securities
       that the strategy will focus on, based on the defined objectives.
