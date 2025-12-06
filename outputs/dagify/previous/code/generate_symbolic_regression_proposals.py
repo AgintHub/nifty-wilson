@@ -100,7 +100,7 @@ from pydantic import BaseModel, Field
 
 class ConfigureLlmForProposalGenerationOutput(BaseModel):
     """Pydantic model for configure_llm_for_proposal_generation node outputs."""
-    model_name: str = Field(..., description="The name of the language model to be used (e.g., \"gpt-4o\", \"llama-3.1\")")
+    model_name: str = Field(..., description="The name of the language model to be used (e.g., "gpt-4o", "llama-3.1")")
     temperature: float = Field(..., description="The sampling temperature controlling randomness of the model output")
     max_tokens: int = Field(..., description="Maximum number of tokens the model should generate for each proposal")
     prompt_template: str = Field(..., description="The prompt format that the LLM will use when generating proposals, incorporating placeholders for objective and data")

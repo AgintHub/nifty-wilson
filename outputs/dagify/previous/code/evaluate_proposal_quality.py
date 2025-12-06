@@ -1,3 +1,20 @@
+from ._evaluate_proposal_quality.log_early_exit import log_early_exit
+from ._evaluate_proposal_quality.extract_proposal_expressions import extract_proposal_expressions
+from ._evaluate_proposal_quality.generate_proposal_ids import generate_proposal_ids
+from ._evaluate_proposal_quality.parse_expressions_to_trees import parse_expressions_to_trees
+from ._evaluate_proposal_quality.load_training_dataset import load_training_dataset
+from ._evaluate_proposal_quality.evaluate_expression_predictions import evaluate_expression_predictions
+from ._evaluate_proposal_quality.compute_accuracy_metric import compute_accuracy_metric
+from ._evaluate_proposal_quality.calculate_structural_complexity import calculate_structural_complexity
+from ._evaluate_proposal_quality.calculate_interpretability_score import calculate_interpretability_score
+from ._evaluate_proposal_quality.normalize_complexity_scores import normalize_complexity_scores
+from ._evaluate_proposal_quality.compute_overall_quality import compute_overall_quality
+from ._evaluate_proposal_quality.log_proposal_warnings import log_proposal_warnings
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Validate the `proposals_valid` flag from the parent node and abort evaluation
 #   if it is false.
@@ -100,8 +117,6 @@
 #   Method: Use Python logging; set metric values to `float('nan')`.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class GenerateSymbolicRegressionProposalsOutput(BaseModel):
@@ -132,13 +147,70 @@ def evaluate_proposal_quality(generate_symbolic_regression_proposals_input: Gene
     Returns:
         EvaluateProposalQualityOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Validate proposals_valid flag and early exit if false
+    if not generate_symbolic_regression_proposals_input.proposals_valid:
+        log_early_exit(reason="proposals_valid is false")
+        return EvaluateProposalQualityOutput(
+            proposal_ids=[],
+            accuracy=[],
+            complexity=[],
+            interpretability=[],
+            overall_quality=[]
+        )
+    
+    # Extract proposal expressions and generate deterministic IDs
+    proposal_expressions: List[str] = extract_proposal_expressions(input_data=generate_symbolic_regression_proposals_input)
+    proposal_ids: List[str] = generate_proposal_ids(expressions=proposal_expressions, node_name="eval")
+    
+    # Parse expressions into evaluatable expression trees
+    parsed_expressions: List = parse_expressions_to_trees(expressions=proposal_expressions)
+    
+    # Load training dataset from context
+    training_data = load_training_dataset(context=kwargs)
+    
+    # Initialize metric lists
+    accuracy_scores: List[float] = []
+    complexity_scores: List[float] = []
+    interpretability_scores: List[float] = []
+    
+    # Evaluate each expression
+    for i, expression_tree in enumerate(parsed_expressions):
+        # Evaluate predictions on training dataset
+        predictions = evaluate_expression_predictions(expression=expression_tree, dataset=training_data)
+        
+        # Compute accuracy metric (R² with MSE fallback)
+        accuracy: float = compute_accuracy_metric(predictions=predictions, targets=training_data)
+        accuracy_scores.append(accuracy)
+        
+        # Calculate structural complexity
+        complexity: float = calculate_structural_complexity(expression=expression_tree)
+        complexity_scores.append(complexity)
+        
+        # Derive interpretability score
+        interpretability: float = calculate_interpretability_score(expression=expression_tree)
+        interpretability_scores.append(interpretability)
+    
+    # Normalize complexity scores
+    normalized_complexity: List[float] = normalize_complexity_scores(complexity_scores=complexity_scores)
+    
+    # Combine metrics into overall quality scores
+    overall_quality_scores: List[float] = compute_overall_quality(
+        accuracy=accuracy_scores,
+        complexity=normalized_complexity,
+        interpretability=interpretability_scores
+    )
+    
+    # Log any proposals with warnings
+    log_proposal_warnings(proposal_ids=proposal_ids, metrics={
+        "accuracy": accuracy_scores,
+        "complexity": normalized_complexity,
+        "interpretability": interpretability_scores
+    })
+    
     return EvaluateProposalQualityOutput(
-        proposal_ids=[],
-        accuracy=[],
-        complexity=[],
-        interpretability=[],
-        overall_quality=[],
+        proposal_ids=proposal_ids,
+        accuracy=accuracy_scores,
+        complexity=normalized_complexity,
+        interpretability=interpretability_scores,
+        overall_quality=overall_quality_scores
     )

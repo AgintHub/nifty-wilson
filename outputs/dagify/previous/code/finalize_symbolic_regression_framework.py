@@ -1,3 +1,18 @@
+from ._finalize_symbolic_regression_framework.get_current_framework_version import get_current_framework_version
+from ._finalize_symbolic_regression_framework.extract_failure_reasons import extract_failure_reasons
+from ._finalize_symbolic_regression_framework.log_framework_failure import log_framework_failure
+from ._finalize_symbolic_regression_framework.check_metrics_against_thresholds import check_metrics_against_thresholds
+from ._finalize_symbolic_regression_framework.perform_hyperparameter_tuning import perform_hyperparameter_tuning
+from ._finalize_symbolic_regression_framework.retrieve_integrated_proposals_data import retrieve_integrated_proposals_data
+from ._finalize_symbolic_regression_framework.compute_expression_complexity import compute_expression_complexity
+from ._finalize_symbolic_regression_framework.compute_expression_interpretability import compute_expression_interpretability
+from ._finalize_symbolic_regression_framework.increment_framework_version import increment_framework_version
+from ._finalize_symbolic_regression_framework.compose_adjustments_summary import compose_adjustments_summary
+from ._finalize_symbolic_regression_framework.evaluate_framework_robustness import evaluate_framework_robustness
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Retrieve test results from the parent node and store each field in local
 #   variables for analysis.
@@ -118,7 +133,6 @@
 #   Method: Serialize the variables into the prescribed JSON schema.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class TestSymbolicRegressionFrameworkOutput(BaseModel):
@@ -151,14 +165,99 @@ def finalize_symbolic_regression_framework(test_symbolic_regression_framework_in
     Returns:
         FinalizeSymbolicRegressionFrameworkOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Retrieve test results from parent node and store in local variables
+    test_accuracy: float = test_symbolic_regression_framework_input.test_accuracy
+    test_rmse: float = test_symbolic_regression_framework_input.test_rmse
+    test_runtime_seconds: float = test_symbolic_regression_framework_input.test_runtime_seconds
+    test_success: bool = test_symbolic_regression_framework_input.test_success
+    test_dataset_names: str = test_symbolic_regression_framework_input.test_dataset_names
+    test_summary: str = test_symbolic_regression_framework_input.test_summary
+    
+    # Get current framework version for potential adjustments
+    current_framework_version: str = get_current_framework_version()
+    
+    # Validate test_success and exit early if failure
+    if not test_success:
+        failure_reasons: str = extract_failure_reasons(test_summary=test_summary)
+        log_framework_failure(reasons=failure_reasons)
+        return FinalizeSymbolicRegressionFrameworkOutput(
+            framework_version=current_framework_version,
+            adjustments_summary="No changes due to failure",
+            is_framework_robust=False,
+            final_performance_accuracy=test_accuracy,
+            final_performance_complexity=0.0,
+            final_performance_interpretability=0.0,
+        )
+    
+    # Check accuracy and RMSE against thresholds and apply tuning if needed
+    accuracy_threshold: float = 0.90
+    rmse_threshold: float = 0.05
+    needs_tuning: bool = check_metrics_against_thresholds(
+        accuracy=test_accuracy, 
+        rmse=test_rmse, 
+        accuracy_threshold=accuracy_threshold, 
+        rmse_threshold=rmse_threshold
+    )
+    
+    adjustments_made = []
+    final_accuracy = test_accuracy
+    
+    if needs_tuning:
+        tuning_results = perform_hyperparameter_tuning(
+            current_accuracy=test_accuracy, 
+            current_rmse=test_rmse
+        )
+        final_accuracy = tuning_results["improved_accuracy"]
+        adjustments_made.append(tuning_results["tuning_summary"])
+    
+    # Retrieve integrated proposals from integration node
+    integration_data = retrieve_integrated_proposals_data()
+    integrated_proposals = integration_data["integrated_proposals"]
+    integration_log = integration_data["integration_log"]
+    
+    # Compute final performance complexity using SymPy analysis
+    final_performance_complexity: float = compute_expression_complexity(
+        expressions=integrated_proposals
+    )
+    
+    # Estimate final performance interpretability using heuristic
+    final_performance_interpretability: float = compute_expression_interpretability(
+        expressions=integrated_proposals
+    )
+    
+    # Determine new framework version based on adjustments
+    framework_version: str = increment_framework_version(
+        current_version=current_framework_version,
+        adjustments_made=adjustments_made
+    )
+    
+    # Compose adjustments summary
+    adjustments_summary: str = compose_adjustments_summary(
+        adjustments_list=adjustments_made,
+        complexity_change=final_performance_complexity,
+        accuracy_improvement=final_accuracy - test_accuracy
+    )
+    
+    # Determine framework robustness based on comprehensive criteria
+    complexity_threshold: float = 10.0
+    interpretability_threshold: float = 0.7
+    is_framework_robust: bool = evaluate_framework_robustness(
+        test_success=test_success,
+        accuracy=final_accuracy,
+        rmse=test_rmse,
+        complexity=final_performance_complexity,
+        interpretability=final_performance_interpretability,
+        accuracy_threshold=accuracy_threshold,
+        rmse_threshold=rmse_threshold,
+        complexity_threshold=complexity_threshold,
+        interpretability_threshold=interpretability_threshold
+    )
+    
     return FinalizeSymbolicRegressionFrameworkOutput(
-        framework_version="",
-        adjustments_summary="",
-        is_framework_robust=False,
-        final_performance_accuracy=0.0,
-        final_performance_complexity=0.0,
-        final_performance_interpretability=0.0,
+        framework_version=framework_version,
+        adjustments_summary=adjustments_summary,
+        is_framework_robust=is_framework_robust,
+        final_performance_accuracy=final_accuracy,
+        final_performance_complexity=final_performance_complexity,
+        final_performance_interpretability=final_performance_interpretability,
     )

@@ -1,3 +1,14 @@
+from ._select_top_proposals.validate_input_arrays import validate_input_arrays
+from ._select_top_proposals.log_validation_failure import log_validation_failure
+from ._select_top_proposals.sort_proposals_by_quality import sort_proposals_by_quality
+from ._select_top_proposals.format_proposal_ids import format_proposal_ids
+from ._select_top_proposals.format_proposal_scores import format_proposal_scores
+from ._select_top_proposals.log_selection_results import log_selection_results
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Validate that all input arrays (`proposal_ids`, `accuracy`, `complexity`,
 #   `interpretability`, `overall_quality`) are non‑empty and have the same
@@ -64,8 +75,6 @@
 #           Scores={top_proposal_scores}".
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class EvaluateProposalQualityOutput(BaseModel):
@@ -82,7 +91,7 @@ class SelectTopProposalsOutput(BaseModel):
     top_proposal_ids: str = Field(..., description="Identifiers of the proposals selected as top candidates.")
     top_proposal_scores: float = Field(..., description="Quality scores for each selected proposal, reflecting accuracy, complexity, and interpretability.")
     selected_count: int = Field(..., description="Number of proposals selected.")
-    selection_criteria: str = Field(..., description="The rule or threshold used for selection (e.g., \"top\u20113 by overall_quality\").")
+    selection_criteria: str = Field(..., description="The rule or threshold used for selection (e.g., "top\u20113 by overall_quality").")
     is_successful: bool = Field(..., description="Indicates whether the selection process completed without errors.")
 
 
@@ -96,13 +105,56 @@ def select_top_proposals(evaluate_proposal_quality_input: EvaluateProposalQualit
     Returns:
         SelectTopProposalsOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Validate input arrays
+    is_valid: bool = validate_input_arrays(
+        proposal_ids=evaluate_proposal_quality_input.proposal_ids,
+        accuracy=evaluate_proposal_quality_input.accuracy,
+        complexity=evaluate_proposal_quality_input.complexity,
+        interpretability=evaluate_proposal_quality_input.interpretability,
+        overall_quality=evaluate_proposal_quality_input.overall_quality
+    )
+    
+    if not is_valid:
+        log_validation_failure(arrays_info=evaluate_proposal_quality_input)
+        return SelectTopProposalsOutput(
+            top_proposal_ids="",
+            top_proposal_scores=0.0,
+            selected_count=0,
+            selection_criteria="",
+            is_successful=False
+        )
+    
+    # Determine number of proposals to select (k)
+    k: int = min(3, len(evaluate_proposal_quality_input.proposal_ids))
+    
+    # Create and sort proposal-score pairs
+    sorted_proposals: List[tuple] = sort_proposals_by_quality(
+        proposal_ids=evaluate_proposal_quality_input.proposal_ids,
+        overall_quality=evaluate_proposal_quality_input.overall_quality
+    )
+    
+    # Select top k proposals
+    top_k_proposals: List[tuple] = sorted_proposals[:k]
+    
+    # Extract IDs and scores
+    top_ids: List[str] = [proposal_id for proposal_id, score in top_k_proposals]
+    top_scores: List[float] = [score for proposal_id, score in top_k_proposals]
+    
+    # Convert lists to required output format
+    top_proposal_ids_str: str = format_proposal_ids(proposal_ids=top_ids)
+    top_proposal_scores_float: float = format_proposal_scores(scores=top_scores)
+    
+    # Log selection process
+    log_selection_results(
+        selected_count=k,
+        proposal_ids=top_ids,
+        scores=top_scores
+    )
+    
     return SelectTopProposalsOutput(
-        top_proposal_ids="",
-        top_proposal_scores=0.0,
-        selected_count=0,
-        selection_criteria="",
-        is_successful=False,
+        top_proposal_ids=top_proposal_ids_str,
+        top_proposal_scores=top_proposal_scores_float,
+        selected_count=k,
+        selection_criteria="top-3 by overall_quality",
+        is_successful=True
     )

@@ -1,3 +1,21 @@
+from ._test_symbolic_regression_framework.parse_expressions_to_ufuncs import parse_expressions_to_ufuncs
+from ._test_symbolic_regression_framework.load_test_datasets_config import load_test_datasets_config
+from ._test_symbolic_regression_framework.start_timer import start_timer
+from ._test_symbolic_regression_framework.load_dataset_csv import load_dataset_csv
+from ._test_symbolic_regression_framework.create_train_test_split import create_train_test_split
+from ._test_symbolic_regression_framework.evaluate_proposals_on_dataset import evaluate_proposals_on_dataset
+from ._test_symbolic_regression_framework.stop_timer import stop_timer
+from ._test_symbolic_regression_framework.calculate_runtime import calculate_runtime
+from ._test_symbolic_regression_framework.aggregate_best_metrics_per_dataset import aggregate_best_metrics_per_dataset
+from ._test_symbolic_regression_framework.load_performance_thresholds import load_performance_thresholds
+from ._test_symbolic_regression_framework.evaluate_performance_thresholds import evaluate_performance_thresholds
+from ._test_symbolic_regression_framework.generate_test_summary import generate_test_summary
+from ._test_symbolic_regression_framework.format_dataset_names_list import format_dataset_names_list
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Parse each integrated symbolic expression string into an evaluable Python
 #   function using SymPy, then convert it to a NumPy ufunc for vectorized
@@ -128,8 +146,6 @@
 #           return the dictionary.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class IntegrateRefinedProposalsIntoFrameworkOutput(BaseModel):
@@ -160,14 +176,83 @@ def test_symbolic_regression_framework(integrate_refined_proposals_into_framewor
     Returns:
         TestSymbolicRegressionFrameworkOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Parse integrated symbolic expressions into evaluable functions
+    symbolic_functions: dict = parse_expressions_to_ufuncs(
+        expressions=integrate_refined_proposals_into_framework_input.integrated_proposals
+    )
+    
+    # Load test dataset configuration
+    dataset_config: dict = load_test_datasets_config(config_path="test_datasets.json")
+    
+    # Start runtime measurement
+    start_time: float = start_timer()
+    
+    # Initialize metrics storage
+    all_metrics: dict = {}
+    dataset_names: List[str] = []
+    
+    # Process each test dataset
+    for dataset_info in dataset_config["test_datasets"]:
+        # Load dataset into DataFrame
+        dataset_df: object = load_dataset_csv(
+            dataset_path=dataset_info["path"],
+            target_variable=dataset_info["target"],
+            feature_variables=dataset_info["features"]
+        )
+        
+        # Split into train/test sets
+        x_test, y_test = create_train_test_split(
+            dataframe=dataset_df,
+            test_size=0.2,
+            random_state=42
+        )
+        
+        dataset_names.append(dataset_info["name"])
+        
+        # Evaluate each symbolic function on this dataset
+        proposal_metrics: dict = evaluate_proposals_on_dataset(
+            symbolic_functions=symbolic_functions,
+            x_test=x_test,
+            y_test=y_test
+        )
+        
+        all_metrics[dataset_info["name"]] = proposal_metrics
+    
+    # Stop runtime measurement
+    end_time: float = stop_timer()
+    runtime_seconds: float = calculate_runtime(start_time=start_time, end_time=end_time)
+    
+    # Aggregate metrics across datasets
+    aggregated_metrics: dict = aggregate_best_metrics_per_dataset(all_metrics=all_metrics)
+    
+    # Load performance thresholds
+    thresholds: dict = load_performance_thresholds(config_path="performance_thresholds.json")
+    
+    # Determine test success
+    test_success: bool = evaluate_performance_thresholds(
+        accuracy=aggregated_metrics["mean_accuracy"],
+        rmse=aggregated_metrics["mean_rmse"],
+        runtime=runtime_seconds,
+        thresholds=thresholds
+    )
+    
+    # Generate human-readable summary
+    summary: str = generate_test_summary(
+        accuracy=aggregated_metrics["mean_accuracy"],
+        rmse=aggregated_metrics["mean_rmse"],
+        runtime=runtime_seconds,
+        success=test_success,
+        best_proposals=aggregated_metrics["best_proposals_per_dataset"]
+    )
+    
+    # Format dataset names as string
+    dataset_names_str: str = format_dataset_names_list(dataset_names=dataset_names)
+    
     return TestSymbolicRegressionFrameworkOutput(
-        test_accuracy=0.0,
-        test_rmse=0.0,
-        test_runtime_seconds=0.0,
-        test_success=False,
-        test_dataset_names="",
-        test_summary="",
+        test_accuracy=float(aggregated_metrics["mean_accuracy"]),
+        test_rmse=float(aggregated_metrics["mean_rmse"]),
+        test_runtime_seconds=float(runtime_seconds),
+        test_success=bool(test_success),
+        test_dataset_names=dataset_names_str,
+        test_summary=summary
     )
