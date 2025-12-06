@@ -1,10 +1,35 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: build_vulnerability_free_openssl
 nodes:
   apply_hardening_flags:
     agent: false
+    code_node_type: stub
     description: Set compilation flags to enhance security.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IntegratePatchOutput(BaseModel):\n    \"\"\"Pydantic model for integrate_patch\
+      \ node outputs.\"\"\"\n    patched_cve_ids: List[str] = Field(..., description=\"\
+      List of CVE IDs for which patches were successfully applied.\")\n    patch_success_count:\
+      \ int = Field(..., description=\"Number of patches that compiled and were applied\
+      \ without errors.\")\n    patch_failure_count: int = Field(..., description=\"\
+      Number of patches that failed to compile or apply.\")\n    overall_patch_success:\
+      \ bool = Field(..., description=\"True if all patches compiled successfully,\
+      \ False otherwise.\")\n    patch_log_entries: List[str] = Field(..., description=\"\
+      Log entries capturing the outcome of each patch application attempt.\")\n\n\n\
+      class ApplyHardeningFlagsOutput(BaseModel):\n    \"\"\"Pydantic model for apply_hardening_flags\
+      \ node outputs.\"\"\"\n    flags_applied: List[str] = Field(..., description=\"\
+      List of compilation flags applied to enable security hardening.\")\n    flags_summary:\
+      \ str = Field(..., description=\"Human-readable summary of the applied hardening\
+      \ options.\")\n    success: bool = Field(..., description=\"Indicates whether\
+      \ the flags were successfully integrated into the build configuration.\")\n\n\
+      \ndef apply_hardening_flags(integrate_patch_input: IntegratePatchOutput, **kwargs)\
+      \ -> ApplyHardeningFlagsOutput:\n    \"\"\"Set compilation flags to enhance\
+      \ security.\n\n    Args:\n        integrate_patch_input: Input from the 'integrate_patch'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ApplyHardeningFlagsOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return ApplyHardeningFlagsOutput(\n        flags_applied=[],\n\
+      \        flags_summary=\"\",\n        success=False,\n    )"
     name: apply_hardening_flags
     nodes_depended_on:
     - integrate_patch
@@ -86,12 +111,42 @@ nodes:
           if all validation steps passed, otherwise False.'
     prompt: Configure the OpenSSL build with security hardening options (e.g., -DOPENSSL_NO_ASM,
       -DOPENSSL_NO_EC, -fstack-protector-strong).
+    shims: []
   build_openssl:
     agent: false
+    code_node_type: stub
     description: Build the OpenSSL binaries from the source code that has been patched
       for known vulnerabilities and configured with security hardening flags. The
       build should generate the standard OpenSSL libraries and binaries, capture detailed
       logs, and record build metrics.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ApplyHardeningFlagsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ apply_hardening_flags node outputs.\"\"\"\n    flags_applied: List[str] =\
+      \ Field(..., description=\"List of compilation flags applied to enable security\
+      \ hardening.\")\n    flags_summary: str = Field(..., description=\"Human-readable\
+      \ summary of the applied hardening options.\")\n    success: bool = Field(...,\
+      \ description=\"Indicates whether the flags were successfully integrated into\
+      \ the build configuration.\")\n\n\nclass BuildOpensslOutput(BaseModel):\n  \
+      \  \"\"\"Pydantic model for build_openssl node outputs.\"\"\"\n    binary_artifacts_path:\
+      \ str = Field(..., description=\"Filesystem path to the directory containing\
+      \ compiled OpenSSL binaries.\")\n    build_success: bool = Field(..., description=\"\
+      Indicates whether the build completed without errors.\")\n    build_log: str\
+      \ = Field(..., description=\"Textual log of the build process.\")\n    artifact_names:\
+      \ str = Field(..., description=\"List of names of generated binary artifacts\
+      \ (e.g., libssl.so, libcrypto.so).\")\n    build_duration_seconds: int = Field(...,\
+      \ description=\"Total time taken for the build in seconds.\")\n\n\ndef build_openssl(apply_hardening_flags_input:\
+      \ ApplyHardeningFlagsOutput, **kwargs) -> BuildOpensslOutput:\n    \"\"\"Build\
+      \ the OpenSSL binaries from the source code that has been patched for known\
+      \ vulnerabilities and configured with security hardening flags. The build should\
+      \ generate the standard OpenSSL libraries and binaries, capture detailed logs,\
+      \ and record build metrics.\n\n    Args:\n        apply_hardening_flags_input:\
+      \ Input from the 'apply_hardening_flags' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        BuildOpensslOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return BuildOpensslOutput(\n\
+      \        binary_artifacts_path=\"\",\n        build_success=False,\n       \
+      \ build_log=\"\",\n        artifact_names=\"\",\n        build_duration_seconds=0,\n\
+      \    )"
     name: build_openssl
     nodes_depended_on:
     - apply_hardening_flags
@@ -179,9 +234,30 @@ nodes:
           to avoid re‑parsing logs.
     prompt: Compile OpenSSL from the patched source using the hardened configuration.
       Produce binary artifacts.
+    shims: []
   collect_current_openssl_source:
     agent: false
+    code_node_type: stub
     description: Fetch the most recent OpenSSL source code from the official repository.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CollectCurrentOpensslSourceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for collect_current_openssl_source node outputs.\"\
+      \"\"\n    repository_url: str = Field(..., description=\"The URL of the OpenSSL\
+      \ repository that was cloned.\")\n    clone_path: str = Field(..., description=\"\
+      The absolute or relative path to the local directory where the source was cloned.\"\
+      )\n    stable_release_tag: str = Field(..., description=\"The name of the latest\
+      \ stable release tag that was checked out.\")\n    commit_hash: str = Field(...,\
+      \ description=\"The full commit SHA of the source code that was cloned.\")\n\
+      \    clone_success: bool = Field(..., description=\"True if the clone operation\
+      \ completed without errors, otherwise False.\")\n\n\ndef collect_current_openssl_source(general_input:\
+      \ str, **kwargs) -> CollectCurrentOpensslSourceOutput:\n    \"\"\"Fetch the\
+      \ most recent OpenSSL source code from the official repository.\n\n    Args:\n\
+      \        general_input: General input string for the root node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        CollectCurrentOpensslSourceOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ CollectCurrentOpensslSourceOutput(\n        repository_url=\"\",\n       \
+      \ clone_path=\"\",\n        stable_release_tag=\"\",\n        commit_hash=\"\
+      \",\n        clone_success=False,\n    )"
     name: collect_current_openssl_source
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -276,9 +352,49 @@ nodes:
     prompt: Clone the latest OpenSSL source code from the official repository (e.g.,
       https://github.com/openssl/openssl) into a local directory. Ensure the repository
       is at the latest stable release tag.
+    shims: []
   document_changes:
     agent: false
+    code_node_type: stub
     description: Document all changes made to the OpenSSL project.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GenerateSecurityReportOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for generate_security_report node outputs.\"\"\"\n    identified_issues: str\
+      \ = Field(..., description=\"List of identified security issues, including CVE\
+      \ IDs and brief descriptions.\")\n    applied_patches: str = Field(..., description=\"\
+      List of applied patches or fixes, identified by CVE IDs or patch names.\")\n\
+      \    hardening_measures: str = Field(..., description=\"List of hardening options\
+      \ applied, such as compiler flags and configuration settings.\")\n    static_analysis_findings:\
+      \ str = Field(..., description=\"Summary of findings from static analysis, including\
+      \ warnings and errors.\")\n    dynamic_test_results: str = Field(..., description=\"\
+      Outcome of dynamic tests, e.g., 'all tests passed', '3 failures', etc.\")\n\
+      \    fuzzing_crashes: int = Field(..., description=\"Number of crashes detected\
+      \ during fuzz testing.\")\n    overall_recommendations: str = Field(..., description=\"\
+      Recommendations for future maintenance and mitigation.\")\n    risk_rating:\
+      \ str = Field(..., description=\"Overall risk rating of the build (e.g., Low,\
+      \ Medium, High).\")\n\n\nclass DocumentChangesOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for document_changes node outputs.\"\"\"\n    changelog_entries:\
+      \ List[str] = Field(..., description=\"Lines added to the changelog reflecting\
+      \ applied patches and hardening measures.\")\n    readme_updates: List[str]\
+      \ = Field(..., description=\"Sections of the README that were updated to include\
+      \ new security information.\")\n    documentation_changes: List[str] = Field(...,\
+      \ description=\"Other documentation files (e.g., INSTALL, CONTRIBUTING) that\
+      \ were modified.\")\n    applied_patches: List[str] = Field(..., description=\"\
+      List of CVE IDs for which patches were applied.\")\n    hardening_flags: List[str]\
+      \ = Field(..., description=\"Compilation hardening flags used in the build.\"\
+      )\n    security_findings_summary: str = Field(..., description=\"Summary of\
+      \ security findings extracted from the security report.\")\n    document_changes_success:\
+      \ bool = Field(..., description=\"Indicates whether the documentation update\
+      \ process completed successfully.\")\n\n\ndef document_changes(generate_security_report_input:\
+      \ GenerateSecurityReportOutput, **kwargs) -> DocumentChangesOutput:\n    \"\"\
+      \"Document all changes made to the OpenSSL project.\n\n    Args:\n        generate_security_report_input:\
+      \ Input from the 'generate_security_report' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DocumentChangesOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DocumentChangesOutput(\n\
+      \        changelog_entries=[],\n        readme_updates=[],\n        documentation_changes=[],\n\
+      \        applied_patches=[],\n        hardening_flags=[],\n        security_findings_summary=\"\
+      \",\n        document_changes_success=False,\n    )"
     name: document_changes
     nodes_depended_on:
     - generate_security_report
@@ -399,9 +515,104 @@ nodes:
           set to false and log detailed error messages for each failed step.
     prompt: Update the changelog, README, and any relevant documentation to reflect
       the applied patches, hardening flags, and security findings.
+    shims: []
   generate_security_report:
     agent: false
+    code_node_type: stub
     description: Create a security report for the OpenSSL build.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass RunStaticAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ run_static_analysis node outputs.\"\"\"\n    total_warnings: int = Field(...,\
+      \ description=\"Total number of warnings detected by the static analysis tools.\"\
+      )\n    total_errors: int = Field(..., description=\"Total number of errors detected\
+      \ by the static analysis tools.\")\n    total_security_issues: int = Field(...,\
+      \ description=\"Total number of potential security issues identified.\")\n \
+      \   warnings_list: str = Field(..., description=\"List of warning messages with\
+      \ file names and line numbers.\")\n    errors_list: str = Field(..., description=\"\
+      List of error messages with file names and line numbers.\")\n    security_issues_list:\
+      \ str = Field(..., description=\"List of security issue descriptions with file\
+      \ names and line numbers.\")\n    analysis_success: bool = Field(..., description=\"\
+      Indicates whether the static analysis completed without fatal failures.\")\n\
+      \    analysis_report_path: str = Field(..., description=\"File system path to\
+      \ the generated static analysis report file.\")\n\n\nclass RunDynamicTestsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for run_dynamic_tests node outputs.\"\"\"\n    total_tests_run:\
+      \ int = Field(..., description=\"Total number of tests executed.\")\n    tests_passed:\
+      \ int = Field(..., description=\"Number of tests that passed.\")\n    tests_failed:\
+      \ int = Field(..., description=\"Number of tests that failed.\")\n    crash_count:\
+      \ int = Field(..., description=\"Number of crashes observed during testing.\"\
+      )\n    failed_test_cases: str = Field(..., description=\"List of identifiers\
+      \ or names of tests that failed.\")\n    crash_logs: str = Field(..., description=\"\
+      List of crash log excerpts or identifiers.\")\n    test_summary: str = Field(...,\
+      \ description=\"Brief summary of test results.\")\n\n\nclass RunFuzzingOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for run_fuzzing node outputs.\"\"\"\n    crash_ids:\
+      \ List[str] = Field(..., description=\"Identifiers (e.g., hashes) for each crash\
+      \ observed during fuzzing.\")\n    crash_descriptions: List[str] = Field(...,\
+      \ description=\"Brief textual description of each crash, including affected\
+      \ function or module.\")\n    unexpected_behavior_count: int = Field(..., description=\"\
+      Total number of unexpected behaviors (e.g., crashes, hangs, assertion failures)\
+      \ detected.\")\n    successful_run: bool = Field(..., description=\"True if\
+      \ fuzzing completed without fatal errors; otherwise False.\")\n    total_duration_seconds:\
+      \ int = Field(..., description=\"Total runtime of the fuzzing session in seconds.\"\
+      )\n\n\nclass ReRunStaticAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for re_run_static_analysis node outputs.\"\"\"\n    warnings_count: int =\
+      \ Field(..., description=\"Number of warnings identified by the static analysis\
+      \ tools.\")\n    errors_count: int = Field(..., description=\"Number of errors\
+      \ identified by the static analysis tools.\")\n    security_findings: str =\
+      \ Field(..., description=\"List of security-related findings or vulnerabilities\
+      \ reported.\")\n    analysis_passed: bool = Field(..., description=\"True if\
+      \ no critical errors or security findings were detected; otherwise False.\"\
+      )\n    report_path: str = Field(..., description=\"File path to the generated\
+      \ static analysis report document.\")\n\n\nclass ReRunDynamicTestsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for re_run_dynamic_tests node outputs.\"\"\"\n   \
+      \ test_suite_name: str = Field(..., description=\"Identifier of the test suite\
+      \ executed\")\n    total_tests: int = Field(..., description=\"Total number\
+      \ of tests run\")\n    passed_tests: int = Field(..., description=\"Number of\
+      \ tests that passed\")\n    failed_tests: int = Field(..., description=\"Number\
+      \ of tests that failed\")\n    failure_details: str = Field(..., description=\"\
+      List of failure messages or test identifiers\")\n    test_duration_seconds:\
+      \ float = Field(..., description=\"Total duration of the test run in seconds\"\
+      )\n    tests_passed_successfully: bool = Field(..., description=\"True if all\
+      \ tests passed, False otherwise\")\n\n\nclass ReRunFuzzingOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for re_run_fuzzing node outputs.\"\"\"\n    crash_count:\
+      \ int = Field(..., description=\"Number of unique crashes detected during fuzzing.\"\
+      )\n    crash_examples: str = Field(..., description=\"File paths or identifiers\
+      \ of crash reproducing inputs.\")\n    fuzzing_duration_seconds: int = Field(...,\
+      \ description=\"Total duration of the fuzzing run in seconds.\")\n    fuzzing_success:\
+      \ bool = Field(..., description=\"Whether the fuzzing run completed without\
+      \ critical errors.\")\n    fuzzing_log: str = Field(..., description=\"Concatenated\
+      \ log output from the fuzzing tool.\")\n\n\nclass GenerateSecurityReportOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for generate_security_report node outputs.\"\"\"\n\
+      \    identified_issues: str = Field(..., description=\"List of identified security\
+      \ issues, including CVE IDs and brief descriptions.\")\n    applied_patches:\
+      \ str = Field(..., description=\"List of applied patches or fixes, identified\
+      \ by CVE IDs or patch names.\")\n    hardening_measures: str = Field(..., description=\"\
+      List of hardening options applied, such as compiler flags and configuration\
+      \ settings.\")\n    static_analysis_findings: str = Field(..., description=\"\
+      Summary of findings from static analysis, including warnings and errors.\")\n\
+      \    dynamic_test_results: str = Field(..., description=\"Outcome of dynamic\
+      \ tests, e.g., 'all tests passed', '3 failures', etc.\")\n    fuzzing_crashes:\
+      \ int = Field(..., description=\"Number of crashes detected during fuzz testing.\"\
+      )\n    overall_recommendations: str = Field(..., description=\"Recommendations\
+      \ for future maintenance and mitigation.\")\n    risk_rating: str = Field(...,\
+      \ description=\"Overall risk rating of the build (e.g., Low, Medium, High).\"\
+      )\n\n\ndef generate_security_report(run_static_analysis_input: RunStaticAnalysisOutput,\
+      \ run_dynamic_tests_input: RunDynamicTestsOutput, run_fuzzing_input: RunFuzzingOutput,\
+      \ re_run_static_analysis_input: ReRunStaticAnalysisOutput, re_run_dynamic_tests_input:\
+      \ ReRunDynamicTestsOutput, re_run_fuzzing_input: ReRunFuzzingOutput, **kwargs)\
+      \ -> GenerateSecurityReportOutput:\n    \"\"\"Create a security report for the\
+      \ OpenSSL build.\n\n    Args:\n        run_static_analysis_input: Input from\
+      \ the 'run_static_analysis' node.\n        run_dynamic_tests_input: Input from\
+      \ the 'run_dynamic_tests' node.\n        run_fuzzing_input: Input from the 'run_fuzzing'\
+      \ node.\n        re_run_static_analysis_input: Input from the 're_run_static_analysis'\
+      \ node.\n        re_run_dynamic_tests_input: Input from the 're_run_dynamic_tests'\
+      \ node.\n        re_run_fuzzing_input: Input from the 're_run_fuzzing' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        GenerateSecurityReportOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ GenerateSecurityReportOutput(\n        identified_issues=\"\",\n        applied_patches=\"\
+      \",\n        hardening_measures=\"\",\n        static_analysis_findings=\"\"\
+      ,\n        dynamic_test_results=\"\",\n        fuzzing_crashes=0,\n        overall_recommendations=\"\
+      \",\n        risk_rating=\"\",\n    )"
     name: generate_security_report
     nodes_depended_on:
     - run_static_analysis
@@ -525,9 +736,26 @@ nodes:
     prompt: Compile a comprehensive report summarizing all identified issues, applied
       patches, hardening measures, and test results. Include recommendations for future
       maintenance.
+    shims: []
   identify_known_vulnerabilities:
     agent: false
+    code_node_type: stub
     description: Gather all known OpenSSL vulnerabilities from public databases.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass IdentifyKnownVulnerabilitiesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_known_vulnerabilities node outputs.\"\
+      \"\"\n    cve_ids: str = Field(..., description=\"List of CVE identifiers for\
+      \ each identified vulnerability.\")\n    cve_descriptions: str = Field(...,\
+      \ description=\"Brief textual description of each CVE.\")\n    severity_levels:\
+      \ str = Field(..., description=\"Severity level of each CVE (e.g., Low, Medium,\
+      \ High, Critical).\")\n\n\ndef identify_known_vulnerabilities(general_input:\
+      \ str, **kwargs) -> IdentifyKnownVulnerabilitiesOutput:\n    \"\"\"Gather all\
+      \ known OpenSSL vulnerabilities from public databases.\n\n    Args:\n      \
+      \  general_input: General input string for the root node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        IdentifyKnownVulnerabilitiesOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ IdentifyKnownVulnerabilitiesOutput(\n        cve_ids=\"\",\n        cve_descriptions=\"\
+      \",\n        severity_levels=\"\",\n    )"
     name: identify_known_vulnerabilities
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -601,9 +829,37 @@ nodes:
           output to the orchestrator.
     prompt: Query the CVE database for all entries tagged with OpenSSL. Produce a
       list of CVE IDs, brief descriptions, and severity levels.
+    shims: []
   integrate_patch:
     agent: false
+    code_node_type: stub
     description: Apply fixes for known vulnerabilities to the source code.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyKnownVulnerabilitiesOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for identify_known_vulnerabilities node outputs.\"\"\"\n    cve_ids:\
+      \ str = Field(..., description=\"List of CVE identifiers for each identified\
+      \ vulnerability.\")\n    cve_descriptions: str = Field(..., description=\"Brief\
+      \ textual description of each CVE.\")\n    severity_levels: str = Field(...,\
+      \ description=\"Severity level of each CVE (e.g., Low, Medium, High, Critical).\"\
+      )\n\n\nclass IntegratePatchOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ integrate_patch node outputs.\"\"\"\n    patched_cve_ids: List[str] = Field(...,\
+      \ description=\"List of CVE IDs for which patches were successfully applied.\"\
+      )\n    patch_success_count: int = Field(..., description=\"Number of patches\
+      \ that compiled and were applied without errors.\")\n    patch_failure_count:\
+      \ int = Field(..., description=\"Number of patches that failed to compile or\
+      \ apply.\")\n    overall_patch_success: bool = Field(..., description=\"True\
+      \ if all patches compiled successfully, False otherwise.\")\n    patch_log_entries:\
+      \ List[str] = Field(..., description=\"Log entries capturing the outcome of\
+      \ each patch application attempt.\")\n\n\ndef integrate_patch(identify_known_vulnerabilities_input:\
+      \ IdentifyKnownVulnerabilitiesOutput, **kwargs) -> IntegratePatchOutput:\n \
+      \   \"\"\"Apply fixes for known vulnerabilities to the source code.\n\n    Args:\n\
+      \        identify_known_vulnerabilities_input: Input from the 'identify_known_vulnerabilities'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       IntegratePatchOutput: Object containing outputs for this node.\n   \
+      \ \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output with\
+      \ placeholder values\n    return IntegratePatchOutput(\n        patched_cve_ids=[],\n\
+      \        patch_success_count=0,\n        patch_failure_count=0,\n        overall_patch_success=False,\n\
+      \        patch_log_entries=[],\n    )"
     name: integrate_patch
     nodes_depended_on:
     - identify_known_vulnerabilities
@@ -695,9 +951,50 @@ nodes:
           as per the defined output schema.
     prompt: For each CVE identified, apply the official patch or a custom fix to the
       OpenSSL source. Verify that the patch compiles.
+    shims: []
   re_run_dynamic_tests:
     agent: false
+    code_node_type: stub
     description: Re-run dynamic tests on the built binaries.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BuildOpensslOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for build_openssl node outputs.\"\"\"\n    binary_artifacts_path:\
+      \ str = Field(..., description=\"Filesystem path to the directory containing\
+      \ compiled OpenSSL binaries.\")\n    build_success: bool = Field(..., description=\"\
+      Indicates whether the build completed without errors.\")\n    build_log: str\
+      \ = Field(..., description=\"Textual log of the build process.\")\n    artifact_names:\
+      \ str = Field(..., description=\"List of names of generated binary artifacts\
+      \ (e.g., libssl.so, libcrypto.so).\")\n    build_duration_seconds: int = Field(...,\
+      \ description=\"Total time taken for the build in seconds.\")\n\n\nclass SetupDynamicTestingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_dynamic_testing_environment node outputs.\"\
+      \"\"\n    environment_setup_success: bool = Field(..., description=\"Indicates\
+      \ whether the environment was set up successfully.\")\n    installed_packages:\
+      \ str = Field(..., description=\"List of package names that were installed as\
+      \ part of the setup.\")\n    config_file_path: str = Field(..., description=\"\
+      Path to the configuration file generated for testing.\")\n    test_binary_path:\
+      \ str = Field(..., description=\"Path to the compiled test binaries.\")\n  \
+      \  environment_variables: str = Field(..., description=\"List of environment\
+      \ variable assignments used during testing.\")\n\n\nclass ReRunDynamicTestsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for re_run_dynamic_tests node outputs.\"\"\"\n   \
+      \ test_suite_name: str = Field(..., description=\"Identifier of the test suite\
+      \ executed\")\n    total_tests: int = Field(..., description=\"Total number\
+      \ of tests run\")\n    passed_tests: int = Field(..., description=\"Number of\
+      \ tests that passed\")\n    failed_tests: int = Field(..., description=\"Number\
+      \ of tests that failed\")\n    failure_details: str = Field(..., description=\"\
+      List of failure messages or test identifiers\")\n    test_duration_seconds:\
+      \ float = Field(..., description=\"Total duration of the test run in seconds\"\
+      )\n    tests_passed_successfully: bool = Field(..., description=\"True if all\
+      \ tests passed, False otherwise\")\n\n\ndef re_run_dynamic_tests(build_openssl_input:\
+      \ BuildOpensslOutput, setup_dynamic_testing_environment_input: SetupDynamicTestingEnvironmentOutput,\
+      \ **kwargs) -> ReRunDynamicTestsOutput:\n    \"\"\"Re-run dynamic tests on the\
+      \ built binaries.\n\n    Args:\n        build_openssl_input: Input from the\
+      \ 'build_openssl' node.\n        setup_dynamic_testing_environment_input: Input\
+      \ from the 'setup_dynamic_testing_environment' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        ReRunDynamicTestsOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return ReRunDynamicTestsOutput(\n\
+      \        test_suite_name=\"\",\n        total_tests=0,\n        passed_tests=0,\n\
+      \        failed_tests=0,\n        failure_details=\"\",\n        test_duration_seconds=0.0,\n\
+      \        tests_passed_successfully=False,\n    )"
     name: re_run_dynamic_tests
     nodes_depended_on:
     - build_openssl
@@ -811,11 +1108,50 @@ nodes:
           return a partial result with `tests_passed_successfully` set to false.'
     prompt: Execute the full suite of dynamic tests on the built binaries. Record
       outcomes.
+    shims: []
   re_run_fuzzing:
     agent: false
+    code_node_type: stub
     description: Re-run fuzz testing on the built OpenSSL binaries using the previously
       configured fuzzing environment. The run should match the duration of the initial
       fuzzing session and capture all crash information.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BuildOpensslOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for build_openssl node outputs.\"\"\"\n    binary_artifacts_path:\
+      \ str = Field(..., description=\"Filesystem path to the directory containing\
+      \ compiled OpenSSL binaries.\")\n    build_success: bool = Field(..., description=\"\
+      Indicates whether the build completed without errors.\")\n    build_log: str\
+      \ = Field(..., description=\"Textual log of the build process.\")\n    artifact_names:\
+      \ str = Field(..., description=\"List of names of generated binary artifacts\
+      \ (e.g., libssl.so, libcrypto.so).\")\n    build_duration_seconds: int = Field(...,\
+      \ description=\"Total time taken for the build in seconds.\")\n\n\nclass SetupFuzzingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_fuzzing_environment node outputs.\"\"\"\n\
+      \    frameworks_configured: str = Field(..., description=\"List of fuzzing frameworks\
+      \ configured (e.g., AFL, libFuzzer).\")\n    seed_files: str = Field(..., description=\"\
+      Paths to the generated initial seed files used for fuzzing.\")\n    environment_ready:\
+      \ bool = Field(..., description=\"Indicates whether the fuzzing environment\
+      \ is fully set up and ready to run tests.\")\n    config_directory: str = Field(...,\
+      \ description=\"File system path to the directory containing fuzzing configuration\
+      \ files.\")\n\n\nclass ReRunFuzzingOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for re_run_fuzzing node outputs.\"\"\"\n    crash_count: int = Field(...,\
+      \ description=\"Number of unique crashes detected during fuzzing.\")\n    crash_examples:\
+      \ str = Field(..., description=\"File paths or identifiers of crash reproducing\
+      \ inputs.\")\n    fuzzing_duration_seconds: int = Field(..., description=\"\
+      Total duration of the fuzzing run in seconds.\")\n    fuzzing_success: bool\
+      \ = Field(..., description=\"Whether the fuzzing run completed without critical\
+      \ errors.\")\n    fuzzing_log: str = Field(..., description=\"Concatenated log\
+      \ output from the fuzzing tool.\")\n\n\ndef re_run_fuzzing(build_openssl_input:\
+      \ BuildOpensslOutput, setup_fuzzing_environment_input: SetupFuzzingEnvironmentOutput,\
+      \ **kwargs) -> ReRunFuzzingOutput:\n    \"\"\"Re-run fuzz testing on the built\
+      \ OpenSSL binaries using the previously configured fuzzing environment. The\
+      \ run should match the duration of the initial fuzzing session and capture all\
+      \ crash information.\n\n    Args:\n        build_openssl_input: Input from the\
+      \ 'build_openssl' node.\n        setup_fuzzing_environment_input: Input from\
+      \ the 'setup_fuzzing_environment' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        ReRunFuzzingOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return ReRunFuzzingOutput(\n\
+      \        crash_count=0,\n        crash_examples=\"\",\n        fuzzing_duration_seconds=0,\n\
+      \        fuzzing_success=False,\n        fuzzing_log=\"\",\n    )"
     name: re_run_fuzzing
     nodes_depended_on:
     - build_openssl
@@ -904,10 +1240,49 @@ nodes:
           second.
     prompt: Run fuzzing on the built binaries for the same duration as before. Log
       any crashes.
+    shims: []
   re_run_static_analysis:
     agent: false
+    code_node_type: stub
     description: Re-run static analysis on the built OpenSSL binaries, capturing warnings,
       errors, and security findings, and produce a detailed report.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BuildOpensslOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for build_openssl node outputs.\"\"\"\n    binary_artifacts_path:\
+      \ str = Field(..., description=\"Filesystem path to the directory containing\
+      \ compiled OpenSSL binaries.\")\n    build_success: bool = Field(..., description=\"\
+      Indicates whether the build completed without errors.\")\n    build_log: str\
+      \ = Field(..., description=\"Textual log of the build process.\")\n    artifact_names:\
+      \ str = Field(..., description=\"List of names of generated binary artifacts\
+      \ (e.g., libssl.so, libcrypto.so).\")\n    build_duration_seconds: int = Field(...,\
+      \ description=\"Total time taken for the build in seconds.\")\n\n\nclass SetupStaticAnalysisEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_static_analysis_environment node outputs.\"\
+      \"\"\n    installed_tools: str = Field(..., description=\"Names of static analysis\
+      \ tools installed in the environment.\")\n    configuration_success: bool =\
+      \ Field(..., description=\"Whether the configuration of the tools succeeded\
+      \ without errors.\")\n    environment_ready: bool = Field(..., description=\"\
+      Indicates if the environment is fully ready for static code analysis runs.\"\
+      )\n\n\nclass ReRunStaticAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for re_run_static_analysis node outputs.\"\"\"\n    warnings_count: int =\
+      \ Field(..., description=\"Number of warnings identified by the static analysis\
+      \ tools.\")\n    errors_count: int = Field(..., description=\"Number of errors\
+      \ identified by the static analysis tools.\")\n    security_findings: str =\
+      \ Field(..., description=\"List of security-related findings or vulnerabilities\
+      \ reported.\")\n    analysis_passed: bool = Field(..., description=\"True if\
+      \ no critical errors or security findings were detected; otherwise False.\"\
+      )\n    report_path: str = Field(..., description=\"File path to the generated\
+      \ static analysis report document.\")\n\n\ndef re_run_static_analysis(build_openssl_input:\
+      \ BuildOpensslOutput, setup_static_analysis_environment_input: SetupStaticAnalysisEnvironmentOutput,\
+      \ **kwargs) -> ReRunStaticAnalysisOutput:\n    \"\"\"Re-run static analysis\
+      \ on the built OpenSSL binaries, capturing warnings, errors, and security findings,\
+      \ and produce a detailed report.\n\n    Args:\n        build_openssl_input:\
+      \ Input from the 'build_openssl' node.\n        setup_static_analysis_environment_input:\
+      \ Input from the 'setup_static_analysis_environment' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        ReRunStaticAnalysisOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ReRunStaticAnalysisOutput(\n        warnings_count=0,\n        errors_count=0,\n\
+      \        security_findings=\"\",\n        analysis_passed=False,\n        report_path=\"\
+      \",\n    )"
     name: re_run_static_analysis
     nodes_depended_on:
     - build_openssl
@@ -1010,10 +1385,43 @@ nodes:
           ensuring they match the defined output structure types.
     prompt: Perform static analysis on the compiled OpenSSL binaries using the same
       tools as before. Capture any new findings.
+    shims: []
   release_artifacts:
     agent: false
+    code_node_type: stub
     description: Prepare and publish the final OpenSSL release by bundling binaries,
       source, and documentation, then creating a version control tag.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DocumentChangesOutput(BaseModel):\n    \"\"\"Pydantic model for document_changes\
+      \ node outputs.\"\"\"\n    changelog_entries: List[str] = Field(..., description=\"\
+      Lines added to the changelog reflecting applied patches and hardening measures.\"\
+      )\n    readme_updates: List[str] = Field(..., description=\"Sections of the\
+      \ README that were updated to include new security information.\")\n    documentation_changes:\
+      \ List[str] = Field(..., description=\"Other documentation files (e.g., INSTALL,\
+      \ CONTRIBUTING) that were modified.\")\n    applied_patches: List[str] = Field(...,\
+      \ description=\"List of CVE IDs for which patches were applied.\")\n    hardening_flags:\
+      \ List[str] = Field(..., description=\"Compilation hardening flags used in the\
+      \ build.\")\n    security_findings_summary: str = Field(..., description=\"\
+      Summary of security findings extracted from the security report.\")\n    document_changes_success:\
+      \ bool = Field(..., description=\"Indicates whether the documentation update\
+      \ process completed successfully.\")\n\n\nclass ReleaseArtifactsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for release_artifacts node outputs.\"\"\"\n    artifact_package_path:\
+      \ str = Field(..., description=\"File system path to the packaged release artifacts.\"\
+      )\n    release_tag: str = Field(..., description=\"The version control tag assigned\
+      \ to this release.\")\n    documentation_files: str = Field(..., description=\"\
+      List of documentation files included in the release.\")\n    binary_files: str\
+      \ = Field(..., description=\"List of binary files included in the release.\"\
+      )\n    build_success: bool = Field(..., description=\"Indicates whether the\
+      \ packaging and tagging succeeded.\")\n\n\ndef release_artifacts(document_changes_input:\
+      \ DocumentChangesOutput, **kwargs) -> ReleaseArtifactsOutput:\n    \"\"\"Prepare\
+      \ and publish the final OpenSSL release by bundling binaries, source, and documentation,\
+      \ then creating a version control tag.\n\n    Args:\n        document_changes_input:\
+      \ Input from the 'document_changes' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        ReleaseArtifactsOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return ReleaseArtifactsOutput(\n\
+      \        artifact_package_path=\"\",\n        release_tag=\"\",\n        documentation_files=\"\
+      \",\n        binary_files=\"\",\n        build_success=False,\n    )"
     name: release_artifacts
     nodes_depended_on:
     - document_changes
@@ -1106,9 +1514,51 @@ nodes:
           to true if all previous steps succeeded, otherwise false.'
     prompt: Package the compiled OpenSSL binaries, source tarball, and documentation
       into release artifacts. Tag the release in the version control system.
+    shims: []
   run_dynamic_tests:
     agent: false
+    code_node_type: stub
     description: Execute dynamic tests on the OpenSSL source code.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CollectCurrentOpensslSourceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for collect_current_openssl_source node outputs.\"\
+      \"\"\n    repository_url: str = Field(..., description=\"The URL of the OpenSSL\
+      \ repository that was cloned.\")\n    clone_path: str = Field(..., description=\"\
+      The absolute or relative path to the local directory where the source was cloned.\"\
+      )\n    stable_release_tag: str = Field(..., description=\"The name of the latest\
+      \ stable release tag that was checked out.\")\n    commit_hash: str = Field(...,\
+      \ description=\"The full commit SHA of the source code that was cloned.\")\n\
+      \    clone_success: bool = Field(..., description=\"True if the clone operation\
+      \ completed without errors, otherwise False.\")\n\n\nclass SetupDynamicTestingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_dynamic_testing_environment node outputs.\"\
+      \"\"\n    environment_setup_success: bool = Field(..., description=\"Indicates\
+      \ whether the environment was set up successfully.\")\n    installed_packages:\
+      \ str = Field(..., description=\"List of package names that were installed as\
+      \ part of the setup.\")\n    config_file_path: str = Field(..., description=\"\
+      Path to the configuration file generated for testing.\")\n    test_binary_path:\
+      \ str = Field(..., description=\"Path to the compiled test binaries.\")\n  \
+      \  environment_variables: str = Field(..., description=\"List of environment\
+      \ variable assignments used during testing.\")\n\n\nclass RunDynamicTestsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for run_dynamic_tests node outputs.\"\"\"\n    total_tests_run:\
+      \ int = Field(..., description=\"Total number of tests executed.\")\n    tests_passed:\
+      \ int = Field(..., description=\"Number of tests that passed.\")\n    tests_failed:\
+      \ int = Field(..., description=\"Number of tests that failed.\")\n    crash_count:\
+      \ int = Field(..., description=\"Number of crashes observed during testing.\"\
+      )\n    failed_test_cases: str = Field(..., description=\"List of identifiers\
+      \ or names of tests that failed.\")\n    crash_logs: str = Field(..., description=\"\
+      List of crash log excerpts or identifiers.\")\n    test_summary: str = Field(...,\
+      \ description=\"Brief summary of test results.\")\n\n\ndef run_dynamic_tests(collect_current_openssl_source_input:\
+      \ CollectCurrentOpensslSourceOutput, setup_dynamic_testing_environment_input:\
+      \ SetupDynamicTestingEnvironmentOutput, **kwargs) -> RunDynamicTestsOutput:\n\
+      \    \"\"\"Execute dynamic tests on the OpenSSL source code.\n\n    Args:\n\
+      \        collect_current_openssl_source_input: Input from the 'collect_current_openssl_source'\
+      \ node.\n        setup_dynamic_testing_environment_input: Input from the 'setup_dynamic_testing_environment'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       RunDynamicTestsOutput: Object containing outputs for this node.\n  \
+      \  \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output with\
+      \ placeholder values\n    return RunDynamicTestsOutput(\n        total_tests_run=0,\n\
+      \        tests_passed=0,\n        tests_failed=0,\n        crash_count=0,\n\
+      \        failed_test_cases=\"\",\n        crash_logs=\"\",\n        test_summary=\"\
+      \",\n    )"
     name: run_dynamic_tests
     nodes_depended_on:
     - collect_current_openssl_source
@@ -1192,13 +1642,57 @@ nodes:
           of tests, pass/fail ratio, and crash count, formatted for readability.
     prompt: Run the full suite of OpenSSL unit and integration tests. Record any test
       failures or crashes.
+    shims: []
   run_fuzzing:
     agent: false
+    code_node_type: stub
     description: Perform fuzz testing on the OpenSSL source code by invoking a configured
       fuzzing framework (e.g., AFL or libFuzzer) on the compiled binaries generated
       from the cloned source. The process must run for a specified time window, capture
       all crash inputs and unexpected events, and produce a structured summary of
       results.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass CollectCurrentOpensslSourceOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for collect_current_openssl_source node outputs.\"\"\"\n    repository_url:\
+      \ str = Field(..., description=\"The URL of the OpenSSL repository that was\
+      \ cloned.\")\n    clone_path: str = Field(..., description=\"The absolute or\
+      \ relative path to the local directory where the source was cloned.\")\n   \
+      \ stable_release_tag: str = Field(..., description=\"The name of the latest\
+      \ stable release tag that was checked out.\")\n    commit_hash: str = Field(...,\
+      \ description=\"The full commit SHA of the source code that was cloned.\")\n\
+      \    clone_success: bool = Field(..., description=\"True if the clone operation\
+      \ completed without errors, otherwise False.\")\n\n\nclass SetupFuzzingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_fuzzing_environment node outputs.\"\"\"\n\
+      \    frameworks_configured: str = Field(..., description=\"List of fuzzing frameworks\
+      \ configured (e.g., AFL, libFuzzer).\")\n    seed_files: str = Field(..., description=\"\
+      Paths to the generated initial seed files used for fuzzing.\")\n    environment_ready:\
+      \ bool = Field(..., description=\"Indicates whether the fuzzing environment\
+      \ is fully set up and ready to run tests.\")\n    config_directory: str = Field(...,\
+      \ description=\"File system path to the directory containing fuzzing configuration\
+      \ files.\")\n\n\nclass RunFuzzingOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for run_fuzzing node outputs.\"\"\"\n    crash_ids: List[str] = Field(...,\
+      \ description=\"Identifiers (e.g., hashes) for each crash observed during fuzzing.\"\
+      )\n    crash_descriptions: List[str] = Field(..., description=\"Brief textual\
+      \ description of each crash, including affected function or module.\")\n   \
+      \ unexpected_behavior_count: int = Field(..., description=\"Total number of\
+      \ unexpected behaviors (e.g., crashes, hangs, assertion failures) detected.\"\
+      )\n    successful_run: bool = Field(..., description=\"True if fuzzing completed\
+      \ without fatal errors; otherwise False.\")\n    total_duration_seconds: int\
+      \ = Field(..., description=\"Total runtime of the fuzzing session in seconds.\"\
+      )\n\n\ndef run_fuzzing(collect_current_openssl_source_input: CollectCurrentOpensslSourceOutput,\
+      \ setup_fuzzing_environment_input: SetupFuzzingEnvironmentOutput, **kwargs)\
+      \ -> RunFuzzingOutput:\n    \"\"\"Perform fuzz testing on the OpenSSL source\
+      \ code by invoking a configured fuzzing framework (e.g., AFL or libFuzzer) on\
+      \ the compiled binaries generated from the cloned source. The process must run\
+      \ for a specified time window, capture all crash inputs and unexpected events,\
+      \ and produce a structured summary of results.\n\n    Args:\n        collect_current_openssl_source_input:\
+      \ Input from the 'collect_current_openssl_source' node.\n        setup_fuzzing_environment_input:\
+      \ Input from the 'setup_fuzzing_environment' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        RunFuzzingOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return RunFuzzingOutput(\n\
+      \        crash_ids=[],\n        crash_descriptions=[],\n        unexpected_behavior_count=0,\n\
+      \        successful_run=False,\n        total_duration_seconds=0,\n    )"
     name: run_fuzzing
     nodes_depended_on:
     - collect_current_openssl_source
@@ -1311,9 +1805,53 @@ nodes:
           a debugging flag is set, to conserve disk space.
     prompt: Execute fuzzing on OpenSSL's APIs for a predefined duration. Log any crashes
       or unexpected behavior.
+    shims: []
   run_static_analysis:
     agent: false
+    code_node_type: stub
     description: Perform static analysis on the OpenSSL source code.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CollectCurrentOpensslSourceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for collect_current_openssl_source node outputs.\"\
+      \"\"\n    repository_url: str = Field(..., description=\"The URL of the OpenSSL\
+      \ repository that was cloned.\")\n    clone_path: str = Field(..., description=\"\
+      The absolute or relative path to the local directory where the source was cloned.\"\
+      )\n    stable_release_tag: str = Field(..., description=\"The name of the latest\
+      \ stable release tag that was checked out.\")\n    commit_hash: str = Field(...,\
+      \ description=\"The full commit SHA of the source code that was cloned.\")\n\
+      \    clone_success: bool = Field(..., description=\"True if the clone operation\
+      \ completed without errors, otherwise False.\")\n\n\nclass SetupStaticAnalysisEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_static_analysis_environment node outputs.\"\
+      \"\"\n    installed_tools: str = Field(..., description=\"Names of static analysis\
+      \ tools installed in the environment.\")\n    configuration_success: bool =\
+      \ Field(..., description=\"Whether the configuration of the tools succeeded\
+      \ without errors.\")\n    environment_ready: bool = Field(..., description=\"\
+      Indicates if the environment is fully ready for static code analysis runs.\"\
+      )\n\n\nclass RunStaticAnalysisOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ run_static_analysis node outputs.\"\"\"\n    total_warnings: int = Field(...,\
+      \ description=\"Total number of warnings detected by the static analysis tools.\"\
+      )\n    total_errors: int = Field(..., description=\"Total number of errors detected\
+      \ by the static analysis tools.\")\n    total_security_issues: int = Field(...,\
+      \ description=\"Total number of potential security issues identified.\")\n \
+      \   warnings_list: str = Field(..., description=\"List of warning messages with\
+      \ file names and line numbers.\")\n    errors_list: str = Field(..., description=\"\
+      List of error messages with file names and line numbers.\")\n    security_issues_list:\
+      \ str = Field(..., description=\"List of security issue descriptions with file\
+      \ names and line numbers.\")\n    analysis_success: bool = Field(..., description=\"\
+      Indicates whether the static analysis completed without fatal failures.\")\n\
+      \    analysis_report_path: str = Field(..., description=\"File system path to\
+      \ the generated static analysis report file.\")\n\n\ndef run_static_analysis(collect_current_openssl_source_input:\
+      \ CollectCurrentOpensslSourceOutput, setup_static_analysis_environment_input:\
+      \ SetupStaticAnalysisEnvironmentOutput, **kwargs) -> RunStaticAnalysisOutput:\n\
+      \    \"\"\"Perform static analysis on the OpenSSL source code.\n\n    Args:\n\
+      \        collect_current_openssl_source_input: Input from the 'collect_current_openssl_source'\
+      \ node.\n        setup_static_analysis_environment_input: Input from the 'setup_static_analysis_environment'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       RunStaticAnalysisOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return RunStaticAnalysisOutput(\n        total_warnings=0,\n\
+      \        total_errors=0,\n        total_security_issues=0,\n        warnings_list=\"\
+      \",\n        errors_list=\"\",\n        security_issues_list=\"\",\n       \
+      \ analysis_success=False,\n        analysis_report_path=\"\",\n    )"
     name: run_static_analysis
     nodes_depended_on:
     - collect_current_openssl_source
@@ -1418,9 +1956,30 @@ nodes:
           that each list is sorted alphabetically by file name for consistency.
     prompt: Execute clang-tidy and cppcheck on the OpenSSL source tree. Capture all
       warnings, errors, and potential security issues.
+    shims: []
   setup_dynamic_testing_environment:
     agent: false
+    code_node_type: stub
     description: Prepare the environment for dynamic testing.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SetupDynamicTestingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_dynamic_testing_environment node outputs.\"\
+      \"\"\n    environment_setup_success: bool = Field(..., description=\"Indicates\
+      \ whether the environment was set up successfully.\")\n    installed_packages:\
+      \ str = Field(..., description=\"List of package names that were installed as\
+      \ part of the setup.\")\n    config_file_path: str = Field(..., description=\"\
+      Path to the configuration file generated for testing.\")\n    test_binary_path:\
+      \ str = Field(..., description=\"Path to the compiled test binaries.\")\n  \
+      \  environment_variables: str = Field(..., description=\"List of environment\
+      \ variable assignments used during testing.\")\n\n\ndef setup_dynamic_testing_environment(general_input:\
+      \ str, **kwargs) -> SetupDynamicTestingEnvironmentOutput:\n    \"\"\"Prepare\
+      \ the environment for dynamic testing.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        SetupDynamicTestingEnvironmentOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ SetupDynamicTestingEnvironmentOutput(\n        environment_setup_success=False,\n\
+      \        installed_packages=\"\",\n        config_file_path=\"\",\n        test_binary_path=\"\
+      \",\n        environment_variables=\"\",\n    )"
     name: setup_dynamic_testing_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -1507,9 +2066,28 @@ nodes:
           variable assignments.'
     prompt: Set up a build of OpenSSL with testing enabled (e.g., ./config enable-tests).
       Ensure all unit and integration tests are compiled.
+    shims: []
   setup_fuzzing_environment:
     agent: false
+    code_node_type: stub
     description: Prepare the environment for fuzz testing.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SetupFuzzingEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_fuzzing_environment node outputs.\"\"\"\n\
+      \    frameworks_configured: str = Field(..., description=\"List of fuzzing frameworks\
+      \ configured (e.g., AFL, libFuzzer).\")\n    seed_files: str = Field(..., description=\"\
+      Paths to the generated initial seed files used for fuzzing.\")\n    environment_ready:\
+      \ bool = Field(..., description=\"Indicates whether the fuzzing environment\
+      \ is fully set up and ready to run tests.\")\n    config_directory: str = Field(...,\
+      \ description=\"File system path to the directory containing fuzzing configuration\
+      \ files.\")\n\n\ndef setup_fuzzing_environment(general_input: str, **kwargs)\
+      \ -> SetupFuzzingEnvironmentOutput:\n    \"\"\"Prepare the environment for fuzz\
+      \ testing.\n\n    Args:\n        general_input: General input string for the\
+      \ root node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n\
+      \        SetupFuzzingEnvironmentOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SetupFuzzingEnvironmentOutput(\n     \
+      \   frameworks_configured=\"\",\n        seed_files=\"\",\n        environment_ready=False,\n\
+      \        config_directory=\"\",\n    )"
     name: setup_fuzzing_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -1597,9 +2175,27 @@ nodes:
           and record the `config_directory` path.'
     prompt: Configure a fuzzing framework such as AFL or libFuzzer for OpenSSL. Generate
       initial seeds for fuzzing.
+    shims: []
   setup_static_analysis_environment:
     agent: false
+    code_node_type: stub
     description: Prepare the environment for static code analysis.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass SetupStaticAnalysisEnvironmentOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for setup_static_analysis_environment node outputs.\"\
+      \"\"\n    installed_tools: str = Field(..., description=\"Names of static analysis\
+      \ tools installed in the environment.\")\n    configuration_success: bool =\
+      \ Field(..., description=\"Whether the configuration of the tools succeeded\
+      \ without errors.\")\n    environment_ready: bool = Field(..., description=\"\
+      Indicates if the environment is fully ready for static code analysis runs.\"\
+      )\n\n\ndef setup_static_analysis_environment(general_input: str, **kwargs) ->\
+      \ SetupStaticAnalysisEnvironmentOutput:\n    \"\"\"Prepare the environment for\
+      \ static code analysis.\n\n    Args:\n        general_input: General input string\
+      \ for the root node.\n        **kwargs: Additional keyword arguments.\n\n  \
+      \  Returns:\n        SetupStaticAnalysisEnvironmentOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return SetupStaticAnalysisEnvironmentOutput(\n\
+      \        installed_tools=\"\",\n        configuration_success=False,\n     \
+      \   environment_ready=False,\n    )"
     name: setup_static_analysis_environment
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -1650,9 +2246,36 @@ nodes:
           any errors or warnings that indicate misconfiguration.
     prompt: Install static analysis tools such as clang-tidy and cppcheck. Configure
       them with default OpenSSL coding standards.
+    shims: []
   verify_build_security:
     agent: false
+    code_node_type: stub
     description: Validate the security of the built binaries.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass BuildOpensslOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for build_openssl node outputs.\"\"\"\n    binary_artifacts_path:\
+      \ str = Field(..., description=\"Filesystem path to the directory containing\
+      \ compiled OpenSSL binaries.\")\n    build_success: bool = Field(..., description=\"\
+      Indicates whether the build completed without errors.\")\n    build_log: str\
+      \ = Field(..., description=\"Textual log of the build process.\")\n    artifact_names:\
+      \ str = Field(..., description=\"List of names of generated binary artifacts\
+      \ (e.g., libssl.so, libcrypto.so).\")\n    build_duration_seconds: int = Field(...,\
+      \ description=\"Total time taken for the build in seconds.\")\n\n\nclass VerifyBuildSecurityOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for verify_build_security node outputs.\"\"\"\n  \
+      \  scan_tool_used: str = Field(..., description=\"Name of the security scanner\
+      \ tool used (e.g., OPA, Snyk).\")\n    vulnerability_count: int = Field(...,\
+      \ description=\"Total number of vulnerabilities found by the scanner.\")\n \
+      \   vulnerability_ids: str = Field(..., description=\"List of CVE IDs or internal\
+      \ identifiers for each detected vulnerability.\")\n    security_passed: bool\
+      \ = Field(..., description=\"True if no critical vulnerabilities were found;\
+      \ otherwise False.\")\n\n\ndef verify_build_security(build_openssl_input: BuildOpensslOutput,\
+      \ **kwargs) -> VerifyBuildSecurityOutput:\n    \"\"\"Validate the security of\
+      \ the built binaries.\n\n    Args:\n        build_openssl_input: Input from\
+      \ the 'build_openssl' node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        VerifyBuildSecurityOutput: Object containing outputs\
+      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return VerifyBuildSecurityOutput(\n\
+      \        scan_tool_used=\"\",\n        vulnerability_count=0,\n        vulnerability_ids=\"\
+      \",\n        security_passed=False,\n    )"
     name: verify_build_security
     nodes_depended_on:
     - build_openssl
@@ -1733,3 +2356,4 @@ nodes:
           and log any schema violations before returning the result.
     prompt: Run security scanners (e.g., OPA, Snyk) on the compiled binaries to detect
       any remaining vulnerabilities.
+    shims: []
