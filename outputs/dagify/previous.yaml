@@ -1,10 +1,12 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: symbolic_regression_framework_with_llm
 nodes:
   configure_llm_for_proposal_generation:
     agent: false
-    description: Configure the LLM for generating proposals for symbolic regression
+    description: Configure all necessary LLM parameters and templates to produce symbolic
+      regression proposals that respect the defined objective, constraints, and data
+      schema.
     name: configure_llm_for_proposal_generation
     nodes_depended_on:
     - define_symbolic_regression_objective
@@ -30,11 +32,82 @@ nodes:
     - description: Number of independent proposal samples the LLM should generate
       key: num_proposals
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use JSON parsing and schema validation to map parent fields to local
+          variables, ensuring no required field is missing.
+        reason: These elements inform the LLM configuration and prompt template to
+          ensure proposals align with the task.
+        text: Parse the parent output to extract the objective description, target
+          variable, feature variables, constraints, performance metrics, and dataset
+          description.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Define a priority list (e.g., ["gpt-4o", "llama-3.1", "openai-gpt-3.5"]),
+          query availability via the provider SDK, and choose the first available
+          model.
+        reason: Model choice directly affects proposal quality and latency.
+        text: Select a default model name based on the target language and available
+          API endpoints; fallback to a safe open‑source model if the preferred one
+          is unavailable.
+      - complexity: LOW
+        impact: MEDIUM
+        method: If constraints specify strict compliance, enforce temperature ≤ 0.3;
+          otherwise use a heuristic based on the complexity of feature_variables.
+        reason: Lower temperature reduces randomness, producing more stable symbolic
+          expressions suitable for downstream evaluation.
+        text: Determine the temperature setting by balancing exploration and precision;
+          default to 0.2 for symbolic regression to favor deterministic, interpretable
+          formulas.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Implement a lightweight estimator that counts tokens for a sample
+          expression and scales accordingly.
+        reason: Ensures enough token space for complex expressions without wasting
+          resources.
+        text: Compute max_tokens by estimating the typical length of symbolic expressions
+          from past runs and adding a buffer; use a formula such as max_tokens = 2
+          * (number_of_features * 5).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Define the template as a Python multiline string with `{objective}`,
+          `{data_description}`, and `{target_variable}` placeholders. Wrap instructions
+          in a JSON object with keys "instruction" and "input" for compatibility with
+          many LLM APIs.
+        reason: A well‑structured template reduces hallucinations and improves the
+          LLM's focus on symbolic content.
+        text: Construct a prompt_template that injects the objective and dataset description,
+          and includes placeholders for the model to output a single symbolic expression
+          per sample. The template should be JSON‑serializable and contain a clear
+          instruction section.
+      - complexity: LOW
+        impact: HIGH
+        method: Serialize a Python dictionary to pretty‑printed JSON and embed it
+          in the prompt_template or provide it as a separate configuration field.
+        reason: Providing a concrete schema guides the LLM in generating syntactically
+          correct expressions and aids downstream validation.
+        text: Generate an input_schema string that describes the expected JSON input
+          the LLM will receive during generation. Include fields for feature_variables,
+          target_variable, and constraints, with data types and example values.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Implement a rule: if len(feature_variables) > 10 then num_proposals
+          = 20 else num_proposals = 10; allow overrides via an optional configuration
+          flag.'
+        reason: More proposals increase the chance of finding high‑quality formulas
+          but consume more API calls.
+        text: Decide the number of proposals (num_proposals) by evaluating the size
+          of the feature set and the evaluation budget; default to 10 proposals for
+          moderate feature sizes, scaling up to 20 if computational resources allow.
     prompt: Set up the LLM with the necessary parameters and input format for generating
       symbolic regression proposals based on the defined objective.
   define_symbolic_regression_objective:
     agent: false
-    description: Define the objective and scope of the symbolic regression task
+    description: Define the objective and scope of the symbolic regression task by
+      collecting a high‑level problem statement, identifying the dependent and independent
+      variables, and setting constraints and performance metrics.
     name: define_symbolic_regression_objective
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -47,21 +120,75 @@ nodes:
       type: str
     - description: List of independent variable names available for modeling
       key: feature_variables
-      type: List[str]
+      type: str
     - description: Explicit constraints or domain rules that models must satisfy
       key: constraints
-      type: List[str]
+      type: str
     - description: Metrics to evaluate model quality (e.g., R², MAE, complexity)
       key: performance_metrics
-      type: List[str]
+      type: str
     - description: Brief description of the data source or sampling strategy
       key: dataset_description
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Design the template using JSON Schema, enforce required fields, and
+          include regex validators for variable names. Use a front‑end form library
+          (e.g., React with Formik) to render the questionnaire.
+        reason: A structured template reduces ambiguity, guides the user to provide
+          all necessary information, and enables automated parsing of responses.
+        text: Create a structured questionnaire template that includes sections for
+          a problem narrative, target variable selection, feature list, constraints,
+          metrics, and dataset description, ensuring each field has a clear label,
+          tooltip, and validation rules.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Write a script that reads the first row of the CSV or Parquet file,
+          extracts column names, and maps them to feature_variables. Use a lookup
+          table for standard metrics.
+        reason: Providing sensible defaults speeds up input and reduces errors, especially
+          for large feature sets.
+        text: Pre‑populate the template with defaults derived from the dataset metadata
+          when available (e.g., infer feature names from column headers, suggest common
+          metrics like R² and MAE).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a Python validation library (pydantic or marshmallow) to enforce
+          these rules and produce user‑friendly error messages.
+        reason: Early validation prevents downstream failures in LLM prompts and model
+          generation.
+        text: 'Implement a validation step that checks for consistency: target_variable
+          must be one of the column names; at least two feature_variables must be
+          provided; constraints must reference existing variables.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Implement a simple string interpolation routine in Python, using list
+          joins for arrays, and trim whitespace.
+        reason: Automating the description ensures consistency and embeds all essential
+          information for the LLM prompt.
+        text: 'Generate the objective_description by concatenating the problem narrative
+          with the selected target and feature set, using a templated sentence: "Develop
+          a symbolic regression model to predict [target_variable] as a function of
+          [feature_variables], under the constraints: [constraints], aiming to optimize
+          [performance_metrics]."'
+      - complexity: LOW
+        impact: HIGH
+        method: Use Python's `json` module to serialize the dictionary, validate against
+          the JSON Schema, and push to an in‑memory store (e.g., Redis) or a workflow
+          engine's state store.
+        reason: Structured JSON enables downstream nodes to consume the data without
+          manual parsing.
+        text: Export the completed response as a JSON object matching the defined
+          output structure, and store it in a central repository or pass it directly
+          to the next node via a message queue.
     prompt: Specify the problem to be solved using symbolic regression, including
       the target variable and relevant constraints.
   evaluate_proposal_quality:
     agent: false
-    description: Evaluate the quality of the generated symbolic regression proposals
+    description: Assess the generated proposals using relevant metrics such as accuracy,
+      complexity, and interpretability.
     name: evaluate_proposal_quality
     nodes_depended_on:
     - generate_symbolic_regression_proposals
@@ -72,22 +199,112 @@ nodes:
       type: List[str]
     - description: Accuracy metric of each proposal (e.g., R² or mean squared error)
       key: accuracy
-      type: float
+      type: List[float]
     - description: Complexity score based on the structural size of the symbolic expression
       key: complexity
-      type: float
+      type: List[float]
     - description: Interpretability score ranging from 0 (poor) to 1 (high), reflecting
         how easily a human can understand the formula
       key: interpretability
-      type: float
+      type: List[float]
     - description: Composite quality score combining accuracy, complexity, and interpretability
       key: overall_quality
-      type: float
-    prompt: Assess the generated proposals using relevant metrics such as accuracy,
-      complexity, and interpretability.
+      type: List[float]
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Simple boolean check; log and return empty lists if false.
+        reason: Early exit avoids wasted computation on syntactically invalid proposals.
+        text: Validate the `proposals_valid` flag from the parent node and abort evaluation
+          if it is false.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Iterate over `proposal_expressions` and generate ID strings.
+        reason: Consistent IDs are required for downstream selection and traceability.
+        text: Assign a deterministic unique identifier to each proposal by concatenating
+          the node name with its index (e.g., `eval_0`).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `sympy.sympify`; handle parsing errors with try‑except and mark
+          such proposals as invalid.
+        reason: Converting to a parse tree allows systematic traversal for metric
+          calculations.
+        text: Parse each proposal string into an evaluatable expression tree using
+          SymPy or a similar symbolic library.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read CSV/SQL or use pre‑loaded DataFrame; validate column names match
+          `feature_variables` and `target_variable`.
+        reason: Accuracy metrics require actual data for prediction.
+        text: Load the training dataset from the `define_symbolic_regression_objective`
+          context, ensuring alignment of feature and target variables.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Vectorize evaluation using `numpy` arrays; handle division by zero
+          and overflow by clipping results.
+        reason: Predictions are needed to compute accuracy.
+        text: For each expression, evaluate predictions on the training dataset by
+          substituting feature values.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `sklearn.metrics.r2_score`; compute MSE with `sklearn.metrics.mean_squared_error`
+          if required.
+        reason: R² provides an interpretable measure of explained variance; fallback
+          ensures metric availability.
+        text: Compute the accuracy metric as the coefficient of determination R².
+          If R² calculation fails (e.g., constant prediction), fall back to negative
+          mean squared error.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Traverse the SymPy expression tree; count nodes and compute depth;
+          divide by max across all proposals.
+        reason: Normalized complexity facilitates fair comparison and weighting.
+        text: Calculate the structural complexity as the number of operators plus
+          parentheses depth, normalizing by the maximum complexity seen across proposals.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: 'Compute a raw score as: 1 - (depth / max_depth + operator_penalty
+          + variable_penalty); clip to [0,1].'
+        reason: Interpretability is subjective; a rule‑based heuristic offers consistency.
+        text: Derive an interpretability score between 0 and 1 using a heuristic that
+          penalizes nested functions, uncommon operators, and excessive variable usage.
+      - complexity: LOW
+        impact: HIGH
+        method: overall_quality = 0.4*accuracy + 0.3*(1 - normalized_complexity) +
+          0.3*interpretability.
+        reason: Weighted sum balances performance with simplicity and human readability.
+        text: Combine accuracy, inverse complexity, and interpretability into an overall
+          quality score using the weighting scheme 0.4, 0.3, 0.3 respectively.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Append each metric to its respective list; ensure all lists share
+          the same length.
+        reason: Structured output is required for downstream nodes.
+        text: Collect all computed metrics into lists aligned with proposal IDs and
+          output them following the defined schema.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use Python logging; set metric values to `float('nan')`.
+        reason: Transparency in evaluation aids debugging and future refinement.
+        text: Log any proposals that triggered warnings (e.g., division by zero, overflow)
+          and optionally set their metrics to NaN to flag them for review.
+    prompt: "For each symbolic regression proposal produced by the LLM:\n1. Assign\
+      \ a unique identifier.\n2. Parse the proposal string into an evaluatable expression.\n\
+      3. Using the training dataset defined in `define_symbolic_regression_objective`,\
+      \ compute predictions and evaluate the model against the target variable.\n\
+      4. Compute the following metrics:\n   * **Accuracy** – R² score (or MSE if R²\
+      \ is not available).\n   * **Complexity** – structural size of the expression\
+      \ (number of operators or tree depth).\n   * **Interpretability** – a heuristic\
+      \ score between 0 and 1 based on operator diversity, presence of domain‑specific\
+      \ functions, and expression depth.\n5. Combine the three metrics into a composite\
+      \ `overall_quality` score using a weighted sum (weights 0.4 for accuracy, 0.3\
+      \ for inverse complexity, 0.3 for interpretability).\n6. Return the results\
+      \ in the specified output structure."
   finalize_symbolic_regression_framework:
     agent: false
-    description: Finalize the symbolic regression framework based on test results
+    description: Finalizes the symbolic regression framework by applying adjustments
+      informed by test results, ensuring robustness and documenting the outcome.
     name: finalize_symbolic_regression_framework
     nodes_depended_on:
     - test_symbolic_regression_framework
@@ -113,8 +330,147 @@ nodes:
     - description: Interpretability metric of the finalized model
       key: final_performance_interpretability
       type: float
-    prompt: Make any necessary adjustments to the framework based on the test results,
-      ensuring it is robust and effective.
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Destructure the JSON object received from *test_symbolic_regression_framework*
+          into variables: test_accuracy, test_rmse, test_runtime_seconds, test_success,
+          test_dataset_names, test_summary.'
+        reason: Ensures all necessary metrics are available for decision making.
+        text: Retrieve test results from the parent node and store each field in local
+          variables for analysis.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Implement a conditional guard: if !test_success then set framework_version
+          = original, adjustments_summary = ''No changes due to failure'', is_framework_robust
+          = False, and skip further steps.'
+        reason: Prevents unnecessary computations when foundational performance criteria
+          are not met.
+        text: Validate `test_success`. If `False`, log the failure reasons from `test_summary`
+          and exit the adjustment process early, returning the original framework
+          version and a robustness flag of `False`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Compare metrics to thresholds; if violated, invoke a tuning routine
+          that re‑optimizes parameters such as mutation rate, population size, or
+          expression depth.
+        reason: Directly targets the primary predictive quality metrics.
+        text: Examine `test_accuracy` and `test_rmse` against predefined thresholds
+          (e.g., accuracy ≥ 0.90, RMSE ≤ 0.05). If either metric is outside the acceptable
+          range, schedule a hyper‑parameter tuning session using the best‑performing
+          proposals.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Query the system cache or storage for the outputs of *integrate_refined_proposals_into_framework*;
+          extract the `integrated_proposals` array.
+        reason: These expressions are the basis for computing complexity and interpretability.
+        text: Retrieve the list of integrated symbolic proposals from the *integrate_refined_proposals_into_framework*
+          node, which contains `integrated_proposals` and `integration_log`.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: For each expression, use `sympy.sympify` to create an expression tree,
+          then traverse the tree to count operators (`+`, `-`, `*`, `/`, `**`, `log`,
+          etc.) and compute tree depth. Sum or average across all expressions to produce
+          a single float.
+        reason: Provides an objective, quantifiable measure of model size that aligns
+          with the complexity metric.
+        text: Compute `final_performance_complexity` by parsing each integrated expression
+          with SymPy, counting the number of operators and the depth of the syntax
+          tree, and aggregating the results (e.g., average operator count).
+      - complexity: MEDIUM
+        impact: LOW
+        method: 'For each expression, check for presence of functions beyond `+`,
+          `-`, `*`, `/`. Compute depth via SymPy; interpretability_score = (is_simple
+          ? 1.0 : 0.0) / (depth + 1). Aggregate across proposals.'
+        reason: Captures human readability while penalizing deep, complex structures.
+        text: 'Estimate `final_performance_interpretability` by applying an interpretability
+          heuristic: assign a base score of 1.0 for expressions containing only arithmetic
+          operators and 0 for those that include non‑standard functions (e.g., `exp`,
+          `sin`, `log`). Weight scores by the inverse of tree depth and average across
+          expressions.'
+      - complexity: LOW
+        impact: LOW
+        method: 'Parse the current framework version string (e.g., `v1.2`), apply
+          semantic versioning rules: if any tuning or simplification changes only,
+          increment minor; if architecture changes, increment major and reset minor.'
+        reason: Versioning communicates the extent of changes to downstream users.
+        text: Determine the new `framework_version` by incrementing the minor semantic
+          version if adjustments are minor (e.g., only tuning or simplification),
+          or the major version if a structural redesign (e.g., new integration strategy)
+          was performed.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Build a string by concatenating bullet points: e.g., ''- Tuned mutation
+          rate from 0.05 to 0.02, improving accuracy by 0.004''.'
+        reason: Provides traceability and aids future maintenance.
+        text: Compose an `adjustments_summary` that lists each change made, including
+          the type of adjustment (tuning, simplification, re‑integration) and its
+          quantitative impact (e.g., accuracy improvement, complexity reduction).
+      - complexity: LOW
+        impact: HIGH
+        method: Implement a boolean expression that evaluates all conditions; assign
+          result to `is_framework_robust`.
+        reason: Defines a comprehensive robustness criterion covering accuracy, error,
+          complexity, and interpretability.
+        text: Set `is_framework_robust` to `True` only if `test_success` is `True`
+          and `test_accuracy` ≥ 0.90, `test_rmse` ≤ 0.05, `final_performance_complexity`
+          ≤ acceptable complexity threshold, and `final_performance_interpretability`
+          ≥ 0.7.
+      - complexity: LOW
+        impact: LOW
+        method: Serialize the variables into the prescribed JSON schema.
+        reason: Produces the final artifact expected by downstream nodes.
+        text: 'Populate the output JSON with the computed fields: `framework_version`,
+          `adjustments_summary`, `is_framework_robust`, `final_performance_accuracy`,
+          `final_performance_complexity`, and `final_performance_interpretability`.'
+    prompt: '## Finalization Prompt
+
+
+      You have received the test results from the *test_symbolic_regression_framework*
+      node:
+
+      - `test_accuracy`: overall accuracy
+
+      - `test_rmse`: root mean squared error
+
+      - `test_runtime_seconds`: total runtime
+
+      - `test_success`: boolean indicating if performance thresholds were met
+
+      - `test_dataset_names`: names of datasets used
+
+      - `test_summary`: concise textual observations
+
+
+      **Task**: Analyse these metrics to determine whether the current symbolic regression
+      framework is robust. If adjustments are needed, identify the specific modifications
+      (e.g., hyper‑parameter tuning, expression simplification, additional training
+      data, or architecture changes). Then:
+
+      1. Assign a new semantic `framework_version` (e.g., v1.1, v2.0). Increment the
+      minor version for small tweaks, major for significant redesigns.
+
+      2. Produce an `adjustments_summary` that lists the changes applied.
+
+      3. Set `is_framework_robust` to `True` only if `test_success` is `True` **and**
+      all key metrics (accuracy, runtime, complexity, interpretability) fall within
+      pre‑defined thresholds.
+
+      4. Capture `final_performance_accuracy` from `test_accuracy`.
+
+      5. Compute `final_performance_complexity` by parsing the integrated symbolic
+      expressions (retrieved from the *integrate_refined_proposals_into_framework*
+      node) and summing the number of operators or tree depth.
+
+      6. Compute `final_performance_interpretability` using an interpretability heuristic:
+      assign 1.0 for expressions with only basic arithmetic and 0 for those using
+      exotic functions; compute a weighted average.
+
+
+      Output a JSON with the fields defined below.
+
+      '
   generate_symbolic_regression_proposals:
     agent: false
     description: Generate proposals for symbolic regression using the configured LLM
@@ -126,15 +482,15 @@ nodes:
     - description: The symbolic regression expressions generated by the LLM, each
         represented as a string.
       key: proposal_expressions
-      type: List[str]
+      type: str
     - description: Integer complexity scores for each proposal, indicating the number
         of operators or depth of the expression tree.
       key: proposal_complexities
-      type: List[int]
+      type: int
     - description: Confidence or probability estimates for each proposal, ranging
         from 0.0 to 1.0.
       key: proposal_confidences
-      type: List[float]
+      type: float
     - description: Total number of proposals generated.
       key: proposal_count
       type: int
@@ -142,11 +498,88 @@ nodes:
         correctness).
       key: proposals_valid
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: 'Deserialize the parent output JSON into a dictionary and extract
+          keys: model_name, temperature, max_tokens, prompt_template, input_schema,
+          num_proposals.'
+        reason: The LLM must be invoked with the same parameters that were intentionally
+          configured for proposal generation to ensure consistent behavior.
+        text: Retrieve LLM configuration parameters from the parent node `configure_llm_for_proposal_generation`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Parse `define_symbolic_regression_objective` output; create a JSON
+          object with keys: objective_description, target_variable, feature_variables,
+          constraints, performance_metrics, dataset_description. Use JSON schema validation
+          libraries to enforce `input_schema` compliance.'
+        reason: The LLM prompt template expects structured data; mismatched formats
+          will cause the model to fail or produce nonsense.
+        text: Validate and transform the objective description and dataset into a
+          JSON payload that matches `input_schema`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use Python f-string or `jinja2` templating to replace placeholders
+          like {{objective_json}} within the template.
+        reason: Embedding the objective and data into the prompt ensures the LLM generates
+          contextually relevant expressions.
+        text: Populate the `prompt_template` with the objective JSON and any required
+          placeholders.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use the OpenAI or vendor-specific SDK to call `model_name` with `temperature`
+          and `max_tokens`. If `num_proposals` > 1, loop or use `n` sampling parameter.
+          Capture raw text responses.
+        reason: Directly controlling sampling and token limits guarantees the output
+          stays within the desired size and diversity.
+        text: Invoke the LLM using the specified `model_name`, `temperature`, `max_tokens`,
+          and `num_proposals`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'First, attempt to parse as JSON array. If fails, split by newline
+          and regex pattern `^Proposal \d+: (.+)$`. Clean leading/trailing whitespace.'
+        reason: The LLM may return proposals separated by newlines, bullets, or JSON;
+          a robust parser reduces errors.
+        text: Parse the raw LLM output into individual proposal strings.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Utilize `sympy.sympify` in a try/except block for each expression.
+          If parsing fails, mark the entire set as invalid and log the error.
+        reason: Invalid expressions would corrupt downstream evaluation and evaluation
+          metrics.
+        text: Validate syntactic correctness of each proposal expression using a symbolic
+          algebra parser.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Parse the expression into an AST using `sympy` and count nodes (operators,
+          functions). Return the node count as an integer.
+        reason: Complexity is a key evaluation metric and required output.
+        text: Compute a complexity score for each proposal.
+      - complexity: LOW
+        impact: MEDIUM
+        method: If LLM provides a probability (e.g., via logit or explicit field),
+          normalize to [0,1]. Otherwise, use uniform confidence of 1/num_proposals
+          or apply a simple heuristic based on expression length (shorter = higher
+          confidence).
+        reason: Confidence informs downstream ranking and selection.
+        text: Assign a confidence score for each proposal.
+      - complexity: LOW
+        impact: HIGH
+        method: Collect lists of expressions, complexities, confidences; compute len(list)
+          for proposal_count; set proposals_valid to True if all expressions parsed
+          successfully, else False.
+        reason: Ensures conformity to the defined output schema and provides a clear
+          success flag.
+        text: Aggregate all metrics into the final output dictionary and set `proposal_count`
+          and `proposals_valid`.
     prompt: Use the configured LLM to generate a set of symbolic regression proposals
       based on the defined objective and input data.
   integrate_refined_proposals_into_framework:
     agent: false
-    description: Integrate the refined proposals into the symbolic regression framework
+    description: Take the list of refined symbolic regression expressions, validate
+      and adapt them to the framework’s internal representation, register them for
+      future use, and produce a concise integration log.
     name: integrate_refined_proposals_into_framework
     nodes_depended_on:
     - refine_selected_proposals
@@ -164,63 +597,324 @@ nodes:
     - description: Log or summary of the integration process.
       key: integration_log
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Direct list assignment and initialization.
+        reason: Establish a working container for the processed equations.
+        text: Retrieve the `refined_proposals` list from the parent node and initialize
+          an empty list `integrated_proposals`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Apply the framework’s `parse_expression` API; catch and log parsing
+          errors.
+        reason: Guarantees that only syntactically valid equations proceed to integration,
+          preventing downstream failures.
+        text: For each equation string in `refined_proposals`, perform syntactic validation
+          using the framework’s parser to ensure the expression is tree‑compliant
+          and free of undefined variables.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Iterate over constraint list, flag mismatches, and record a validation
+          status.
+        reason: Enforces domain constraints specified in the objective definition,
+          ensuring model feasibility.
+        text: Cross‑check each validated equation against the framework’s constraint
+          set (e.g., variable names, allowed operators) derived from `define_symbolic_regression_objective`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Call `framework.build_model(eq_str)`; store returned object in a registry.
+        reason: Converts raw text into an executable model representation for later
+          use in training/testing.
+        text: Transform each validated string into an internal `SymbolicModel` object
+          by invoking the framework’s `build_model` routine, capturing metadata such
+          as complexity score and operator counts.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `framework.register_model(model_obj, id)` with collision handling.
+        reason: Allows the framework and downstream nodes (e.g., testing) to reference
+          the integrated models consistently.
+        text: Register each `SymbolicModel` instance in the framework’s global model
+          registry under a unique identifier (e.g., UUID or proposal ID).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Aggregate boolean flags and counts; set `integration_success` accordingly.
+        reason: Provides a concise, machine‑readable result for downstream nodes.
+        text: 'After all proposals are processed, compile a summary: count of successful
+          integrations, any failures, and overall status flag based on whether any
+          model failed validation or registration.'
+      - complexity: LOW
+        impact: LOW
+        method: String concatenation using a formatted log template.
+        reason: Facilitates debugging, audit trails, and stakeholder communication.
+        text: Generate a human‑readable `integration_log` capturing timestamps, number
+          of proposals, validation errors, registration steps, and a short success/failure
+          message.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Conditional appending based on validation flag.
+        reason: Ensures the output list reflects only usable models and prevents downstream
+          errors.
+        text: If any proposal failed validation, record the specific reason and exclude
+          it from `integrated_proposals`; otherwise, include the fully registered
+          model’s string representation.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Direct assignment to output fields before returning.
+        reason: Completes the node’s contract per the defined output structure.
+        text: 'Return the final outputs: `integrated_proposals` (list of strings),
+          `integration_success` (bool), `integrated_count` (int), and `integration_log`
+          (string).'
     prompt: Incorporate the refined proposals into the overall framework, ensuring
       compatibility and optimal performance.
   refine_selected_proposals:
     agent: false
-    description: Refine the selected proposals to improve their quality and robustness
+    description: This node takes the top symbolic regression proposals identified
+      by the selection step, refines them through optimization (e.g., hyperparameter
+      tuning, ensembling, or simplification), re-evaluates their predictive accuracy
+      and complexity, and outputs the improved expressions along with metrics that
+      quantify the gains.
     name: refine_selected_proposals
     nodes_depended_on:
     - select_top_proposals
     nodes_dependent_on: []
     output_structure:
-    - description: List of symbolic regression expressions that have been refined
+    - description: List of symbolic regression expressions that have been refined.
       key: refined_proposals
       type: List[str]
     - description: Absolute improvement in predictive accuracy compared to the original
-        top proposals
+        top proposals.
       key: accuracy_improvement
       type: float
     - description: Net change in model complexity (negative indicates simplification,
-        positive indicates added complexity)
+        positive indicates added complexity).
       key: complexity_change
       type: int
     - description: Overall interpretability score of the refined proposals on a scale
-        from 0.0 (least interpretable) to 1.0 (most interpretable)
+        from 0.0 (least interpretable) to 1.0 (most interpretable).
       key: interpretability_score
       type: float
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Deserialize the JSON payload from the previous node, map each `top_proposal_ids`
+          to its corresponding evaluation metrics stored in a shared data store (e.g.,
+          a key‑value map).
+        reason: The refinement process requires baseline metrics to compute improvements
+          and to know which proposals to work on.
+        text: Retrieve the list of top proposal IDs and their original accuracy, complexity,
+          and interpretability scores from the output of the `select_top_proposals`
+          node.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Invoke `sympy.sympify` with custom `locals` mapping to restrict available
+          functions to the domain (e.g., sin, log, exp). Handle parse errors by flagging
+          the proposal as invalid and excluding it from refinement.
+        reason: AST representation enables systematic manipulation for hyperparameter
+          tuning, simplification, and ensembling.
+        text: For each selected proposal, parse the symbolic expression string into
+          an abstract syntax tree (AST) using a domain‑specific parser (e.g., `sympy.sympify`
+          with safe evaluation settings).
+      - complexity: HIGH
+        impact: HIGH
+        method: Define a cost function that evaluates the MSE on a validation split,
+          constrain coefficient bounds based on domain knowledge, and run a fixed
+          number of acquisition iterations. Store the best coefficient set.
+        reason: Symbolic regression coefficients often have nonlinear effects; Bayesian
+          Optimization efficiently explores the parameter space with few evaluations.
+        text: Apply hyperparameter tuning to each AST by optimizing the coefficients
+          and variable transformations using a gradient‑free optimizer (e.g., Bayesian
+          Optimization with the `scikit-optimize` library).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Generate `n` tuned copies (n=5) by re‑running the hyperparameter search
+          with different seeds, then compute the mean predicted value for each input
+          sample during evaluation.
+        reason: Ensembling reduces variance and often improves predictive accuracy
+          without drastically increasing complexity.
+        text: Create an ensemble model by averaging predictions from multiple independently
+          tuned variants of the same proposal (e.g., using different random seeds
+          or data bootstraps).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Apply a sequence of sympy simplification passes, validate that the
+          simplified expression does not change predictions beyond a tolerance, and
+          record the new node count.
+        reason: Simplification can reduce complexity while preserving predictive power,
+          directly impacting the complexity_change metric.
+        text: Simplify the ensemble’s symbolic expression by applying tree‑based reduction
+          rules (e.g., `sympy.simplify`, `sympy.trigsimp`, `sympy.expand` with `force=True`)
+          to remove redundant terms and combine like components.
+      - complexity: LOW
+        impact: HIGH
+        method: Use the same preprocessing pipeline as the original evaluation, predict
+          with the refined AST, and compute metrics with `sklearn.metrics`.
+        reason: Accurate measurement of improvement is essential to quantify the benefit
+          of refinement.
+        text: Evaluate each refined proposal on an unseen test split to obtain new
+          accuracy metrics (e.g., R² or MSE) and compute `accuracy_improvement` by
+          subtracting the original accuracy.
+      - complexity: LOW
+        impact: LOW
+        method: Count AST nodes using `sympy.count_ops` or a custom traversal; subtract
+          original complexity.
+        reason: This metric quantifies whether the refinement simplified or bloated
+          the model.
+        text: Compute `complexity_change` as the difference between the new AST node
+          count and the original proposal’s complexity score.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Define `syntactic_score = 1 - (num_unary_ops / total_nodes)`, `readability_score
+          = max(0, (max_length - expr_length) / max_length)`, then average the two
+          scores.
+        reason: Interpretability is a key requirement; a composite score captures
+          both structural simplicity and readability.
+        text: Estimate the `interpretability_score` of the refined proposals by combining
+          a syntactic interpretability heuristic (e.g., ratio of unary operators to
+          total nodes) with a human‑readability metric derived from the length of
+          the expression string.
+      - complexity: LOW
+        impact: LOW
+        method: Call `str(sympy_expr)` and apply any necessary post‑processing (e.g.,
+          removing whitespace, normalizing function names).
+        reason: The framework expects expressions as plain strings; consistent formatting
+          aids debugging and logging.
+        text: Serialize the refined AST back into string representation using `sympy.srepr`
+          or `sympy.pretty`, ensuring consistent formatting for downstream integration.
+      - complexity: LOW
+        impact: HIGH
+        method: Use a JSON library to build an object with the correct field names
+          and types, then write to stdout or a temporary file as per platform conventions.
+        reason: Clear and type‑safe output is required for the next node’s ingestion.
+        text: Package all outputs into the defined output structure, including `refined_proposals`,
+          `accuracy_improvement`, `complexity_change`, and `interpretability_score`
+          as JSON values.
     prompt: Apply techniques such as hyperparameter tuning or ensemble methods to
       refine the selected proposals and enhance their performance.
   select_top_proposals:
     agent: false
-    description: Select the top proposals based on their evaluated quality
+    description: Select the top proposals based on their evaluated quality, using
+      a top‑k strategy.
     name: select_top_proposals
     nodes_depended_on:
     - evaluate_proposal_quality
     nodes_dependent_on: []
     output_structure:
-    - description: Identifiers (or indices) of the proposals selected as top candidates.
+    - description: Identifiers of the proposals selected as top candidates.
       key: top_proposal_ids
-      type: List[str]
-    - description: Quality score for each selected proposal, reflecting metrics such
-        as accuracy, complexity, and interpretability.
+      type: str
+    - description: Quality scores for each selected proposal, reflecting accuracy,
+        complexity, and interpretability.
       key: top_proposal_scores
-      type: List[float]
+      type: float
     - description: Number of proposals selected.
       key: selected_count
       type: int
-    - description: The rule or threshold used for selection (e.g., "top-k by score"
-        or "score > 0.8").
+    - description: The rule or threshold used for selection (e.g., "top‑3 by overall_quality").
       key: selection_criteria
       type: str
     - description: Indicates whether the selection process completed without errors.
       key: is_successful
       type: bool
-    prompt: Choose the best proposals based on their quality metrics, considering
-      factors such as performance and simplicity.
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a pre‑processing step that checks `len(proposal_ids) == len(accuracy)
+          == len(complexity) == len(interpretability) == len(overall_quality)` and
+          that the length is > 0. If not, log the discrepancy and skip further processing.
+        reason: Ensures data integrity before processing; prevents index errors and
+          guarantees meaningful results.
+        text: Validate that all input arrays (`proposal_ids`, `accuracy`, `complexity`,
+          `interpretability`, `overall_quality`) are non‑empty and have the same length.
+          If validation fails, set `is_successful` to `false` and return empty arrays
+          for all outputs.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Set `k = min(3, len(proposal_ids))`.
+        reason: Adheres to the specification of a top‑3 selection while gracefully
+          handling datasets with fewer proposals.
+        text: Determine the number of proposals to select, `k`, as the minimum of
+          3 and the total number of proposals available.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Use `sorted(zip(proposal_ids, overall_quality), key=lambda x: x[1],
+          reverse=True)`.'
+        reason: Facilitates efficient extraction of the top‑k proposals based on a
+          single composite metric.
+        text: Create a list of tuples pairing each proposal ID with its corresponding
+          `overall_quality` score, then sort this list in descending order of `overall_quality`.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Use list comprehensions: `top_ids = [id for id, score in top_k]`
+          and `top_scores = [score for id, score in top_k]`.'
+        reason: Directly populates the output fields as required by the schema.
+        text: Slice the sorted list to obtain the top‑k entries, and separate the
+          proposal IDs and scores into their respective output arrays (`top_proposal_ids`
+          and `top_proposal_scores`).
+      - complexity: LOW
+        impact: LOW
+        method: 'Assign values directly: `selected_count = k; selection_criteria =
+          "top-3 by overall_quality"; is_successful = True`.'
+        reason: Completes the output specification and signals successful execution.
+        text: Set `selected_count` to the actual number of selected proposals (`k`),
+          set `selection_criteria` to the string "top‑3 by overall_quality", and set
+          `is_successful` to `true`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Use a structured logging framework to emit a message such as "Selected
+          top-3 proposals: IDs={top_proposal_ids}, Scores={top_proposal_scores}".'
+        reason: Facilitates debugging and auditability of the selection logic.
+        text: 'Log the selection process for traceability: number of proposals, chosen
+          IDs, and the top scores. Include this log in the system logs but not in
+          the output fields.'
+    prompt: '## Top Proposals Selection
+
+
+      You are given the following arrays from the **evaluate_proposal_quality** node:
+
+      - `proposal_ids`: List of unique identifiers for each proposal.
+
+      - `accuracy`: List of accuracy metrics (e.g., R² or MSE) for each proposal.
+
+      - `complexity`: List of complexity scores (structural size of the expression).
+
+      - `interpretability`: List of interpretability scores (0–1).
+
+      - `overall_quality`: List of composite quality scores combining accuracy, complexity,
+      and interpretability.
+
+
+      **Task**: Select the best proposals based on `overall_quality`. Use a *top‑k*
+      strategy with \(k = 3\). Return the following:
+
+      - `top_proposal_ids`: List of the identifiers of the selected proposals.
+
+      - `top_proposal_scores`: The corresponding `overall_quality` values.
+
+      - `selected_count`: Number of proposals selected (should equal the number actually
+      chosen).
+
+      - `selection_criteria`: A descriptive string, e.g., "top‑3 by overall_quality".
+
+      - `is_successful`: Boolean flag indicating whether the selection succeeded.
+
+
+      If fewer than 3 proposals are available, return all of them. Ensure that the
+      output arrays are in descending order of `overall_quality`.
+
+
+      **Error handling**: If any of the input lists are empty or of mismatched lengths,
+      set `is_successful` to `false` and return empty lists for the remaining fields.'
   test_symbolic_regression_framework:
     agent: false
-    description: Test the integrated symbolic regression framework
+    description: Run a comprehensive evaluation of the symbolic regression framework
+      that was built from the refined proposals. The test harness must load a curated
+      set of benchmark datasets, evaluate each integrated symbolic expression on the
+      test split, compute key metrics (accuracy, RMSE, runtime), determine if predefined
+      performance thresholds are met, and produce a concise summary.
     name: test_symbolic_regression_framework
     nodes_depended_on:
     - integrate_refined_proposals_into_framework
@@ -240,9 +934,112 @@ nodes:
       type: bool
     - description: Names of the test datasets used in the evaluation
       key: test_dataset_names
-      type: List[str]
+      type: str
     - description: Short textual summary of the test results and observations
       key: test_summary
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: For each expression in `integrated_proposals`, use `sympy.sympify`
+          to parse, then `sympy.lambdify` with modules=['numpy'] to generate a ufunc;
+          verify no syntax errors and store the callable in a dictionary keyed by
+          proposal id.
+        reason: The framework’s performance must be measured on the exact expressions
+          that were integrated; converting to a ufunc allows fast predictions across
+          large test sets.
+        text: Parse each integrated symbolic expression string into an evaluable Python
+          function using SymPy, then convert it to a NumPy ufunc for vectorized evaluation.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Open the file with `json.load`, validate that `test_datasets` key
+          exists and is a list, then iterate over each entry to construct full file
+          paths relative to a data directory.
+        reason: Using an external config keeps the test harness flexible and decouples
+          dataset selection from code changes.
+        text: Read the list of test dataset names from a JSON configuration file (`test_datasets.json`)
+          that resides in the project root, ensuring the file contains an array of
+          dataset identifiers and optional file paths.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `pd.read_csv`; then separate features `X` and target `y` based
+          on the `target_variable` and `feature_variables` lists; drop any rows containing
+          NaNs.
+        reason: Consistent feature‑target alignment is critical for fair metric calculation.
+        text: For each test dataset, load the CSV file into a Pandas DataFrame, extract
+          feature columns and the target variable as specified by the original objective
+          definition (passed via environment variable or a separate config).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Call `train_test_split(X, y, test_size=0.2, random_state=42, shuffle=True)`
+          and store the resulting `X_test` and `y_test` for evaluation.
+        reason: While the integrated proposals were trained elsewhere, we need a held‑out
+          test set to evaluate generalization.
+        text: Split each dataset into a training (80%) and test (20%) split using
+          `sklearn.model_selection.train_test_split` with a fixed random seed for
+          reproducibility.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Invoke the ufunc with `X_test.values` to obtain `y_pred`; then call
+          `r2_score(y_test, y_pred)` and `mean_squared_error(y_test, y_pred, squared=False)`;
+          store results in a per‑proposal dictionary.
+        reason: These metrics directly correspond to the `performance_metrics` expected
+          by the framework and allow comparison across expressions.
+        text: For every parsed symbolic function, generate predictions on the test
+          split, compute the coefficient of determination (R²) and root‑mean‑square
+          error (RMSE) using `sklearn.metrics.r2_score` and `mean_squared_error` respectively.
+      - complexity: LOW
+        impact: HIGH
+        method: For each dataset, iterate over the proposals’ metrics, identify the
+          maximum R², and keep the corresponding RMSE; then average the R²s and RMSEs
+          across datasets.
+        reason: Aggregating the best scores across datasets reflects the overall capability
+          of the framework while accounting for variability.
+        text: Aggregate the metrics across all proposals for each dataset by selecting
+          the best performing proposal (highest R²) and recording its metrics. Compute
+          the mean of these per‑dataset best metrics to derive `test_accuracy` and
+          `test_rmse`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `time.perf_counter()` before and after the entire evaluation loop;
+          compute `runtime = end - start`.
+        reason: Runtime is a crucial performance indicator that may affect deployment
+          decisions.
+        text: Measure the total runtime by recording a start timestamp before the
+          first prediction and an end timestamp after the last prediction across all
+          datasets. Convert the difference to seconds and output as `test_runtime_seconds`.
+      - complexity: LOW
+        impact: HIGH
+        method: Load thresholds via `json.load`; perform straightforward comparison;
+          log the outcome.
+        reason: Automating the pass/fail check ensures consistent quality gate enforcement.
+        text: Determine `test_success` by comparing the aggregated metrics against
+          configurable thresholds. If `test_accuracy >= 0.80`, `test_rmse <= 10.0`,
+          and `test_runtime_seconds <= 300.0`, set `test_success` to `True`; otherwise
+          `False`. Thresholds are read from `performance_thresholds.json` if available,
+          otherwise defaults are used.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Format a multi‑line string using f‑strings, interpolating the calculated
+          metrics and a success flag; e.g., `f"Framework passed: {test_success}. Avg
+          Accuracy: {test_accuracy:.4f}, Avg RMSE: {test_rmse:.4f}"
+
+          Best proposal per dataset: {best_proposals_dict}".'
+        reason: Summaries aid stakeholders in quickly assessing results without parsing
+          raw numbers.
+        text: Generate a concise human‑readable summary (`test_summary`) that includes
+          the overall accuracy, RMSE, runtime, the name of the best proposal per dataset,
+          and a statement of whether the framework passed the quality gates.
+      - complexity: LOW
+        impact: HIGH
+        method: Construct a dictionary matching the output schema; for each field,
+          convert using `float(...)`, `bool(...)`, or direct assignment; finally return
+          the dictionary.
+        reason: The downstream node `finalize_symbolic_regression_framework` expects
+          strictly typed outputs; mismatches will cause validation failures.
+        text: 'Populate the output structure fields in the exact order specified,
+          ensuring type fidelity: cast numeric metrics to `float`, the success flag
+          to `bool`, and the dataset names list to `List[str]`.'
     prompt: Evaluate the performance of the integrated framework using relevant benchmarks
       and test datasets.
