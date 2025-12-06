@@ -1,7 +1,5 @@
-dag_type: plain_text
-description: This workflow builds a trading platform that supports both stock and
-  forex trading, including performance optimization, deployment, security auditing,
-  and a user interface.
+dag_type: typed
+description: Generated workflow from UI.
 name: build_stock_and_forex_trading_platform
 nodes:
   conduct_performance_optimization:
@@ -12,6 +10,31 @@ nodes:
     - implement_user_interface
     - implement_trading_api
     nodes_dependent_on: []
+    output_structure:
+    - description: Average end-to-end latency of trading operations in milliseconds
+      key: overall_latency_ms
+      type: int
+    - description: Maximum number of trades that can be processed per second
+      key: throughput_trades_per_sec
+      type: int
+    - description: Percentage of cache hits for frequently accessed market data
+      key: cache_hit_rate_percent
+      type: float
+    - description: Recommended scaling strategy (e.g., "scale up", "scale out", "auto-scaling
+        policy")
+      key: recommended_server_scaling
+      type: str
+    - description: Summary of index additions or query rewrites performed to reduce
+        latency
+      key: query_optimization_summary
+      type: str
+    - description: List of performance bottlenecks identified during the optimization
+        process
+      key: performance_issues_found
+      type: List[str]
+    - description: Whether the platform meets the target latency and throughput thresholds
+      key: is_optimized
+      type: bool
     prompt: Optimize the trading platform for low latency and high throughput. Consider
       caching, query optimization, and server scaling.
   deploy_to_production:
@@ -22,6 +45,44 @@ nodes:
     - conduct_performance_optimization
     - perform_security_auditing
     nodes_dependent_on: []
+    output_structure:
+    - description: The cloud provider or environment where the platform is deployed
+        (e.g., AWS, GCP, Azure, On-premise).
+      key: deployment_environment
+      type: str
+    - description: Semantic version of the deployed platform.
+      key: deployed_version
+      type: str
+    - description: Result of the deployment operation (e.g., "success" or "failure").
+      key: deployment_status
+      type: str
+    - description: ISO 8601 timestamp when the deployment was completed.
+      key: deployment_timestamp
+      type: str
+    - description: Strategy used for scaling (e.g., "auto-scaling", "fixed", "manual").
+      key: scaling_strategy
+      type: str
+    - description: Number of instances or nodes running the platform.
+      key: number_of_nodes
+      type: int
+    - description: Whether monitoring has been enabled for the deployment.
+      key: monitoring_enabled
+      type: bool
+    - description: List of monitoring tools or services used (e.g., Prometheus, Grafana).
+      key: monitoring_tools
+      type: List[str]
+    - description: Primary backup strategy (e.g., "daily", "weekly", "real-time").
+      key: backup_strategy
+      type: str
+    - description: Cron expression or schedule description for backups.
+      key: backup_schedule
+      type: str
+    - description: Location where backups are stored (e.g., S3 bucket, Azure Blob).
+      key: backup_location
+      type: str
+    - description: Any additional notes or remarks about the deployment.
+      key: deployment_notes
+      type: str
     prompt: Deploy the fully tested and optimized trading platform to a production
       environment. Ensure scalability, monitoring, and backup strategies are in place.
   design_database_schema:
@@ -31,6 +92,28 @@ nodes:
     nodes_depended_on:
     - identify_required_data_feeds
     nodes_dependent_on: []
+    output_structure:
+    - description: Name of the table storing stock metadata (e.g., company symbol,
+        name, sector).
+      key: metadata_table_name
+      type: str
+    - description: List of column names for the metadata table.
+      key: metadata_columns
+      type: List[str]
+    - description: Name of the table storing real‑time price history.
+      key: price_history_table_name
+      type: str
+    - description: List of column names for the price history table.
+      key: price_history_columns
+      type: List[str]
+    - description: Primary key column for the price history table (typically a composite
+        of stock symbol and timestamp).
+      key: primary_key
+      type: str
+    - description: Indicates whether the schema design includes partitioning (e.g.,
+        by date or symbol).
+      key: supports_partitioning
+      type: bool
     prompt: Create a database schema that can efficiently store real-time S&P 500
       stock prices. Consider tables for stock metadata and price history.
   design_user_interface:
@@ -40,6 +123,26 @@ nodes:
     nodes_depended_on:
     - implement_trading_api
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of top-level screens in the UI (e.g., Dashboard, Portfolio,
+        Trade, Settings)
+      key: ui_screen_list
+      type: List[str]
+    - description: Device types for which the UI is responsive (e.g., mobile, tablet,
+        desktop)
+      key: responsive_devices_supported
+      type: List[str]
+    - description: Trading API endpoints that the UI will call (e.g., get_stock_price,
+        place_trade)
+      key: api_endpoints_integrated
+      type: List[str]
+    - description: Main navigation items presented in the UI (e.g., Home, Watchlist,
+        Trade, Account)
+      key: primary_navigation_items
+      type: List[str]
+    - description: Whether the UI design is finalized and ready for implementation
+      key: is_design_complete
+      type: bool
     prompt: Create a user-friendly interface that displays real-time S&P 500 stock
       prices and allows users to perform trading operations. Consider a responsive
       design for various devices.
@@ -50,6 +153,24 @@ nodes:
     nodes_depended_on:
     - implement_data_ingestion_pipeline
     nodes_dependent_on: []
+    output_structure:
+    - description: List of fully qualified API endpoint URLs exposed by the backend.
+      key: api_endpoints
+      type: List[str]
+    - description: Primary authentication mechanism used (e.g., JWT, OAuth2, API Key).
+      key: authentication_mechanism
+      type: str
+    - description: Name of the database schema that stores stock prices and trading
+        data.
+      key: database_schema_name
+      type: str
+    - description: Semantic version identifier of the backend service.
+      key: service_version
+      type: str
+    - description: Indicates whether low-latency optimizations (caching, query tuning,
+        scaling) have been applied.
+      key: is_optimized
+      type: bool
     prompt: Create a backend API that can serve real-time S&P 500 stock prices and
       handle trading operations. Consider using a robust framework and secure authentication
       mechanisms.
@@ -60,6 +181,13 @@ nodes:
     name: identify_required_data_feeds
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of data feeds required for real-time S&P 500 stock prices.
+      key: feed_names
+      type: List[str]
+    - description: Total number of data feeds identified.
+      key: feed_count
+      type: int
     prompt: List the specific data feeds needed for real-time S&P 500 stock prices.
   implement_data_ingestion_pipeline:
     agent: false
@@ -70,6 +198,25 @@ nodes:
     - select_data_providers
     - design_database_schema
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the data providers used by the ingestion pipeline.
+      key: provider_names
+      type: List[str]
+    - description: Indicates whether the pipeline is currently running without critical
+        failures.
+      key: ingestion_status
+      type: bool
+    - description: Average number of price records ingested each day.
+      key: records_ingested_per_day
+      type: int
+    - description: Average latency in milliseconds from data provider to database
+        ingestion.
+      key: average_latency_ms
+      type: float
+    - description: Total number of ingestion errors detected during the last monitoring
+        interval.
+      key: error_count
+      type: int
     prompt: Develop a data pipeline that fetches real-time S&P 500 stock prices from
       the selected data providers and stores them in the designed database schema.
   implement_forex_data_ingestion_pipeline:
@@ -80,6 +227,26 @@ nodes:
     - select_forex_data_providers
     - design_database_schema
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the forex data providers used in the ingestion process.
+      key: provider_names
+      type: List[str]
+    - description: Total number of forex rate records ingested during the last execution.
+      key: records_ingested
+      type: int
+    - description: Number of errors encountered while fetching or storing data.
+      key: errors_found
+      type: int
+    - description: Whether the ingestion process completed successfully (true if no
+        critical failures).
+      key: ingestion_success
+      type: bool
+    - description: Average latency in milliseconds for fetching data from all providers.
+      key: average_latency_ms
+      type: float
+    - description: ISO‑8601 timestamp of the most recent ingestion operation.
+      key: latest_ingestion_timestamp
+      type: str
     prompt: Develop a data pipeline that fetches real-time forex rates from the selected
       providers and stores them in the existing database schema. Ensure data integrity,
       handle errors, and record ingestion metrics.
@@ -91,6 +258,23 @@ nodes:
     - develop_trading_platform_backend
     - implement_forex_data_ingestion_pipeline
     nodes_dependent_on: []
+    output_structure:
+    - description: Overall operational status of the forex trading API after deployment
+      key: api_status
+      type: bool
+    - description: Result message from the latest place_forex_order call, e.g., success
+        confirmation or error description
+      key: place_forex_order_response
+      type: str
+    - description: List of textual summaries for each forex order in the user's history
+      key: get_forex_order_history_records
+      type: List[str]
+    - description: Success status of the most recent portfolio management action
+      key: manage_forex_portfolio_status
+      type: bool
+    - description: Total number of forex orders processed in the last reporting period
+      key: forex_order_count
+      type: int
     prompt: 'Create API endpoints for forex trading operations: place_forex_order,
       get_forex_order_history, manage_forex_portfolio. Use existing backend, secure
       authentication, rate limiting, and compliance with relevant standards.'
@@ -101,6 +285,28 @@ nodes:
     nodes_depended_on:
     - develop_trading_platform_backend
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the trading API endpoints created.
+      key: endpoint_list
+      type: List[str]
+    - description: Authentication mechanism used for the trading APIs.
+      key: auth_mechanism
+      type: str
+    - description: Maximum number of requests allowed per minute per API key.
+      key: rate_limit_per_min
+      type: int
+    - description: Maximum number of concurrent connections supported by the API.
+      key: concurrency_limit
+      type: int
+    - description: Whether the API has been successfully deployed.
+      key: is_deployed
+      type: bool
+    - description: Error message if deployment failed; empty string if none.
+      key: error_message
+      type: str
+    - description: URL to the generated API documentation.
+      key: api_docs_url
+      type: str
     prompt: Develop APIs for placing trades, retrieving trade history, and managing
       user portfolios. Ensure the APIs are secure and scalable.
   implement_user_interface:
@@ -111,6 +317,28 @@ nodes:
     - design_user_interface
     - implement_trading_api
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the frontend build was successful
+      key: frontend_build_status
+      type: bool
+    - description: File system path to the generated frontend bundle
+      key: build_artifact_path
+      type: str
+    - description: Frontend framework or library used (e.g., React, Angular, Vue)
+      key: frontend_framework
+      type: str
+    - description: Whether responsive design was implemented for multiple devices
+      key: responsive_design_applied
+      type: bool
+    - description: Names of UI components included in the application
+      key: ui_components_list
+      type: List[str]
+    - description: List of backend API endpoints integrated into the UI
+      key: api_endpoints_used
+      type: List[str]
+    - description: URL where the frontend is deployed for testing or production
+      key: deployment_url
+      type: str
     prompt: Develop the frontend application using the designed UI, integrating it
       with the trading APIs to provide a seamless user experience.
   perform_security_auditing:
@@ -121,6 +349,28 @@ nodes:
     - implement_user_interface
     - implement_trading_api
     nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the entire audit process has been finished.
+      key: audit_completed
+      type: bool
+    - description: Total count of distinct vulnerabilities identified during the audit.
+      key: vulnerabilities_found
+      type: int
+    - description: Short textual descriptions of each identified vulnerability.
+      key: vulnerability_descriptions
+      type: List[str]
+    - description: Severity score for each vulnerability (e.g., 1-10, higher is more
+        critical).
+      key: risk_scores
+      type: List[int]
+    - description: List of security compliance standards that were not met during
+        the audit.
+      key: compliance_gaps
+      type: List[str]
+    - description: Whether all identified vulnerabilities and compliance gaps have
+        been remediated.
+      key: remediation_complete
+      type: bool
     prompt: Conduct a thorough security audit to identify vulnerabilities in the trading
       platform. Consider penetration testing, code review, and compliance with security
       standards.
@@ -131,6 +381,23 @@ nodes:
     nodes_depended_on:
     - identify_required_data_feeds
     nodes_dependent_on: []
+    output_structure:
+    - description: List of provider names that offer real-time S&P 500 stock prices
+      key: provider_names
+      type: List[str]
+    - description: List of accuracy percentages for each provider (0 to 100)
+      key: provider_accuracies
+      type: List[float]
+    - description: List of average latency in milliseconds for each provider
+      key: provider_latencies
+      type: List[float]
+    - description: List of monthly cost in USD for each provider
+      key: provider_costs
+      type: List[float]
+    - description: List of booleans indicating whether each provider was selected
+        for the pipeline
+      key: provider_selected
+      type: List[bool]
     prompt: Choose data providers that offer real-time S&P 500 stock prices. Consider
       factors like data accuracy, latency, and cost.
   select_forex_data_providers:
@@ -140,6 +407,22 @@ nodes:
     nodes_depended_on:
     - identify_required_data_feeds
     nodes_dependent_on: []
+    output_structure:
+    - description: Names of the selected forex data providers
+      key: provider_names
+      type: List[str]
+    - description: Accuracy percentage for each provider (0 to 100)
+      key: accuracies
+      type: List[float]
+    - description: Average latency in milliseconds for each provider
+      key: latencies_ms
+      type: List[int]
+    - description: Monthly cost in USD for each provider
+      key: costs_usd
+      type: List[float]
+    - description: Flag indicating whether the provider was chosen (true) or not (false)
+      key: is_selected
+      type: List[bool]
     prompt: Choose reliable data providers for real-time forex market data, considering
       accuracy, latency, cost, and compliance. List provider names, accuracy, latency,
       cost, and selection flag.
