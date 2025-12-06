@@ -1,58 +1,286 @@
 dag_type: plain_text
-description: A workflow to solve a quadratic equation of the form ax^2 + bx + c =
-  0
-name: solve_quadratic_equation
+description: A highly concurrent, step‑by‑step workflow that produces a state‑of‑the‑art
+  next‑generation RISC‑V CPU chip comparable to Google Coral's CPU, covering requirements,
+  architecture, RTL implementation, verification, synthesis, physical design, firmware,
+  documentation and tape‑out.
+name: next_gen_riscv_chip_design
 nodes:
-  calculate_discriminant:
+  conduct_floorplanning:
     agent: false
-    description: Calculate the discriminant (b^2 - 4ac) of the quadratic equation
-    name: calculate_discriminant
+    description: Create a floorplan defining macro placement, IO pins, and power rings.
+    name: conduct_floorplanning
     nodes_depended_on:
-    - get_coefficients
+    - perform_synthesis
     nodes_dependent_on: []
-    prompt: Using the coefficients a, b, and c, calculate the discriminant as b^2
-      - 4ac
-  calculate_roots:
+    prompt: Generate a floorplan file that assigns core, cache, and peripheral macros
+      to physical regions, respecting power domain boundaries.
+  create_microarchitecture_block_diagram:
     agent: false
-    description: Calculate the roots of the quadratic equation
-    name: calculate_roots
+    description: Draft a block‑level diagram showing core pipeline stages, caches,
+      memory system, and peripheral interfaces.
+    name: create_microarchitecture_block_diagram
     nodes_depended_on:
-    - get_coefficients
-    - calculate_discriminant
+    - define_architecture_goals
+    - select_riscv_base_isa_and_extensions
     nodes_dependent_on: []
-    prompt: Using the coefficients a, b, and the discriminant, calculate the roots
-      of the quadratic equation
-  determine_nature_of_roots:
+    prompt: Produce an ASCII or textual block diagram that enumerates the major microarchitectural
+      components and their interconnections.
+  create_testbench_environment:
     agent: false
-    description: Determine the nature of the roots based on the discriminant
-    name: determine_nature_of_roots
+    description: Set up a reusable testbench framework with stimulus drivers, monitors,
+      and scoreboards.
+    name: create_testbench_environment
     nodes_depended_on:
-    - calculate_discriminant
+    - draft_verification_plan
+    - set_up_design_toolchain
     nodes_dependent_on: []
-    prompt: Based on the discriminant, determine if the roots are real and distinct,
-      real and equal, or complex
-  format_roots:
+    prompt: Provide a SystemVerilog/UVM testbench skeleton that can be instantiated
+      for core, cache, and peripheral modules, including clock and reset generation.
+  define_architecture_goals:
     agent: false
-    description: Format the roots for presentation
-    name: format_roots
+    description: Translate market requirements into high‑level architectural goals
+      such as core count, pipeline depth, and scalability.
+    name: define_architecture_goals
     nodes_depended_on:
-    - calculate_roots
-    - determine_nature_of_roots
+    - gather_market_and_performance_requirements
     nodes_dependent_on: []
-    prompt: Format the calculated roots according to their nature (real or complex)
-  get_coefficients:
+    prompt: Based on the gathered requirements, define goals like single‑issue vs.
+      multi‑issue, target CPI, maximum clock frequency, and scalability to multi‑core
+      configurations.
+  deliver_chip_prototype:
     agent: false
-    description: Obtain the coefficients a, b, and c of the quadratic equation
-    name: get_coefficients
+    description: Coordinate with the foundry to fabricate a prototype batch and arrange
+      testing.
+    name: deliver_chip_prototype
+    nodes_depended_on:
+    - finalize_tape_out
+    nodes_dependent_on: []
+    prompt: 'Provide a checklist for prototype hand‑off: mask set release, test wafer
+      plan, and initial bring‑up schedule.'
+  design_cache_hierarchy:
+    agent: false
+    description: Specify L1/L2/L3 cache sizes, associativity, latency, and coherence
+      protocol.
+    name: design_cache_hierarchy
+    nodes_depended_on:
+    - create_microarchitecture_block_diagram
+    nodes_dependent_on: []
+    prompt: Provide a table with cache level, size (KB), associativity, line size,
+      and expected hit latency.
+  design_pipeline_structure:
+    agent: false
+    description: Define the detailed pipeline stages (fetch, decode, execute, memory,
+      write‑back) and any out‑of‑order mechanisms.
+    name: design_pipeline_structure
+    nodes_depended_on:
+    - create_microarchitecture_block_diagram
+    nodes_dependent_on: []
+    prompt: Specify the number of stages, stage responsibilities, and any speculation
+      or renaming hardware required.
+  design_power_management:
+    agent: false
+    description: Create power‑saving features such as clock gating, DVFS, and power
+      domains.
+    name: design_power_management
+    nodes_depended_on:
+    - create_microarchitecture_block_diagram
+    nodes_dependent_on: []
+    prompt: List each power‑saving technique, the hardware blocks it applies to, and
+      the control mechanism (e.g., software register).
+  develop_security_features:
+    agent: false
+    description: Define hardware security mechanisms like PMP, secure boot, and crypto
+      accelerators.
+    name: develop_security_features
+    nodes_depended_on:
+    - select_riscv_base_isa_and_extensions
+    nodes_dependent_on: []
+    prompt: Enumerate the security features to be integrated, their ISA support, and
+      an implementation sketch for each.
+  draft_verification_plan:
+    agent: false
+    description: Outline verification methodology, testbench architecture, coverage
+      goals, and simulation environments.
+    name: draft_verification_plan
+    nodes_depended_on:
+    - define_architecture_goals
+    - select_riscv_base_isa_and_extensions
+    - create_microarchitecture_block_diagram
+    nodes_dependent_on: []
+    prompt: Provide a verification plan that includes unit tests, integration tests,
+      random stimulus, and formal checks with coverage metrics.
+  execute_place_and_route:
+    agent: false
+    description: Run detailed placement and routing to produce a post‑layout netlist.
+    name: execute_place_and_route
+    nodes_depended_on:
+    - conduct_floorplanning
+    nodes_dependent_on: []
+    prompt: Run the P&R tool with timing constraints, output the routed netlist and
+      reports on utilization, congestion, and DRC status.
+  finalize_tape_out:
+    agent: false
+    description: Produce GDSII/OPA files and sign‑off checklists for silicon fabrication.
+    name: finalize_tape_out
+    nodes_depended_on:
+    - prepare_design_documentation
+    - perform_timing_analysis
+    - run_power_analysis
+    nodes_dependent_on: []
+    prompt: List the final tape‑out artifacts (GDS, LEF, DEF, netlist, constraints)
+      and confirm all sign‑off criteria are met.
+  gather_market_and_performance_requirements:
+    agent: false
+    description: Collect target market use‑cases, performance metrics, power budget,
+      area constraints, and cost goals for the new RISC‑V chip.
+    name: gather_market_and_performance_requirements
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Enter the coefficients a, b, and c of the quadratic equation ax^2 + bx
-      + c = 0
-  present_solution:
+    prompt: Summarize the intended applications (e.g., edge AI, IoT), required GHz,
+      FLOPS, energy per operation, die size limits, and target price per unit. Provide
+      a concise bullet list.
+  generate_software_firmware_bootloader:
     agent: false
-    description: Present the final solution
-    name: present_solution
+    description: Develop a minimal bootloader and initialization firmware for the
+      chip.
+    name: generate_software_firmware_bootloader
     nodes_depended_on:
-    - format_roots
+    - select_riscv_base_isa_and_extensions
     nodes_dependent_on: []
-    prompt: Present the final roots of the quadratic equation in a clear format
+    prompt: Write C/assembly source for a bootloader that sets up stack, configures
+      PMP, and jumps to main entry. Provide build commands.
+  integrate_firmware_with_hardware:
+    agent: false
+    description: Validate that the bootloader runs correctly on the synthesized design
+      using simulation.
+    name: integrate_firmware_with_hardware
+    nodes_depended_on:
+    - iterate_design_optimizations
+    - generate_software_firmware_bootloader
+    nodes_dependent_on: []
+    prompt: Run a full‑chip simulation loading the bootloader binary, verify correct
+      initialization, and report any functional issues.
+  iterate_design_optimizations:
+    agent: false
+    description: Apply architectural or RTL changes to fix timing/power issues, then
+      re‑run synthesis and P&R.
+    name: iterate_design_optimizations
+    nodes_depended_on:
+    - perform_timing_analysis
+    - run_power_analysis
+    - run_preliminary_simulations
+    nodes_dependent_on: []
+    prompt: Identify the top three optimization actions (e.g., pipeline retiming,
+      buffer insertion, clock gating tweaks), describe the change, and specify the
+      next iteration steps.
+  perform_synthesis:
+    agent: false
+    description: Synthesize all RTL modules to a gate‑level netlist targeting the
+      target technology node.
+    name: perform_synthesis
+    nodes_depended_on:
+    - write_rtl_modules_core
+    - write_rtl_modules_peripherals
+    - write_rtl_modules_debug
+    - set_up_design_toolchain
+    nodes_dependent_on: []
+    prompt: Invoke the synthesis tool with appropriate constraints (clock, area, power)
+      and output the gate‑level netlist and synthesis report.
+  perform_timing_analysis:
+    agent: false
+    description: Analyze the routed design for setup/hold timing violations and worst‑case
+      path delays.
+    name: perform_timing_analysis
+    nodes_depended_on:
+    - execute_place_and_route
+    nodes_dependent_on: []
+    prompt: Run static timing analysis and list any violations, slack distribution,
+      and the achieved maximum clock frequency.
+  prepare_design_documentation:
+    agent: false
+    description: Assemble all architectural specs, RTL, verification results, and
+      tool reports into a design dossier.
+    name: prepare_design_documentation
+    nodes_depended_on:
+    - iterate_design_optimizations
+    - integrate_firmware_with_hardware
+    - run_preliminary_simulations
+    nodes_dependent_on: []
+    prompt: Create a markdown document that includes block diagram, pipeline description,
+      cache specs, security features, verification coverage summary, timing and power
+      reports, and firmware integration notes.
+  run_power_analysis:
+    agent: false
+    description: Estimate dynamic and static power consumption of the placed‑and‑routed
+      design.
+    name: run_power_analysis
+    nodes_depended_on:
+    - execute_place_and_route
+    nodes_dependent_on: []
+    prompt: Perform power analysis at the target operating voltage and frequency,
+      and report total power, per‑block breakdown, and power‑gating effectiveness.
+  run_preliminary_simulations:
+    agent: false
+    description: Execute functional simulations of individual RTL modules using the
+      testbench.
+    name: run_preliminary_simulations
+    nodes_depended_on:
+    - write_rtl_modules_core
+    - write_rtl_modules_peripherals
+    - write_rtl_modules_debug
+    - create_testbench_environment
+    nodes_dependent_on: []
+    prompt: Run zero‑time functional simulations for each module and report pass/fail
+      status and any assertion failures.
+  select_riscv_base_isa_and_extensions:
+    agent: false
+    description: Choose the RISC‑V base ISA (e.g., RV64IMAFD) and required extensions
+      (e.g., vector, crypto, compressed).
+    name: select_riscv_base_isa_and_extensions
+    nodes_depended_on:
+    - define_architecture_goals
+    nodes_dependent_on: []
+    prompt: Select the appropriate base ISA and list any optional extensions needed
+      to satisfy performance and security goals. Explain each choice in one sentence.
+  set_up_design_toolchain:
+    agent: false
+    description: Install and configure EDA tools (HDL compiler, synthesis, place‑and‑route,
+      timing and power analysis) required for the design flow.
+    name: set_up_design_toolchain
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: List the specific versions of the synthesis, STA, P&R, and verification
+      tools to be used, and provide brief installation and licensing steps for each.
+  write_rtl_modules_core:
+    agent: false
+    description: Implement the core pipeline RTL (fetch, decode, issue, execution
+      units, commit).
+    name: write_rtl_modules_core
+    nodes_depended_on:
+    - design_pipeline_structure
+    - design_power_management
+    - develop_security_features
+    nodes_dependent_on: []
+    prompt: Write synthesizable Verilog/SystemVerilog code for each pipeline stage,
+      including interfaces for power control and security registers. Output one module
+      per stage.
+  write_rtl_modules_debug:
+    agent: false
+    description: Create RTL for debug and trace facilities (JTAG, ETM, performance
+      counters).
+    name: write_rtl_modules_debug
+    nodes_depended_on:
+    - develop_security_features
+    nodes_dependent_on: []
+    prompt: Write Verilog modules implementing JTAG TAP, hardware trace buffer, and
+      configurable performance counters.
+  write_rtl_modules_peripherals:
+    agent: false
+    description: Implement RTL for caches, memory controller, and I/O interfaces.
+    name: write_rtl_modules_peripherals
+    nodes_depended_on:
+    - design_cache_hierarchy
+    - select_riscv_base_isa_and_extensions
+    nodes_dependent_on: []
+    prompt: Produce Verilog/SystemVerilog modules for L1/L2 caches, a simple memory
+      controller, and standard peripherals (UART, SPI, GPIO).
