@@ -1,3 +1,17 @@
+from ._design_trading_strategies.extract_market_making_principles import extract_market_making_principles
+from ._design_trading_strategies.rank_markets_by_strategy_type import rank_markets_by_strategy_type
+from ._design_trading_strategies.develop_market_making_strategies import develop_market_making_strategies
+from ._design_trading_strategies.develop_statistical_arbitrage_strategies import develop_statistical_arbitrage_strategies
+from ._design_trading_strategies.develop_options_trading_strategies import develop_options_trading_strategies
+from ._design_trading_strategies.validate_strategies_against_philosophy import validate_strategies_against_philosophy
+from ._design_trading_strategies.generate_strategy_names import generate_strategy_names
+from ._design_trading_strategies.format_strategy_names_as_string import format_strategy_names_as_string
+from ._design_trading_strategies.document_and_store_strategies import document_and_store_strategies
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Extract relevant market making principles from the core trading philosophy
 #   defined in the define_core_trading_philosophy node.
@@ -59,8 +73,6 @@
 #           thoroughly validated and tested before implementation.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class DefineCoreTradingPhilosophyOutput(BaseModel):
@@ -97,13 +109,67 @@ def design_trading_strategies(define_core_trading_philosophy_input: DefineCoreTr
     Returns:
         DesignTradingStrategiesOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract market making principles from core trading philosophy
+    market_making_principles: List[str] = extract_market_making_principles(
+        philosophy=define_core_trading_philosophy_input.core_trading_philosophy
+    )
+    
+    # Rank and select markets for each strategy type based on selection reasoning
+    market_rankings: dict = rank_markets_by_strategy_type(
+        markets=select_primary_markets_input.primary_markets,
+        selection_reasoning=select_primary_markets_input.market_selection_reasoning,
+        liquidity_assessment=select_primary_markets_input.liquidity_risk_assessment
+    )
+    
+    # Develop market making strategies
+    market_maker_strategies: List[dict] = develop_market_making_strategies(
+        principles=market_making_principles,
+        selected_markets=market_rankings.get("market_making", []),
+        regulatory_env=select_primary_markets_input.regulatory_environment
+    )
+    
+    # Develop statistical arbitrage strategies
+    stat_arb_strategies: List[dict] = develop_statistical_arbitrage_strategies(
+        philosophy=define_core_trading_philosophy_input.core_trading_philosophy,
+        selected_markets=market_rankings.get("statistical_arbitrage", []),
+        competitive_landscape=select_primary_markets_input.competitive_landscape
+    )
+    
+    # Develop options trading strategies
+    options_strategies: List[dict] = develop_options_trading_strategies(
+        philosophy=define_core_trading_philosophy_input.core_trading_philosophy,
+        selected_markets=market_rankings.get("options_trading", []),
+        liquidity_assessment=select_primary_markets_input.liquidity_risk_assessment
+    )
+    
+    # Combine all strategies and validate against core philosophy
+    all_strategies: List[dict] = market_maker_strategies + stat_arb_strategies + options_strategies
+    validated_strategies: List[dict] = validate_strategies_against_philosophy(
+        strategies=all_strategies,
+        core_philosophy=define_core_trading_philosophy_input.core_trading_philosophy
+    )
+    
+    # Generate strategy names and documentation
+    strategy_names_list: List[str] = generate_strategy_names(strategies=validated_strategies)
+    strategy_names_str: str = format_strategy_names_as_string(names=strategy_names_list)
+    
+    # Document and store strategies
+    document_and_store_strategies(
+        strategies=validated_strategies,
+        documentation_format="comprehensive",
+        storage_system="version_controlled"
+    )
+    
+    # Determine strategy counts and types
+    total_count: int = len(validated_strategies)
+    has_market_maker: bool = len(market_maker_strategies) > 0
+    has_stat_arb: bool = len(stat_arb_strategies) > 0
+    has_options: bool = len(options_strategies) > 0
+    
     return DesignTradingStrategiesOutput(
-        trading_strategy_count=0,
-        strategy_names="",
-        market_maker_strategies=False,
-        statistical_arbitrage_strategies=False,
-        options_trading_strategies=False,
+        trading_strategy_count=total_count,
+        strategy_names=strategy_names_str,
+        market_maker_strategies=has_market_maker,
+        statistical_arbitrage_strategies=has_stat_arb,
+        options_trading_strategies=has_options
     )

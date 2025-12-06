@@ -1,3 +1,14 @@
+from ._develop_compliance_program.analyze_regulatory_requirements import analyze_regulatory_requirements
+from ._develop_compliance_program.develop_trade_surveillance_policies import develop_trade_surveillance_policies
+from ._develop_compliance_program.develop_record_keeping_policies import develop_record_keeping_policies
+from ._develop_compliance_program.develop_risk_reporting_policies import develop_risk_reporting_policies
+from ._develop_compliance_program.develop_regulatory_communications_policies import develop_regulatory_communications_policies
+from ._develop_compliance_program.map_policies_to_requirements import map_policies_to_requirements
+from ._develop_compliance_program.generate_compliance_program_documents import generate_compliance_program_documents
+
+from pydantic import BaseModel, Field
+
+
 # -- PRD --
 # 1. BULLET: Review and analyze the regulatory requirements output from
 #   identify_regulatory_requirements to understand the requirements for trade
@@ -43,7 +54,6 @@
 #           requirements.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
 
 
 class IdentifyRegulatoryRequirementsOutput(BaseModel):
@@ -72,13 +82,60 @@ def develop_compliance_program(identify_regulatory_requirements_input: IdentifyR
     Returns:
         DevelopComplianceProgramOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Review and analyze the regulatory requirements
+    parsed_requirements: dict = analyze_regulatory_requirements(
+        regulatory_requirements=identify_regulatory_requirements_input.regulatory_requirements,
+        entity_type=identify_regulatory_requirements_input.entity_type,
+        selected_markets=identify_regulatory_requirements_input.selected_markets
+    )
+    
+    # Develop trade surveillance policies
+    trade_surveillance_policies: str = develop_trade_surveillance_policies(
+        requirements=parsed_requirements,
+        entity_type=identify_regulatory_requirements_input.entity_type,
+        markets=identify_regulatory_requirements_input.selected_markets
+    )
+    
+    # Develop record keeping policies
+    record_keeping_policies: str = develop_record_keeping_policies(
+        requirements=parsed_requirements,
+        entity_type=identify_regulatory_requirements_input.entity_type
+    )
+    
+    # Develop risk reporting policies
+    risk_reporting_policies: str = develop_risk_reporting_policies(
+        requirements=parsed_requirements,
+        markets=identify_regulatory_requirements_input.selected_markets
+    )
+    
+    # Develop regulatory communications policies
+    regulatory_communications_policies: str = develop_regulatory_communications_policies(
+        requirements=parsed_requirements,
+        entity_type=identify_regulatory_requirements_input.entity_type
+    )
+    
+    # Map each policy to specific regulatory requirements
+    policy_mapping: dict = map_policies_to_requirements(
+        trade_surveillance=trade_surveillance_policies,
+        record_keeping=record_keeping_policies,
+        risk_reporting=risk_reporting_policies,
+        regulatory_communications=regulatory_communications_policies,
+        requirements=parsed_requirements
+    )
+    
+    # Generate comprehensive compliance program documents
+    compliance_documents: str = generate_compliance_program_documents(
+        trade_surveillance_policies=trade_surveillance_policies,
+        record_keeping_policies=record_keeping_policies,
+        risk_reporting_policies=risk_reporting_policies,
+        regulatory_communications_policies=regulatory_communications_policies,
+        policy_mapping=policy_mapping
+    )
+    
     return DevelopComplianceProgramOutput(
-        compliance_program_documents="",
-        trade_surveillance_policies="",
-        recordKeepingPolicies="",
-        riskReportingPolicies="",
-        regulatoryCommunicationsPolicies="",
+        compliance_program_documents=compliance_documents,
+        trade_surveillance_policies=trade_surveillance_policies,
+        recordKeepingPolicies=record_keeping_policies,
+        riskReportingPolicies=risk_reporting_policies,
+        regulatoryCommunicationsPolicies=regulatory_communications_policies
     )

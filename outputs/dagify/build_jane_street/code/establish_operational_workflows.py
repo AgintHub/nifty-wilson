@@ -1,3 +1,15 @@
+from ._establish_operational_workflows.map_trade_settlement_workflow import map_trade_settlement_workflow
+from ._establish_operational_workflows.create_settlement_process_documentation import create_settlement_process_documentation
+from ._establish_operational_workflows.develop_pl_calculation_method import develop_pl_calculation_method
+from ._establish_operational_workflows.create_risk_monitoring_framework import create_risk_monitoring_framework
+from ._establish_operational_workflows.establish_position_reconciliation_procedure import establish_position_reconciliation_procedure
+from ._establish_operational_workflows.create_regulatory_reporting_schedule import create_regulatory_reporting_schedule
+from ._establish_operational_workflows.define_operational_roles_and_responsibilities import define_operational_roles_and_responsibilities
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Define the trade settlement process, including the steps involved and the
 #   systems used for trade execution and settlement.
@@ -73,8 +85,6 @@
 #           training manuals.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class DesignRiskManagementFrameworkOutput(BaseModel):
@@ -124,14 +134,55 @@ def establish_operational_workflows(design_risk_management_framework_input: Desi
     Returns:
         EstablishOperationalWorkflowsOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Define trade settlement process with workflow mapping
+    settlement_workflow_steps: List[str] = map_trade_settlement_workflow(
+        prime_brokers=identify_prime_brokerage_partners_input.prime_brokerage_partners,
+        execution_venues=identify_prime_brokerage_partners_input.execution_venues
+    )
+    trade_settlement_process: str = create_settlement_process_documentation(
+        workflow_steps=settlement_workflow_steps
+    )
+    
+    # Develop P&L calculation methodology
+    pl_methodology: str = develop_pl_calculation_method(
+        var_limit=design_risk_management_framework_input.var_limit,
+        drawdown_limit=design_risk_management_framework_input.drawdown_limit,
+        portfolio_metrics=design_risk_management_framework_input.portfolio_concentration_metrics
+    )
+    
+    # Establish risk monitoring framework and frequency
+    risk_framework: str = create_risk_monitoring_framework(
+        pre_trade_measures=design_risk_management_framework_input.pre_trade_risk_measures,
+        post_trade_measures=design_risk_management_framework_input.post_trade_risk_measures,
+        var_limit=design_risk_management_framework_input.var_limit
+    )
+    
+    # Define position reconciliation procedures
+    reconciliation_process: str = establish_position_reconciliation_procedure(
+        compliance_docs=develop_compliance_program_input.compliance_program_documents,
+        record_keeping_policies=develop_compliance_program_input.recordKeepingPolicies
+    )
+    
+    # Create regulatory reporting schedule
+    reporting_schedule: str = create_regulatory_reporting_schedule(
+        risk_reporting_policies=develop_compliance_program_input.riskReportingPolicies,
+        regulatory_communications=develop_compliance_program_input.regulatoryCommunicationsPolicies,
+        trade_surveillance=develop_compliance_program_input.trade_surveillance_policies
+    )
+    
+    # Define roles and responsibilities for operational personnel
+    operational_roles: str = define_operational_roles_and_responsibilities(
+        settlement_process=trade_settlement_process,
+        pl_method=pl_methodology,
+        risk_framework=risk_framework,
+        reconciliation_procedure=reconciliation_process
+    )
+    
     return EstablishOperationalWorkflowsOutput(
-        trade_settlement_process="",
-        pl_calculation_method="",
-        risk_monitoring_frequency="",
-        position_reconciliation_procedure="",
-        regulatory_reporting_schedule="",
-        roles_and_responsibilities="",
+        trade_settlement_process=trade_settlement_process,
+        pl_calculation_method=pl_methodology,
+        risk_monitoring_frequency=risk_framework,
+        position_reconciliation_procedure=reconciliation_process,
+        regulatory_reporting_schedule=reporting_schedule,
+        roles_and_responsibilities=operational_roles
     )
