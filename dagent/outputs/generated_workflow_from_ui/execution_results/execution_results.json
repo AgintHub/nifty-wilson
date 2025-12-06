@@ -1,56 +1,38 @@
 {
-  "compare_to_theoretical_value": {
+  "calculate_discriminant": {
     "output": {
-      "output": "0.15479236413291475"
+      "output": "0"
     },
-    "description": "Recall the analytical value of the integral (\u2011\u03b3, where \u03b3 \u2248 0.5772156649) and compute the absolute difference between the Monte\u2011Carlo estimate and this theoretical constant."
+    "description": "Calculate the discriminant (b^2 - 4ac) of the quadratic equation"
   },
-  "compute_log_of_samples": {
+  "calculate_roots": {
     "output": {
-      "output": "[-0.36651292058166435, 0.4758845809995901, -1.4996787627856252, 1.5271754744865815, -2.248987876957307]"
+      "output": "The quadratic equation coefficients are a=1, b=10, c=25. The discriminant is 0, indicating one real root. The root is calculated as -b/(2a) = -10/(2*1) = -5."
     },
-    "description": "Compute the natural logarithm of each sampled value t_i, i.e., ln(t_i)."
+    "description": "Calculate the roots of the quadratic equation"
   },
-  "compute_monte_carlo_estimate": {
+  "determine_nature_of_roots": {
     "output": {
-      "output": "-0.42242330076708525"
+      "output": "real and equal"
     },
-    "description": "Calculate the Monte\u2011Carlo estimate of the integral as the arithmetic mean of the ln(t_i) values."
+    "description": "Determine the nature of the roots based on the discriminant"
   },
-  "compute_standard_error": {
+  "format_roots": {
     "output": {
-      "output": "0.001420665253900581"
+      "output": "The equation has a real double root: x = -5."
     },
-    "description": "Determine the standard error of the Monte\u2011Carlo estimator using the sample standard deviation of ln(t_i) divided by \u221aN."
+    "description": "Format the roots for presentation"
   },
-  "generate_exponential_samples": {
+  "get_coefficients": {
     "output": {
-      "output": "[0.6931471805599453, 1.6094379124341003, 0.2231435513142097, 4.605170185988091, 0.10536051565782628]"
+      "output": "a=1, b=10, c=25"
     },
-    "description": "Generate N independent samples from Exp(1) using a standard pseudo\u2011random generator."
+    "description": "Obtain the coefficients a, b, and c of the quadratic equation"
   },
-  "select_importance_sampling_distribution": {
+  "present_solution": {
     "output": {
-      "output": "Use an exponential distribution with rate \u03bb=1 (i.e., Exp(1)) as the importance\u2011sampling distribution. This matches the e^{-t} factor in the integrand, eliminating the weighting term and yielding a simple unbiased estimator."
+      "output": "The equation has a real double root: x = -5."
     },
-    "description": "Identify the importance\u2011sampling probability distribution that matches the e^{-t} factor, namely an exponential distribution with rate \u03bb=1."
-  },
-  "set_integration_bounds": {
-    "output": {
-      "output": "Lower limit: 0, Upper limit: \u221e. The infinite upper bound will be addressed via importance sampling with an exponential distribution."
-    },
-    "description": "Specify the integration domain for the integral (lower bound 0, upper bound \u221e) and note that importance sampling will be used to handle the infinite limit."
-  },
-  "set_number_of_samples": {
-    "output": {
-      "output": "1000000"
-    },
-    "description": "Choose a concrete number of Monte\u2011Carlo samples (e.g., 1,000,000) to use for the empirical estimate."
-  },
-  "summarize_results": {
-    "output": {
-      "output": "Monte-Carlo estimate: -0.42242330076708525\nStandard error: 0.001420665253900581\nAnalytical value (-\u03b3): -0.57721566490153286\nAbsolute difference: 0.15479236413291475\nInterpretation: The estimate deviates from the analytical value by far more than the standard error, suggesting a poor approximation."
-    },
-    "description": "Produce a concise summary containing the Monte\u2011Carlo estimate, its standard error, the theoretical value, and the difference between them."
+    "description": "Present the final solution"
   }
 }
