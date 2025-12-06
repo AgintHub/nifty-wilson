@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: build_jane_street
 nodes:
@@ -26,6 +26,45 @@ nodes:
     - description: List of research capital requirements
       key: research_capital_requirements
       type: List[float]
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Review the output of the design_data_infrastructure node and identify
+          the key components required for the research infrastructure. Use this information
+          to select the appropriate research tools and data analysis frameworks.
+        reason: This will ensure that the research infrastructure meets the needs
+          of the trading strategies and can support the required research activities.
+        text: Identify the research infrastructure requirements based on the data
+          infrastructure design and trading strategy needs.
+      - complexity: LOW
+        impact: LOW
+        method: Conduct research to identify the most suitable research tools and
+          data analysis frameworks for the research activities. Use this information
+          to compile a list of the selected tools and frameworks.
+        reason: This will ensure that the necessary tools and frameworks are available
+          to support the research activities.
+        text: Develop a list of research tools and data analysis frameworks to support
+          the research activities.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Review the output of the research_infrastructure node and identify
+          the key components that are relevant to the trading strategies. Use this
+          information to develop a list of strategy evaluation criteria.
+        reason: This will ensure that the strategy evaluation criteria are consistent
+          with the research infrastructure and can support the evaluation of the trading
+          strategies.
+        text: Define the strategy evaluation criteria based on the research infrastructure
+          and trading strategy needs.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Review the output of the research_infrastructure node and identify
+          the key components that are relevant to the research activities. Use this
+          information to estimate the research capital requirements.
+        reason: This will ensure that the research capital requirements are consistent
+          with the research infrastructure and can support the research activities.
+        text: Determine the research capital requirements based on the research infrastructure
+          and trading strategy needs.
     prompt: Define the research infrastructure and processes for developing, backtesting,
       and implementing new trading strategies. Include research tools, data analysis
       frameworks, and strategy evaluation criteria.
@@ -51,6 +90,8 @@ nodes:
     - description: Rationale for the chosen legal structure
       key: rationale
       type: str
+    prd:
+      bullets: []
     prompt: Select the appropriate legal entity structure for Jane Street (LLC, Corporation,
       Partnership). Consider tax implications, liability protection, and operational
       flexibility. Provide rationale in 2-3 sentences.
@@ -80,6 +121,8 @@ nodes:
     - description: Total number of words in the business plan
       key: total_words
       type: int
+    prd:
+      bullets: []
     prompt: Compile all previous outputs into a comprehensive business plan for Jane
       Street. Include executive summary, market opportunity, competitive advantage,
       financial projections, and implementation roadmap. Keep to 500 words maximum.
@@ -95,7 +138,7 @@ nodes:
     - description: List of role requirements for quantitative researchers, software
         engineers, and traders
       key: role_requirements
-      type: str
+      type: List[str]
     - description: Description of compensation structure for key roles
       key: compensation_structure
       type: str
@@ -105,6 +148,8 @@ nodes:
     - description: List of target hiring numbers for key roles
       key: target_hiring_numbers
       type: List[int]
+    prd:
+      bullets: []
     prompt: Develop a hiring strategy for Jane Street focusing on quantitative researchers,
       software engineers, and traders. Define role requirements, compensation structure,
       and recruitment approach.
@@ -122,13 +167,21 @@ nodes:
       type: str
     - description: List of dependencies for the launch timeline
       key: dependencies
-      type: List[str]
+      type: str
     - description: List of critical paths for the launch timeline
       key: critical_path
-      type: List[str]
-    prompt: Create a 12-month launch timeline with specific milestones for technology
+      type: str
+    prd:
+      bullets: []
+    prompt: '# Create a 12-month launch timeline with specific milestones for technology
       deployment, regulatory approvals, team hiring, strategy testing, and live trading
-      commencement. Include dependencies and critical path.
+      commencement.
+
+
+      ## Dependencies and Critical Path
+
+
+      Consider the dependencies and critical path when creating the launch timeline.'
   define_capital_requirements:
     agent: false
     description: Calculate initial and ongoing capital needs
@@ -146,7 +199,34 @@ nodes:
       type: float
     - description: Breakdown of capital requirements by category
       key: capital_breakdown
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a weighted average of the regulatory minimums, trading capital
+          needs, and operational expenses to calculate the initial capital requirements.
+        reason: This approach provides the most accurate calculation of initial capital
+          requirements
+        text: Implement the calculation of initial capital requirements using the
+          regulatory minimums, trading capital needs, and operational expenses.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a weighted average of the trading capital needs and operational
+          expenses to calculate the ongoing capital needs.
+        reason: This approach provides the most accurate calculation of ongoing capital
+          needs
+        text: Implement the calculation of ongoing capital needs using the trading
+          capital needs and operational expenses.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a weighted average of the regulatory minimums, trading capital
+          needs, and operational expenses to calculate the breakdown of capital requirements
+          by category.
+        reason: This approach provides the most accurate breakdown of capital requirements
+          by category
+        text: Implement the breakdown of capital requirements by category using the
+          regulatory minimums, trading capital needs, and operational expenses.
     prompt: Determine the initial capital requirements considering regulatory minimums,
       trading capital needs, and operational expenses. Provide breakdown by category
       and timeline.
@@ -156,6 +236,12 @@ nodes:
     name: define_core_trading_philosophy
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: The core trading philosophy for Jane Street
+      key: core_trading_philosophy
+      type: List[str]
+    prd:
+      bullets: []
     prompt: Define the core trading philosophy for Jane Street, focusing on quantitative
       methods, market making principles, and risk management fundamentals. Provide
       5-7 key principles that will guide trading decisions.
@@ -188,6 +274,8 @@ nodes:
     - description: List of technology requirements for the data infrastructure
       key: technology_requirements
       type: str
+    prd:
+      bullets: []
     prompt: Design the data infrastructure including real-time market data feeds,
       historical data storage, alternative data sources, and data processing pipelines
       needed for quantitative research and trading.
@@ -198,6 +286,27 @@ nodes:
     nodes_depended_on:
     - establish_operational_workflows
     nodes_dependent_on: []
+    output_structure:
+    - description: Description of the trade settlement process
+      key: trade_settlement_process
+      type: str
+    - description: Method used for calculating P&L
+      key: pl_calculation_method
+      type: str
+    - description: Frequency of risk monitoring
+      key: risk_monitoring_frequency
+      type: str
+    - description: Procedure for position reconciliation
+      key: position_reconciliation_procedure
+      type: str
+    - description: Schedule for regulatory reporting
+      key: regulatory_reporting_schedule
+      type: str
+    - description: List of roles and responsibilities for operational workflows
+      key: roles_and_responsibilities
+      type: str
+    prd:
+      bullets: []
     prompt: Design performance measurement and attribution systems to track strategy
       performance, risk-adjusted returns, and trading costs. Define key metrics and
       reporting frequencies.
@@ -211,10 +320,10 @@ nodes:
     output_structure:
     - description: List of position size limits by asset type
       key: position_size_limits
-      type: List[int]
+      type: int
     - description: List of portfolio concentration metrics
       key: portfolio_concentration_metrics
-      type: List[float]
+      type: float
     - description: Value-at-Risk (VaR) limit
       key: var_limit
       type: float
@@ -227,6 +336,8 @@ nodes:
     - description: List of post-trade risk measures
       key: post_trade_risk_measures
       type: str
+    prd:
+      bullets: []
     prompt: Design a risk management framework with specific limits for position size,
       portfolio concentration, VaR, and drawdown controls. Include both pre-trade
       and post-trade risk measures.
@@ -244,7 +355,7 @@ nodes:
       type: int
     - description: List of trading strategy names
       key: strategy_names
-      type: List[str]
+      type: str
     - description: Whether market making strategies are included
       key: market_maker_strategies
       type: bool
@@ -254,6 +365,56 @@ nodes:
     - description: Whether options trading strategies are included
       key: options_trading_strategies
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use natural language processing techniques to extract key points from
+          the core trading philosophy document. Then, use the extracted key points
+          to develop market making strategies.
+        reason: This will help in developing market making strategies aligned with
+          the core philosophy.
+        text: Extract relevant market making principles from the core trading philosophy
+          defined in the define_core_trading_philosophy node.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use the market selection reasoning from the select_primary_markets
+          node to rank the primary markets and exchanges for each trading strategy.
+          Then, select the top-ranked markets and exchanges for each strategy.
+        reason: This will ensure that each trading strategy is aligned with the selected
+          markets and exchanges.
+        text: Select the most suitable primary markets and exchanges for each trading
+          strategy based on the market selection reasoning provided by the select_primary_markets
+          node.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use programming languages such as Python or C++ to develop the trading
+          strategies. Use quantitative finance libraries such as QuantLib or PyAlgoTrade
+          to implement the strategies. Ensure that each strategy is thoroughly backtested
+          and validated before implementation.
+        reason: This will provide a diverse set of trading strategies aligned with
+          the core philosophy and suitable for the selected markets.
+        text: Develop four to six quantitative trading strategies using the selected
+          primary markets and exchanges, and focus on market making, statistical arbitrage,
+          and options trading approaches.
+      - complexity: LOW
+        impact: LOW
+        method: Use a version control system such as Git to store and manage the trading
+          strategy documentation and code. Use a database or data storage system such
+          as MySQL or MongoDB to store the strategy details.
+        reason: This will facilitate future reference and improvement of the trading
+          strategies.
+        text: Document and store each developed trading strategy along with its details,
+          such as market making principles, statistical arbitrage approaches, and
+          options trading strategies.
+      - complexity: HIGH
+        impact: HIGH
+        method: Use the core trading philosophy document as a reference to review
+          and finalize each trading strategy. Ensure that each strategy is thoroughly
+          validated and tested before implementation.
+        reason: This will ensure that the trading strategies are effective and sustainable.
+        text: Review and finalize the developed trading strategies to ensure they
+          meet the core philosophy and are aligned with the selected markets and exchanges.
     prompt: Create 4-6 specific quantitative trading strategies aligned with the core
       philosophy and suitable for the selected markets. Focus on market making, statistical
       arbitrage, and options trading approaches.
@@ -267,19 +428,53 @@ nodes:
     output_structure:
     - description: List of documents included in the compliance program
       key: compliance_program_documents
-      type: List[str]
+      type: str
     - description: List of trade surveillance policies implemented
       key: trade_surveillance_policies
-      type: List[str]
+      type: str
     - description: List of record keeping policies implemented
       key: recordKeepingPolicies
-      type: List[str]
+      type: str
     - description: List of risk reporting policies implemented
       key: riskReportingPolicies
-      type: List[str]
+      type: str
     - description: List of regulatory communications policies implemented
       key: regulatoryCommunicationsPolicies
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use data ingestion methods to gather regulatory requirements. Analyze
+          and parse the data to identify key requirements.
+        reason: This step allows us to understand the specific requirements and tailor
+          our compliance program accordingly.
+        text: Review and analyze the regulatory requirements output from identify_regulatory_requirements
+          to understand the requirements for trade surveillance, record keeping, risk
+          reporting, and regulatory communications.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use policy development frameworks to create policies. Map each policy
+          to specific regulatory requirements.
+        reason: This step ensures that our compliance program addresses all necessary
+          regulatory requirements.
+        text: Develop a comprehensive compliance program incorporating policies for
+          trade surveillance, record keeping, risk reporting, and regulatory communications.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use data mapping methods to link policy outputs to regulatory requirements.
+          Verify that each policy meets the corresponding requirement.
+        reason: This step ensures that our compliance program meets all regulatory
+          requirements.
+        text: Map each policy to specific regulatory requirements output from identify_regulatory_requirements.
+      - complexity: LOW
+        impact: HIGH
+        method: Use document generation methods to create the compliance program documents.
+          Include all relevant policies and mapped regulatory requirements.
+        reason: This step completes the compliance program creation process.
+        text: Output the comprehensive compliance program documents including trade
+          surveillance, record keeping, risk reporting, and regulatory communications
+          policies.
     prompt: Develop a comprehensive compliance program including policies for trade
       surveillance, record keeping, risk reporting, and regulatory communications.
       Map each policy to specific regulatory requirements.
@@ -311,6 +506,66 @@ nodes:
     - description: List of roles and responsibilities for operational workflows
       key: roles_and_responsibilities
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a structured approach to identify and document the trade settlement
+          process, including the use of workflow diagrams and process mapping tools.
+        reason: A clear understanding of the trade settlement process is necessary
+          to ensure accurate and timely settlement of trades.
+        text: Define the trade settlement process, including the steps involved and
+          the systems used for trade execution and settlement.
+      - complexity: HIGH
+        impact: HIGH
+        method: Develop and document a P&L calculation methodology that takes into
+          account all relevant financial and trading metrics, including but not limited
+          to, mark-to-market valuations, dividends, and interest income.
+        reason: An accurate and timely P&L calculation is essential for risk management
+          and performance evaluation.
+        text: Determine the P&L calculation method, including the frequency of P&L
+          reporting and the methodology used for calculating P&L.
+      - complexity: HIGH
+        impact: HIGH
+        method: Develop and document a risk monitoring framework that includes regular
+          risk reporting, stress testing, and scenario analysis, using tools such
+          as VaR models, scenario analysis, and stress testing.
+        reason: Continuous risk monitoring is necessary to ensure the timely identification
+          and mitigation of potential risks.
+        text: Establish a risk monitoring frequency, including the schedule for risk
+          reporting and the parameters used for risk analysis.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Develop and document a position reconciliation process that includes
+          regular position reporting, reconciliation analysis, and discrepancy resolution,
+          using tools such as automated position reconciliation systems and manual
+          reconciliation processes.
+        reason: Accurate and timely position reconciliation is necessary to ensure
+          compliance with regulatory requirements and maintain accurate trading records.
+        text: Define the position reconciliation procedure, including the schedule
+          for position reconciliation and the methodology used for identifying and
+          resolving reconciliation discrepancies.
+      - complexity: HIGH
+        impact: HIGH
+        method: Develop and document a regulatory reporting framework that includes
+          regular reporting of trading activity, position holdings, and other relevant
+          financial metrics, using tools such as regulatory reporting software and
+          manual reporting processes.
+        reason: Timely and accurate regulatory reporting is necessary to ensure compliance
+          with regulatory requirements and maintain a positive relationship with regulatory
+          authorities.
+        text: Establish a regulatory reporting schedule, including the frequency of
+          regulatory reporting and the content of regulatory reports.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Develop and document job descriptions, performance metrics, and training
+          requirements for operational personnel, using tools such as job description
+          templates, performance metrics frameworks, and training manuals.
+        reason: Clear and well-defined roles and responsibilities are necessary to
+          ensure effective and efficient operation of daily workflows.
+        text: Define the roles and responsibilities for operational workflows, including
+          the job descriptions, performance metrics, and training requirements for
+          operational personnel.
     prompt: Create operational workflows for daily processes including trade settlement,
       P&L calculation, risk monitoring, position reconciliation, and regulatory reporting.
       Define roles and responsibilities.
@@ -322,6 +577,49 @@ nodes:
     - select_primary_markets
     - define_capital_requirements
     nodes_dependent_on: []
+    output_structure:
+    - description: List of potential prime brokerage partners
+      key: prime_brokerage_partners
+      type: List[str]
+    - description: List of potential execution venues
+      key: execution_venues
+      type: List[str]
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use a weighted scoring system to evaluate the prime brokerage partners
+          and execution venues based on factors like execution quality, technology
+          connectivity, margin rates, and counterparty risk
+        reason: To ensure that the prime brokerage partners and execution venues are
+          selected based on their capabilities and fit for Jane Street's trading operations
+        text: Define the evaluation criteria for prime brokerage partners and execution
+          venues
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use online research tools and databases to identify potential prime
+          brokerage partners and execution venues, and contact them to gather more
+          information
+        reason: To gather information about the prime brokerage partners and execution
+          venues and assess their capabilities and fit for Jane Street's trading operations
+        text: Research and identify potential prime brokerage partners and execution
+          venues
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use a weighted scoring system to assess the prime brokerage partners
+          and execution venues based on factors like execution quality, technology
+          connectivity, margin rates, and counterparty risk
+        reason: To determine the potential prime brokerage partners and execution
+          venues that best fit Jane Street's trading operations
+        text: Assess the prime brokerage partners and execution venues based on the
+          evaluation criteria
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Select the prime brokerage partners and execution venues that received
+          the highest scores in the assessment
+        reason: To identify the prime brokerage partners and execution venues that
+          best fit Jane Street's trading operations
+        text: Select the prime brokerage partners and execution venues
     prompt: Identify and evaluate potential prime brokerage partners and execution
       venues. Consider factors like execution quality, technology connectivity, margin
       rates, and counterparty risk.
@@ -336,13 +634,44 @@ nodes:
     output_structure:
     - description: List of key regulatory requirements
       key: regulatory_requirements
-      type: List[str]
+      type: str
     - description: Type of entity for the trading firm (LLC, Corporation, etc.)
       key: entity_type
       type: str
     - description: List of selected primary markets
       key: selected_markets
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Select the 'entity_type' value from the 'choose_legal_structure' output
+          structure
+        reason: The legal entity structure will impact the regulatory requirements
+          for the trading firm
+        text: Use the output from 'choose_legal_structure' to determine the type of
+          entity for the trading firm
+      - complexity: LOW
+        impact: MEDIUM
+        method: Select the 'selected_markets' value from the 'select_primary_markets'
+          output structure
+        reason: The selected primary markets will impact the regulatory requirements
+          for the trading firm
+        text: Use the output from 'select_primary_markets' to determine the selected
+          primary markets
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Consult with regulatory experts and conduct research to identify the
+          key regulatory requirements
+        reason: Regulatory requirements can be complex and vary by jurisdiction
+        text: Use regulatory research and data to map out the key regulatory requirements
+          for the trading firm
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create a comprehensive report outlining the key regulatory requirements
+          and their corresponding obligations
+        reason: Compliance obligations must be clearly understood and documented
+        text: Document the key regulatory requirements and their corresponding obligations
     prompt: List the key regulatory requirements for operating as a proprietary trading
       firm in the selected markets. Include required registrations, capital requirements,
       and reporting obligations.
@@ -370,6 +699,8 @@ nodes:
     - description: Analysis of competitive landscape in each selected market
       key: competitive_landscape
       type: str
+    prd:
+      bullets: []
     prompt: Based on the trading philosophy, select 3-5 primary markets and exchanges
       where Jane Street will initially operate. Consider liquidity, regulatory environment,
       and competitive landscape.
@@ -393,6 +724,35 @@ nodes:
     - description: Description of connectivity requirements for trading
       key: connectivity_requirements
       type: str
+    prd:
+      bullets:
+      - complexity: HIGH
+        impact: HIGH
+        method: Use the output structure of design_trading_strategies to inform the
+          technology architecture design
+        reason: The technology architecture must support the trading strategies developed
+          in design_trading_strategies
+        text: Gather requirements from design_trading_strategies node
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Research and identify at least 3 low-latency trading systems
+        reason: Low-latency trading systems are critical for trading strategy execution
+        text: Identify low-latency trading systems
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Research and identify at least 3 data feeds
+        reason: Data feeds are essential for trading strategy execution
+        text: Identify data feeds
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Research and identify at least 3 risk management systems
+        reason: Risk management systems are critical for trading strategy execution
+        text: Identify risk management systems
+      - complexity: LOW
+        impact: MEDIUM
+        method: Document at least 5 connectivity requirements
+        reason: Connectivity requirements are essential for trading strategy execution
+        text: Document connectivity requirements
     prompt: Outline the core technology architecture needed to support the trading
       strategies. Include low-latency trading systems, data feeds, risk management
       systems, and connectivity requirements.

@@ -1,10 +1,51 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: build_jane_street
 nodes:
   build_research_capabilities:
     agent: false
+    code_node_type: stub
     description: Establish quantitative research and strategy development processes
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignDataInfrastructureOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for design_data_infrastructure node outputs.\"\"\"\n    data_infrastructure_design:\
+      \ str = Field(..., description=\"Detailed description of the data infrastructure\
+      \ design\")\n    market_data_feeds: str = Field(..., description=\"List of real-time\
+      \ market data feeds\")\n    historical_data_storage: str = Field(..., description=\"\
+      Description of the historical data storage system\")\n    alternative_data_sources:\
+      \ str = Field(..., description=\"List of alternative data sources considered\"\
+      )\n    data_processing_pipelines: str = Field(..., description=\"Description\
+      \ of the data processing pipelines\")\n    research_data_systems: str = Field(...,\
+      \ description=\"Description of the research data systems\")\n    technology_requirements:\
+      \ str = Field(..., description=\"List of technology requirements for the data\
+      \ infrastructure\")\n\n\nclass CreateHiringStrategyOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for create_hiring_strategy node outputs.\"\"\"\n    role_requirements:\
+      \ List[str] = Field(..., description=\"List of role requirements for quantitative\
+      \ researchers, software engineers, and traders\")\n    compensation_structure:\
+      \ str = Field(..., description=\"Description of compensation structure for key\
+      \ roles\")\n    recruitment_approach: str = Field(..., description=\"Description\
+      \ of recruitment approach for key roles\")\n    target_hiring_numbers: List[int]\
+      \ = Field(..., description=\"List of target hiring numbers for key roles\")\n\
+      \n\nclass BuildResearchCapabilitiesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for build_research_capabilities node outputs.\"\"\"\n    research_infrastructure:\
+      \ str = Field(..., description=\"Description of the research infrastructure\"\
+      )\n    research_tools: List[str] = Field(..., description=\"List of research\
+      \ tools used\")\n    data_analysis_frameworks: List[str] = Field(..., description=\"\
+      List of data analysis frameworks used\")\n    strategy_evaluation_criteria:\
+      \ List[str] = Field(..., description=\"List of strategy evaluation criteria\"\
+      )\n    research_capital_requirements: List[float] = Field(..., description=\"\
+      List of research capital requirements\")\n\n\ndef build_research_capabilities(design_data_infrastructure_input:\
+      \ DesignDataInfrastructureOutput, create_hiring_strategy_input: CreateHiringStrategyOutput,\
+      \ **kwargs) -> BuildResearchCapabilitiesOutput:\n    \"\"\"Establish quantitative\
+      \ research and strategy development processes\n\n    Args:\n        design_data_infrastructure_input:\
+      \ Input from the 'design_data_infrastructure' node.\n        create_hiring_strategy_input:\
+      \ Input from the 'create_hiring_strategy' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        BuildResearchCapabilitiesOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ BuildResearchCapabilitiesOutput(\n        research_infrastructure=\"\",\n\
+      \        research_tools=[],\n        data_analysis_frameworks=[],\n        strategy_evaluation_criteria=[],\n\
+      \        research_capital_requirements=[],\n    )"
     name: build_research_capabilities
     nodes_depended_on:
     - design_data_infrastructure
@@ -68,9 +109,28 @@ nodes:
     prompt: Define the research infrastructure and processes for developing, backtesting,
       and implementing new trading strategies. Include research tools, data analysis
       frameworks, and strategy evaluation criteria.
+    shims: []
   choose_legal_structure:
     agent: false
+    code_node_type: stub
     description: Determine optimal corporate structure for the trading firm
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ChooseLegalStructureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for choose_legal_structure node outputs.\"\"\"\n \
+      \   legal_entity: str = Field(..., description=\"The chosen legal entity structure\
+      \ (LLC, Corporation, Partnership)\")\n    tax_implications: str = Field(...,\
+      \ description=\"Brief description of tax implications\")\n    liability_protection:\
+      \ str = Field(..., description=\"Brief description of liability protection\"\
+      )\n    operational_flexibility: str = Field(..., description=\"Brief description\
+      \ of operational flexibility\")\n    rationale: str = Field(..., description=\"\
+      Rationale for the chosen legal structure\")\n\n\ndef choose_legal_structure(general_input:\
+      \ str, **kwargs) -> ChooseLegalStructureOutput:\n    \"\"\"Determine optimal\
+      \ corporate structure for the trading firm\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        ChooseLegalStructureOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return ChooseLegalStructureOutput(\n\
+      \        legal_entity=\"\",\n        tax_implications=\"\",\n        liability_protection=\"\
+      \",\n        operational_flexibility=\"\",\n        rationale=\"\",\n    )"
     name: choose_legal_structure
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -95,9 +155,36 @@ nodes:
     prompt: Select the appropriate legal entity structure for Jane Street (LLC, Corporation,
       Partnership). Consider tax implications, liability protection, and operational
       flexibility. Provide rationale in 2-3 sentences.
+    shims: []
   compile_business_plan:
     agent: false
+    code_node_type: stub
     description: Synthesize all elements into comprehensive business plan
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass CreateLaunchTimelineOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_launch_timeline node outputs.\"\"\"\n \
+      \   launch_timeline: str = Field(..., description=\"The 12-month launch timeline\
+      \ with specific milestones\")\n    dependencies: str = Field(..., description=\"\
+      List of dependencies for the launch timeline\")\n    critical_path: str = Field(...,\
+      \ description=\"List of critical paths for the launch timeline\")\n\n\nclass\
+      \ CompileBusinessPlanOutput(BaseModel):\n    \"\"\"Pydantic model for compile_business_plan\
+      \ node outputs.\"\"\"\n    executive_summary: str = Field(..., description=\"\
+      Summary of the business plan\")\n    market_opportunity: str = Field(..., description=\"\
+      Summary of the market opportunity\")\n    competitive_advantage: str = Field(...,\
+      \ description=\"Summary of the competitive advantage\")\n    financial_projections:\
+      \ str = Field(..., description=\"Summary of the financial projections\")\n \
+      \   implementation_roadmap: str = Field(..., description=\"Summary of the implementation\
+      \ roadmap\")\n    total_words: int = Field(..., description=\"Total number of\
+      \ words in the business plan\")\n\n\ndef compile_business_plan(create_launch_timeline_input:\
+      \ CreateLaunchTimelineOutput, **kwargs) -> CompileBusinessPlanOutput:\n    \"\
+      \"\"Synthesize all elements into comprehensive business plan\n\n    Args:\n\
+      \        create_launch_timeline_input: Input from the 'create_launch_timeline'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       CompileBusinessPlanOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return CompileBusinessPlanOutput(\n        executive_summary=\"\
+      \",\n        market_opportunity=\"\",\n        competitive_advantage=\"\",\n\
+      \        financial_projections=\"\",\n        implementation_roadmap=\"\",\n\
+      \        total_words=0,\n    )"
     name: compile_business_plan
     nodes_depended_on:
     - create_launch_timeline
@@ -126,9 +213,46 @@ nodes:
     prompt: Compile all previous outputs into a comprehensive business plan for Jane
       Street. Include executive summary, market opportunity, competitive advantage,
       financial projections, and implementation roadmap. Keep to 500 words maximum.
+    shims: []
   create_hiring_strategy:
     agent: false
+    code_node_type: stub
     description: Plan talent acquisition for key roles
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SpecifyTechnologyArchitectureOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for specify_technology_architecture node outputs.\"\"\"\n    trading_systems:\
+      \ List[str] = Field(..., description=\"List of low-latency trading systems used\"\
+      )\n    data_feeds: List[str] = Field(..., description=\"List of data feeds used\
+      \ for trading\")\n    risk_management_systems: List[str] = Field(..., description=\"\
+      List of risk management systems used for trading\")\n    connectivity_requirements:\
+      \ str = Field(..., description=\"Description of connectivity requirements for\
+      \ trading\")\n\n\nclass DesignTradingStrategiesOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for design_trading_strategies node outputs.\"\"\"\n    trading_strategy_count:\
+      \ int = Field(..., description=\"Number of trading strategies developed\")\n\
+      \    strategy_names: str = Field(..., description=\"List of trading strategy\
+      \ names\")\n    market_maker_strategies: bool = Field(..., description=\"Whether\
+      \ market making strategies are included\")\n    statistical_arbitrage_strategies:\
+      \ bool = Field(..., description=\"Whether statistical arbitrage strategies are\
+      \ included\")\n    options_trading_strategies: bool = Field(..., description=\"\
+      Whether options trading strategies are included\")\n\n\nclass CreateHiringStrategyOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for create_hiring_strategy node outputs.\"\"\"\n \
+      \   role_requirements: List[str] = Field(..., description=\"List of role requirements\
+      \ for quantitative researchers, software engineers, and traders\")\n    compensation_structure:\
+      \ str = Field(..., description=\"Description of compensation structure for key\
+      \ roles\")\n    recruitment_approach: str = Field(..., description=\"Description\
+      \ of recruitment approach for key roles\")\n    target_hiring_numbers: List[int]\
+      \ = Field(..., description=\"List of target hiring numbers for key roles\")\n\
+      \n\ndef create_hiring_strategy(specify_technology_architecture_input: SpecifyTechnologyArchitectureOutput,\
+      \ design_trading_strategies_input: DesignTradingStrategiesOutput, **kwargs)\
+      \ -> CreateHiringStrategyOutput:\n    \"\"\"Plan talent acquisition for key\
+      \ roles\n\n    Args:\n        specify_technology_architecture_input: Input from\
+      \ the 'specify_technology_architecture' node.\n        design_trading_strategies_input:\
+      \ Input from the 'design_trading_strategies' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        CreateHiringStrategyOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return CreateHiringStrategyOutput(\n\
+      \        role_requirements=[],\n        compensation_structure=\"\",\n     \
+      \   recruitment_approach=\"\",\n        target_hiring_numbers=[],\n    )"
     name: create_hiring_strategy
     nodes_depended_on:
     - specify_technology_architecture
@@ -153,9 +277,46 @@ nodes:
     prompt: Develop a hiring strategy for Jane Street focusing on quantitative researchers,
       software engineers, and traders. Define role requirements, compensation structure,
       and recruitment approach.
+    shims: []
   create_launch_timeline:
     agent: false
+    code_node_type: stub
     description: Develop phased implementation plan with milestones
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass BuildResearchCapabilitiesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for build_research_capabilities node outputs.\"\"\"\n    research_infrastructure:\
+      \ str = Field(..., description=\"Description of the research infrastructure\"\
+      )\n    research_tools: List[str] = Field(..., description=\"List of research\
+      \ tools used\")\n    data_analysis_frameworks: List[str] = Field(..., description=\"\
+      List of data analysis frameworks used\")\n    strategy_evaluation_criteria:\
+      \ List[str] = Field(..., description=\"List of strategy evaluation criteria\"\
+      )\n    research_capital_requirements: List[float] = Field(..., description=\"\
+      List of research capital requirements\")\n\n\nclass DesignPerformanceMeasurementOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_performance_measurement node outputs.\"\
+      \"\"\n    trade_settlement_process: str = Field(..., description=\"Description\
+      \ of the trade settlement process\")\n    pl_calculation_method: str = Field(...,\
+      \ description=\"Method used for calculating P&L\")\n    risk_monitoring_frequency:\
+      \ str = Field(..., description=\"Frequency of risk monitoring\")\n    position_reconciliation_procedure:\
+      \ str = Field(..., description=\"Procedure for position reconciliation\")\n\
+      \    regulatory_reporting_schedule: str = Field(..., description=\"Schedule\
+      \ for regulatory reporting\")\n    roles_and_responsibilities: str = Field(...,\
+      \ description=\"List of roles and responsibilities for operational workflows\"\
+      )\n\n\nclass CreateLaunchTimelineOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for create_launch_timeline node outputs.\"\"\"\n    launch_timeline: str =\
+      \ Field(..., description=\"The 12-month launch timeline with specific milestones\"\
+      )\n    dependencies: str = Field(..., description=\"List of dependencies for\
+      \ the launch timeline\")\n    critical_path: str = Field(..., description=\"\
+      List of critical paths for the launch timeline\")\n\n\ndef create_launch_timeline(build_research_capabilities_input:\
+      \ BuildResearchCapabilitiesOutput, design_performance_measurement_input: DesignPerformanceMeasurementOutput,\
+      \ **kwargs) -> CreateLaunchTimelineOutput:\n    \"\"\"Develop phased implementation\
+      \ plan with milestones\n\n    Args:\n        build_research_capabilities_input:\
+      \ Input from the 'build_research_capabilities' node.\n        design_performance_measurement_input:\
+      \ Input from the 'design_performance_measurement' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        CreateLaunchTimelineOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return CreateLaunchTimelineOutput(\n\
+      \        launch_timeline=\"\",\n        dependencies=\"\",\n        critical_path=\"\
+      \",\n    )"
     name: create_launch_timeline
     nodes_depended_on:
     - build_research_capabilities
@@ -182,9 +343,42 @@ nodes:
 
 
       Consider the dependencies and critical path when creating the launch timeline.'
+    shims: []
   define_capital_requirements:
     agent: false
+    code_node_type: stub
     description: Calculate initial and ongoing capital needs
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass IdentifyRegulatoryRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_regulatory_requirements node outputs.\"\
+      \"\"\n    regulatory_requirements: str = Field(..., description=\"List of key\
+      \ regulatory requirements\")\n    entity_type: str = Field(..., description=\"\
+      Type of entity for the trading firm (LLC, Corporation, etc.)\")\n    selected_markets:\
+      \ str = Field(..., description=\"List of selected primary markets\")\n\n\nclass\
+      \ DesignRiskManagementFrameworkOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for design_risk_management_framework node outputs.\"\"\"\n    position_size_limits:\
+      \ int = Field(..., description=\"List of position size limits by asset type\"\
+      )\n    portfolio_concentration_metrics: float = Field(..., description=\"List\
+      \ of portfolio concentration metrics\")\n    var_limit: float = Field(..., description=\"\
+      Value-at-Risk (VaR) limit\")\n    drawdown_limit: float = Field(..., description=\"\
+      Drawdown limit\")\n    pre_trade_risk_measures: str = Field(..., description=\"\
+      List of pre-trade risk measures\")\n    post_trade_risk_measures: str = Field(...,\
+      \ description=\"List of post-trade risk measures\")\n\n\nclass DefineCapitalRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_capital_requirements node outputs.\"\"\"\
+      \n    initial_capital_requirements: float = Field(..., description=\"Initial\
+      \ capital requirements\")\n    ongoing_capital_needs: float = Field(..., description=\"\
+      Ongoing capital needs\")\n    capital_breakdown: str = Field(..., description=\"\
+      Breakdown of capital requirements by category\")\n\n\ndef define_capital_requirements(identify_regulatory_requirements_input:\
+      \ IdentifyRegulatoryRequirementsOutput, design_risk_management_framework_input:\
+      \ DesignRiskManagementFrameworkOutput, **kwargs) -> DefineCapitalRequirementsOutput:\n\
+      \    \"\"\"Calculate initial and ongoing capital needs\n\n    Args:\n      \
+      \  identify_regulatory_requirements_input: Input from the 'identify_regulatory_requirements'\
+      \ node.\n        design_risk_management_framework_input: Input from the 'design_risk_management_framework'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DefineCapitalRequirementsOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DefineCapitalRequirementsOutput(\n\
+      \        initial_capital_requirements=0.0,\n        ongoing_capital_needs=0.0,\n\
+      \        capital_breakdown=\"\",\n    )"
     name: define_capital_requirements
     nodes_depended_on:
     - identify_regulatory_requirements
@@ -230,9 +424,23 @@ nodes:
     prompt: Determine the initial capital requirements considering regulatory minimums,
       trading capital needs, and operational expenses. Provide breakdown by category
       and timeline.
+    shims: []
   define_core_trading_philosophy:
     agent: false
+    code_node_type: stub
     description: Establish fundamental principles for quantitative trading approach
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineCoreTradingPhilosophyOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for define_core_trading_philosophy node outputs.\"\"\"\n    core_trading_philosophy:\
+      \ List[str] = Field(..., description=\"The core trading philosophy for Jane\
+      \ Street\")\n\n\ndef define_core_trading_philosophy(general_input: str, **kwargs)\
+      \ -> DefineCoreTradingPhilosophyOutput:\n    \"\"\"Establish fundamental principles\
+      \ for quantitative trading approach\n\n    Args:\n        general_input: General\
+      \ input string for the root node.\n        **kwargs: Additional keyword arguments.\n\
+      \n    Returns:\n        DefineCoreTradingPhilosophyOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return DefineCoreTradingPhilosophyOutput(\n\
+      \        core_trading_philosophy=[],\n    )"
     name: define_core_trading_philosophy
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -245,9 +453,42 @@ nodes:
     prompt: Define the core trading philosophy for Jane Street, focusing on quantitative
       methods, market making principles, and risk management fundamentals. Provide
       5-7 key principles that will guide trading decisions.
+    shims: []
   design_data_infrastructure:
     agent: false
+    code_node_type: stub
     description: Plan market data and research data systems
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SpecifyTechnologyArchitectureOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for specify_technology_architecture node outputs.\"\"\"\n    trading_systems:\
+      \ List[str] = Field(..., description=\"List of low-latency trading systems used\"\
+      )\n    data_feeds: List[str] = Field(..., description=\"List of data feeds used\
+      \ for trading\")\n    risk_management_systems: List[str] = Field(..., description=\"\
+      List of risk management systems used for trading\")\n    connectivity_requirements:\
+      \ str = Field(..., description=\"Description of connectivity requirements for\
+      \ trading\")\n\n\nclass DesignDataInfrastructureOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for design_data_infrastructure node outputs.\"\"\"\n    data_infrastructure_design:\
+      \ str = Field(..., description=\"Detailed description of the data infrastructure\
+      \ design\")\n    market_data_feeds: str = Field(..., description=\"List of real-time\
+      \ market data feeds\")\n    historical_data_storage: str = Field(..., description=\"\
+      Description of the historical data storage system\")\n    alternative_data_sources:\
+      \ str = Field(..., description=\"List of alternative data sources considered\"\
+      )\n    data_processing_pipelines: str = Field(..., description=\"Description\
+      \ of the data processing pipelines\")\n    research_data_systems: str = Field(...,\
+      \ description=\"Description of the research data systems\")\n    technology_requirements:\
+      \ str = Field(..., description=\"List of technology requirements for the data\
+      \ infrastructure\")\n\n\ndef design_data_infrastructure(specify_technology_architecture_input:\
+      \ SpecifyTechnologyArchitectureOutput, **kwargs) -> DesignDataInfrastructureOutput:\n\
+      \    \"\"\"Plan market data and research data systems\n\n    Args:\n       \
+      \ specify_technology_architecture_input: Input from the 'specify_technology_architecture'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DesignDataInfrastructureOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DesignDataInfrastructureOutput(\n    \
+      \    data_infrastructure_design=\"\",\n        market_data_feeds=\"\",\n   \
+      \     historical_data_storage=\"\",\n        alternative_data_sources=\"\",\n\
+      \        data_processing_pipelines=\"\",\n        research_data_systems=\"\"\
+      ,\n        technology_requirements=\"\",\n    )"
     name: design_data_infrastructure
     nodes_depended_on:
     - specify_technology_architecture
@@ -279,9 +520,42 @@ nodes:
     prompt: Design the data infrastructure including real-time market data feeds,
       historical data storage, alternative data sources, and data processing pipelines
       needed for quantitative research and trading.
+    shims: []
   design_performance_measurement:
     agent: false
+    code_node_type: stub
     description: Create systems for tracking and analyzing trading performance
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass EstablishOperationalWorkflowsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for establish_operational_workflows node outputs.\"\
+      \"\"\n    trade_settlement_process: str = Field(..., description=\"Description\
+      \ of the trade settlement process\")\n    pl_calculation_method: str = Field(...,\
+      \ description=\"Method used for calculating P&L\")\n    risk_monitoring_frequency:\
+      \ str = Field(..., description=\"Frequency of risk monitoring\")\n    position_reconciliation_procedure:\
+      \ str = Field(..., description=\"Procedure for position reconciliation\")\n\
+      \    regulatory_reporting_schedule: str = Field(..., description=\"Schedule\
+      \ for regulatory reporting\")\n    roles_and_responsibilities: str = Field(...,\
+      \ description=\"List of roles and responsibilities for operational workflows\"\
+      )\n\n\nclass DesignPerformanceMeasurementOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for design_performance_measurement node outputs.\"\"\"\n    trade_settlement_process:\
+      \ str = Field(..., description=\"Description of the trade settlement process\"\
+      )\n    pl_calculation_method: str = Field(..., description=\"Method used for\
+      \ calculating P&L\")\n    risk_monitoring_frequency: str = Field(..., description=\"\
+      Frequency of risk monitoring\")\n    position_reconciliation_procedure: str\
+      \ = Field(..., description=\"Procedure for position reconciliation\")\n    regulatory_reporting_schedule:\
+      \ str = Field(..., description=\"Schedule for regulatory reporting\")\n    roles_and_responsibilities:\
+      \ str = Field(..., description=\"List of roles and responsibilities for operational\
+      \ workflows\")\n\n\ndef design_performance_measurement(establish_operational_workflows_input:\
+      \ EstablishOperationalWorkflowsOutput, **kwargs) -> DesignPerformanceMeasurementOutput:\n\
+      \    \"\"\"Create systems for tracking and analyzing trading performance\n\n\
+      \    Args:\n        establish_operational_workflows_input: Input from the 'establish_operational_workflows'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DesignPerformanceMeasurementOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DesignPerformanceMeasurementOutput(\n\
+      \        trade_settlement_process=\"\",\n        pl_calculation_method=\"\"\
+      ,\n        risk_monitoring_frequency=\"\",\n        position_reconciliation_procedure=\"\
+      \",\n        regulatory_reporting_schedule=\"\",\n        roles_and_responsibilities=\"\
+      \",\n    )"
     name: design_performance_measurement
     nodes_depended_on:
     - establish_operational_workflows
@@ -310,9 +584,39 @@ nodes:
     prompt: Design performance measurement and attribution systems to track strategy
       performance, risk-adjusted returns, and trading costs. Define key metrics and
       reporting frequencies.
+    shims: []
   design_risk_management_framework:
     agent: false
+    code_node_type: stub
     description: Establish comprehensive risk controls and limits
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DesignTradingStrategiesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_trading_strategies node outputs.\"\"\"\n\
+      \    trading_strategy_count: int = Field(..., description=\"Number of trading\
+      \ strategies developed\")\n    strategy_names: str = Field(..., description=\"\
+      List of trading strategy names\")\n    market_maker_strategies: bool = Field(...,\
+      \ description=\"Whether market making strategies are included\")\n    statistical_arbitrage_strategies:\
+      \ bool = Field(..., description=\"Whether statistical arbitrage strategies are\
+      \ included\")\n    options_trading_strategies: bool = Field(..., description=\"\
+      Whether options trading strategies are included\")\n\n\nclass DesignRiskManagementFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_risk_management_framework node outputs.\"\
+      \"\"\n    position_size_limits: int = Field(..., description=\"List of position\
+      \ size limits by asset type\")\n    portfolio_concentration_metrics: float =\
+      \ Field(..., description=\"List of portfolio concentration metrics\")\n    var_limit:\
+      \ float = Field(..., description=\"Value-at-Risk (VaR) limit\")\n    drawdown_limit:\
+      \ float = Field(..., description=\"Drawdown limit\")\n    pre_trade_risk_measures:\
+      \ str = Field(..., description=\"List of pre-trade risk measures\")\n    post_trade_risk_measures:\
+      \ str = Field(..., description=\"List of post-trade risk measures\")\n\n\ndef\
+      \ design_risk_management_framework(design_trading_strategies_input: DesignTradingStrategiesOutput,\
+      \ **kwargs) -> DesignRiskManagementFrameworkOutput:\n    \"\"\"Establish comprehensive\
+      \ risk controls and limits\n\n    Args:\n        design_trading_strategies_input:\
+      \ Input from the 'design_trading_strategies' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DesignRiskManagementFrameworkOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DesignRiskManagementFrameworkOutput(\n        position_size_limits=0,\n  \
+      \      portfolio_concentration_metrics=0.0,\n        var_limit=0.0,\n      \
+      \  drawdown_limit=0.0,\n        pre_trade_risk_measures=\"\",\n        post_trade_risk_measures=\"\
+      \",\n    )"
     name: design_risk_management_framework
     nodes_depended_on:
     - design_trading_strategies
@@ -341,9 +645,44 @@ nodes:
     prompt: Design a risk management framework with specific limits for position size,
       portfolio concentration, VaR, and drawdown controls. Include both pre-trade
       and post-trade risk measures.
+    shims: []
   design_trading_strategies:
     agent: false
+    code_node_type: stub
     description: Develop specific quantitative trading strategies
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineCoreTradingPhilosophyOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for define_core_trading_philosophy node outputs.\"\"\"\n    core_trading_philosophy:\
+      \ List[str] = Field(..., description=\"The core trading philosophy for Jane\
+      \ Street\")\n\n\nclass SelectPrimaryMarketsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for select_primary_markets node outputs.\"\"\"\n    primary_markets:\
+      \ List[str] = Field(..., description=\"List of selected primary markets and\
+      \ exchanges\")\n    market_selection_reasoning: str = Field(..., description=\"\
+      Rationale for selecting each primary market and exchange\")\n    liquidity_risk_assessment:\
+      \ str = Field(..., description=\"Assessment of liquidity risk in each selected\
+      \ market\")\n    regulatory_environment: str = Field(..., description=\"Overview\
+      \ of regulatory requirements and implications for each selected market\")\n\
+      \    competitive_landscape: str = Field(..., description=\"Analysis of competitive\
+      \ landscape in each selected market\")\n\n\nclass DesignTradingStrategiesOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_trading_strategies node outputs.\"\"\"\n\
+      \    trading_strategy_count: int = Field(..., description=\"Number of trading\
+      \ strategies developed\")\n    strategy_names: str = Field(..., description=\"\
+      List of trading strategy names\")\n    market_maker_strategies: bool = Field(...,\
+      \ description=\"Whether market making strategies are included\")\n    statistical_arbitrage_strategies:\
+      \ bool = Field(..., description=\"Whether statistical arbitrage strategies are\
+      \ included\")\n    options_trading_strategies: bool = Field(..., description=\"\
+      Whether options trading strategies are included\")\n\n\ndef design_trading_strategies(define_core_trading_philosophy_input:\
+      \ DefineCoreTradingPhilosophyOutput, select_primary_markets_input: SelectPrimaryMarketsOutput,\
+      \ **kwargs) -> DesignTradingStrategiesOutput:\n    \"\"\"Develop specific quantitative\
+      \ trading strategies\n\n    Args:\n        define_core_trading_philosophy_input:\
+      \ Input from the 'define_core_trading_philosophy' node.\n        select_primary_markets_input:\
+      \ Input from the 'select_primary_markets' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DesignTradingStrategiesOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DesignTradingStrategiesOutput(\n        trading_strategy_count=0,\n      \
+      \  strategy_names=\"\",\n        market_maker_strategies=False,\n        statistical_arbitrage_strategies=False,\n\
+      \        options_trading_strategies=False,\n    )"
     name: design_trading_strategies
     nodes_depended_on:
     - define_core_trading_philosophy
@@ -418,9 +757,36 @@ nodes:
     prompt: Create 4-6 specific quantitative trading strategies aligned with the core
       philosophy and suitable for the selected markets. Focus on market making, statistical
       arbitrage, and options trading approaches.
+    shims: []
   develop_compliance_program:
     agent: false
+    code_node_type: stub
     description: Create policies and procedures for regulatory compliance
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass IdentifyRegulatoryRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_regulatory_requirements node outputs.\"\
+      \"\"\n    regulatory_requirements: str = Field(..., description=\"List of key\
+      \ regulatory requirements\")\n    entity_type: str = Field(..., description=\"\
+      Type of entity for the trading firm (LLC, Corporation, etc.)\")\n    selected_markets:\
+      \ str = Field(..., description=\"List of selected primary markets\")\n\n\nclass\
+      \ DevelopComplianceProgramOutput(BaseModel):\n    \"\"\"Pydantic model for develop_compliance_program\
+      \ node outputs.\"\"\"\n    compliance_program_documents: str = Field(..., description=\"\
+      List of documents included in the compliance program\")\n    trade_surveillance_policies:\
+      \ str = Field(..., description=\"List of trade surveillance policies implemented\"\
+      )\n    recordKeepingPolicies: str = Field(..., description=\"List of record\
+      \ keeping policies implemented\")\n    riskReportingPolicies: str = Field(...,\
+      \ description=\"List of risk reporting policies implemented\")\n    regulatoryCommunicationsPolicies:\
+      \ str = Field(..., description=\"List of regulatory communications policies\
+      \ implemented\")\n\n\ndef develop_compliance_program(identify_regulatory_requirements_input:\
+      \ IdentifyRegulatoryRequirementsOutput, **kwargs) -> DevelopComplianceProgramOutput:\n\
+      \    \"\"\"Create policies and procedures for regulatory compliance\n\n    Args:\n\
+      \        identify_regulatory_requirements_input: Input from the 'identify_regulatory_requirements'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DevelopComplianceProgramOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return DevelopComplianceProgramOutput(\n    \
+      \    compliance_program_documents=\"\",\n        trade_surveillance_policies=\"\
+      \",\n        recordKeepingPolicies=\"\",\n        riskReportingPolicies=\"\"\
+      ,\n        regulatoryCommunicationsPolicies=\"\",\n    )"
     name: develop_compliance_program
     nodes_depended_on:
     - identify_regulatory_requirements
@@ -478,9 +844,58 @@ nodes:
     prompt: Develop a comprehensive compliance program including policies for trade
       surveillance, record keeping, risk reporting, and regulatory communications.
       Map each policy to specific regulatory requirements.
+    shims: []
   establish_operational_workflows:
     agent: false
+    code_node_type: stub
     description: Design daily operational processes and procedures
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignRiskManagementFrameworkOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for design_risk_management_framework node outputs.\"\"\"\n    position_size_limits:\
+      \ int = Field(..., description=\"List of position size limits by asset type\"\
+      )\n    portfolio_concentration_metrics: float = Field(..., description=\"List\
+      \ of portfolio concentration metrics\")\n    var_limit: float = Field(..., description=\"\
+      Value-at-Risk (VaR) limit\")\n    drawdown_limit: float = Field(..., description=\"\
+      Drawdown limit\")\n    pre_trade_risk_measures: str = Field(..., description=\"\
+      List of pre-trade risk measures\")\n    post_trade_risk_measures: str = Field(...,\
+      \ description=\"List of post-trade risk measures\")\n\n\nclass IdentifyPrimeBrokeragePartnersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_prime_brokerage_partners node outputs.\"\
+      \"\"\n    prime_brokerage_partners: List[str] = Field(..., description=\"List\
+      \ of potential prime brokerage partners\")\n    execution_venues: List[str]\
+      \ = Field(..., description=\"List of potential execution venues\")\n\n\nclass\
+      \ DevelopComplianceProgramOutput(BaseModel):\n    \"\"\"Pydantic model for develop_compliance_program\
+      \ node outputs.\"\"\"\n    compliance_program_documents: str = Field(..., description=\"\
+      List of documents included in the compliance program\")\n    trade_surveillance_policies:\
+      \ str = Field(..., description=\"List of trade surveillance policies implemented\"\
+      )\n    recordKeepingPolicies: str = Field(..., description=\"List of record\
+      \ keeping policies implemented\")\n    riskReportingPolicies: str = Field(...,\
+      \ description=\"List of risk reporting policies implemented\")\n    regulatoryCommunicationsPolicies:\
+      \ str = Field(..., description=\"List of regulatory communications policies\
+      \ implemented\")\n\n\nclass EstablishOperationalWorkflowsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for establish_operational_workflows node outputs.\"\
+      \"\"\n    trade_settlement_process: str = Field(..., description=\"Description\
+      \ of the trade settlement process\")\n    pl_calculation_method: str = Field(...,\
+      \ description=\"Method used for calculating P&L\")\n    risk_monitoring_frequency:\
+      \ str = Field(..., description=\"Frequency of risk monitoring\")\n    position_reconciliation_procedure:\
+      \ str = Field(..., description=\"Procedure for position reconciliation\")\n\
+      \    regulatory_reporting_schedule: str = Field(..., description=\"Schedule\
+      \ for regulatory reporting\")\n    roles_and_responsibilities: str = Field(...,\
+      \ description=\"List of roles and responsibilities for operational workflows\"\
+      )\n\n\ndef establish_operational_workflows(design_risk_management_framework_input:\
+      \ DesignRiskManagementFrameworkOutput, identify_prime_brokerage_partners_input:\
+      \ IdentifyPrimeBrokeragePartnersOutput, develop_compliance_program_input: DevelopComplianceProgramOutput,\
+      \ **kwargs) -> EstablishOperationalWorkflowsOutput:\n    \"\"\"Design daily\
+      \ operational processes and procedures\n\n    Args:\n        design_risk_management_framework_input:\
+      \ Input from the 'design_risk_management_framework' node.\n        identify_prime_brokerage_partners_input:\
+      \ Input from the 'identify_prime_brokerage_partners' node.\n        develop_compliance_program_input:\
+      \ Input from the 'develop_compliance_program' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        EstablishOperationalWorkflowsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ EstablishOperationalWorkflowsOutput(\n        trade_settlement_process=\"\"\
+      ,\n        pl_calculation_method=\"\",\n        risk_monitoring_frequency=\"\
+      \",\n        position_reconciliation_procedure=\"\",\n        regulatory_reporting_schedule=\"\
+      \",\n        roles_and_responsibilities=\"\",\n    )"
     name: establish_operational_workflows
     nodes_depended_on:
     - design_risk_management_framework
@@ -569,9 +984,42 @@ nodes:
     prompt: Create operational workflows for daily processes including trade settlement,
       P&L calculation, risk monitoring, position reconciliation, and regulatory reporting.
       Define roles and responsibilities.
+    shims: []
   identify_prime_brokerage_partners:
     agent: false
+    code_node_type: stub
     description: Select prime brokers and execution venues
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectPrimaryMarketsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ select_primary_markets node outputs.\"\"\"\n    primary_markets: List[str]\
+      \ = Field(..., description=\"List of selected primary markets and exchanges\"\
+      )\n    market_selection_reasoning: str = Field(..., description=\"Rationale\
+      \ for selecting each primary market and exchange\")\n    liquidity_risk_assessment:\
+      \ str = Field(..., description=\"Assessment of liquidity risk in each selected\
+      \ market\")\n    regulatory_environment: str = Field(..., description=\"Overview\
+      \ of regulatory requirements and implications for each selected market\")\n\
+      \    competitive_landscape: str = Field(..., description=\"Analysis of competitive\
+      \ landscape in each selected market\")\n\n\nclass DefineCapitalRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_capital_requirements node outputs.\"\"\"\
+      \n    initial_capital_requirements: float = Field(..., description=\"Initial\
+      \ capital requirements\")\n    ongoing_capital_needs: float = Field(..., description=\"\
+      Ongoing capital needs\")\n    capital_breakdown: str = Field(..., description=\"\
+      Breakdown of capital requirements by category\")\n\n\nclass IdentifyPrimeBrokeragePartnersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_prime_brokerage_partners node outputs.\"\
+      \"\"\n    prime_brokerage_partners: List[str] = Field(..., description=\"List\
+      \ of potential prime brokerage partners\")\n    execution_venues: List[str]\
+      \ = Field(..., description=\"List of potential execution venues\")\n\n\ndef\
+      \ identify_prime_brokerage_partners(select_primary_markets_input: SelectPrimaryMarketsOutput,\
+      \ define_capital_requirements_input: DefineCapitalRequirementsOutput, **kwargs)\
+      \ -> IdentifyPrimeBrokeragePartnersOutput:\n    \"\"\"Select prime brokers and\
+      \ execution venues\n\n    Args:\n        select_primary_markets_input: Input\
+      \ from the 'select_primary_markets' node.\n        define_capital_requirements_input:\
+      \ Input from the 'define_capital_requirements' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        IdentifyPrimeBrokeragePartnersOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ IdentifyPrimeBrokeragePartnersOutput(\n        prime_brokerage_partners=[],\n\
+      \        execution_venues=[],\n    )"
     name: identify_prime_brokerage_partners
     nodes_depended_on:
     - select_primary_markets
@@ -623,9 +1071,46 @@ nodes:
     prompt: Identify and evaluate potential prime brokerage partners and execution
       venues. Consider factors like execution quality, technology connectivity, margin
       rates, and counterparty risk.
+    shims: []
   identify_regulatory_requirements:
     agent: false
+    code_node_type: stub
     description: Map out regulatory registrations and compliance obligations
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ChooseLegalStructureOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ choose_legal_structure node outputs.\"\"\"\n    legal_entity: str = Field(...,\
+      \ description=\"The chosen legal entity structure (LLC, Corporation, Partnership)\"\
+      )\n    tax_implications: str = Field(..., description=\"Brief description of\
+      \ tax implications\")\n    liability_protection: str = Field(..., description=\"\
+      Brief description of liability protection\")\n    operational_flexibility: str\
+      \ = Field(..., description=\"Brief description of operational flexibility\"\
+      )\n    rationale: str = Field(..., description=\"Rationale for the chosen legal\
+      \ structure\")\n\n\nclass SelectPrimaryMarketsOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for select_primary_markets node outputs.\"\"\"\n    primary_markets:\
+      \ List[str] = Field(..., description=\"List of selected primary markets and\
+      \ exchanges\")\n    market_selection_reasoning: str = Field(..., description=\"\
+      Rationale for selecting each primary market and exchange\")\n    liquidity_risk_assessment:\
+      \ str = Field(..., description=\"Assessment of liquidity risk in each selected\
+      \ market\")\n    regulatory_environment: str = Field(..., description=\"Overview\
+      \ of regulatory requirements and implications for each selected market\")\n\
+      \    competitive_landscape: str = Field(..., description=\"Analysis of competitive\
+      \ landscape in each selected market\")\n\n\nclass IdentifyRegulatoryRequirementsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for identify_regulatory_requirements node outputs.\"\
+      \"\"\n    regulatory_requirements: str = Field(..., description=\"List of key\
+      \ regulatory requirements\")\n    entity_type: str = Field(..., description=\"\
+      Type of entity for the trading firm (LLC, Corporation, etc.)\")\n    selected_markets:\
+      \ str = Field(..., description=\"List of selected primary markets\")\n\n\ndef\
+      \ identify_regulatory_requirements(choose_legal_structure_input: ChooseLegalStructureOutput,\
+      \ select_primary_markets_input: SelectPrimaryMarketsOutput, **kwargs) -> IdentifyRegulatoryRequirementsOutput:\n\
+      \    \"\"\"Map out regulatory registrations and compliance obligations\n\n \
+      \   Args:\n        choose_legal_structure_input: Input from the 'choose_legal_structure'\
+      \ node.\n        select_primary_markets_input: Input from the 'select_primary_markets'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       IdentifyRegulatoryRequirementsOutput: Object containing outputs for\
+      \ this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return IdentifyRegulatoryRequirementsOutput(\n\
+      \        regulatory_requirements=\"\",\n        entity_type=\"\",\n        selected_markets=\"\
+      \",\n    )"
     name: identify_regulatory_requirements
     nodes_depended_on:
     - choose_legal_structure
@@ -675,9 +1160,35 @@ nodes:
     prompt: List the key regulatory requirements for operating as a proprietary trading
       firm in the selected markets. Include required registrations, capital requirements,
       and reporting obligations.
+    shims: []
   select_primary_markets:
     agent: false
+    code_node_type: stub
     description: Identify initial markets and exchanges for trading operations
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DefineCoreTradingPhilosophyOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for define_core_trading_philosophy node outputs.\"\"\"\n    core_trading_philosophy:\
+      \ List[str] = Field(..., description=\"The core trading philosophy for Jane\
+      \ Street\")\n\n\nclass SelectPrimaryMarketsOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for select_primary_markets node outputs.\"\"\"\n    primary_markets:\
+      \ List[str] = Field(..., description=\"List of selected primary markets and\
+      \ exchanges\")\n    market_selection_reasoning: str = Field(..., description=\"\
+      Rationale for selecting each primary market and exchange\")\n    liquidity_risk_assessment:\
+      \ str = Field(..., description=\"Assessment of liquidity risk in each selected\
+      \ market\")\n    regulatory_environment: str = Field(..., description=\"Overview\
+      \ of regulatory requirements and implications for each selected market\")\n\
+      \    competitive_landscape: str = Field(..., description=\"Analysis of competitive\
+      \ landscape in each selected market\")\n\n\ndef select_primary_markets(define_core_trading_philosophy_input:\
+      \ DefineCoreTradingPhilosophyOutput, **kwargs) -> SelectPrimaryMarketsOutput:\n\
+      \    \"\"\"Identify initial markets and exchanges for trading operations\n\n\
+      \    Args:\n        define_core_trading_philosophy_input: Input from the 'define_core_trading_philosophy'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SelectPrimaryMarketsOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SelectPrimaryMarketsOutput(\n        primary_markets=[],\n\
+      \        market_selection_reasoning=\"\",\n        liquidity_risk_assessment=\"\
+      \",\n        regulatory_environment=\"\",\n        competitive_landscape=\"\"\
+      ,\n    )"
     name: select_primary_markets
     nodes_depended_on:
     - define_core_trading_philosophy
@@ -704,9 +1215,37 @@ nodes:
     prompt: Based on the trading philosophy, select 3-5 primary markets and exchanges
       where Jane Street will initially operate. Consider liquidity, regulatory environment,
       and competitive landscape.
+    shims: []
   specify_technology_architecture:
     agent: false
+    code_node_type: stub
     description: Define high-level technology infrastructure requirements
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignTradingStrategiesOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for design_trading_strategies node outputs.\"\"\"\n    trading_strategy_count:\
+      \ int = Field(..., description=\"Number of trading strategies developed\")\n\
+      \    strategy_names: str = Field(..., description=\"List of trading strategy\
+      \ names\")\n    market_maker_strategies: bool = Field(..., description=\"Whether\
+      \ market making strategies are included\")\n    statistical_arbitrage_strategies:\
+      \ bool = Field(..., description=\"Whether statistical arbitrage strategies are\
+      \ included\")\n    options_trading_strategies: bool = Field(..., description=\"\
+      Whether options trading strategies are included\")\n\n\nclass SpecifyTechnologyArchitectureOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for specify_technology_architecture node outputs.\"\
+      \"\"\n    trading_systems: List[str] = Field(..., description=\"List of low-latency\
+      \ trading systems used\")\n    data_feeds: List[str] = Field(..., description=\"\
+      List of data feeds used for trading\")\n    risk_management_systems: List[str]\
+      \ = Field(..., description=\"List of risk management systems used for trading\"\
+      )\n    connectivity_requirements: str = Field(..., description=\"Description\
+      \ of connectivity requirements for trading\")\n\n\ndef specify_technology_architecture(design_trading_strategies_input:\
+      \ DesignTradingStrategiesOutput, **kwargs) -> SpecifyTechnologyArchitectureOutput:\n\
+      \    \"\"\"Define high-level technology infrastructure requirements\n\n    Args:\n\
+      \        design_trading_strategies_input: Input from the 'design_trading_strategies'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SpecifyTechnologyArchitectureOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return SpecifyTechnologyArchitectureOutput(\n\
+      \        trading_systems=[],\n        data_feeds=[],\n        risk_management_systems=[],\n\
+      \        connectivity_requirements=\"\",\n    )"
     name: specify_technology_architecture
     nodes_depended_on:
     - design_trading_strategies
@@ -756,3 +1295,4 @@ nodes:
     prompt: Outline the core technology architecture needed to support the trading
       strategies. Include low-latency trading systems, data feeds, risk management
       systems, and connectivity requirements.
+    shims: []
