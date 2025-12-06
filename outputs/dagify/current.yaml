@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: build_vulnerability_free_openssl
 nodes:
@@ -20,11 +20,78 @@ nodes:
         build configuration.
       key: success
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement a regular‑expression parser in Python that scans each log
+          entry for "Applied patch to" and captures the directory path. Validate the
+          existence of the extracted path with os.path.isdir; if multiple paths are
+          found, prioritize the one with the deepest directory depth.
+        reason: The source tree must be identified before any build configuration
+          can be modified. Parsing patch_log_entries ensures we are working on the
+          exact codebase that received patches.
+        text: Parse the output of integrate_patch to locate the root directory of
+          the OpenSSL source tree. Search the patch_log_entries list for entries containing
+          the pattern "Applied patch to" and extract the file path prefix; use this
+          prefix as the source root for subsequent operations.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Hard‑code the list as a Python list of strings. Ensure each flag is
+          correctly escaped for shell execution.
+        reason: A consistent set of flags guarantees reproducible security postures
+          across builds and simplifies downstream verification.
+        text: Define a canonical list of hardening flags to be applied. Include -DOPENSSL_NO_ASM,
+          -DOPENSSL_NO_EC, -fstack-protector-strong, -Wextra, -Werror, -fPIE, -pie,
+          and -D_FORTIFY_SOURCE=2. Store this list in a variable named hardening_flags.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use Python's os.environ to set the variables. Verify that the values
+          are correctly set by printing os.environ['CFLAGS'] after assignment.
+        reason: OpenSSL's ./config script inherits compiler flags from the environment,
+          allowing us to inject hardening options without modifying the script itself.
+        text: Export the hardening flags as environment variables CFLAGS and CXXFLAGS
+          before invoking the OpenSSL configuration script. Concatenate the flags
+          into a single string separated by spaces, then set os.environ['CFLAGS']
+          = os.environ['CXXFLAGS'] = ' '.join(hardening_flags).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Execute the command using subprocess.run with capture_output=True,
+          check=True. If a CalledProcessError is raised, log the error and set success
+          to False.
+        reason: The configuration step generates Makefiles that incorporate the environment‑supplied
+          flags. Failure to configure indicates a problem with the flag syntax or
+          environment setup.
+        text: Run the OpenSSL configuration command (./config --prefix=/opt/openssl
+          --openssldir=/opt/openssl) within the source root directory, capturing its
+          stdout and stderr. Ensure the command completes successfully before proceeding.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read the Makefile (e.g., Makefile) and config.h into memory. For each
+          flag in hardening_flags, use the in operator to check presence. Record any
+          missing flags in a list.
+        reason: Ensures that the build system actually received the hardening options;
+          missing flags could undermine security objectives.
+        text: Validate that the flags are present in the generated Makefile or config.h
+          by grepping for each flag string. If any flag is missing, log a warning
+          and set success to False.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Construct flags_summary as "Applied hardening flags: {}".format('',
+          ''.join(hardening_flags)). Return the three fields as a JSON object.'
+        reason: These outputs feed downstream nodes (build_openssl) and provide a
+          clear audit trail for the hardening process.
+        text: 'Populate the output fields: flags_applied = hardening_flags, flags_summary
+          = a concatenated sentence describing the applied flags, and success = True
+          if all validation steps passed, otherwise False.'
     prompt: Configure the OpenSSL build with security hardening options (e.g., -DOPENSSL_NO_ASM,
       -DOPENSSL_NO_EC, -fstack-protector-strong).
   build_openssl:
     agent: false
-    description: Build the OpenSSL binaries.
+    description: Build the OpenSSL binaries from the source code that has been patched
+      for known vulnerabilities and configured with security hardening flags. The
+      build should generate the standard OpenSSL libraries and binaries, capture detailed
+      logs, and record build metrics.
     name: build_openssl
     nodes_depended_on:
     - apply_hardening_flags
@@ -41,10 +108,75 @@ nodes:
       type: str
     - description: List of names of generated binary artifacts (e.g., libssl.so, libcrypto.so).
       key: artifact_names
-      type: List[str]
+      type: str
     - description: Total time taken for the build in seconds.
       key: build_duration_seconds
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse the flags_applied list, iterate over each entry, concatenate
+          them into a single string, and invoke `./config $FLAGS` followed by `make`
+          and `make install`. Capture stdout/stderr to a log file.
+        reason: Integrating the exact hardening flags ensures reproducibility and
+          that the compiled binaries reflect the security posture defined by the parent
+          node.
+        text: 1. Retrieve the hardened configuration flags from the parent node's
+          output (flags_applied) and merge them into the OpenSSL build command line
+          using the `./config` script with `--enable-optimizations` and `--with-ssl-module`
+          options. Ensure that each flag is prefixed with `-D` or `-f` as appropriate,
+          and that the command line is constructed in a portable shell script that
+          expands environment variables for the build host.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `mkdir -p` to create the directory, then `rsync -a` or `cp -r`
+          to copy the source. Record the path in `build_artifacts_path`.
+        reason: A clean environment eliminates hidden dependencies and ensures that
+          the build results are deterministic.
+        text: 2. Set up a clean build environment by creating a temporary directory
+          (e.g., `/tmp/openssl_build_${TIMESTAMP}`) and copying the patched source
+          code into it. This isolates the build from any pre‑existing artifacts and
+          prevents side effects on the source tree.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Record `start_time=$(date +%s)` before invoking `make`, then `end_time=$(date
+          +%s)` after completion. Compute duration as `build_duration_seconds=$((end_time
+          - start_time))`.
+        reason: Parallel compilation maximizes performance while the log file provides
+          a source of truth for debugging and audit.
+        text: 3. Execute the build process using `make -j$(nproc)` to parallelize
+          compilation across all CPU cores. Redirect both stdout and stderr to a log
+          file (`build.log`) and capture the start and end timestamps to compute `build_duration_seconds`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `ls -1 $PREFIX/lib` and filter for files matching `libssl.*` and
+          `libcrypto.*`. Strip any version suffixes if required by downstream consumers.
+        reason: Explicitly enumerating artifacts enables downstream nodes to reference
+          them without hard‑coding paths.
+        text: 4. After a successful `make install`, collect the names of the generated
+          binary artifacts by listing the contents of the install prefix (`/usr/local/ssl/lib`
+          or the configured prefix). Populate the `artifact_names` list with base
+          filenames (e.g., `libssl.so.1.1`, `libcrypto.so.1.1`).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Capture `$?` from the last command; parse `build.log` with `grep -i
+          'error\|fatal'`. If matches found, set `build_success=false`.
+        reason: Accurate success flag is essential for conditional execution of downstream
+          nodes (e.g., re‑run tests).
+        text: 5. Determine `build_success` by checking the exit status of the `make`
+          command and verifying that no critical errors appear in the log (e.g., lines
+          containing `error:` or `fatal:`). If any such errors are present, set `build_success`
+          to `false` and include the relevant log excerpts in `build_log`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `jq` or a Python script to serialize the fields into JSON and
+          write to `build_metadata.json`.
+        reason: Centralizing output in a structured format simplifies data ingestion
+          for subsequent processes.
+        text: 6. Write a concise summary of the build outcome to a metadata file (`build_metadata.json`)
+          containing all output fields. This file will be consumed by downstream nodes
+          to avoid re‑parsing logs.
     prompt: Compile OpenSSL from the patched source using the hardened configuration.
       Produce binary artifacts.
   collect_current_openssl_source:
@@ -71,6 +203,76 @@ nodes:
         False.
       key: clone_success
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `git --version` to confirm Git availability; perform a DNS lookup
+          or a simple `curl -I` request to the repository URL to verify connectivity.
+          Log any failures and abort with `clone_success = False` if the checks fail.
+        reason: Ensures that subsequent clone operations will not fail due to missing
+          tools or network issues.
+        text: Validate the execution environment by checking that Git is installed
+          and the network can reach the OpenSSL repository URL (e.g., https://github.com/openssl/openssl).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `os.makedirs` with `exist_ok=True` to create the directory, then
+          invoke `subprocess.run(['git', 'clone', repository_url, clone_path], check=True,
+          capture_output=True)` to perform the clone. Capture any errors to set `clone_success`
+          appropriately.
+        reason: Isolates the source retrieval from other system files and provides
+          a clean workspace.
+        text: Create a temporary working directory (e.g., /tmp/openssl_clone_<timestamp>)
+          and clone the repository into it using `git clone <repository_url> <clone_path>`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Run `git fetch --tags` to ensure all tags are present. Use `git tag`
+          to list tags, then apply a regex to filter semantic versions. Sort the filtered
+          list using `packaging.version.parse` (or similar) to compare versions, and
+          pick the maximum as `stable_release_tag`. Handle cases where no matching
+          tag is found by logging an error and setting `clone_success = False`.
+        reason: OpenSSL stable releases follow a semantic versioning scheme; selecting
+          the most recent ensures the source is up‑to‑date.
+        text: Retrieve all tags from the cloned repository and determine the latest
+          stable release tag by filtering tags that match the semantic version pattern
+          `v[0-9]+.[0-9]+.[0-9]+` and selecting the highest version.
+      - complexity: LOW
+        impact: HIGH
+        method: Execute `subprocess.run(['git', 'checkout', f'tags/{stable_release_tag}'],
+          cwd=clone_path, check=True, capture_output=True)`. Verify the checkout succeeded
+          by checking the return code.
+        reason: Guarantees that the source code corresponds to the stable tag rather
+          than the default branch.
+        text: Checkout the identified stable release tag using `git checkout tags/<stable_release_tag>`
+          to ensure the working tree reflects the exact commit of that release.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Run `subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=clone_path,
+          check=True, capture_output=True, text=True)` and strip the output to get
+          the SHA.
+        reason: Provides an immutable identifier for the exact source state, useful
+          for reproducibility.
+        text: Obtain the full commit SHA of the checked‑out source using `git rev-parse
+          HEAD` and store it as `commit_hash`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Wrap the entire process in a try/except block; on success, assign
+          the collected values to a dictionary matching the output schema. On any
+          exception, log the error, set `clone_success = False`, and populate the
+          remaining fields with `None` or empty strings as appropriate.
+        reason: Ensures the node returns a well‑defined, typed payload for downstream
+          consumers.
+        text: Populate the output fields `repository_url`, `clone_path`, `stable_release_tag`,
+          `commit_hash`, and set `clone_success` to True if all previous steps succeeded
+          without exceptions.
+      - complexity: LOW
+        impact: LOW
+        method: Use `shutil.rmtree(clone_path, ignore_errors=True)` to delete the
+          directory when the clone operation failed.
+        reason: Prevents disk clutter and potential security issues from incomplete
+          clones.
+        text: If `clone_success` is False, clean up the temporary directory to avoid
+          orphaned files on the filesystem.
     prompt: Clone the latest OpenSSL source code from the official repository (e.g.,
       https://github.com/openssl/openssl) into a local directory. Ensure the repository
       is at the latest stable release tag.
@@ -106,6 +308,95 @@ nodes:
     - description: Indicates whether the documentation update process completed successfully.
       key: document_changes_success
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read the JSON payload of generate_security_report, map each field
+          to a local variable, and perform validation (e.g., ensure lists are not
+          empty).
+        reason: The documentation update requires a comprehensive view of what was
+          fixed, which hardening was applied, and what security findings remain.
+        text: Collect all relevant data from the generate_security_report node's output
+          fields (applied_patches, hardening_measures, security_issues_list, overall_recommendations,
+          risk_rating).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Iterate over applied_patches and hardening_flags, concatenate strings
+          with appropriate prefixes, and store the result in changelog_entries.
+        reason: A consistent changelog format aids traceability and downstream tooling.
+        text: Generate changelog_entries by formatting each applied patch and hardening
+          measure into a standard changelog entry (e.g., "[CVE-2023-1234] Fixed memory
+          corruption; added -fstack-protector-strong flag").
+      - complexity: LOW
+        impact: MEDIUM
+        method: Load README.md, apply regex r'^(##+)\s*(SECURITY|INSTALL|HACKING)\s*$'
+          to capture relevant sections.
+        reason: Targeted updates prevent unnecessary modifications and preserve existing
+          content.
+        text: Identify README sections that need updates (e.g., SECURITY, HACKING,
+          INSTALL) by scanning the current README for headings using regex patterns.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a templating engine (e.g., Jinja2) to replace placeholders or
+          append text after the section header.
+        reason: Ensures that users are aware of critical security changes without
+          breaking README syntax.
+        text: Create readme_updates entries by inserting security findings summary
+          and hardening flag notes into the identified sections, preserving original
+          formatting.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Iterate over file paths, open each file in append mode, and write
+          a formatted note.
+        reason: Maintains consistency across all project documentation.
+        text: For each documentation file listed in documentation_changes (e.g., INSTALL,
+          CONTRIBUTING), locate the file, read its contents, and append a brief note
+          summarizing applied patches and hardening flags.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Convert to a set to remove duplicates, then sort.
+        reason: A clean list is required for downstream release notes and artifact
+          packaging.
+        text: Compile applied_patches list directly from generate_security_report.applied_patches,
+          ensuring no duplicates and sorting alphabetically.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use string matching or regex to isolate flag tokens.
+        reason: Clear flag listing assists developers and auditors.
+        text: Compile hardening_flags list by extracting generate_security_report.hardening_measures,
+          filtering for compiler flag patterns (e.g., stringsfstack-protector-strong'),
+          and normalizing syntax.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse lists, extract first sentences, and format.
+        reason: Provides a concise overview for README and release notes.
+        text: 'Generate security_findings_summary by concatenating the first sentence
+          of each entry in generate_security_report.static_analysis_findings and dynamic_test_results,
+          prefixed with "Static analysis: " and "Dynamic tests: ".'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use file I/O with atomic write operations (e.g., write to temp file
+          then rename) to avoid corruption.
+        reason: Persisting changes ensures the repository reflects the latest security
+          posture.
+        text: 'Write all generated entries back to the appropriate files: prepend
+          changelog_entries to CHANGELOG.md, insert readme_updates into README.md,
+          and write documentation_changes notes to their respective files.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use os.path.exists, os.path.getsize, and hashlib.sha256.
+        reason: Guarantees the integrity of the documentation update process.
+        text: Validate that all write operations succeeded by checking file existence,
+          file size > 0, and optionally computing a SHA-256 checksum before and after
+          writing.
+      - complexity: LOW
+        impact: HIGH
+        method: Wrap the entire process in a try/except block and update the flag
+          accordingly.
+        reason: Clear success indicator for downstream nodes (e.g., release_artifacts).
+        text: Set document_changes_success flag to true if all validations pass; otherwise
+          set to false and log detailed error messages for each failed step.
     prompt: Update the changelog, README, and any relevant documentation to reflect
       the applied patches, hardening flags, and security findings.
   generate_security_report:
@@ -124,23 +415,23 @@ nodes:
     - description: List of identified security issues, including CVE IDs and brief
         descriptions.
       key: identified_issues
-      type: List[str]
+      type: str
     - description: List of applied patches or fixes, identified by CVE IDs or patch
         names.
       key: applied_patches
-      type: List[str]
+      type: str
     - description: List of hardening options applied, such as compiler flags and configuration
         settings.
       key: hardening_measures
-      type: List[str]
+      type: str
     - description: Summary of findings from static analysis, including warnings and
         errors.
       key: static_analysis_findings
-      type: List[str]
+      type: str
     - description: Outcome of dynamic tests, e.g., 'all tests passed', '3 failures',
         etc.
       key: dynamic_test_results
-      type: List[str]
+      type: str
     - description: Number of crashes detected during fuzz testing.
       key: fuzzing_crashes
       type: int
@@ -150,6 +441,87 @@ nodes:
     - description: Overall risk rating of the build (e.g., Low, Medium, High).
       key: risk_rating
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Parse the warnings_list, errors_list, and security_issues_list fields
+          from each static analysis output; deduplicate by file/line; format each
+          entry as ''CVE_ID: description'' or ''Warning: message''; aggregate into
+          identified_issues.'
+        reason: Both static analysis runs may uncover new findings; merging ensures
+          completeness.
+        text: Extract and consolidate static analysis warnings, errors, and security
+          findings from both run_static_analysis and re_run_static_analysis outputs
+          into a unified list of identified issues.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read the patched_cve_ids list from the integrate_patch output; map
+          each CVE to its patch name if available; concatenate into applied_patches.
+        reason: The report must reflect all patches applied to mitigate known CVEs.
+        text: Aggregate applied patches from the integrate_patch node (exposed via
+          a shared artifact) and include them in the applied_patches field.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read flags_applied; prepend each flag with '--' if not already; join
+          with commas; store in hardening_measures.
+        reason: Hardening measures are a key security control to be documented.
+        text: Collect hardening flags from apply_hardening_flags output (flags_applied)
+          and format them as a human‑readable list for hardening_measures.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Open each analysis_report_path (e.g., HTML or JSON); parse for entries
+          marked as 'error' or 'critical warning'; format as 'File:Line - Message';
+          aggregate into static_analysis_findings.
+        reason: Stakeholders need a concise view of static analysis outcomes.
+        text: Summarize static analysis findings into static_analysis_findings by
+          extracting the most critical warnings and errors from the analysis_report_path
+          files.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: If total_tests_run == 0, treat as failure; else compute pass_rate
+          = tests_passed / total_tests_run; create strings like 'All tests passed
+          (100% success)' or '3 failures out of 150 tests (2% failure)'; include crash_count;
+          store in dynamic_test_results.
+        reason: Dynamic testing reveals runtime vulnerabilities and stability issues.
+        text: Generate dynamic test results summary by aggregating tests_passed, tests_failed,
+          and crash_count from run_dynamic_tests and re_run_dynamic_tests outputs.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read crash_count from each fuzzing output; sum them; assign to fuzzing_crashes.
+        reason: Fuzzing identifies hidden vulnerabilities that static/dynamic tests
+          may miss.
+        text: Count total fuzzing crashes by summing crash_count from run_fuzzing
+          and re_run_fuzzing outputs, and store the result in fuzzing_crashes.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Define weights (e.g., CVE severity: Critical=5, High=4, Medium=3,
+          Low=2; each patch adds -1 point; each hardening flag adds -0.5 point; each
+          crash adds +2 points). Sum weighted scores; if total <= 5 → Low; 6‑15 →
+          Medium; >15 → High.'
+        reason: A quantifiable risk rating aids decision‑making.
+        text: 'Derive overall risk rating by applying a scoring rubric: assign points
+          for each identified issue (severity weight), patch count, hardening depth,
+          and fuzzing crashes; map total score to Low/Medium/High.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: For each identified issue lacking a patch, note missing mitigation;
+          for any hardening flag not present that is recommended by OpenSSL security
+          guidelines, suggest addition; for any test failures or crashes, recommend
+          targeted debugging; aggregate suggestions into a single string for overall_recommendations.
+        reason: Recommendations provide actionable next steps.
+        text: Compose overall recommendations by cross‑referencing identified issues,
+          patch status, hardening measures, and test outcomes; suggest actions such
+          as 'Implement additional compiler sanitizers', 'Schedule quarterly fuzzing',
+          'Monitor CVE feed for new vulnerabilities', and 'Update documentation accordingly'.
+      - complexity: LOW
+        impact: LOW
+        method: Iterate over the output_structure; check each key in the constructed
+          report dict; if missing or empty, assign default value; serialize to JSON.
+        reason: Ensures downstream nodes receive well‑formed data.
+        text: Validate that all output fields are populated and conform to their specified
+          types; if any field is empty, insert a placeholder (e.g., 'None' for strings,
+          empty list for lists, 0 for ints).
     prompt: Compile a comprehensive report summarizing all identified issues, applied
       patches, hardening measures, and test results. Include recommendations for future
       maintenance.
@@ -162,13 +534,71 @@ nodes:
     output_structure:
     - description: List of CVE identifiers for each identified vulnerability.
       key: cve_ids
-      type: List[str]
+      type: str
     - description: Brief textual description of each CVE.
       key: cve_descriptions
-      type: List[str]
+      type: str
     - description: Severity level of each CVE (e.g., Low, Medium, High, Critical).
       key: severity_levels
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Send HTTP GET requests using a language such as Python (requests library).
+          Handle API rate limits by implementing exponential back‑off and caching
+          responses locally. Parse the JSON payload to extract the `cve` object for
+          each result.
+        reason: The NVD API provides a comprehensive, up‑to‑date repository of CVE
+          records; a keyword search filters the dataset to relevant OpenSSL vulnerabilities
+          while the larger page size reduces the number of HTTP requests needed.
+        text: Use the National Vulnerability Database (NVD) REST API to perform a
+          keyword search for "OpenSSL" across all CVE entries, ensuring the query
+          includes the `keyword=OpenSSL` parameter and the `resultsPerPage=200` setting
+          to minimize pagination overhead.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Python dictionaries to map CVSS base scores to severity labels.
+          Validate that each CVE record contains the required fields; if missing,
+          log a warning and skip the entry.
+        reason: Consistent severity mapping ensures downstream processes can reliably
+          interpret risk levels.
+        text: 'Iterate over each CVE record in the JSON response, extracting the `CVE_ID`,
+          `description` (from the `cve` description field), and `severity` (from the
+          `impact` field, mapping CVSS scores to standardized severity levels: Low
+          < 4.0, Medium 4.0‑7.9, High 8.0‑9.9, Critical ≥ 10.0).'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Append extracted values to their respective lists in a single loop
+          iteration. After processing all records, verify that all lists share the
+          same length; if not, raise an exception.
+        reason: Parallel list alignment is essential for downstream nodes (e.g., `integrate_patch`)
+          that expect synchronized input arrays.
+        text: Maintain parallel lists (`cve_ids`, `cve_descriptions`, `severity_levels`)
+          where the index of each element corresponds across lists, guaranteeing that
+          the description and severity at index *i* belong to the CVE ID at index
+          *i*.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create an ordered dictionary (`collections.OrderedDict`) keyed by
+          CVE ID, storing the description and severity as values. Convert the dictionary
+          back to three ordered lists.
+        reason: Eliminates redundancy, reduces processing overhead for subsequent
+          nodes, and prevents potential double‑patching.
+        text: Deduplicate CVE entries by converting the `cve_ids` list to a set and
+          then reconstructing the parallel lists to preserve order, ensuring that
+          each CVE is represented only once even if multiple NVD entries exist.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Use JSON serialization (`json.dump`) with UTF‑8 encoding. Include
+          metadata such as `source: NVD`, `retrieved_at: timestamp`, and `record_count`.
+          Return the data via the orchestrator''s API or local file system path as
+          defined by the DAG.'
+        reason: Providing a stable, machine‑readable output format enables seamless
+          integration with downstream nodes and facilitates debugging.
+        text: Serialize the three lists into the node's output format, optionally
+          writing them to a temporary JSON file for auditability, and return the structured
+          output to the orchestrator.
     prompt: Query the CVE database for all entries tagged with OpenSSL. Produce a
       list of CVE IDs, brief descriptions, and severity levels.
   integrate_patch:
@@ -194,6 +624,75 @@ nodes:
     - description: Log entries capturing the outcome of each patch application attempt.
       key: patch_log_entries
       type: List[str]
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use JSON or CSV parsing libraries; create a list of dictionaries with
+          keys 'cve_id', 'description', 'severity'.
+        reason: Having a clean, in-memory representation of the vulnerability data
+          enables deterministic patch selection and application.
+        text: Parse the parent node output to extract the list of CVE IDs, descriptions,
+          and severity levels, storing them in a structured in for iteration.
+      - complexity: HIGH
+        impact: HIGH
+        method: Automate HTTP GET requests to NVD API; parse response for patch URLs;
+          for custom fixes, use a templated patch generator that applies standard
+          mitigations (e.g., disabling vulnerable functions, adding bounds checks).
+        reason: Ensures that the most authoritative fix is applied; custom fixes are
+          fallback for unpatched issues.
+        text: For each CVE ID, query the National Vulnerability Database (NVD) or
+          vendor patch repository to locate the official patch file (e.g., a diff
+          or tarball). If no official patch exists, construct a custom fix based on
+          the vulnerability description and CVE CVSS score.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute shell commands via subprocess, redirect stdout/stderr to a
+          log string; record success/failure per CVE.
+        reason: Standard patching tools provide reliable application and error reporting.
+        text: Apply the retrieved or generated patch to the OpenSSL source tree using
+          'git apply' or 'patch -p1', capturing any application errors in a log entry.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Run 'make -j$(nproc)' or the appropriate build command; parse exit
+          code and compiler warnings/errors; log the result.
+        reason: Verification of compilation ensures that the patch does not break
+          the build.
+        text: After patch application, attempt to compile the affected source files
+          (or the entire project if necessary) using the same build configuration
+          as the downstream build step, and capture the compiler output.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Update counters and lists in the in-memory data structure; format
+          log entries with CVE ID and outcome.
+        reason: Accurate bookkeeping of success/failure is required for downstream
+          metrics and decision making.
+        text: If compilation succeeds, record the CVE ID in 'patched_cve_ids' and
+          increment 'patch_success_count'; otherwise, increment 'patch_failure_count'
+          and log the failure details.
+      - complexity: LOW
+        impact: LOW
+        method: Simple boolean comparison; assign to output field.
+        reason: Provides a quick boolean indicator for downstream nodes (e.g., hardening
+          flags) to decide whether to proceed.
+        text: After processing all CVEs, set 'overall_patch_success' to true only
+          if 'patch_failure_count' is zero, otherwise false.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use datetime formatting; concatenate strings; store as list.
+        reason: A detailed log is essential for auditability and debugging.
+        text: Aggregate all individual log entries into the 'patch_log_entries' list,
+          ensuring each entry includes timestamp, CVE ID, patch source (official/custom),
+          application result, and compilation status.
+      - complexity: LOW
+        impact: HIGH
+        method: Serialize the data structure to JSON or pass as a dictionary; ensure
+          type alignment.
+        reason: Conforms to the downstream node expectations and enables automated
+          consumption.
+        text: Return the final structured output containing 'patched_cve_ids', 'patch_success_count',
+          'patch_failure_count', 'overall_patch_success', and 'patch_log_entries'
+          as per the defined output schema.
     prompt: For each CVE identified, apply the official patch or a custom fix to the
       OpenSSL source. Verify that the patch compiles.
   re_run_dynamic_tests:
@@ -219,18 +718,104 @@ nodes:
       type: int
     - description: List of failure messages or test identifiers
       key: failure_details
-      type: List[str]
+      type: str
     - description: Total duration of the test run in seconds
       key: test_duration_seconds
       type: float
     - description: True if all tests passed, False otherwise
       key: tests_passed_successfully
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Read the boolean flag from the parent node's JSON output; if false,
+          raise an exception and exit.
+        reason: Ensures prerequisite environment is ready before test execution, preventing
+          false negatives.
+        text: Validate that the dynamic testing environment was successfully set up
+          by checking the `environment_setup_success` flag from `setup_dynamic_testing_environment`
+          output. If false, abort and log the error.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use filesystem checks (`os.path.isfile` and `os.access` with execute
+          permission) in the execution script.
+        reason: Dynamic tests must be run against the correct binaries; path validation
+          avoids runtime errors.
+        text: Locate the compiled test binaries using the `test_binary_path` field
+          from `setup_dynamic_testing_environment`. Verify the path exists and is
+          executable.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Parse the binary filename or read a known config key; assign to the
+          output field.
+        reason: Provides a clear identifier for the output record, facilitating traceability.
+        text: Determine the test suite name by inspecting the test binary name or
+          by reading a configuration file (e.g., `config_file_path`). Store this as
+          `test_suite_name`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Spawn a subprocess with `subprocess.run`, redirecting output to pipes;
+          enforce timeout via `timeout` parameter.
+        reason: Runs the actual dynamic tests and collects raw results for parsing.
+        text: Execute the test suite using the appropriate command (e.g., `./test`
+          or `make test`) with a timeout that covers the expected runtime. Capture
+          stdout and stderr streams.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Apply regex patterns to match lines like "TOTAL: X", "PASSED: Y",
+          "FAILED: Z"; fallback to XML parsing if available.'
+        reason: Accurate aggregation of test results is essential for downstream reporting.
+        text: Parse the captured logs to count total, passed, and failed tests. Use
+          regular expressions or a test framework parser (e.g., `pytest` XML report)
+          to extract counts.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Iterate over failed test entries, capture relevant log snippets, and
+          append to a list.
+        reason: Provides actionable data for debugging and for inclusion in the security
+          report.
+        text: Extract detailed failure information (error messages, stack traces,
+          test identifiers) and store them in the `failure_details` list. Limit the
+          size to avoid excessive payloads.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use `time.monotonic()` before and after execution; compute difference.
+        reason: Duration metrics help assess performance regressions and test suite
+          size.
+        text: Measure the total duration of the test run by recording the start and
+          end timestamps. Convert to seconds with floating‑point precision and store
+          in `test_duration_seconds`.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Simple conditional check after parsing counts.
+        reason: Provides a quick boolean indicator for downstream nodes that may skip
+          further steps if tests fail.
+        text: Set the `tests_passed_successfully` flag to true only if `failed_tests`
+          equals zero; otherwise set to false.
+      - complexity: LOW
+        impact: HIGH
+        method: Create a dictionary with keys matching the output fields and serialize
+          with `json.dumps`.
+        reason: Ensures downstream nodes receive data in the expected format for further
+          processing.
+        text: Assemble all extracted data into a JSON object matching the defined
+          output structure and emit it as the node's result.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Wrap execution logic in try/except blocks; use structured logging.
+        reason: Prevents the entire workflow from crashing due to a single failure
+          and provides diagnostic information.
+        text: 'Implement robust error handling: if any step fails (e.g., binary not
+          found, test execution error), capture the exception message, log it, and
+          return a partial result with `tests_passed_successfully` set to false.'
     prompt: Execute the full suite of dynamic tests on the built binaries. Record
       outcomes.
   re_run_fuzzing:
     agent: false
-    description: Re-run fuzz testing on the built binaries.
+    description: Re-run fuzz testing on the built OpenSSL binaries using the previously
+      configured fuzzing environment. The run should match the duration of the initial
+      fuzzing session and capture all crash information.
     name: re_run_fuzzing
     nodes_depended_on:
     - build_openssl
@@ -242,7 +827,7 @@ nodes:
       type: int
     - description: File paths or identifiers of crash reproducing inputs.
       key: crash_examples
-      type: List[str]
+      type: str
     - description: Total duration of the fuzzing run in seconds.
       key: fuzzing_duration_seconds
       type: int
@@ -252,11 +837,77 @@ nodes:
     - description: Concatenated log output from the fuzzing tool.
       key: fuzzing_log
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read binary_artifacts_path, seed_files, and frameworks_configured
+          from the parent node outputs. Perform a simple boolean check on environment_ready.
+        reason: Ensures that the fuzzing run uses the correct binaries and seed inputs,
+          preventing false negatives or crashes due to missing data.
+        text: Collect the binary artifacts path from build_openssl and the list of
+          seed files and configured frameworks from setup_fuzzing_environment. Verify
+          that environment_ready is true before proceeding.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Query the shared state store (e.g., Redis, file system) for a key
+          named "previous_fuzzing_duration_seconds". If the key does not exist, set
+          duration_seconds = 7200.
+        reason: Maintains consistency with the original fuzzing session, enabling
+          accurate comparison of results and impact analysis.
+        text: Determine the fuzzing duration by reading the previous fuzzing_duration_seconds
+          from the most recent fuzzing run metadata (stored in a shared state or configuration
+          file). If unavailable, default to a pre‑defined safe duration (e.g., 2 hours).
+      - complexity: HIGH
+        impact: HIGH
+        method: 'For each framework in frameworks_configured, construct the command
+          line:
+
+          - AFL: "afl-fuzz -i <seed_dir> -o <output_dir> -t <duration_ms> -- <binary_path>"
+
+          - libFuzzer: "<binary_path> -fuzz_time=<duration_seconds> -runs=<seed_count>"
+
+          Use subprocess.run with capture_output=True, timeout=duration_seconds+300.
+          Write the combined stdout/stderr to fuzzing_log.'
+        reason: Runs the fuzzing process in a controlled manner, ensuring that all
+          inputs are processed and that logs are available for downstream analysis.
+        text: Execute the chosen fuzzing framework (e.g., AFL or libFuzzer) against
+          each binary artifact using the collected seed files and the determined duration.
+          Capture the complete stdout/stderr streams to a log file.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use regular expressions to locate lines matching "Crash detected"
+          and extract the input file name. Store each unique input path in a set for
+          crash_examples. crash_count = len(set).
+        reason: Transforms raw log data into structured output that can be consumed
+          by the security report and other downstream nodes.
+        text: Parse the fuzzing_log to extract crash identifiers (e.g., hash of input
+          causing crash) and the corresponding input file paths. Count unique crashes
+          to populate crash_count and collect crash_examples.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Check subprocess.returncode and scan fuzzing_log for keywords such
+          as "Fatal error" or "Segmentation fault". Set fuzzing_success accordingly.
+        reason: Provides a quick indicator of whether the fuzzing run was successful,
+          enabling automated gating for the security report.
+        text: Set fuzzing_success to true if the fuzzing process exited with status
+          0 and no critical errors (e.g., segmentation faults of the fuzzing tool)
+          were reported. Otherwise, set it to false.
+      - complexity: LOW
+        impact: LOW
+        method: Record time.time() before and after subprocess execution; duration_seconds
+          = int(end - start).
+        reason: Provides an objective measure of the runtime, which is required for
+          the output structure and for comparing against the original run.
+        text: Compute fuzzing_duration_seconds as the elapsed wall‑clock time between
+          the start and end timestamps of the fuzzing process, rounded to the nearest
+          second.
     prompt: Run fuzzing on the built binaries for the same duration as before. Log
       any crashes.
   re_run_static_analysis:
     agent: false
-    description: Re-run static analysis on the built binaries.
+    description: Re-run static analysis on the built OpenSSL binaries, capturing warnings,
+      errors, and security findings, and produce a detailed report.
     name: re_run_static_analysis
     nodes_depended_on:
     - build_openssl
@@ -271,7 +922,7 @@ nodes:
       type: int
     - description: List of security-related findings or vulnerabilities reported.
       key: security_findings
-      type: List[str]
+      type: str
     - description: True if no critical errors or security findings were detected;
         otherwise False.
       key: analysis_passed
@@ -279,11 +930,90 @@ nodes:
     - description: File path to the generated static analysis report document.
       key: report_path
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Read the `environment_ready` boolean from the parent node’s output;
+          if false, raise an exception and terminate the task.
+        reason: Ensures that clang-tidy and cppcheck are installed and configured
+          correctly before execution, preventing false negatives and wasted compute.
+        text: Validate that the static analysis environment is fully prepared by checking
+          the `environment_ready` flag from the `setup_static_analysis_environment`
+          node. If the flag is false, abort the run and log an error indicating missing
+          tools or misconfiguration.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use filesystem API to confirm existence of `binary_artifacts_path`;
+          list files and filter for `.so`, `.dll`, `.exe`, or ELF binaries.
+        reason: Static analysis tools operate on compiled artifacts; locating them
+          correctly is essential for accurate analysis.
+        text: Retrieve the path to the compiled OpenSSL binaries from the `build_openssl`
+          node’s `binary_artifacts_path` output. Verify that the directory exists
+          and contains at least one executable or shared library.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Generate or locate `compile_commands.json` in the build directory;
+          loop over binaries, execute clang-tidy via subprocess, redirect output to
+          `clang_tidy.log`.
+        reason: clang-tidy provides fine‑grained linting and security checks; its
+          output includes warnings, errors, and potential vulnerabilities.
+        text: Run clang-tidy on each binary artifact by invoking `clang-tidy -p <compile_commands.json>
+          <binary>` and capture its stdout and stderr. Store the raw output in a temporary
+          file for later parsing.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Execute cppcheck via subprocess, redirect XML output to `cppcheck.xml`;
+          use an XML parser to count `<error>` and `<warning>` elements and extract
+          CWE identifiers.
+        reason: cppcheck complements clang-tidy by detecting a broader range of C/C++
+          issues, including memory leaks and buffer overflows.
+        text: Run cppcheck on the same set of binaries using `cppcheck --enable=all
+          --xml <binary> 2> cppcheck.xml`. Parse the XML to extract warnings, errors,
+          and security issues (e.g., `CWE` tags).
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read the temporary log files, use regular expressions to count occurrences,
+          and append findings to a set to deduplicate.
+        reason: Combining outputs from both tools yields a comprehensive view of static
+          analysis results.
+        text: 'Aggregate the results from clang-tidy and cppcheck: sum the warning
+          counts, sum the error counts, and merge the security finding lists while
+          eliminating duplicates.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Simple boolean logic: `analysis_passed = (errors_count == 0) and
+          (len(security_findings) == 0)`.'
+        reason: Provides a clear pass/fail indicator for downstream processes such
+          as the security report generation.
+        text: Determine `analysis_passed` by evaluating whether `errors_count` is
+          zero and `security_findings` is empty. If either condition fails, set `analysis_passed`
+          to false; otherwise true.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create a dictionary with the output fields, serialize to JSON, and
+          write to disk; set `report_path` to the file’s absolute path.
+        reason: Persisting the report enables traceability, auditability, and consumption
+          by downstream nodes such as `generate_security_report`.
+        text: Generate a structured static analysis report file in JSON format at
+          a predefined location (e.g., `reports/static_analysis_report.json`). Include
+          all output fields (`warnings_count`, `errors_count`, `security_findings`,
+          `analysis_passed`, `report_path`).
+      - complexity: LOW
+        impact: HIGH
+        method: Construct a response object with the exact keys and types, and emit
+          it via the workflow engine’s API.
+        reason: Conforms to the DAG’s contract, allowing dependent nodes to consume
+          the data without type mismatches.
+        text: Return the populated output fields (`warnings_count`, `errors_count`,
+          `security_findings`, `analysis_passed`, `report_path`) as the node’s result,
+          ensuring they match the defined output structure types.
     prompt: Perform static analysis on the compiled OpenSSL binaries using the same
       tools as before. Capture any new findings.
   release_artifacts:
     agent: false
-    description: Prepare and publish the final OpenSSL release.
+    description: Prepare and publish the final OpenSSL release by bundling binaries,
+      source, and documentation, then creating a version control tag.
     name: release_artifacts
     nodes_depended_on:
     - document_changes
@@ -297,13 +1027,83 @@ nodes:
       type: str
     - description: List of documentation files included in the release.
       key: documentation_files
-      type: List[str]
+      type: str
     - description: List of binary files included in the release.
       key: binary_files
-      type: List[str]
+      type: str
     - description: Indicates whether the packaging and tagging succeeded.
       key: build_success
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Use a file system check (e.g., os.path.isdir) and read the binary_artifacts_path
+          from the build_openssl artifact store.
+        reason: The binaries are the core deliverable; ensuring they are present prevents
+          downstream packaging failures.
+        text: Retrieve the path to the compiled OpenSSL binaries from the build_openssl
+          output (stored in the environment or a known artifact directory) and verify
+          its existence.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Construct the expected tarball filename using the stable_release_tag
+          and verify with os.path.isfile.
+        reason: Including the exact source code version is required for reproducibility
+          and compliance.
+        text: Obtain the source tarball path from the collect_current_openssl_source
+          output (clone_path + "openssl-" + stable_release_tag + ".tar.gz") and confirm
+          the tarball exists.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Create a temporary docs folder, write each entry to appropriate files
+          (e.g., CHANGELOG.md, README.md, INSTALL.md), and include security_findings_summary
+          as SECURITY.md.
+        reason: All documentation updates must be bundled to reflect the applied patches
+          and hardening measures.
+        text: 'Gather the documentation files from the document_changes output: changelog_entries,
+          readme_updates, documentation_changes, and security_findings_summary; copy
+          them into a documentation directory within the staging area.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use shutil.copytree or rsync to replicate the directory structure,
+          ensuring permissions are preserved.
+        reason: Organizing artifacts in a clean layout simplifies archiving and version
+          control tagging.
+        text: Create a staging directory (e.g., /tmp/openssl_release_<timestamp>)
+          and copy the binaries, source tarball, and documentation into subdirectories
+          (bin/, src/, docs/).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Invoke tar or zip via subprocess, handling errors and capturing the
+          full path.
+        reason: A single archive is the standard distribution format for OpenSSL releases.
+        text: Package the staged directory into a compressed archive (e.g., openssl-<version>.tar.gz)
+          and store the path in artifact_package_path.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use git command line via subprocess, and capture any output or errors.
+        reason: A unique, descriptive tag is essential for traceability and downstream
+          consumption.
+        text: Determine the release tag based on the stable_release_tag and the current
+          date (e.g., v<stable_release_tag>-release-<YYYYMMDD>) and create the tag
+          in the git repository using git tag -a.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute git push and check the return code; log any failures.
+        reason: Remote tagging makes the release visible to all stakeholders and CI
+          pipelines.
+        text: Push the new tag to the remote repository (git push origin <tag>) and
+          verify the push succeeded.
+      - complexity: LOW
+        impact: HIGH
+        method: Aggregate paths and flags into a JSON object, handling exceptions
+          to set build_success appropriately.
+        reason: The downstream nodes require these structured outputs to continue
+          the workflow.
+        text: 'Populate the output fields: artifact_package_path, release_tag, documentation_files
+          (list of docs copied), binary_files (list of binaries copied), and set build_success
+          to true if all previous steps succeeded, otherwise false.'
     prompt: Package the compiled OpenSSL binaries, source tarball, and documentation
       into release artifacts. Tag the release in the version control system.
   run_dynamic_tests:
@@ -329,18 +1129,76 @@ nodes:
       type: int
     - description: List of identifiers or names of tests that failed.
       key: failed_test_cases
-      type: List[str]
+      type: str
     - description: List of crash log excerpts or identifiers.
       key: crash_logs
-      type: List[str]
+      type: str
     - description: Brief summary of test results.
       key: test_summary
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Read the JSON output of `setup_dynamic_testing_environment`; if `environment_setup_success`
+          is false or `test_binary_path` does not exist, abort and log an error.
+        reason: Early validation prevents wasted effort if the environment is misconfigured.
+        text: Validate that the dynamic testing environment was successfully set up
+          by checking the `environment_setup_success` flag from `setup_dynamic_testing_environment`
+          and ensuring the `test_binary_path` points to an existing executable.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute `cd <clone_path>` in a shell; capture the working directory
+          for subsequent commands.
+        reason: All test binaries are relative to the source root, so correct path
+          context is essential.
+        text: Navigate to the cloned OpenSSL source root directory using the `clone_path`
+          from `collect_current_openssl_source`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `subprocess.run` in Python or a shell script to invoke `<test_binary_path>
+          -v`; redirect output to `test_output.txt` and `test_error.txt`.
+        reason: Running the test binary directly ensures that all unit and integration
+          tests are executed as intended.
+        text: Execute the test suite by running the compiled test binary located at
+          `test_binary_path` with appropriate flags (e.g., `./test -v` for verbose
+          output). Capture both stdout and stderr into temporary files.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read `test_output.txt`; for each line, if it contains "[PASS]" increment
+          `tests_passed`; if "[FAIL]" increment `tests_failed` and record the test
+          identifier; if "[CRASH]" increment `crash_count` and capture the crash log
+          snippet.
+        reason: Accurate counting is required to populate the PRD fields correctly.
+        text: Parse the test output to compute `total_tests_run`, `tests_passed`,
+          `tests_failed`, and `crash_count` using regular expressions that match patterns
+          like "[PASS]", "[FAIL]", and "[CRASH]".
+      - complexity: LOW
+        impact: MEDIUM
+        method: Append each failed test name to a Python list; for crashes, store
+          the relevant lines from `test_error.txt` that contain stack traces or error
+          messages.
+        reason: These lists provide detailed failure diagnostics for the security
+          report.
+        text: Aggregate the failed test identifiers into the `failed_test_cases` list
+          and collect crash log excerpts into the `crash_logs` list.
+      - complexity: LOW
+        impact: LOW
+        method: 'Use string formatting: "Ran {total} tests: {passed} passed, {failed}
+          failed, {crashes} crashes."'
+        reason: A summary enables quick assessment of test health without sifting
+          through logs.
+        text: Construct a concise `test_summary` string that includes the total number
+          of tests, pass/fail ratio, and crash count, formatted for readability.
     prompt: Run the full suite of OpenSSL unit and integration tests. Record any test
       failures or crashes.
   run_fuzzing:
     agent: false
-    description: Perform fuzz testing on the OpenSSL source code.
+    description: Perform fuzz testing on the OpenSSL source code by invoking a configured
+      fuzzing framework (e.g., AFL or libFuzzer) on the compiled binaries generated
+      from the cloned source. The process must run for a specified time window, capture
+      all crash inputs and unexpected events, and produce a structured summary of
+      results.
     name: run_fuzzing
     nodes_depended_on:
     - collect_current_openssl_source
@@ -364,6 +1222,93 @@ nodes:
     - description: Total runtime of the fuzzing session in seconds.
       key: total_duration_seconds
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Read the boolean flag from the parent node's output; if false, log
+          an error and terminate the process.
+        reason: Ensures that all required tools (e.g., AFL, libFuzzer) and dependencies
+          are installed before execution.
+        text: Validate that the fuzzing environment is fully ready by checking the
+          'environment_ready' flag from 'setup_fuzzing_environment'. If false, abort
+          the run and set 'successful_run' to false.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Access the list from the parent output; apply a simple conditional
+          selection.
+        reason: Standardizes the fuzzing approach and avoids ambiguity when multiple
+          frameworks are configured.
+        text: Determine the fuzzing framework to use by selecting the first entry
+          from 'frameworks_configured' (prefer libFuzzer over AFL if both are present).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Concatenate strings to form the expected build directory; use filesystem
+          checks (e.g., os.path.isdir) to confirm existence.
+        reason: Ensures that fuzzing is performed on the correct binaries rather than
+          source files.
+        text: Construct the path to the compiled OpenSSL binaries by appending 'build'
+          to the 'clone_path' from 'collect_current_openssl_source'. Verify that the
+          binaries exist before proceeding.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use the 'tempfile' module or shell 'mktemp' to generate a unique directory.
+        reason: Provides isolation between fuzzing sessions and makes post‑processing
+          easier.
+        text: Create a temporary directory for storing crash inputs and logs, using
+          a unique timestamped name to avoid collisions with previous runs.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Construct a command line string; invoke via subprocess.run with timeout
+          and redirect output to a log file.
+        reason: Runs the fuzzing engine while collecting all relevant output for analysis.
+        text: Launch the fuzzing tool with arguments that include the path to the
+          seed files from 'seed_files', the target binary directory, and a predefined
+          timeout (e.g., 3600 seconds). Capture stdout and stderr to a log file in
+          the temporary directory.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Read the log file line by line; for each crash block, locate the input
+          file path, read its contents, compute hash, and extract the relevant trace
+          lines.
+        reason: Produces deterministic identifiers that can be used for later triage.
+        text: Parse the fuzzing log file to extract crash identifiers by hashing the
+          crash input files (e.g., using SHA‑256) and collect the first line of each
+          crash stack trace as the description.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use regular expressions or simple string matching over the log content.
+        reason: Provides a quantitative measure of fuzzing effectiveness.
+        text: Count the number of unexpected behaviors by scanning the log for keywords
+          such as 'crash', 'hang', 'assert', and 'timeout'. Increment a counter for
+          each occurrence.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Inspect the 'returncode' attribute from the subprocess result.
+        reason: Captures whether the fuzzing process completed normally.
+        text: Determine 'successful_run' by checking the exit code of the fuzzing
+          process; a non‑zero exit code indicates a fatal error during execution.
+      - complexity: LOW
+        impact: LOW
+        method: Use time.time() before and after the subprocess call; subtract to
+          obtain duration.
+        reason: Provides a precise measurement of runtime for reporting.
+        text: Calculate 'total_duration_seconds' by recording the start and end timestamps
+          of the fuzzing run and computing the difference in seconds.
+      - complexity: LOW
+        impact: HIGH
+        method: Populate a Python dict with the collected values; cast to appropriate
+          types (e.g., int, bool).
+        reason: Produces the structured result required by downstream nodes.
+        text: Assemble the final output dictionary with keys 'crash_ids', 'crash_descriptions',
+          'unexpected_behavior_count', 'successful_run', and 'total_duration_seconds',
+          ensuring each matches the defined types.
+      - complexity: LOW
+        impact: LOW
+        method: Use shutil.rmtree on the temporary path; guard with a debug mode check.
+        reason: Prevents accumulation of large log files over multiple runs.
+        text: Clean up the temporary directory (remove crash inputs and logs) unless
+          a debugging flag is set, to conserve disk space.
     prompt: Execute fuzzing on OpenSSL's APIs for a predefined duration. Log any crashes
       or unexpected behavior.
   run_static_analysis:
@@ -386,19 +1331,91 @@ nodes:
       type: int
     - description: List of warning messages with file names and line numbers.
       key: warnings_list
-      type: List[str]
+      type: str
     - description: List of error messages with file names and line numbers.
       key: errors_list
-      type: List[str]
+      type: str
     - description: List of security issue descriptions with file names and line numbers.
       key: security_issues_list
-      type: List[str]
+      type: str
     - description: Indicates whether the static analysis completed without fatal failures.
       key: analysis_success
       type: bool
     - description: File system path to the generated static analysis report file.
       key: analysis_report_path
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Read clone_path from parent output; read environment_ready from setup_static_analysis_environment;
+          if false, abort with error log.
+        reason: Ensures that the analysis tools have a valid source repository and
+          a correctly configured environment, preventing runtime errors.
+        text: Validate that the OpenSSL source tree is present at the path provided
+          by collect_current_openssl_source (clone_path) and that the analysis environment
+          is ready (environment_ready) before proceeding.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Execute `clang-tidy -p build -j$(nproc) $(find . -name '*.c' -or -name
+          '*.cpp')`; redirect output to clang_tidy.log.
+        reason: clang-tidy provides detailed linting and potential security checks;
+          capturing streams allows later parsing.
+        text: Run clang-tidy on the entire source tree with the default OpenSSL coding
+          standards configuration, capturing its stdout and stderr streams to temporary
+          files.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Execute `cppcheck --enable=all --xml --xml-version=2 . 2> cppcheck.xml`.
+        reason: cppcheck complements clang-tidy by detecting a broader range of bugs
+          and potential security issues.
+        text: Run cppcheck on the same source tree using the `--enable=all` flag and
+          `--xml` output mode, directing the XML result to a separate file.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a regex pattern to match lines; filter by severity (warning/error);
+          append to respective lists.
+        reason: Standardized format simplifies downstream aggregation and reporting.
+        text: 'Parse clang_tidy.log to extract warnings and errors, normalizing each
+          entry into the format "file:line:column: severity: message" and populate
+          warnings_list and errors_list accordingly.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use an XML parser (e.g., lxml) to iterate over <error> elements; extract
+          attributes (file, line, severity) and message; classify based on severity.
+        reason: cppcheck’s XML output provides structured data that can be accurately
+          mapped to the required lists.
+        text: Parse cppcheck.xml to extract warnings, errors, and security findings,
+          converting each XML element into a human‑readable string and adding them
+          to warnings_list, errors_list, and security_issues_list.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use len(warnings_list), len(errors_list), len(security_issues_list).
+        reason: Aggregated counts provide quick metrics for the security report.
+        text: Count the total number of warnings, errors, and security issues across
+          both tools and store the results in total_warnings, total_errors, and total_security_issues.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Capture exit codes; if both are 0 and parsing succeeded, set analysis_success
+          = true.
+        reason: A boolean success flag simplifies downstream decision‑making in generate_security_report.
+        text: Determine analysis_success by checking that both clang-tidy and cppcheck
+          exit with code 0 and that no unexpected fatal errors were encountered during
+          parsing.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Create markdown content with tables; write to file; store absolute
+          path.
+        reason: A human‑readable report aids developers in triaging issues.
+        text: Generate a comprehensive static analysis report file (e.g., analysis_report.md)
+          that includes sections for warnings, errors, security findings, and overall
+          summary, and write its path to analysis_report_path.
+      - complexity: LOW
+        impact: LOW
+        method: Sort warnings_list, errors_list, security_issues_list before returning.
+        reason: Consistent ordering makes downstream consumption deterministic.
+        text: Return all output fields as defined in the output_structure, ensuring
+          that each list is sorted alphabetically by file name for consistency.
     prompt: Execute clang-tidy and cppcheck on the OpenSSL source tree. Capture all
       warnings, errors, and potential security issues.
   setup_dynamic_testing_environment:
@@ -413,7 +1430,7 @@ nodes:
       type: bool
     - description: List of package names that were installed as part of the setup.
       key: installed_packages
-      type: List[str]
+      type: str
     - description: Path to the configuration file generated for testing.
       key: config_file_path
       type: str
@@ -422,7 +1439,72 @@ nodes:
       type: str
     - description: List of environment variable assignments used during testing.
       key: environment_variables
-      type: List[str]
+      type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Use shell commands `mkdir -p` and `chmod` to set up the directory;
+          verify with `ls -ld`.
+        reason: Isolation prevents cross-contamination with other build artifacts
+          and ensures reproducible results.
+        text: Create a dedicated build directory under the source tree to isolate
+          testing artifacts, e.g., `build/test`. Ensure the directory is writable
+          and has appropriate permissions for the build user.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Run `sudo apt-get install -y` (Debian/Ubuntu) or `sudo yum install
+          -y` (RHEL/CentOS) for each package; parse the output to populate `installed_packages`.
+        reason: Missing dependencies cause configuration or compilation failures,
+          halting the test setup.
+        text: Install all required development packages (e.g., `make`, `gcc`, `perl`,
+          `openssl-devel`) using the system package manager, and capture the list
+          of installed packages for output.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Run `./config enable-tests` inside the source root; redirect stdout
+          to a temporary file and store its path as `config_file_path`.
+        reason: The `enable-tests` flag tells the build system to compile test binaries;
+          capturing the config file allows later verification.
+        text: Execute the OpenSSL configuration script with the `enable-tests` flag
+          and any additional test‑related options (e.g., `no-shared` for static builds).
+          Capture the generated `config` file path.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Run `make -j$(nproc)`; upon success, locate the binaries under `build/test`
+          or `build/openssl` and set `test_binary_path`.
+        reason: Compiling tests ensures they are up‑to‑date with the current source
+          and configuration.
+        text: Invoke `make` to compile all test binaries, specifying parallelism (e.g.,
+          `make -j$(nproc)`). Record the path to the resulting test binary directory.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Export variables in the shell (`export VAR=value`) and capture them
+          via `env | grep VAR`.
+        reason: Environment variables control runtime behavior and ensure the test
+          binaries link against the correct libraries.
+        text: Set necessary environment variables for testing, such as `LD_LIBRARY_PATH`
+          pointing to the build's lib directory, and any OpenSSL-specific variables
+          (e.g., `OPENSSL_CONF`). Store these assignments in `environment_variables`.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Execute `make test` with a timeout; parse the exit code and set `environment_setup_success`
+          accordingly.
+        reason: A quick sanity check confirms that the environment is correctly configured
+          before full test runs.
+        text: Run a lightweight sanity check by executing a subset of tests (e.g.,
+          `make test` with `-t` to run a few tests) and verify that all tests exit
+          with status 0.
+      - complexity: LOW
+        impact: HIGH
+        method: Serialize the collected data into a JSON or YAML format matching the
+          defined output schema.
+        reason: Providing structured output enables downstream nodes to consume the
+          setup results reliably.
+        text: 'Populate the output fields: set `environment_setup_success` to `true`
+          if all previous steps succeeded; otherwise `false`. Include the list of
+          installed packages, config file path, test binary path, and environment
+          variable assignments.'
     prompt: Set up a build of OpenSSL with testing enabled (e.g., ./config enable-tests).
       Ensure all unit and integration tests are compiled.
   setup_fuzzing_environment:
@@ -434,10 +1516,10 @@ nodes:
     output_structure:
     - description: List of fuzzing frameworks configured (e.g., AFL, libFuzzer).
       key: frameworks_configured
-      type: List[str]
+      type: str
     - description: Paths to the generated initial seed files used for fuzzing.
       key: seed_files
-      type: List[str]
+      type: str
     - description: Indicates whether the fuzzing environment is fully set up and ready
         to run tests.
       key: environment_ready
@@ -446,6 +1528,73 @@ nodes:
         files.
       key: config_directory
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use package manager commands (apt-get, yum, brew) to install packages;
+          verify installation by checking versions.
+        reason: Ensures that the build tools and dependencies needed for compiling
+          OpenSSL with fuzzing instrumentation are available.
+        text: Install all required system packages and libraries for AFL and libFuzzer,
+          including clang, gcc, and the OpenSSL development headers.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Run `git clone https://github.com/openssl/openssl` and `git checkout
+          <stable-tag>`; store the path for later steps.
+        reason: Provides a clean, reproducible source base for building with fuzzing
+          support.
+        text: Clone the latest OpenSSL source tree into a dedicated workspace and
+          check out the stable release tag.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Detect which framework is chosen (AFL or libFuzzer) and append the
+          corresponding compiler flags; run `./config` with these flags.
+        reason: Ensures that the compiled binaries are instrumented for memory safety
+          and crash detection.
+        text: Configure OpenSSL to enable fuzzing instrumentation by passing the appropriate
+          flags to the `./config` script (e.g., `-fuzzer` for AFL or `-fsanitize=fuzzer`
+          for libFuzzer).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Execute `make -j$(nproc)` and capture the build log; ensure build_success
+          is true.
+        reason: Produces the fuzzable binaries that will be used by the fuzzing framework.
+        text: Compile the OpenSSL binaries using `make` with the `-j` flag to leverage
+          parallelism.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Run OpenSSL's test suite with `--output-seeds` option if available;
+          otherwise, capture input streams from test cases and store them as files.
+        reason: Seeds provide the starting point for fuzzers to explore code paths.
+        text: Generate initial seed files by extracting the existing OpenSSL test
+          vectors (e.g., `testssl.sh` outputs) and converting them into binary format
+          suitable for AFL/libFuzzer.
+      - complexity: LOW
+        impact: LOW
+        method: Use `mkdir -p` to create the directory; write minimal config files
+          that specify target binary path and seed directory.
+        reason: Organizes all fuzzing settings for reproducibility and easy cleanup.
+        text: Create a dedicated configuration directory (e.g., `/opt/fuzz-config`)
+          and store the framework-specific configuration files (e.g., `afl.cfg`, `libfuzzer.cfg`).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Execute `afl-fuzz -i <seed-dir> -o <out-dir> -- openssl version` or
+          `clang-fuzzer <binary> <seed>` and inspect exit status.
+        reason: Catches configuration errors before full fuzzing sessions start.
+        text: 'Validate the fuzzing environment by running a short sanity check: invoke
+          the chosen fuzzing framework on a minimal OpenSSL command (e.g., `openssl
+          version`) with a single seed and ensure no immediate crashes or missing
+          binaries.'
+      - complexity: LOW
+        impact: HIGH
+        method: Programmatically collect file paths and boolean flags; serialize them
+          into the expected output structure.
+        reason: Ensures that downstream nodes receive the correct data to proceed
+          with fuzzing.
+        text: 'Populate the output fields: list the configured frameworks, paths to
+          generated seed files, set `environment_ready` to true if all checks passed,
+          and record the `config_directory` path.'
     prompt: Configure a fuzzing framework such as AFL or libFuzzer for OpenSSL. Generate
       initial seeds for fuzzing.
   setup_static_analysis_environment:
@@ -457,7 +1606,7 @@ nodes:
     output_structure:
     - description: Names of static analysis tools installed in the environment.
       key: installed_tools
-      type: List[str]
+      type: str
     - description: Whether the configuration of the tools succeeded without errors.
       key: configuration_success
       type: bool
@@ -465,6 +1614,40 @@ nodes:
         runs.
       key: environment_ready
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Run `sudo apt-get install -y clang-tidy cppcheck` on Debian/Ubuntu,
+          or the equivalent commands for other distros; verify installation by checking
+          the version output.
+        reason: Installing tools via the system package manager guarantees compatibility
+          with the host OS and simplifies future updates.
+        text: Use a package manager (e.g., apt, yum, brew) to install clang-tidy and
+          cppcheck, ensuring the latest stable versions are retrieved and any required
+          dependencies (e.g., libclang) are met.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Generate the files using templated content from OpenSSL's style guide;
+          place them in the configuration directory and set environment variables
+          `CLANG_TIDY_CONFIG` and `CPPCHECK_CONFIG` to point to these files.
+        reason: Centralizing configuration files allows consistent enforcement across
+          all analysis runs and makes it easy to revert or adjust standards.
+        text: Create a dedicated configuration directory (e.g., `~/.config/openssl/static_analysis`)
+          and place a `clang-tidy` configuration file (`.clang-tidy`) that enforces
+          OpenSSL coding standards (e.g., `-warnings-as-errors`, `-header-filter=.*`),
+          and a `cppcheck` configuration file (`cppcheck.cfg`) with appropriate `--enable=all`
+          and `--inconclusive` flags.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse the output for fatal errors; if any are found, adjust the configuration
+          files accordingly and repeat until no fatal errors remain.
+        reason: A dry‑run ensures that the tools are correctly interpreting the configuration
+          and that the environment is ready for full analysis.
+        text: Validate the configuration by running a dry‑run analysis on a small
+          subset of the OpenSSL source tree (e.g., `clang-tidy -p build --config-file=.clang-tidy
+          src/ssl/*.c` and `cppcheck --config=cppcheck.cfg src/ssl/*.c`), capturing
+          any errors or warnings that indicate misconfiguration.
     prompt: Install static analysis tools such as clang-tidy and cppcheck. Configure
       them with default OpenSSL coding standards.
   verify_build_security:
@@ -483,9 +1666,70 @@ nodes:
       type: int
     - description: List of CVE IDs or internal identifiers for each detected vulnerability.
       key: vulnerability_ids
-      type: List[str]
+      type: str
     - description: True if no critical vulnerabilities were found; otherwise False.
       key: security_passed
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read the JSON output of build_openssl, extract binary_artifacts_path,
+          resolve relative paths using the working directory, and verify file existence
+          with a filesystem check.
+        reason: The scanner needs a concrete filesystem location to analyze; using
+          the parent’s output guarantees consistency and avoids hard‑coding paths.
+        text: Prepare the binary artifact path from the parent node build_openssl
+          by reading its output field binary_artifacts_path, ensuring the path is
+          absolute and accessible by the scanner environment.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Define a configuration mapping of tool names to command templates;
+          inject the binary path and any required authentication tokens.
+        reason: Having a deterministic selection process ensures reproducibility and
+          compliance with policy.
+        text: Select a primary scanner tool (e.g., Snyk) and optionally a secondary
+          tool (e.g., OPA) based on the project's security policy, then construct
+          the corresponding CLI command with appropriate flags for binary scanning.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Python’s subprocess.run with capture_output=True, text=True, and
+          a timeout parameter; log the raw output for audit.
+        reason: Subprocess execution isolates the scanner, while capturing outputs
+          enables downstream parsing.
+        text: Execute the scanner command in a subprocess, capturing stdout, stderr,
+          and the exit code, and enforce a timeout to prevent hanging scans.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: If JSON, load with json.loads; if text, use regex patterns to find
+          CVE IDs and count entries; handle pagination or multiple sections.
+        reason: The raw output format varies per tool; robust parsing ensures accurate
+          mapping to the required output fields.
+        text: Parse the scanner’s JSON or text report to extract the total vulnerability
+          count and a list of vulnerability identifiers (CVE IDs or internal IDs).
+      - complexity: LOW
+        impact: HIGH
+        method: Map severity strings to a numeric ranking; iterate over the list of
+          vulnerabilities, checking their severity field.
+        reason: The business rule requires a binary pass/fail outcome based on criticality.
+        text: Determine the security_passed flag by evaluating the severity of each
+          identified vulnerability; if any severity is marked Critical or High, set
+          security_passed to False, else True.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Populate a Python dict with the extracted values, cast to the correct
+          types, and serialize with json.dumps.
+        reason: The downstream nodes expect a strict schema; type correctness prevents
+          integration failures.
+        text: Construct the final output JSON object with keys scan_tool_used, vulnerability_count,
+          vulnerability_ids, and security_passed, ensuring type compliance (e.g.,
+          int, list of strings, bool).
+      - complexity: LOW
+        impact: LOW
+        method: Use jsonschema.validate with the defined schema; capture ValidationError
+          exceptions and include details in the log.
+        reason: Schema validation catches accidental mismatches early, improving reliability.
+        text: Validate the output against a JSON schema (matching the output_structure)
+          and log any schema violations before returning the result.
     prompt: Run security scanners (e.g., OPA, Snyk) on the compiled binaries to detect
       any remaining vulnerabilities.
