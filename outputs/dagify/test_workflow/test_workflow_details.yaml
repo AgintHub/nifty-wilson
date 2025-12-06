@@ -1,22 +1,20 @@
 dag_type: plain_text
-description: A workflow designed to achieve the objective 'test'
+description: A simple workflow to test the system
 name: test_workflow
 nodes:
-  generate_response:
+  initial_test_step:
     agent: false
-    description: Develop a detailed workflow DAG that achieves the objective.
-    name: generate_response
-    nodes_depended_on:
-    - interpret_objective
-    nodes_dependent_on: []
-    prompt: Create a PlainTextDAGModel in JSON format that defines an execution plan
-      for the objective 'test'.
-  interpret_objective:
-    agent: false
-    description: Analyze the objective to identify key elements and expected outcomes.
-    name: interpret_objective
+    description: Initial test step to verify system functionality
+    name: initial_test_step
     nodes_depended_on: []
     nodes_dependent_on:
-    - generate_response
-    prompt: Understand the given objective 'test' and determine its requirements and
-      constraints.
+    - subsequent_test_step
+    prompt: Perform an initial test to ensure the system is functioning correctly.
+  subsequent_test_step:
+    agent: false
+    description: Subsequent test step to validate initial test results
+    name: subsequent_test_step
+    nodes_depended_on:
+    - initial_test_step
+    nodes_dependent_on: []
+    prompt: Perform a subsequent test to validate the results of the initial test.
