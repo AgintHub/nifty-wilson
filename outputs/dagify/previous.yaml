@@ -1,226 +1,58 @@
 dag_type: plain_text
-description: Compile a hardened, vulnerability‑free OpenSSL build, generate documentation
-  and security reports, and prepare and submit a NeurIPS manuscript detailing the
-  process.
-name: build_vulnerability_free_openssl_with_neurips_submission
+description: A workflow to solve a quadratic equation of the form ax^2 + bx + c =
+  0
+name: solve_quadratic_equation
 nodes:
-  apply_hardening_flags:
+  calculate_discriminant:
     agent: false
-    description: Set compilation flags to enhance security.
-    name: apply_hardening_flags
+    description: Calculate the discriminant (b^2 - 4ac) of the quadratic equation
+    name: calculate_discriminant
     nodes_depended_on:
-    - integrate_patch
-    nodes_dependent_on:
-    - build_openssl
-    prompt: Configure the OpenSSL build with security hardening options (e.g., -DOPENSSL_NO_ASM,
-      -DOPENSSL_NO_EC, -fstack-protector-strong).
-  build_openssl:
-    agent: false
-    description: Build the OpenSSL binaries.
-    name: build_openssl
-    nodes_depended_on:
-    - collect_current_openssl_source
-    nodes_dependent_on:
-    - apply_hardening_flags
-    prompt: Compile OpenSSL from the patched source using the hardened configuration.
-      Produce binary artifacts.
-  collect_current_openssl_source:
-    agent: false
-    description: Fetch the most recent OpenSSL source code from the official repository.
-    name: collect_current_openssl_source
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - identify_known_vulnerabilities
-    prompt: Clone the latest OpenSSL source code from the official repository (e.g.,
-      https://github.com/openssl/openssl) into a local directory. Ensure the repository
-      is at the latest stable release tag.
-  document_changes:
-    agent: false
-    description: Document all changes made to the OpenSSL project.
-    name: document_changes
-    nodes_depended_on:
-    - generate_security_report
-    nodes_dependent_on:
-    - release_artifacts
-    prompt: Update the changelog, README, and any relevant documentation to reflect
-      the applied patches, hardening flags, and security findings.
-  format_neurips_manuscript:
-    agent: false
-    description: Write and format the NeurIPS manuscript.
-    name: format_neurips_manuscript
-    nodes_depended_on:
-    - prepare_neurips_submission
-    nodes_dependent_on:
-    - submit_neurips
-    prompt: 'Using the provided code, results, and security report, write a NeurIPS
-      manuscript following the conference template. Include sections: abstract, introduction,
-      methodology, results, discussion, conclusion, references.'
-  generate_security_report:
-    agent: false
-    description: Create a security report for the OpenSSL build.
-    name: generate_security_report
-    nodes_depended_on:
-    - run_static_analysis
-    - run_dynamic_tests
-    - run_fuzzing
-    - re_run_static_analysis
-    - re_run_dynamic_tests
-    - re_run_fuzzing
-    nodes_dependent_on:
-    - document_changes
-    prompt: Compile a comprehensive report summarizing all identified issues, applied
-      patches, hardening measures, and test results. Include recommendations for future
-      maintenance.
-  identify_known_vulnerabilities:
-    agent: false
-    description: Gather all known OpenSSL vulnerabilities from public databases.
-    name: identify_known_vulnerabilities
-    nodes_depended_on:
-    - collect_current_openssl_source
-    nodes_dependent_on:
-    - integrate_patch
-    prompt: Query the CVE database for all entries tagged with OpenSSL. Produce a
-      list of CVE IDs, brief descriptions, and severity levels.
-  integrate_patch:
-    agent: false
-    description: Apply fixes for known vulnerabilities to the source code.
-    name: integrate_patch
-    nodes_depended_on:
-    - identify_known_vulnerabilities
-    nodes_dependent_on:
-    - run_static_analysis
-    prompt: For each CVE identified, apply the official patch or a custom fix to the
-      OpenSSL source. Verify that the patch compiles.
-  prepare_neurips_submission:
-    agent: false
-    description: Collect all necessary materials for a NeurIPS submission.
-    name: prepare_neurips_submission
-    nodes_depended_on:
-    - release_artifacts
-    nodes_dependent_on:
-    - format_neurips_manuscript
-    prompt: Gather all release artifacts, security reports, and documentation to create
-      a NeurIPS submission package. Ensure all required files (code archive, binaries,
-      README, security report) are included.
-  re_run_dynamic_tests:
-    agent: false
-    description: Re-run dynamic tests on the built binaries.
-    name: re_run_dynamic_tests
-    nodes_depended_on:
-    - build_openssl
-    - setup_dynamic_testing_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Execute the full suite of dynamic tests on the built binaries. Record
-      outcomes.
-  re_run_fuzzing:
-    agent: false
-    description: Re-run fuzz testing on the built binaries.
-    name: re_run_fuzzing
-    nodes_depended_on:
-    - build_openssl
-    - setup_fuzzing_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Run fuzzing on the built binaries for the same duration as before. Log
-      any crashes.
-  re_run_static_analysis:
-    agent: false
-    description: Re-run static analysis on the built binaries.
-    name: re_run_static_analysis
-    nodes_depended_on:
-    - build_openssl
-    - setup_static_analysis_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Perform static analysis on the compiled OpenSSL binaries using the same
-      tools as before. Capture any new findings.
-  release_artifacts:
-    agent: false
-    description: Prepare and publish the final OpenSSL release.
-    name: release_artifacts
-    nodes_depended_on:
-    - document_changes
-    nodes_dependent_on:
-    - prepare_neurips_submission
-    prompt: Package the compiled OpenSSL binaries, source tarball, and documentation
-      into release artifacts. Tag the release in the version control system.
-  run_dynamic_tests:
-    agent: false
-    description: Execute dynamic tests on the OpenSSL source code.
-    name: run_dynamic_tests
-    nodes_depended_on:
-    - collect_current_openssl_source
-    - setup_dynamic_testing_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Run the full suite of OpenSSL unit and integration tests. Record any test
-      failures or crashes.
-  run_fuzzing:
-    agent: false
-    description: Perform fuzz testing on the OpenSSL source code.
-    name: run_fuzzing
-    nodes_depended_on:
-    - collect_current_openssl_source
-    - setup_fuzzing_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Execute fuzzing on OpenSSL's APIs for a predefined duration. Log any crashes
-      or unexpected behavior.
-  run_static_analysis:
-    agent: false
-    description: Perform static analysis on the OpenSSL source code.
-    name: run_static_analysis
-    nodes_depended_on:
-    - collect_current_openssl_source
-    - setup_static_analysis_environment
-    nodes_dependent_on:
-    - generate_security_report
-    prompt: Execute clang-tidy and cppcheck on the OpenSSL source tree. Capture all
-      warnings, errors, and potential security issues.
-  setup_dynamic_testing_environment:
-    agent: false
-    description: Prepare the environment for dynamic testing.
-    name: setup_dynamic_testing_environment
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - run_dynamic_tests
-    prompt: Set up a build of OpenSSL with testing enabled (e.g., ./config enable-tests).
-      Ensure all unit and integration tests are compiled.
-  setup_fuzzing_environment:
-    agent: false
-    description: Prepare the environment for fuzz testing.
-    name: setup_fuzzing_environment
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - run_fuzzing
-    prompt: Configure a fuzzing framework such as AFL or libFuzzer for OpenSSL. Generate
-      initial seeds for fuzzing.
-  setup_static_analysis_environment:
-    agent: false
-    description: Prepare the environment for static code analysis.
-    name: setup_static_analysis_environment
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - run_static_analysis
-    prompt: Install static analysis tools such as clang-tidy and cppcheck. Configure
-      them with default OpenSSL coding standards.
-  submit_neurips:
-    agent: false
-    description: Submit the NeurIPS manuscript to the conference portal.
-    name: submit_neurips
-    nodes_depended_on:
-    - format_neurips_manuscript
+    - get_coefficients
     nodes_dependent_on: []
-    prompt: Package the manuscript, figures, and supplementary material into the NeurIPS
-      submission format and upload to the conference submission portal. Record the
-      submission ID.
-  verify_build_security:
+    prompt: Using the coefficients a, b, and c, calculate the discriminant as b^2
+      - 4ac
+  calculate_roots:
     agent: false
-    description: Validate the security of the built binaries.
-    name: verify_build_security
+    description: Calculate the roots of the quadratic equation
+    name: calculate_roots
     nodes_depended_on:
-    - build_openssl
+    - get_coefficients
+    - calculate_discriminant
     nodes_dependent_on: []
-    prompt: Run security scanners (e.g., OPA, Snyk) on the compiled binaries to detect
-      any remaining vulnerabilities.
+    prompt: Using the coefficients a, b, and the discriminant, calculate the roots
+      of the quadratic equation
+  determine_nature_of_roots:
+    agent: false
+    description: Determine the nature of the roots based on the discriminant
+    name: determine_nature_of_roots
+    nodes_depended_on:
+    - calculate_discriminant
+    nodes_dependent_on: []
+    prompt: Based on the discriminant, determine if the roots are real and distinct,
+      real and equal, or complex
+  format_roots:
+    agent: false
+    description: Format the roots for presentation
+    name: format_roots
+    nodes_depended_on:
+    - calculate_roots
+    - determine_nature_of_roots
+    nodes_dependent_on: []
+    prompt: Format the calculated roots according to their nature (real or complex)
+  get_coefficients:
+    agent: false
+    description: Obtain the coefficients a, b, and c of the quadratic equation
+    name: get_coefficients
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Enter the coefficients a, b, and c of the quadratic equation ax^2 + bx
+      + c = 0
+  present_solution:
+    agent: false
+    description: Present the final solution
+    name: present_solution
+    nodes_depended_on:
+    - format_roots
+    nodes_dependent_on: []
+    prompt: Present the final roots of the quadratic equation in a clear format
