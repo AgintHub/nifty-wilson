@@ -1,12 +1,47 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: symbolic_regression_framework_with_llm
 nodes:
   configure_llm_for_proposal_generation:
     agent: false
+    code_node_type: stub
     description: Configure all necessary LLM parameters and templates to produce symbolic
       regression proposals that respect the defined objective, constraints, and data
       schema.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineSymbolicRegressionObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_symbolic_regression_objective node outputs.\"\
+      \"\"\n    objective_description: str = Field(..., description=\"High\\u2011level\
+      \ description of the regression objective\")\n    target_variable: str = Field(...,\
+      \ description=\"Name of the dependent variable to predict\")\n    feature_variables:\
+      \ str = Field(..., description=\"List of independent variable names available\
+      \ for modeling\")\n    constraints: str = Field(..., description=\"Explicit\
+      \ constraints or domain rules that models must satisfy\")\n    performance_metrics:\
+      \ str = Field(..., description=\"Metrics to evaluate model quality (e.g., R\\\
+      u00b2, MAE, complexity)\")\n    dataset_description: str = Field(..., description=\"\
+      Brief description of the data source or sampling strategy\")\n\n\nclass ConfigureLlmForProposalGenerationOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for configure_llm_for_proposal_generation node outputs.\"\
+      \"\"\n    model_name: str = Field(..., description=\"The name of the language\
+      \ model to be used (e.g., \\\"gpt-4o\\\", \\\"llama-3.1\\\")\")\n    temperature:\
+      \ float = Field(..., description=\"The sampling temperature controlling randomness\
+      \ of the model output\")\n    max_tokens: int = Field(..., description=\"Maximum\
+      \ number of tokens the model should generate for each proposal\")\n    prompt_template:\
+      \ str = Field(..., description=\"The prompt format that the LLM will use when\
+      \ generating proposals, incorporating placeholders for objective and data\"\
+      )\n    input_schema: str = Field(..., description=\"Human\\u2011readable description\
+      \ or JSON schema of the input data expected by the LLM\")\n    num_proposals:\
+      \ int = Field(..., description=\"Number of independent proposal samples the\
+      \ LLM should generate\")\n\n\ndef configure_llm_for_proposal_generation(define_symbolic_regression_objective_input:\
+      \ DefineSymbolicRegressionObjectiveOutput, **kwargs) -> ConfigureLlmForProposalGenerationOutput:\n\
+      \    \"\"\"Configure all necessary LLM parameters and templates to produce symbolic\
+      \ regression proposals that respect the defined objective, constraints, and\
+      \ data schema.\n\n    Args:\n        define_symbolic_regression_objective_input:\
+      \ Input from the 'define_symbolic_regression_objective' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        ConfigureLlmForProposalGenerationOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ConfigureLlmForProposalGenerationOutput(\n        model_name=\"\",\n     \
+      \   temperature=0.0,\n        max_tokens=0,\n        prompt_template=\"\",\n\
+      \        input_schema=\"\",\n        num_proposals=0,\n    )"
     name: configure_llm_for_proposal_generation
     nodes_depended_on:
     - define_symbolic_regression_objective
@@ -103,11 +138,36 @@ nodes:
           moderate feature sizes, scaling up to 20 if computational resources allow.
     prompt: Set up the LLM with the necessary parameters and input format for generating
       symbolic regression proposals based on the defined objective.
+    shims: []
   define_symbolic_regression_objective:
     agent: false
+    code_node_type: stub
     description: Define the objective and scope of the symbolic regression task by
       collecting a high‑level problem statement, identifying the dependent and independent
       variables, and setting constraints and performance metrics.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass DefineSymbolicRegressionObjectiveOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for define_symbolic_regression_objective node outputs.\"\
+      \"\"\n    objective_description: str = Field(..., description=\"High\\u2011level\
+      \ description of the regression objective\")\n    target_variable: str = Field(...,\
+      \ description=\"Name of the dependent variable to predict\")\n    feature_variables:\
+      \ str = Field(..., description=\"List of independent variable names available\
+      \ for modeling\")\n    constraints: str = Field(..., description=\"Explicit\
+      \ constraints or domain rules that models must satisfy\")\n    performance_metrics:\
+      \ str = Field(..., description=\"Metrics to evaluate model quality (e.g., R\\\
+      u00b2, MAE, complexity)\")\n    dataset_description: str = Field(..., description=\"\
+      Brief description of the data source or sampling strategy\")\n\n\ndef define_symbolic_regression_objective(general_input:\
+      \ str, **kwargs) -> DefineSymbolicRegressionObjectiveOutput:\n    \"\"\"Define\
+      \ the objective and scope of the symbolic regression task by collecting a high‑level\
+      \ problem statement, identifying the dependent and independent variables, and\
+      \ setting constraints and performance metrics.\n\n    Args:\n        general_input:\
+      \ General input string for the root node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        DefineSymbolicRegressionObjectiveOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ DefineSymbolicRegressionObjectiveOutput(\n        objective_description=\"\
+      \",\n        target_variable=\"\",\n        feature_variables=\"\",\n      \
+      \  constraints=\"\",\n        performance_metrics=\"\",\n        dataset_description=\"\
+      \",\n    )"
     name: define_symbolic_regression_objective
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -185,10 +245,45 @@ nodes:
           to the next node via a message queue.
     prompt: Specify the problem to be solved using symbolic regression, including
       the target variable and relevant constraints.
+    shims: []
   evaluate_proposal_quality:
     agent: false
+    code_node_type: stub
     description: Assess the generated proposals using relevant metrics such as accuracy,
       complexity, and interpretability.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass GenerateSymbolicRegressionProposalsOutput(BaseModel):\n    \"\"\"\
+      Pydantic model for generate_symbolic_regression_proposals node outputs.\"\"\"\
+      \n    proposal_expressions: str = Field(..., description=\"The symbolic regression\
+      \ expressions generated by the LLM, each represented as a string.\")\n    proposal_complexities:\
+      \ int = Field(..., description=\"Integer complexity scores for each proposal,\
+      \ indicating the number of operators or depth of the expression tree.\")\n \
+      \   proposal_confidences: float = Field(..., description=\"Confidence or probability\
+      \ estimates for each proposal, ranging from 0.0 to 1.0.\")\n    proposal_count:\
+      \ int = Field(..., description=\"Total number of proposals generated.\")\n \
+      \   proposals_valid: bool = Field(..., description=\"Whether the proposal set\
+      \ passed preliminary validation (e.g., syntactic correctness).\")\n\n\nclass\
+      \ EvaluateProposalQualityOutput(BaseModel):\n    \"\"\"Pydantic model for evaluate_proposal_quality\
+      \ node outputs.\"\"\"\n    proposal_ids: List[str] = Field(..., description=\"\
+      List of identifiers for each proposal evaluated\")\n    accuracy: List[float]\
+      \ = Field(..., description=\"Accuracy metric of each proposal (e.g., R\\u00b2\
+      \ or mean squared error)\")\n    complexity: List[float] = Field(..., description=\"\
+      Complexity score based on the structural size of the symbolic expression\")\n\
+      \    interpretability: List[float] = Field(..., description=\"Interpretability\
+      \ score ranging from 0 (poor) to 1 (high), reflecting how easily a human can\
+      \ understand the formula\")\n    overall_quality: List[float] = Field(..., description=\"\
+      Composite quality score combining accuracy, complexity, and interpretability\"\
+      )\n\n\ndef evaluate_proposal_quality(generate_symbolic_regression_proposals_input:\
+      \ GenerateSymbolicRegressionProposalsOutput, **kwargs) -> EvaluateProposalQualityOutput:\n\
+      \    \"\"\"Assess the generated proposals using relevant metrics such as accuracy,\
+      \ complexity, and interpretability.\n\n    Args:\n        generate_symbolic_regression_proposals_input:\
+      \ Input from the 'generate_symbolic_regression_proposals' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        EvaluateProposalQualityOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ EvaluateProposalQualityOutput(\n        proposal_ids=[],\n        accuracy=[],\n\
+      \        complexity=[],\n        interpretability=[],\n        overall_quality=[],\n\
+      \    )"
     name: evaluate_proposal_quality
     nodes_depended_on:
     - generate_symbolic_regression_proposals
@@ -301,10 +396,46 @@ nodes:
       \ `overall_quality` score using a weighted sum (weights 0.4 for accuracy, 0.3\
       \ for inverse complexity, 0.3 for interpretability).\n6. Return the results\
       \ in the specified output structure."
+    shims: []
   finalize_symbolic_regression_framework:
     agent: false
+    code_node_type: stub
     description: Finalizes the symbolic regression framework by applying adjustments
       informed by test results, ensuring robustness and documenting the outcome.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass TestSymbolicRegressionFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for test_symbolic_regression_framework node outputs.\"\
+      \"\"\n    test_accuracy: float = Field(..., description=\"Overall accuracy of\
+      \ the framework on the test datasets\")\n    test_rmse: float = Field(..., description=\"\
+      Root mean squared error on the test datasets\")\n    test_runtime_seconds: float\
+      \ = Field(..., description=\"Total execution time in seconds for all test runs\"\
+      )\n    test_success: bool = Field(..., description=\"Whether the framework met\
+      \ the predefined performance thresholds\")\n    test_dataset_names: str = Field(...,\
+      \ description=\"Names of the test datasets used in the evaluation\")\n    test_summary:\
+      \ str = Field(..., description=\"Short textual summary of the test results and\
+      \ observations\")\n\n\nclass FinalizeSymbolicRegressionFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for finalize_symbolic_regression_framework node outputs.\"\
+      \"\"\n    framework_version: str = Field(..., description=\"Version identifier\
+      \ of the finalized symbolic regression framework\")\n    adjustments_summary:\
+      \ str = Field(..., description=\"Concise summary of modifications made based\
+      \ on test results\")\n    is_framework_robust: bool = Field(..., description=\"\
+      Indicates whether the framework meets robustness criteria after adjustments\"\
+      )\n    final_performance_accuracy: float = Field(..., description=\"Accuracy\
+      \ metric achieved by the finalized framework on the test dataset\")\n    final_performance_complexity:\
+      \ float = Field(..., description=\"Complexity metric of the finalized model\"\
+      )\n    final_performance_interpretability: float = Field(..., description=\"\
+      Interpretability metric of the finalized model\")\n\n\ndef finalize_symbolic_regression_framework(test_symbolic_regression_framework_input:\
+      \ TestSymbolicRegressionFrameworkOutput, **kwargs) -> FinalizeSymbolicRegressionFrameworkOutput:\n\
+      \    \"\"\"Finalizes the symbolic regression framework by applying adjustments\
+      \ informed by test results, ensuring robustness and documenting the outcome.\n\
+      \n    Args:\n        test_symbolic_regression_framework_input: Input from the\
+      \ 'test_symbolic_regression_framework' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        FinalizeSymbolicRegressionFrameworkOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ FinalizeSymbolicRegressionFrameworkOutput(\n        framework_version=\"\"\
+      ,\n        adjustments_summary=\"\",\n        is_framework_robust=False,\n \
+      \       final_performance_accuracy=0.0,\n        final_performance_complexity=0.0,\n\
+      \        final_performance_interpretability=0.0,\n    )"
     name: finalize_symbolic_regression_framework
     nodes_depended_on:
     - test_symbolic_regression_framework
@@ -471,9 +602,45 @@ nodes:
       Output a JSON with the fields defined below.
 
       '
+    shims: []
   generate_symbolic_regression_proposals:
     agent: false
+    code_node_type: stub
     description: Generate proposals for symbolic regression using the configured LLM
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ConfigureLlmForProposalGenerationOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for configure_llm_for_proposal_generation node outputs.\"\
+      \"\"\n    model_name: str = Field(..., description=\"The name of the language\
+      \ model to be used (e.g., \\\"gpt-4o\\\", \\\"llama-3.1\\\")\")\n    temperature:\
+      \ float = Field(..., description=\"The sampling temperature controlling randomness\
+      \ of the model output\")\n    max_tokens: int = Field(..., description=\"Maximum\
+      \ number of tokens the model should generate for each proposal\")\n    prompt_template:\
+      \ str = Field(..., description=\"The prompt format that the LLM will use when\
+      \ generating proposals, incorporating placeholders for objective and data\"\
+      )\n    input_schema: str = Field(..., description=\"Human\\u2011readable description\
+      \ or JSON schema of the input data expected by the LLM\")\n    num_proposals:\
+      \ int = Field(..., description=\"Number of independent proposal samples the\
+      \ LLM should generate\")\n\n\nclass GenerateSymbolicRegressionProposalsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for generate_symbolic_regression_proposals node outputs.\"\
+      \"\"\n    proposal_expressions: str = Field(..., description=\"The symbolic\
+      \ regression expressions generated by the LLM, each represented as a string.\"\
+      )\n    proposal_complexities: int = Field(..., description=\"Integer complexity\
+      \ scores for each proposal, indicating the number of operators or depth of the\
+      \ expression tree.\")\n    proposal_confidences: float = Field(..., description=\"\
+      Confidence or probability estimates for each proposal, ranging from 0.0 to 1.0.\"\
+      )\n    proposal_count: int = Field(..., description=\"Total number of proposals\
+      \ generated.\")\n    proposals_valid: bool = Field(..., description=\"Whether\
+      \ the proposal set passed preliminary validation (e.g., syntactic correctness).\"\
+      )\n\n\ndef generate_symbolic_regression_proposals(configure_llm_for_proposal_generation_input:\
+      \ ConfigureLlmForProposalGenerationOutput, **kwargs) -> GenerateSymbolicRegressionProposalsOutput:\n\
+      \    \"\"\"Generate proposals for symbolic regression using the configured LLM\n\
+      \n    Args:\n        configure_llm_for_proposal_generation_input: Input from\
+      \ the 'configure_llm_for_proposal_generation' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        GenerateSymbolicRegressionProposalsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ GenerateSymbolicRegressionProposalsOutput(\n        proposal_expressions=\"\
+      \",\n        proposal_complexities=0,\n        proposal_confidences=0.0,\n \
+      \       proposal_count=0,\n        proposals_valid=False,\n    )"
     name: generate_symbolic_regression_proposals
     nodes_depended_on:
     - configure_llm_for_proposal_generation
@@ -575,11 +742,43 @@ nodes:
           and `proposals_valid`.
     prompt: Use the configured LLM to generate a set of symbolic regression proposals
       based on the defined objective and input data.
+    shims: []
   integrate_refined_proposals_into_framework:
     agent: false
+    code_node_type: stub
     description: Take the list of refined symbolic regression expressions, validate
       and adapt them to the framework’s internal representation, register them for
       future use, and produce a concise integration log.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass RefineSelectedProposalsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for refine_selected_proposals node outputs.\"\"\"\n    refined_proposals:\
+      \ List[str] = Field(..., description=\"List of symbolic regression expressions\
+      \ that have been refined.\")\n    accuracy_improvement: float = Field(..., description=\"\
+      Absolute improvement in predictive accuracy compared to the original top proposals.\"\
+      )\n    complexity_change: int = Field(..., description=\"Net change in model\
+      \ complexity (negative indicates simplification, positive indicates added complexity).\"\
+      )\n    interpretability_score: float = Field(..., description=\"Overall interpretability\
+      \ score of the refined proposals on a scale from 0.0 (least interpretable) to\
+      \ 1.0 (most interpretable).\")\n\n\nclass IntegrateRefinedProposalsIntoFrameworkOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for integrate_refined_proposals_into_framework node\
+      \ outputs.\"\"\"\n    integrated_proposals: List[str] = Field(..., description=\"\
+      List of symbolic regression equations integrated into the framework.\")\n  \
+      \  integration_success: bool = Field(..., description=\"Whether the integration\
+      \ process completed successfully.\")\n    integrated_count: int = Field(...,\
+      \ description=\"Number of proposals integrated into the framework.\")\n    integration_log:\
+      \ str = Field(..., description=\"Log or summary of the integration process.\"\
+      )\n\n\ndef integrate_refined_proposals_into_framework(refine_selected_proposals_input:\
+      \ RefineSelectedProposalsOutput, **kwargs) -> IntegrateRefinedProposalsIntoFrameworkOutput:\n\
+      \    \"\"\"Take the list of refined symbolic regression expressions, validate\
+      \ and adapt them to the framework’s internal representation, register them for\
+      \ future use, and produce a concise integration log.\n\n    Args:\n        refine_selected_proposals_input:\
+      \ Input from the 'refine_selected_proposals' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        IntegrateRefinedProposalsIntoFrameworkOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ IntegrateRefinedProposalsIntoFrameworkOutput(\n        integrated_proposals=[],\n\
+      \        integration_success=False,\n        integrated_count=0,\n        integration_log=\"\
+      \",\n    )"
     name: integrate_refined_proposals_into_framework
     nodes_depended_on:
     - refine_selected_proposals
@@ -668,13 +867,47 @@ nodes:
           (string).'
     prompt: Incorporate the refined proposals into the overall framework, ensuring
       compatibility and optimal performance.
+    shims: []
   refine_selected_proposals:
     agent: false
+    code_node_type: stub
     description: This node takes the top symbolic regression proposals identified
       by the selection step, refines them through optimization (e.g., hyperparameter
       tuning, ensembling, or simplification), re-evaluates their predictive accuracy
       and complexity, and outputs the improved expressions along with metrics that
       quantify the gains.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectTopProposalsOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ select_top_proposals node outputs.\"\"\"\n    top_proposal_ids: str = Field(...,\
+      \ description=\"Identifiers of the proposals selected as top candidates.\")\n\
+      \    top_proposal_scores: float = Field(..., description=\"Quality scores for\
+      \ each selected proposal, reflecting accuracy, complexity, and interpretability.\"\
+      )\n    selected_count: int = Field(..., description=\"Number of proposals selected.\"\
+      )\n    selection_criteria: str = Field(..., description=\"The rule or threshold\
+      \ used for selection (e.g., \\\"top\\u20113 by overall_quality\\\").\")\n  \
+      \  is_successful: bool = Field(..., description=\"Indicates whether the selection\
+      \ process completed without errors.\")\n\n\nclass RefineSelectedProposalsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for refine_selected_proposals node outputs.\"\"\"\n\
+      \    refined_proposals: List[str] = Field(..., description=\"List of symbolic\
+      \ regression expressions that have been refined.\")\n    accuracy_improvement:\
+      \ float = Field(..., description=\"Absolute improvement in predictive accuracy\
+      \ compared to the original top proposals.\")\n    complexity_change: int = Field(...,\
+      \ description=\"Net change in model complexity (negative indicates simplification,\
+      \ positive indicates added complexity).\")\n    interpretability_score: float\
+      \ = Field(..., description=\"Overall interpretability score of the refined proposals\
+      \ on a scale from 0.0 (least interpretable) to 1.0 (most interpretable).\")\n\
+      \n\ndef refine_selected_proposals(select_top_proposals_input: SelectTopProposalsOutput,\
+      \ **kwargs) -> RefineSelectedProposalsOutput:\n    \"\"\"This node takes the\
+      \ top symbolic regression proposals identified by the selection step, refines\
+      \ them through optimization (e.g., hyperparameter tuning, ensembling, or simplification),\
+      \ re-evaluates their predictive accuracy and complexity, and outputs the improved\
+      \ expressions along with metrics that quantify the gains.\n\n    Args:\n   \
+      \     select_top_proposals_input: Input from the 'select_top_proposals' node.\n\
+      \        **kwargs: Additional keyword arguments.\n\n    Returns:\n        RefineSelectedProposalsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ RefineSelectedProposalsOutput(\n        refined_proposals=[],\n        accuracy_improvement=0.0,\n\
+      \        complexity_change=0,\n        interpretability_score=0.0,\n    )"
     name: refine_selected_proposals
     nodes_depended_on:
     - select_top_proposals
@@ -793,10 +1026,43 @@ nodes:
           as JSON values.
     prompt: Apply techniques such as hyperparameter tuning or ensemble methods to
       refine the selected proposals and enhance their performance.
+    shims: []
   select_top_proposals:
     agent: false
+    code_node_type: stub
     description: Select the top proposals based on their evaluated quality, using
       a top‑k strategy.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass EvaluateProposalQualityOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for evaluate_proposal_quality node outputs.\"\"\"\n    proposal_ids: List[str]\
+      \ = Field(..., description=\"List of identifiers for each proposal evaluated\"\
+      )\n    accuracy: List[float] = Field(..., description=\"Accuracy metric of each\
+      \ proposal (e.g., R\\u00b2 or mean squared error)\")\n    complexity: List[float]\
+      \ = Field(..., description=\"Complexity score based on the structural size of\
+      \ the symbolic expression\")\n    interpretability: List[float] = Field(...,\
+      \ description=\"Interpretability score ranging from 0 (poor) to 1 (high), reflecting\
+      \ how easily a human can understand the formula\")\n    overall_quality: List[float]\
+      \ = Field(..., description=\"Composite quality score combining accuracy, complexity,\
+      \ and interpretability\")\n\n\nclass SelectTopProposalsOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for select_top_proposals node outputs.\"\"\"\n   \
+      \ top_proposal_ids: str = Field(..., description=\"Identifiers of the proposals\
+      \ selected as top candidates.\")\n    top_proposal_scores: float = Field(...,\
+      \ description=\"Quality scores for each selected proposal, reflecting accuracy,\
+      \ complexity, and interpretability.\")\n    selected_count: int = Field(...,\
+      \ description=\"Number of proposals selected.\")\n    selection_criteria: str\
+      \ = Field(..., description=\"The rule or threshold used for selection (e.g.,\
+      \ \\\"top\\u20113 by overall_quality\\\").\")\n    is_successful: bool = Field(...,\
+      \ description=\"Indicates whether the selection process completed without errors.\"\
+      )\n\n\ndef select_top_proposals(evaluate_proposal_quality_input: EvaluateProposalQualityOutput,\
+      \ **kwargs) -> SelectTopProposalsOutput:\n    \"\"\"Select the top proposals\
+      \ based on their evaluated quality, using a top‑k strategy.\n\n    Args:\n \
+      \       evaluate_proposal_quality_input: Input from the 'evaluate_proposal_quality'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SelectTopProposalsOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SelectTopProposalsOutput(\n        top_proposal_ids=\"\
+      \",\n        top_proposal_scores=0.0,\n        selected_count=0,\n        selection_criteria=\"\
+      \",\n        is_successful=False,\n    )"
     name: select_top_proposals
     nodes_depended_on:
     - evaluate_proposal_quality
@@ -908,13 +1174,49 @@ nodes:
 
       **Error handling**: If any of the input lists are empty or of mismatched lengths,
       set `is_successful` to `false` and return empty lists for the remaining fields.'
+    shims: []
   test_symbolic_regression_framework:
     agent: false
+    code_node_type: stub
     description: Run a comprehensive evaluation of the symbolic regression framework
       that was built from the refined proposals. The test harness must load a curated
       set of benchmark datasets, evaluate each integrated symbolic expression on the
       test split, compute key metrics (accuracy, RMSE, runtime), determine if predefined
       performance thresholds are met, and produce a concise summary.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IntegrateRefinedProposalsIntoFrameworkOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for integrate_refined_proposals_into_framework node outputs.\"\
+      \"\"\n    integrated_proposals: List[str] = Field(..., description=\"List of\
+      \ symbolic regression equations integrated into the framework.\")\n    integration_success:\
+      \ bool = Field(..., description=\"Whether the integration process completed\
+      \ successfully.\")\n    integrated_count: int = Field(..., description=\"Number\
+      \ of proposals integrated into the framework.\")\n    integration_log: str =\
+      \ Field(..., description=\"Log or summary of the integration process.\")\n\n\
+      \nclass TestSymbolicRegressionFrameworkOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for test_symbolic_regression_framework node outputs.\"\"\"\n    test_accuracy:\
+      \ float = Field(..., description=\"Overall accuracy of the framework on the\
+      \ test datasets\")\n    test_rmse: float = Field(..., description=\"Root mean\
+      \ squared error on the test datasets\")\n    test_runtime_seconds: float = Field(...,\
+      \ description=\"Total execution time in seconds for all test runs\")\n    test_success:\
+      \ bool = Field(..., description=\"Whether the framework met the predefined performance\
+      \ thresholds\")\n    test_dataset_names: str = Field(..., description=\"Names\
+      \ of the test datasets used in the evaluation\")\n    test_summary: str = Field(...,\
+      \ description=\"Short textual summary of the test results and observations\"\
+      )\n\n\ndef test_symbolic_regression_framework(integrate_refined_proposals_into_framework_input:\
+      \ IntegrateRefinedProposalsIntoFrameworkOutput, **kwargs) -> TestSymbolicRegressionFrameworkOutput:\n\
+      \    \"\"\"Run a comprehensive evaluation of the symbolic regression framework\
+      \ that was built from the refined proposals. The test harness must load a curated\
+      \ set of benchmark datasets, evaluate each integrated symbolic expression on\
+      \ the test split, compute key metrics (accuracy, RMSE, runtime), determine if\
+      \ predefined performance thresholds are met, and produce a concise summary.\n\
+      \n    Args:\n        integrate_refined_proposals_into_framework_input: Input\
+      \ from the 'integrate_refined_proposals_into_framework' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        TestSymbolicRegressionFrameworkOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ TestSymbolicRegressionFrameworkOutput(\n        test_accuracy=0.0,\n     \
+      \   test_rmse=0.0,\n        test_runtime_seconds=0.0,\n        test_success=False,\n\
+      \        test_dataset_names=\"\",\n        test_summary=\"\",\n    )"
     name: test_symbolic_regression_framework
     nodes_depended_on:
     - integrate_refined_proposals_into_framework
@@ -1043,3 +1345,4 @@ nodes:
           to `bool`, and the dataset names list to `List[str]`.'
     prompt: Evaluate the performance of the integrated framework using relevant benchmarks
       and test datasets.
+    shims: []

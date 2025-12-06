@@ -128,7 +128,7 @@ class SelectTopProposalsOutput(BaseModel):
     top_proposal_ids: str = Field(..., description="Identifiers of the proposals selected as top candidates.")
     top_proposal_scores: float = Field(..., description="Quality scores for each selected proposal, reflecting accuracy, complexity, and interpretability.")
     selected_count: int = Field(..., description="Number of proposals selected.")
-    selection_criteria: str = Field(..., description="The rule or threshold used for selection (e.g., \"top\u20113 by overall_quality\").")
+    selection_criteria: str = Field(..., description="The rule or threshold used for selection (e.g., "top\u20113 by overall_quality").")
     is_successful: bool = Field(..., description="Indicates whether the selection process completed without errors.")
 
 

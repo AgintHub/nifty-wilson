@@ -1,3 +1,24 @@
+from ._integrate_refined_proposals_into_framework.initialize_integration_log import initialize_integration_log
+from ._integrate_refined_proposals_into_framework.validate_equation_syntax import validate_equation_syntax
+from ._integrate_refined_proposals_into_framework.get_syntax_validation_error import get_syntax_validation_error
+from ._integrate_refined_proposals_into_framework.log_validation_failure import log_validation_failure
+from ._integrate_refined_proposals_into_framework.validate_against_constraints import validate_against_constraints
+from ._integrate_refined_proposals_into_framework.log_constraint_failure import log_constraint_failure
+from ._integrate_refined_proposals_into_framework.build_symbolic_model import build_symbolic_model
+from ._integrate_refined_proposals_into_framework.get_model_build_error import get_model_build_error
+from ._integrate_refined_proposals_into_framework.log_build_failure import log_build_failure
+from ._integrate_refined_proposals_into_framework.generate_unique_model_id import generate_unique_model_id
+from ._integrate_refined_proposals_into_framework.register_model_in_framework import register_model_in_framework
+from ._integrate_refined_proposals_into_framework.get_registration_error import get_registration_error
+from ._integrate_refined_proposals_into_framework.log_registration_failure import log_registration_failure
+from ._integrate_refined_proposals_into_framework.get_model_string_representation import get_model_string_representation
+from ._integrate_refined_proposals_into_framework.log_successful_integration import log_successful_integration
+from ._integrate_refined_proposals_into_framework.compile_integration_log import compile_integration_log
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Retrieve the `refined_proposals` list from the parent node and initialize an
 #   empty list `integrated_proposals`.
@@ -84,8 +105,6 @@
 #   Method: Direct assignment to output fields before returning.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class RefineSelectedProposalsOutput(BaseModel):
@@ -105,7 +124,7 @@ class IntegrateRefinedProposalsIntoFrameworkOutput(BaseModel):
 
 
 def integrate_refined_proposals_into_framework(refine_selected_proposals_input: RefineSelectedProposalsOutput, **kwargs) -> IntegrateRefinedProposalsIntoFrameworkOutput:
-    """Take the list of refined symbolic regression expressions, validate and adapt them to the framework’s internal representation, register them for future use, and produce a concise integration log.
+    """Take the list of refined symbolic regression expressions, validate and adapt them to the framework's internal representation, register them for future use, and produce a concise integration log.
 
     Args:
         refine_selected_proposals_input: Input from the 'refine_selected_proposals' node.
@@ -114,12 +133,80 @@ def integrate_refined_proposals_into_framework(refine_selected_proposals_input: 
     Returns:
         IntegrateRefinedProposalsIntoFrameworkOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Retrieve the refined proposals list and initialize working container
+    refined_proposals: List[str] = refine_selected_proposals_input.refined_proposals
+    integrated_proposals: List[str] = []
+    
+    # Initialize tracking variables
+    successful_integrations: int = 0
+    validation_failures: List[str] = []
+    registration_failures: List[str] = []
+    
+    # Start integration log
+    log_entries: List[str] = initialize_integration_log(proposal_count=len(refined_proposals))
+    
+    # Process each equation string in refined_proposals
+    for equation_str in refined_proposals:
+        # Perform syntactic validation using framework's parser
+        is_syntactically_valid: bool = validate_equation_syntax(equation=equation_str)
+        
+        if not is_syntactically_valid:
+            validation_error: str = get_syntax_validation_error(equation=equation_str)
+            validation_failures.append(validation_error)
+            log_validation_failure(log_entries=log_entries, equation=equation_str, error=validation_error)
+            continue
+            
+        # Cross-check against framework's constraint set
+        constraint_validation_result: dict = validate_against_constraints(equation=equation_str)
+        
+        if not constraint_validation_result["is_valid"]:
+            constraint_error: str = constraint_validation_result["error"]
+            validation_failures.append(constraint_error)
+            log_constraint_failure(log_entries=log_entries, equation=equation_str, error=constraint_error)
+            continue
+            
+        # Transform validated string into SymbolicModel object
+        symbolic_model: object = build_symbolic_model(equation_str=equation_str)
+        
+        if symbolic_model is None:
+            build_error: str = get_model_build_error(equation=equation_str)
+            validation_failures.append(build_error)
+            log_build_failure(log_entries=log_entries, equation=equation_str, error=build_error)
+            continue
+            
+        # Register SymbolicModel instance in framework's global registry
+        unique_id: str = generate_unique_model_id()
+        registration_success: bool = register_model_in_framework(model=symbolic_model, model_id=unique_id)
+        
+        if not registration_success:
+            registration_error: str = get_registration_error(model_id=unique_id)
+            registration_failures.append(registration_error)
+            log_registration_failure(log_entries=log_entries, equation=equation_str, error=registration_error)
+            continue
+            
+        # Include successfully integrated model in output
+        model_string_representation: str = get_model_string_representation(model=symbolic_model)
+        integrated_proposals.append(model_string_representation)
+        successful_integrations += 1
+        log_successful_integration(log_entries=log_entries, equation=equation_str, model_id=unique_id)
+    
+    # Compile summary and determine overall success
+    total_failures: int = len(validation_failures) + len(registration_failures)
+    integration_success: bool = total_failures == 0 and successful_integrations > 0
+    
+    # Generate final integration log
+    final_log: str = compile_integration_log(
+        log_entries=log_entries,
+        successful_count=successful_integrations,
+        total_count=len(refined_proposals),
+        validation_failures=validation_failures,
+        registration_failures=registration_failures,
+        overall_success=integration_success
+    )
+    
     return IntegrateRefinedProposalsIntoFrameworkOutput(
-        integrated_proposals=[],
-        integration_success=False,
-        integrated_count=0,
-        integration_log="",
+        integrated_proposals=integrated_proposals,
+        integration_success=integration_success,
+        integrated_count=successful_integrations,
+        integration_log=final_log
     )
