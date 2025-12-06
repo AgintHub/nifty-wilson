@@ -1,4 +1,4 @@
-dag_type: typed
+dag_type: spec
 description: Generated workflow from UI.
 name: build_stock_and_forex_trading_platform
 nodes:
@@ -31,10 +31,133 @@ nodes:
     - description: List of performance bottlenecks identified during the optimization
         process
       key: performance_issues_found
-      type: List[str]
+      type: str
     - description: Whether the platform meets the target latency and throughput thresholds
       key: is_optimized
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Application Performance Monitoring (APM) tools such as New Relic
+          or Datadog; capture metrics over a 24‑hour period; export data to a CSV
+          for analysis.
+        reason: Establishing a quantitative baseline is essential to measure improvement
+          and to identify which components are the true bottlenecks.
+        text: Collect baseline performance metrics from both the user interface and
+          trading API deployments, including response times, CPU/memory utilization,
+          and request queues.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse the `api_docs_url` logs, aggregate latency per `endpoint_list`
+          entry, calculate percentiles, and flag endpoints above a 95th‑percentile
+          threshold of 200 ms.
+        reason: Pinpointing slow endpoints directs optimization effort where it matters
+          most.
+        text: Analyze API endpoint logs from implement_trading_api to compute per‑endpoint
+          latency distributions and identify the slowest endpoints.
+      - complexity: HIGH
+        impact: HIGH
+        method: Run EXPLAIN ANALYZE on the most frequent queries identified in step
+          2; map query patterns to `database_schema_name` tables; document missing
+          indexes.
+        reason: Unoptimized queries can dramatically increase latency, especially
+          under high traffic.
+        text: Review database query patterns in the trading API code to identify unindexed
+          joins or full table scans.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Execute SQL `CREATE INDEX` statements; verify with `EXPLAIN` that
+          query plans use the new indexes.
+        reason: These indexes speed up common query patterns such as user trade history
+          and real‑time price lookups.
+        text: Add composite B‑Tree indexes on the trade table’s `(user_id, created_at)`
+          and on the price history table’s `(symbol, timestamp)` columns.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Configure Redis with sharding; modify the API to first check cache
+          before DB; set TTLs based on market volatility; instrument cache hit/miss
+          counters.
+        reason: Caching reduces database load and cuts latency for hot data such as
+          ticker prices.
+        text: Implement a distributed in‑memory cache (Redis Cluster) for the most
+          frequently requested market data endpoints.
+      - complexity: LOW
+        impact: LOW
+        method: Use Prometheus counters for hits and misses; compute percentage as
+          `(hits / (hits + misses)) * 100`.
+        reason: Quantifying cache effectiveness informs whether further tuning is
+          needed.
+        text: Instrument cache hit/miss metrics in the API and calculate `cache_hit_rate_percent`
+          during a 1‑hour load test.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use Go/Node profiler (pprof or clinic.js) to identify hot functions;
+          refactor synchronous DB writes to asynchronous streams.
+        reason: Blocking code can become a throughput ceiling even if latency per
+          request is low.
+        text: Profile CPU usage of the trade placement workflow to detect serialization
+          or blocking I/O operations.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Run k6 or JMeter scripts to ramp up concurrent users; observe `throughput_trades_per_sec`
+          and adjust `concurrency_limit` accordingly.
+        reason: Too low a limit throttles performance; too high may cause resource
+          contention.
+        text: Adjust the concurrency limits of the API based on the measured `concurrency_limit`
+          and actual throughput during load testing.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Define Cloud provider autoscaler rules: min=2, max=10, metric=CPU > 70 %
+          or requests > 500 sps; test scaling with a 10‑minute spike.'
+        reason: Scale‑out improves both latency (by reducing queue lengths) and throughput
+          (more instances handling requests).
+        text: Configure horizontal auto‑scaling groups for the API instances, ensuring
+          that at least 3 replicas are active during peak load.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Configure API gateway or middleware (e.g., Kong, NGINX) to enforce
+          per‑key limits; log violations.
+        reason: Rate limiting protects downstream services from burst traffic that
+          could degrade performance.
+        text: Implement request rate limiting per API key using the `rate_limit_per_min`
+          configuration, and expose metrics for monitoring.
+      - complexity: LOW
+        impact: LOW
+        method: Use Grafana panels with Prometheus queries for each metric.
+        reason: Observability allows continuous verification that optimizations remain
+          effective.
+        text: Set up a monitoring dashboard that visualizes `overall_latency_ms`,
+          `throughput_trades_per_sec`, and `cache_hit_rate_percent` in real time.
+      - complexity: LOW
+        impact: LOW
+        method: 'Concatenate a description string: "Added B‑Tree indexes on trade(user_id,
+          created_at) and price_history(symbol, timestamp); rewrote complex joins
+          to use sub‑queries."'
+        reason: The output must explain the changes to the caller.
+        text: Generate the `query_optimization_summary` field by summarizing all index
+          additions and any query rewrites performed.
+      - complexity: LOW
+        impact: LOW
+        method: Aggregate findings from steps 2, 3, 4, 5, 7.
+        reason: Provides transparency for future maintenance and audits.
+        text: Compile `performance_issues_found` by listing each identified bottleneck,
+          e.g., "Full table scan on trades", "Cache miss rate 30 %", "CPU bottleneck
+          in order validation".
+      - complexity: LOW
+        impact: HIGH
+        method: If both conditions met set true; otherwise false.
+        reason: Boolean flag signals readiness for production.
+        text: Determine `is_optimized` by comparing the measured `overall_latency_ms`
+          and `throughput_trades_per_sec` against predefined targets (e.g., latency < 150 ms,
+          throughput > 200 tps).
+      - complexity: LOW
+        impact: LOW
+        method: Use the scaling configuration determined in step 9.
+        reason: The output must reflect the deployment plan.
+        text: 'Populate `recommended_server_scaling` based on the chosen scaling strategy:
+          if auto‑scaling rules are enabled, set to "auto-scaling policy"; otherwise
+          recommend "scale out" with a 3‑node baseline.'
     prompt: Optimize the trading platform for low latency and high throughput. Consider
       caching, query optimization, and server scaling.
   deploy_to_production:
@@ -47,7 +170,7 @@ nodes:
     nodes_dependent_on: []
     output_structure:
     - description: The cloud provider or environment where the platform is deployed
-        (e.g., AWS, GCP, Azure, On-premise).
+        (e.g., AWS, GCP, Azure, On‑premise).
       key: deployment_environment
       type: str
     - description: Semantic version of the deployed platform.
@@ -59,7 +182,7 @@ nodes:
     - description: ISO 8601 timestamp when the deployment was completed.
       key: deployment_timestamp
       type: str
-    - description: Strategy used for scaling (e.g., "auto-scaling", "fixed", "manual").
+    - description: Strategy used for scaling (e.g., "auto‑scaling", "fixed", "manual").
       key: scaling_strategy
       type: str
     - description: Number of instances or nodes running the platform.
@@ -70,8 +193,8 @@ nodes:
       type: bool
     - description: List of monitoring tools or services used (e.g., Prometheus, Grafana).
       key: monitoring_tools
-      type: List[str]
-    - description: Primary backup strategy (e.g., "daily", "weekly", "real-time").
+      type: str
+    - description: Primary backup strategy (e.g., "daily", "weekly", "real‑time").
       key: backup_strategy
       type: str
     - description: Cron expression or schedule description for backups.
@@ -83,11 +206,111 @@ nodes:
     - description: Any additional notes or remarks about the deployment.
       key: deployment_notes
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Parse the JSON from `conduct_performance_optimization` and `perform_security_auditing`;
+          assert `is_optimized == true` and `remediation_complete == true`. If either
+          condition fails, abort deployment and log a detailed error.
+        reason: Ensures that performance metrics meet latency/throughput targets and
+          all security vulnerabilities have been remediated, preventing downstream
+          issues.
+        text: Validate parent outputs to confirm the platform is fully optimized and
+          secure before initiating deployment.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Read configuration files or environment variables (e.g., `DEPLOY_ENV`).
+          Validate against a whitelist of allowed providers; if not present, default
+          to a secure staging environment.
+        reason: Aligns deployment with organizational cloud strategy and ensures compliance
+          with data residency requirements.
+        text: Determine the target deployment environment based on infrastructure
+          policies and resource requirements.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Concatenate the backend service version (`service_version`) with the
+          UI build hash to form a composite semantic tag (e.g., `v1.4.2-frontend-a1b2c3`).
+        reason: Versioning guarantees traceability and rollback capability.
+        text: Select the semantic version to deploy using the backend's `service_version`
+          and UI build metadata.
+      - complexity: HIGH
+        impact: HIGH
+        method: Run the IaC pipeline with the target environment variables; capture
+          output JSON for resource IDs. Validate that all required services (compute,
+          database, networking) are provisioned successfully.
+        reason: Automates resource creation, ensuring consistency across deployments
+          and reducing human error.
+        text: Execute IaC (Infrastructure as Code) scripts to provision the production
+          environment (e.g., Terraform, CloudFormation).
+      - complexity: HIGH
+        impact: HIGH
+        method: Use Kubernetes manifests or ECS task definitions pointing to container
+          images tagged with the semantic version. Apply manifests via `kubectl apply`
+          or ECS update service; wait for readiness checks.
+        reason: Streamlines the release process and ensures the latest optimized code
+          runs in production.
+        text: Deploy the application containers using a CI/CD pipeline that integrates
+          with the IaC output.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: If `recommended_server_scaling == "auto‑scaling"`, create a scaling
+          policy in the cloud provider that uses CPU/memory thresholds derived from
+          `overall_latency_ms` and `throughput_trades_per_sec`. For other strategies,
+          set fixed node counts.
+        reason: Adapts resource usage to traffic patterns, optimizing cost and maintaining
+          low latency.
+        text: Configure auto‑scaling rules based on the `recommended_server_scaling`
+          from performance optimization.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Deploy monitoring agents to all nodes; set up dashboards for latency,
+          throughput, error rates. Export metrics to a central time‑series database
+          and configure alerts for threshold breaches.
+        reason: Provides visibility into system health and facilitates rapid incident
+          response.
+        text: Enable and configure monitoring with selected tools (e.g., Prometheus,
+          Grafana, CloudWatch).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: 'Create automated snapshots or replication jobs: schedule daily backups
+          to an S3 bucket with server‑side encryption; configure lifecycle policies
+          for archiving and expiration. Verify that `backup_schedule` is a valid cron
+          expression.'
+        reason: Ensures data durability and compliance with regulatory requirements.
+        text: Establish a backup strategy that matches the defined backup schedule
+          and location.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Invoke key trading API endpoints and UI health checks; record response
+          times and compare against thresholds. If any metric exceeds acceptable limits,
+          roll back the deployment.
+        reason: Catches deployment regressions early and confirms that performance
+          targets are still met in production.
+        text: Perform a smoke test of the deployed platform to verify functional endpoints
+          and latency.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create a JSON object with all output fields (deployment_environment,
+          deployed_version, etc.), stamp with the current ISO 8601 timestamp, and
+          write to a central configuration store or artifact repository.
+        reason: Provides an auditable trail of deployments for compliance and rollback.
+        text: Generate the final deployment metadata record and persist it in a deployment
+          registry.
+      - complexity: LOW
+        impact: LOW
+        method: Aggregate logs from the deployment pipeline, highlight any warnings
+          or errors, and format them into a human‑readable note string.
+        reason: Facilitates knowledge transfer and continuous improvement.
+        text: Compose deployment notes summarizing any anomalies, manual steps taken,
+          and future recommendations.
     prompt: Deploy the fully tested and optimized trading platform to a production
       environment. Ensure scalability, monitoring, and backup strategies are in place.
   design_database_schema:
     agent: false
-    description: Design a database schema to store S&P 500 stock prices.
+    description: Design a relational database schema capable of ingesting and serving
+      real‑time price data for the 500 largest US companies, while supporting efficient
+      querying for analytics and trade execution.
     name: design_database_schema
     nodes_depended_on:
     - identify_required_data_feeds
@@ -99,13 +322,13 @@ nodes:
       type: str
     - description: List of column names for the metadata table.
       key: metadata_columns
-      type: List[str]
+      type: str
     - description: Name of the table storing real‑time price history.
       key: price_history_table_name
       type: str
     - description: List of column names for the price history table.
       key: price_history_columns
-      type: List[str]
+      type: str
     - description: Primary key column for the price history table (typically a composite
         of stock symbol and timestamp).
       key: primary_key
@@ -114,6 +337,91 @@ nodes:
         by date or symbol).
       key: supports_partitioning
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Parse the parent output `feed_names` and `feed_count`. Verify `feed_count`
+          >= 500; if not, flag an error for upstream data feed selection.
+        reason: Ensuring the schema accommodates all data feeds guarantees that no
+          symbol is omitted and that the ingestion pipeline has a defined target.
+        text: Validate the number of required data feeds from the parent node to confirm
+          that the ingestion pipeline will provide price updates for all 500 symbols.
+      - complexity: LOW
+        impact: HIGH
+        method: 'Create a DDL snippet: `CREATE TABLE stock_metadata (symbol CHAR(5)
+          PRIMARY KEY, company_name VARCHAR(255), exchange VARCHAR(50), industry VARCHAR(100),
+          sector VARCHAR(100), market_cap BIGINT, ipo_date DATE, last_updated TIMESTAMP);`'
+        reason: These columns cover common attributes needed for filtering and display
+          in the UI while keeping the table normalized.
+        text: 'Define the metadata table name as `stock_metadata` and list its columns:
+          `symbol`, `company_name`, `exchange`, `industry`, `sector`, `market_cap`,
+          `ipo_date`, `last_updated`.'
+      - complexity: LOW
+        impact: HIGH
+        method: 'Define DDL: `CREATE TABLE stock_price_history (symbol CHAR(5), price_timestamp
+          TIMESTAMP, open NUMERIC(12,4), high NUMERIC(12,4), low NUMERIC(12,4), close
+          NUMERIC(12,4), volume BIGINT, adjusted_close NUMERIC(12,4), PRIMARY KEY
+          (symbol, price_timestamp));`'
+        reason: These columns capture a full OHLCV record along with an adjusted price
+          for corporate actions.
+        text: 'Design the price history table name as `stock_price_history` with columns:
+          `symbol`, `price_timestamp`, `open`, `high`, `low`, `close`, `volume`, `adjusted_close`.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Include `PRIMARY KEY (symbol, price_timestamp)` in the table DDL.
+        reason: A composite key eliminates duplicates and improves index locality
+          for time‑series queries.
+        text: Add a composite primary key on `(symbol, price_timestamp)` for the price
+          history table to guarantee uniqueness and enable fast range queries by symbol
+          and time.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Add `PARTITION BY RANGE (DATE(price_timestamp))` clause and create
+          daily partitions via a deployment script or database management tool.
+        reason: Time‑series data benefits from partitioning, reducing table size per
+          partition and improving query performance.
+        text: Enable partitioning on the price history table by daily ranges of `price_timestamp`
+          to accelerate historical queries and simplify archival.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute `CREATE INDEX idx_stock_symbol ON stock_price_history(symbol);`
+        reason: Many queries request all records for a particular symbol; this index
+          reduces search time.
+        text: Create an index on `symbol` alone to speed up lookups of all history
+          for a single stock.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute `CREATE INDEX idx_stock_symbol_ts_desc ON stock_price_history(symbol,
+          price_timestamp DESC);`
+        reason: Most dashboards request the latest prices; the descending order ensures
+          index is read‑friendly for newest data.
+        text: Create a multi‑column index on `(symbol, price_timestamp DESC)` for
+          recent‑price queries and chart generation.
+      - complexity: LOW
+        impact: LOW
+        method: Choose type specifications in DDL statements; ensure timezone awareness
+          in the database configuration.
+        reason: Correct data types prevent overflow and maintain consistency across
+          ingestion and querying.
+        text: 'Define data types that match the expected precision: use `NUMERIC(12,4)`
+          for price fields, `BIGINT` for volume, and `TIMESTAMP` with UTC timezone
+          for timestamps.'
+      - complexity: MEDIUM
+        impact: LOW
+        method: Create a database trigger that updates `last_updated` on insert/update
+          into `stock_price_history`.
+        reason: Maintaining a freshness indicator aids monitoring and UI display of
+          data currency.
+        text: Add a `last_updated` column to the metadata table and trigger it on
+          any price ingestion to keep the metadata in sync with the latest price data.
+      - complexity: LOW
+        impact: LOW
+        method: Set the boolean to `true` in the final output structure.
+        reason: Downstream ingestion and query optimization steps rely on knowing
+          partitioning to generate correct queries.
+        text: Include a `supports_partitioning` flag in the output to inform downstream
+          nodes that partitioning logic is active.
     prompt: Create a database schema that can efficiently store real-time S&P 500
       stock prices. Consider tables for stock metadata and price history.
   design_user_interface:
@@ -143,6 +451,91 @@ nodes:
     - description: Whether the UI design is finalized and ready for implementation
       key: is_design_complete
       type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Prepare structured interview questions, record sessions, and create
+          a persona & journey map; summarize findings into a requirement spec.
+        reason: User‑centric requirements ensure the UI addresses real needs and avoids
+          unnecessary features.
+        text: Conduct stakeholder interviews to capture user personas, primary workflows
+          (watching real‑time prices, placing trades, reviewing history) and pain
+          points.
+      - complexity: LOW
+        impact: HIGH
+        method: Apply use‑case mapping; each requirement maps to a screen, then collapse
+          duplicates; document in a table.
+        reason: Clear top‑level screens provide an intuitive entry point for users
+          and simplify navigation mapping.
+        text: 'Translate functional requirements into a screen hierarchy: decide that
+          the platform will expose four top‑level screens – Dashboard (price ticker
+          & watchlist), Portfolio, Trade, and Settings.'
+      - complexity: LOW
+        impact: HIGH
+        method: Perform card‑sorting exercises with mock items; finalize order based
+          on heuristic principles (e.g., most frequent actions first).
+        reason: Consistent navigation reduces cognitive load and aligns with industry
+          best practices for trading apps.
+        text: Generate a primary navigation menu that mirrors the screen hierarchy,
+          adding logical secondary items such as ‘Home’, ‘Watchlist’, ‘Trade’, and
+          ‘Account’.
+      - complexity: LOW
+        impact: HIGH
+        method: Programmatically parse the JSON output from implement_trading_api,
+          map each endpoint to a UI feature, and populate the api_endpoints_integrated
+          list.
+        reason: Ensures the UI design is tightly coupled to actual backend capabilities,
+          preventing design‑implementation mismatch.
+        text: 'Extract the list of API endpoints produced by implement_trading_api
+          (endpoint_list) and filter for those required by the UI: get_stock_price,
+          get_trade_history, place_trade, and get_portfolio_summary.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use CSS Grid/Flexbox with media queries; document in a responsive
+          design guide; validate with device emulators.
+        reason: A clear breakpoint strategy guarantees a consistent user experience
+          across all devices.
+        text: 'Define responsive breakpoints: mobile (≤480px), tablet (481‑1024px),
+          desktop (>1024px). For each breakpoint, specify how the layout should adjust
+          (single column on mobile, two‑column grid on tablet, three‑column on desktop).'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Sketch each screen on a 5‑point grid, annotate with notes, and share
+          with stakeholders for quick iteration.
+        reason: Early visual feedback helps detect layout or navigation issues before
+          detailed design.
+        text: Create low‑fidelity wireframes for each screen using Figma (or similar),
+          focusing on content placement, navigation flow, and interaction hotspots.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Hold review sessions, capture changes in a change‑log, and update
+          wireframes in Figma.
+        reason: Iterative refinement reduces costly rework later in the development
+          cycle.
+        text: Iterate wireframes based on stakeholder feedback, refining component
+          placement, labeling, and interaction states until the design aligns with
+          requirements.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a design system (e.g., Storybook components) in Figma; export
+          style guide; handoff specs via Zeplin or Figma’s design tokens.
+        reason: Mockups provide a realistic reference for developers, ensuring the
+          UI implementation meets visual and functional expectations.
+        text: Develop high‑fidelity mockups incorporating branding guidelines (logo,
+          color palette, typography) and component library (buttons, charts, forms).
+          Ensure that real‑time price ticker is visually prominent and that trade
+          forms are user‑friendly.
+      - complexity: LOW
+        impact: HIGH
+        method: Generate a JSON/Markdown document from the design system export; double‑check
+          that all required fields are populated.
+        reason: Consolidating all artifacts into a single deliverable ensures that
+          downstream nodes have all required inputs.
+        text: 'Compile the final design artifact: list the screens (ui_screen_list),
+          responsive device types (responsive_devices_supported), integrated API endpoints
+          (api_endpoints_integrated), navigation items (primary_navigation_items),
+          and set is_design_complete to true.'
     prompt: Create a user-friendly interface that displays real-time S&P 500 stock
       prices and allows users to perform trading operations. Consider a responsive
       design for various devices.
@@ -156,7 +549,7 @@ nodes:
     output_structure:
     - description: List of fully qualified API endpoint URLs exposed by the backend.
       key: api_endpoints
-      type: List[str]
+      type: str
     - description: Primary authentication mechanism used (e.g., JWT, OAuth2, API Key).
       key: authentication_mechanism
       type: str
@@ -171,6 +564,106 @@ nodes:
         scaling) have been applied.
       key: is_optimized
       type: bool
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Set up FastAPI with uvicorn, configure async route handlers, generate
+          OpenAPI schema, and expose /openapi.json for client SDK generation.
+        reason: FastAPI provides native async support, low latency, and auto‑generated
+          docs which align with the real‑time nature of the platform.
+        text: Select a production‑grade web framework (FastAPI for Python) based on
+          async capabilities and automatic OpenAPI documentation to expose high‑throughput
+          REST endpoints for market data and trading operations.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create Pydantic models for request/response schemas, map each endpoint
+          to a dedicated controller function.
+        reason: Explicit endpoints reduce ambiguity and provide clear contract for
+          frontend and other services.
+        text: 'Define a strict API contract: /stocks/{symbol}/price for real‑time
+          price retrieval, /orders for order placement, /orders/{id} for status, /portfolio
+          for holdings, and /marketdata/history for historical data.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create /auth/login endpoint that validates user credentials against
+          a secure password store, issue JWT with appropriate scopes, and add a dependency
+          that validates the token for all trading routes.
+        reason: JWTs allow horizontal scaling without session state while embedding
+          user permissions directly in the token.
+        text: Implement JWT‑based stateless authentication with role‑based claims
+          (trader, admin) and enforce token expiration policies using PyJWT and FastAPI’s
+          Depends system.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use SQLAlchemy or asyncpg to connect to the PostgreSQL schema "trading_data",
+          create read‑only repositories, and cache recent price rows in Redis.
+        reason: The backend must consume the latest prices stored by the ingestion
+          pipeline to serve clients, and the same schema ensures consistency across
+          services.
+        text: Integrate with the existing ingestion pipeline by establishing a read‑only
+          connection to the database schema defined in design_database_schema (e.g.,
+          schema name "trading_data").
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Instantiate aioredis connection pool, create cache get/set wrappers,
+          and integrate cache fallback logic in the price retrieval endpoint.
+        reason: Caching reduces read latency and handles burst traffic from multiple
+          concurrent clients requesting the same symbol.
+        text: Deploy a Redis cluster for caching the most recent price of each S&P
+          500 symbol, keyed by symbol, with a TTL of 5 seconds to reduce database
+          load while keeping data freshness.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Configure a token bucket per API key, store counters in Redis, and
+          return 429 on threshold breaches.
+        reason: Rate limiting protects the backend from spikes and maintains QoS for
+          legitimate users.
+        text: Apply rate‑limiting middleware (e.g., Starlette’s RateLimitMiddleware)
+          to enforce per‑user request quotas, preventing abuse and ensuring fair usage.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Configure asyncpg.create_pool with min_size=20, max_size=100, and
+          integrate with FastAPI startup/shutdown events.
+        reason: Connection pooling maximizes resource utilization and prevents connection
+          exhaustion under high concurrency.
+        text: Implement database connection pooling with asyncpg and tune pool size
+          based on anticipated concurrent read/write load (e.g., max 100 connections).
+      - complexity: MEDIUM
+        impact: LOW
+        method: Use pytest‑asyncio, httpx async client, and SQLite in memory for unit
+          tests; for integration tests use Docker Compose with PostgreSQL and Redis.
+        reason: Tests ensure that endpoint contracts remain intact and that changes
+          to authentication or caching do not break functionality.
+        text: Create automated integration tests that spawn a test database, load
+          sample price history, and validate endpoint responses for both success and
+          failure scenarios.
+      - complexity: LOW
+        impact: LOW
+        method: Read VERSION file on startup, inject into FastAPI app.state, and return
+          JSON in /version.
+        reason: Versioning aids in rollback, monitoring, and compatibility checks
+          across dependent services.
+        text: Tag the deployed backend with a semantic version (e.g., v1.0.0) stored
+          in a VERSION file and exposed via a /version endpoint.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Script a load test that targets /stocks/{symbol}/price and /orders
+          with realistic user counts, measure avg latency, throughput, cache hit rate,
+          and flag if thresholds are not met.
+        reason: Quantitative metrics confirm that the low‑latency optimizations are
+          effective and meet SLA requirements.
+        text: Run a performance benchmark using Locust or k6 to validate latency and
+          throughput against the performance target defined in conduct_performance_optimization.
+      - complexity: LOW
+        impact: HIGH
+        method: Query benchmark results in CI pipeline, set boolean flag in deployment
+          metadata, and expose via API if needed.
+        reason: Clear gatekeeping ensures that only a fully optimized backend reaches
+          production.
+        text: Set is_optimized flag to true only after passing all latency, throughput,
+          and cache hit rate benchmarks, and store this status in a metadata table
+          for CI/CD visibility.
     prompt: Create a backend API that can serve real-time S&P 500 stock prices and
       handle trading operations. Consider using a robust framework and secure authentication
       mechanisms.
@@ -188,6 +681,53 @@ nodes:
     - description: Total number of data feeds identified.
       key: feed_count
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use an API or CSV export to retrieve the 500 tickers, store in a local
+          array, and perform a deduplication pass.
+        reason: Ensures that every stock that must be covered by the feeds is accounted
+          for, avoiding blind spots in later data provider selection.
+        text: Compile a definitive list of all S&P 500 constituents from the latest
+          market data source (e.g., S&P Global, Nasdaq website).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Create a dictionary {ticker: exchange} and reference a vendor lookup
+          table (e.g., IEX Cloud, Polygon, Bloomberg, Refinitiv).'
+        reason: Many vendors provide coverage per exchange; mapping reduces redundant
+          provider selection and aligns with vendor licensing.
+        text: Map each constituent to its primary exchange and known real‑time data
+          sources using a curated lookup table of major market data vendors.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Apply a greedy algorithm: iterate over feeds sorted by cost/latency,
+          adding each feed until all tickers are covered; then evaluate trade‑offs.'
+        reason: Minimizes subscription costs and integration complexity while guaranteeing
+          full coverage.
+        text: Identify the minimal set of data feeds that collectively cover 100%
+          of the S&P 500 tickers, prioritizing providers with the lowest latency and
+          highest reliability.
+      - complexity: LOW
+        impact: LOW
+        method: Convert the list to a set and back to an ordered list for output.
+        reason: Prevents double‑counting of feeds that may appear multiple times due
+          to multiple tickers.
+        text: Deduplicate the list of selected feeds to produce a final set of unique
+          feed names.
+      - complexity: LOW
+        impact: LOW
+        method: Use the length of the unique feed list.
+        reason: Provides a quick metric for downstream budget and scaling decisions.
+        text: Count the number of unique feeds and assign the count to the 'feed_count'
+          output field.
+      - complexity: LOW
+        impact: LOW
+        method: Sort the feed names list before assignment.
+        reason: An ordered list improves readability for stakeholders reviewing the
+          specification.
+        text: Populate the 'feed_names' output field with the finalized list of feed
+          names, ensuring alphabetical order for consistency.
     prompt: List the specific data feeds needed for real-time S&P 500 stock prices.
   implement_data_ingestion_pipeline:
     agent: false
@@ -201,7 +741,7 @@ nodes:
     output_structure:
     - description: Names of the data providers used by the ingestion pipeline.
       key: provider_names
-      type: List[str]
+      type: str
     - description: Indicates whether the pipeline is currently running without critical
         failures.
       key: ingestion_status
@@ -217,11 +757,99 @@ nodes:
         interval.
       key: error_count
       type: int
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: LOW
+        method: Use a JSON deserialization library to read the provider_names and
+          provider_selected arrays; filter providers where provider_selected is true.
+        reason: Provides a clear source of provider metadata (names, latency, accuracy)
+          required for API client configuration.
+        text: Parse the provider list from the output of select_data_providers and
+          store it in a local variable `selected_providers`.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Maintain a YAML/JSON config file mapping provider names to endpoint
+          URLs, auth methods, and rate limits; load into a dictionary for lookup.
+        reason: Ensures that each provider is contacted via the correct protocol and
+          credentials, preventing connection errors.
+        text: Map each selected provider to its corresponding REST/WS API endpoint
+          URL and authentication credentials based on a provider configuration registry.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a base abstract class `MarketDataClient` with concrete subclasses
+          per provider; implement retry logic with exponential backoff.
+        reason: Encapsulates provider-specific quirks and simplifies the main ingestion
+          loop.
+        text: Instantiate a dedicated client class for each provider, encapsulating
+          connection logic, request throttling, and error handling.
+      - complexity: HIGH
+        impact: HIGH
+        method: Implement a `ScheduledExecutorService` (Java) or `asyncio` tasks (Python)
+          that schedule fetches; use a token bucket algorithm for rate limiting.
+        reason: Balances real‑time accuracy with compliance to provider limits and
+          system resource constraints.
+        text: Design the ingestion scheduler to poll each provider at the highest
+          feasible frequency that respects the provider’s rate limit and the desired
+          data granularity (e.g., 1‑second ticks).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a mapper function that translates provider fields to the target
+          columns; use reflection or a static mapping dictionary.
+        reason: Guarantees consistency in the database regardless of provider schema
+          differences.
+        text: For each fetched payload, normalize the data schema to match the price_history
+          table columns defined in design_database_schema (symbol, timestamp, open,
+          high, low, close, volume).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use JDBC batch updates or SQLAlchemy bulk_save_objects; include a
+          timeout and retry on deadlock.
+        reason: Improves write throughput while limiting transaction size to avoid
+          long locks.
+        text: Batch the normalized records into a bulk insert transaction, committing
+          every 10,000 rows or every 30 seconds, whichever comes first.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Wrap each network call in a timer context; increment counters in thread‑safe
+          atomic variables; expose metrics via Prometheus exporter.
+        reason: Provides the necessary data to populate `records_ingested_per_day`,
+          `average_latency_ms`, and `error_count` outputs.
+        text: 'Implement a metrics collector that tracks: number of records per provider,
+          latency per request, and error counts.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Expose `/health` via a lightweight HTTP server; check provider connectivity
+          and error thresholds.
+        reason: Allows downstream services to monitor pipeline health without inspecting
+          logs.
+        text: Set up a health check endpoint that returns `ingestion_status=true`
+          only when all providers are reachable and no critical errors have been recorded
+          in the last 5 minutes.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Define a simple key‑value schema; use upsert operations to maintain
+          current state.
+        reason: Facilitates restarts, audits, and debugging of ingestion failures.
+        text: Store the pipeline’s configuration, last successful fetch timestamp,
+          and error log in a dedicated `pipeline_state` table.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a scheduler to trigger a metric aggregation job; write results
+          to a JSON blob or message queue consumed by the orchestrator.
+        reason: Bridges internal metrics to the expected PRD output, enabling automated
+          reporting.
+        text: After each ingestion cycle, compute and publish the aggregated metrics
+          to the platform’s monitoring dashboard, ensuring they map directly to the
+          output structure fields.
     prompt: Develop a data pipeline that fetches real-time S&P 500 stock prices from
       the selected data providers and stores them in the designed database schema.
   implement_forex_data_ingestion_pipeline:
     agent: false
-    description: Implement a data ingestion pipeline for real-time forex rates.
+    description: This node builds a robust, fault‑tolerant ingestion pipeline that
+      pulls live forex rates from the chosen data providers, validates the data, persists
+      it to the pre‑designed database schema, and records key performance metrics
+      for monitoring.
     name: implement_forex_data_ingestion_pipeline
     nodes_depended_on:
     - select_forex_data_providers
@@ -247,6 +875,109 @@ nodes:
     - description: ISO‑8601 timestamp of the most recent ingestion operation.
       key: latest_ingestion_timestamp
       type: str
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Parse JSON output, filter boolean list, build dict with key: provider_name,
+          values: {endpoint, token, rate_limit}'
+        reason: Using the provider selection data ensures the pipeline only attempts
+          to call APIs that the organization has chosen and is compliant with cost
+          and latency budgets.
+        text: Extract the list of selected providers and their connection parameters
+          from the output of `select_forex_data_providers`; filter to include only
+          those where `is_selected` is true, and construct a runtime configuration
+          mapping provider name to API endpoint, authentication token, and rate‑limit
+          details.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Execute a lightweight 'DESCRIBE table' query; compare result set to
+          expected column list
+        reason: Schema validation prevents runtime failures due to mismatched columns
+          and guarantees data integrity during inserts.
+        text: Retrieve the database table names and column metadata from `design_database_schema`;
+          validate that the forex rate table exists and that its schema matches the
+          expected columns (e.g., base_currency, quote_currency, rate, timestamp).
+      - complexity: LOW
+        impact: LOW
+        method: Use APScheduler with a `BackgroundScheduler` and a `IntervalTrigger`
+          set to 5s
+        reason: A simple scheduler keeps the implementation lean while still enabling
+          high‑frequency data pulls.
+        text: Instantiate a lightweight orchestration scheduler (e.g., APScheduler
+          or a cron‑like loop) to trigger the ingestion job at the required frequency
+          (e.g., every 5 seconds).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use `httpx` async client, wrap call in try/except, capture `time.monotonic()`
+          before/after
+        reason: Provider‑specific fetchers abstract API quirks, allowing uniform downstream
+          processing.
+        text: For each selected provider, implement a dedicated fetcher module that
+          (1) constructs the HTTP request with necessary headers (including API keys),
+          (2) sends the request, and (3) records the start and end timestamps to compute
+          latency.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Write a parser per provider using `pydantic` models or custom dict
+          mapping; convert timestamp via `datetime.fromisoformat` or `pytz`
+        reason: Standardizing the record format simplifies downstream validation,
+          deduplication, and DB insertion.
+        text: 'Parse the provider’s JSON/XML response into a canonical record format:
+          `{base_currency, quote_currency, rate, timestamp}`. Normalize timestamp
+          to UTC ISO‑8601 and enforce numeric types for rate.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Implement validation functions using `pydantic` validators; log validation
+          failures and increment `errors_found` counter
+        reason: Early validation prevents corrupt data from polluting the database
+          and reduces downstream error handling.
+        text: 'Validate each record: ensure required fields are present, rate is within
+          a realistic numeric range, and timestamp is not older than a configurable
+          threshold (e.g., 5 minutes). Discard or flag any record failing validation.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use SQLAlchemy or raw PostgreSQL `INSERT ... ON CONFLICT (base_currency,
+          quote_currency, timestamp) DO UPDATE`
+        reason: Bulk writes reduce latency and database load; upsert logic prevents
+          duplicate keys on repeated runs.
+        text: Batch validated records and perform a single bulk `INSERT ... ON CONFLICT`
+          (upsert) operation into the forex rate table. Use a transaction per batch
+          to guarantee atomicity.
+      - complexity: LOW
+        impact: HIGH
+        method: Maintain counters in memory during job run; after completion, compute
+          averages and boolean status
+        reason: Metric aggregation provides actionable insight into pipeline health
+          and performance.
+        text: 'Aggregate ingestion metrics: sum `records_ingested`, compute `average_latency_ms`
+          across all provider fetches, and determine `ingestion_success` based on
+          whether `errors_found` is below a critical threshold.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Insert a row into `ingestion_metrics` with fields: provider_names,
+          timestamp, records_ingested, errors_found, average_latency_ms, ingestion_success'
+        reason: Historical metrics enable trend analysis and trigger alerts when ingestion
+          quality degrades.
+        text: Persist a metrics snapshot to a dedicated `ingestion_metrics` table
+          (or expose via Prometheus exporter) for downstream monitoring and alerting.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `tenacity` retry decorator with `wait_exponential` and `stop_after_attempt`
+        reason: Retries increase reliability without manual intervention, while graceful
+          degradation prevents cascading failures.
+        text: 'Implement robust error handling and retry logic: for transient network
+          errors, retry with exponential backoff up to 3 attempts; for permanent errors
+          (e.g., 401), log and skip provider for that cycle.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Construct dict, serialize with `json.dumps` with `ensure_ascii=False`;
+          use `datetime.utcnow().isoformat() + 'Z'`
+        reason: A deterministic output format simplifies integration with downstream
+          nodes like `implement_forex_trading_api`.
+        text: Generate a concise, machine‑readable report (JSON) at the end of each
+          ingestion cycle containing all required output fields, ensuring timestamps
+          are formatted in UTC ISO‑8601.
     prompt: Develop a data pipeline that fetches real-time forex rates from the selected
       providers and stores them in the existing database schema. Ensure data integrity,
       handle errors, and record ingestion metrics.
@@ -268,19 +999,174 @@ nodes:
       type: str
     - description: List of textual summaries for each forex order in the user's history
       key: get_forex_order_history_records
-      type: List[str]
+      type: str
     - description: Success status of the most recent portfolio management action
       key: manage_forex_portfolio_status
       type: bool
     - description: Total number of forex orders processed in the last reporting period
       key: forex_order_count
       type: int
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use the ORM provided by the backend framework (e.g., SQLAlchemy for
+          Python or TypeORM for Node). Define constraints (e.g., CHECK(price > 0),
+          UNIQUE(order_id)). Generate migration scripts via Alembic or TypeORM CLI.
+        reason: A clear domain model guarantees consistency across endpoints, eases
+          validation, and facilitates future extensions.
+        text: Define the domain model for a forex order (order_id, user_id, base_currency,
+          quote_currency, amount, price, order_type, status, timestamp) and create
+          a corresponding SQLAlchemy (or Prisma) entity that maps to the existing
+          trading database schema, ensuring foreign keys to users and market data
+          tables.
+      - complexity: LOW
+        impact: HIGH
+        method: 'In FastAPI: add Depends(get_current_user) where get_current_user
+          verifies token using PyJWT. In Express: use express-jwt middleware.'
+        reason: Reusing existing authentication eliminates duplication, reduces attack
+          surface, and ensures consistency across APIs.
+        text: Leverage the authentication mechanism exposed by develop_trading_platform_backend
+          (JWT with HMAC SHA256). Implement an authentication middleware that extracts
+          the JWT from the Authorization header, validates signature, checks expiration,
+          and injects the user_id into the request context.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use packages such as fastapi-limiter or express-rate-limit with Redis.
+          Store counters under keys like "rl:{user_id}:{endpoint}" and reset on expiry.
+        reason: Rate limiting protects backend resources and prevents abusive usage
+          patterns.
+        text: Implement rate limiting per API key using a distributed in‑memory store
+          (Redis) with the token bucket algorithm. Configure a limit of 120 requests/min
+          for place_forex_order and 200 requests/min for get_forex_order_history,
+          ensuring compliance with platform usage policies.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Define route handlers with dependency injection for auth and rate
+          limiter. For FastAPI: @app.post("/forex/orders"), etc. For Express: router.post(''/forex/orders'',
+          ...).'
+        reason: Clear REST conventions improve client integration and maintainability.
+        text: 'Create RESTful endpoints: POST /forex/orders (place_forex_order), GET
+          /forex/orders/history (get_forex_order_history), PUT /forex/portfolio (manage_forex_portfolio).
+          Use OpenAPI annotations to generate swagger documentation automatically.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Query the rates table for base/quote pair, calculate required margin
+          = amount * price * margin_ratio, compare with user’s free margin. If insufficient,
+          raise HTTP 400 with message.
+        reason: Real‑time risk checks are essential to prevent over‑exposure and regulatory
+          violations.
+        text: 'In place_forex_order, perform validation: check user balances, risk
+          limits, and current market price from the latest snapshot produced by implement_forex_data_ingestion_pipeline.
+          Compute margin requirements and reject orders that violate limits, returning
+          a descriptive error message.'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use a message broker (Redis or RabbitMQ). Publish a job with order
+          details; the worker consumes, matches against the order book, updates status,
+          and logs the trade.
+        reason: Asynchronous processing decouples the API from long‑running operations
+          and improves throughput.
+        text: Persist valid orders to the database and asynchronously enqueue them
+          to an order‑execution worker (Celery for Python or BullMQ for Node) that
+          will handle actual trade matching against market depth.
+      - complexity: LOW
+        impact: LOW
+        method: Use ORM query with order_by(desc(Order.timestamp)). Format results
+          with f-strings or template strings.
+        reason: Providing human‑readable summaries meets UI expectations and simplifies
+          testing.
+        text: 'Implement get_forex_order_history to query the orders table filtered
+          by user_id, order by timestamp desc, and map each record to a concise string:
+          "[timestamp] {order_type} {amount} {base}→{quote} @ {price} (status: {status})".'
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Deserialize payload with Pydantic (Python) or Joi (Node). Update relevant
+          tables; wrap in a transaction.
+        reason: Allowing portfolio modifications from a single endpoint reduces client
+          complexity.
+        text: For manage_forex_portfolio, expose a PUT endpoint that accepts JSON
+          payloads for actions such as 'close_position' or 'adjust_leverage'. Validate
+          action against current portfolio state, enforce compliance rules, and return
+          a boolean status.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Use middleware (FastAPI logger or Morgan). Configure log format JSON;
+          ship to Logstash.
+        reason: Observability is critical for debugging, compliance audits, and performance
+          tuning.
+        text: 'Add comprehensive logging for each request: log method, endpoint, user_id,
+          response status, and latency. Store logs in a centralized log service (ElasticStack).'
+      - complexity: LOW
+        impact: LOW
+        method: Define a simple GET handler that queries the DB connectivity and returns
+          status.
+        reason: Automated health checks allow CI/CD pipelines to confirm readiness
+          before exposing the API to clients.
+        text: 'Implement health‑check endpoint /forex/health that returns JSON {"api_status":
+          true} and a 200 OK. The deployment script will periodically ping this endpoint
+          to set api_status.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Prometheus client libraries (prometheus‑client for Python or prom-client
+          for Node).
+        reason: Real‑time metrics support SLA monitoring and alerting for performance
+          regressions.
+        text: 'Configure API monitoring with Prometheus metrics: request count, latency
+          histogram, error rate. Expose metrics at /metrics and set up Grafana dashboards.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Add audit columns, use encrypted fields for sensitive data, implement
+          data retention policies.
+        reason: Regulatory adherence prevents legal penalties and builds client trust.
+        text: Enforce compliance with MiFID II and GDPR by ensuring all data stored
+          in orders and portfolio tables include an audit trail (created_at, updated_at,
+          updated_by) and that personal data is pseudonymized where possible.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use test client (TestClient for FastAPI) to simulate requests, mock
+          external services (Redis, ingestion pipeline).
+        reason: Automated tests guard against regressions and validate business logic.
+        text: Write unit tests for each endpoint using pytest (Python) or Jest (Node).
+          Include positive scenarios (valid orders), negative scenarios (insufficient
+          margin), and boundary tests (maximum order size). Achieve ≥90% coverage.
+      - complexity: LOW
+        impact: LOW
+        method: FastAPI automatically generates /docs; for Express use Swagger‑UI‑Express
+          with YAML definition.
+        reason: Clear documentation accelerates client development and reduces support
+          tickets.
+        text: Generate API documentation with OpenAPI and host it at /docs. Include
+          example requests and responses for place_forex_order, get_forex_order_history,
+          and manage_forex_portfolio.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Write Dockerfile, Helm chart values, and K8s manifests. Use K8s liveness/readiness
+          probes.
+        reason: Containerized deployment ensures reproducibility and scalability.
+        text: Deploy the API service in a Docker container, expose the ports to a
+          Kubernetes Deployment with HPA (Horizontal Pod Autoscaler) based on CPU
+          usage. Use Helm chart to manage secrets (JWT secret, Redis password).
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a test harness that calls the endpoints, asserts expected status
+          codes, parses JSON, and writes results to a JSON file that the DAG system
+          ingests.
+        reason: Automated validation ensures that the node outputs reflect the actual
+          service state.
+        text: 'After deployment, run a smoke test that triggers a place_forex_order,
+          retrieves its history, and performs a portfolio adjustment. Capture the
+          outputs to populate the node''s output fields: api_status=true, place_forex_order_response,
+          get_forex_order_history_records, manage_forex_portfolio_status, forex_order_count.'
     prompt: 'Create API endpoints for forex trading operations: place_forex_order,
       get_forex_order_history, manage_forex_portfolio. Use existing backend, secure
       authentication, rate limiting, and compliance with relevant standards.'
   implement_trading_api:
     agent: false
-    description: Implement APIs for trading operations.
+    description: Implement the trading REST/GraphQL API layer that interacts with
+      the backend services, provides authenticated endpoints for trade execution,
+      portfolio management, and trade history retrieval, and is ready for deployment
+      to production.
     name: implement_trading_api
     nodes_depended_on:
     - develop_trading_platform_backend
@@ -307,6 +1193,124 @@ nodes:
     - description: URL to the generated API documentation.
       key: api_docs_url
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Deserialize JSON output of `develop_trading_platform_backend`; map
+          fields to local variables.
+        reason: Guarantees that the trading API uses the same authentication strategy
+          and backend routes as the core service, preventing mismatch errors during
+          integration.
+        text: 'Extract backend configuration: Retrieve `authentication_mechanism`
+          and `api_endpoints` from the output of `develop_trading_platform_backend`
+          to ensure consistency between layers.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Swagger‑UI / Redoc; programmatically generate YAML/JSON with Python's
+          pydantic or Node's OpenAPI‑Express‑Validator.
+        reason: An explicit contract documents the API surface, aids in client generation,
+          and serves as the source for automated docs.
+        text: Define the OpenAPI 3.0 specification using the extracted backend endpoints
+          as base URLs, adding CRUD operations for trades and portfolio management
+          (`/trades`, `/trades/{id}`, `/portfolio`, `/orders/history`).
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Create `app.py`/`server.js`, register routers, and bind to the backend
+          service URL extracted earlier.
+        reason: Both frameworks provide high performance, built‑in validation, and
+          are widely adopted for microservices.
+        text: Implement the API layer with FastAPI (Python) or Express (Node) to leverage
+          async support, automatic OpenAPI generation, and middleware stacking for
+          security.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `pyjwt` / `jsonwebtoken`; expose `/auth/login` endpoint that validates
+          credentials against the backend auth service.
+        reason: JWT offers stateless, scalable auth with minimal database roundtrips,
+          fitting microservice architecture.
+        text: Integrate JWT authentication using the `authentication_mechanism` from
+          the backend. If the backend uses JWT‑RS256, issue and verify tokens via
+          a shared public/private key pair stored in a secrets manager.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Add `ssl_certificate` directives; test with `openssl s_client`.
+        reason: Encryption protects sensitive trade data and authentication tokens
+          in transit.
+        text: Enforce HTTPS on all endpoints by configuring a TLS termination proxy
+          (NGINX or Envoy) with certificates from Let’s Encrypt or a corporate CA.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use `slowapi` (FastAPI) or `express-rate-limit` with Redis store;
+          configure key prefix as `api_key:{id}`.
+        reason: Prevents abuse, DDoS, and ensures fair usage across tenants.
+        text: Implement rate limiting per API key using a distributed token bucket
+          algorithm backed by Redis. Set default limit to 1,200 requests per minute.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Deploy with `uvicorn --workers 8 --limit-concurrency 10000`; test
+          with `wrk` or `k6`.
+        reason: High throughput trading workloads require efficient resource utilization.
+        text: Configure connection pooling and async I/O to support a concurrency
+          limit of 10,000 simultaneous requests. Use the underlying event loop (uvicorn
+          with workers) and set `--workers` based on CPU cores.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Pydantic schemas for validation; catch exceptions globally and
+          return consistent error codes.
+        reason: Ensures compliance with industry best practices and mitigates common
+          vulnerabilities.
+        text: 'Apply OWASP ASVS V4.0 security controls: input validation, output encoding,
+          authentication, session management, error handling, and logging.'
+      - complexity: LOW
+        impact: MEDIUM
+        method: Write `Dockerfile` with `python:3.12-slim`; install dependencies,
+          expose port 80.
+        reason: Facilitates reproducible deployments, scaling, and CI/CD pipelines.
+        text: Containerize the API service using Docker, tagging images with `develop_trading_platform_backend.service_version`
+          for traceability.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'Use Helm charts; define `replicas: 3`, `resources.limits.cpu: 500m`.'
+        reason: Helps the API scale horizontally and provides automated health checks.
+        text: Create Kubernetes manifests (Deployment, Service, Ingress) that reference
+          the Docker image, set resource limits, and enable liveness/readiness probes.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Integrate `prometheus_fastapi_instrumentator` or `prom-client`.
+        reason: Real‑time monitoring is critical for trading latency and SLA enforcement.
+        text: Expose Prometheus metrics (`/metrics`) for request latency, error rates,
+          and token bucket usage; configure Prometheus scrape configs.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Deploy `/docs` endpoint; expose via Ingress with appropriate sub‑domain.
+        reason: Facilitates client onboarding and reduces integration friction.
+        text: Generate interactive API docs at `/docs` using FastAPI’s automatic Swagger
+          UI; publish static docs to an internal portal and set `api_docs_url` accordingly.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create test modules per endpoint; mock Redis and backend responses.
+        reason: Automated tests catch regressions before deployment and satisfy audit
+          requirements.
+        text: Implement comprehensive unit and integration tests covering authentication,
+          rate limiting, and endpoint correctness. Use `pytest` with `httpx` for FastAPI,
+          or `jest` with `supertest` for Express.
+      - complexity: LOW
+        impact: HIGH
+        method: Use CI/CD pipeline scripts to deploy; parse logs for success markers.
+        reason: Provides a clear success/failure signal for downstream nodes like
+          `deploy_to_production`.
+        text: Deploy to the staging environment, run a smoke test, and capture deployment
+          status. If successful, set `is_deployed` to `true` and `error_message` to
+          an empty string; otherwise populate error details.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Cross‑check audit findings with implemented fixes; update documentation
+          accordingly.
+        reason: Security audit closure is a prerequisite for production release.
+        text: Validate API compliance against the `perform_security_auditing` output
+          by ensuring all identified vulnerabilities are remediated and `remediation_complete`
+          is true before final deployment.
     prompt: Develop APIs for placing trades, retrieving trade history, and managing
       user portfolios. Ensure the APIs are secure and scalable.
   implement_user_interface:
@@ -339,6 +1343,130 @@ nodes:
     - description: URL where the frontend is deployed for testing or production
       key: deployment_url
       type: str
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: HIGH
+        method: Run `npm create vite@latest frontend -- --template react-ts` and install
+          required dependencies (react-router-dom, axios, chart.js, @mui/material).
+        reason: React is the most widely adopted framework for SPAs and Vite provides
+          fast bundling and hot module replacement, which speeds up development.
+        text: Initialize a new React project with Vite, using TypeScript for type
+          safety.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create `.eslintrc.cjs` with Airbnb + TypeScript configs; add Prettier
+          plugin; run `npm install eslint prettier eslint-config-prettier eslint-plugin-prettier`.
+        reason: Ensures maintainability and aligns with the UI design quality metrics.
+        text: Configure ESLint and Prettier for consistent code style, referencing
+          the design_user_interface’s `is_design_complete` flag to lock style guidelines.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a `routes.ts` file that exports a mapping from route names
+          to component paths; use `react-router-dom`’s `createBrowserRouter` to set
+          up lazy‑loaded routes.
+        reason: Automates routing setup and guarantees navigation consistency with
+          the UI design.
+        text: Generate a high‑level router skeleton based on `ui_screen_list` and
+          `primary_navigation_items` from design_user_interface.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use Material‑UI’s `useMediaQuery` hook with breakpoints matching the
+          design’s device list; wrap components with a `<ResponsiveContext>`.
+        reason: Centralizes responsive logic, reducing duplication across screens.
+        text: Create reusable layout components (Header, Sidebar, Footer) that consume
+          `responsive_devices_supported` to conditionally render mobile, tablet, and
+          desktop views.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a folder `src/pages` with a TypeScript file per screen; each
+          file imports `apiConfig` and calls relevant endpoints; use React Query for
+          caching and automatic refetching.
+        reason: Directly maps design screens to functional components, providing a
+          clear path from UI spec to implementation.
+        text: Implement the main content components (Dashboard, Portfolio, Trade,
+          Settings) as per the `ui_screen_list`, ensuring each component fetches data
+          via Axios from the `api_endpoints_integrated` list.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Create `src/api/client.ts` using Axios interceptors; store JWT in
+          secure HttpOnly cookies; implement a simple request queue that delays requests
+          when exceeding `rate_limit_per_min`.
+        reason: Ensures secure and compliant communication with the backend while
+          respecting rate limits.
+        text: Set up a central API client that automatically includes authentication
+          headers derived from `auth_mechanism` (e.g., JWT), and respects the `rate_limit_per_min`
+          by queuing requests with a leaky bucket algorithm.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Configure `store.ts` with slices for `portfolio`, `trades`, and `prices`;
+          expose selectors and async thunks that call the API client.
+        reason: Provides predictable data flow and aligns with performance expectations.
+        text: Build a global state store (e.g., Redux Toolkit) to hold user portfolio,
+          trade history, and live price data, feeding components without prop drilling.
+      - complexity: HIGH
+        impact: HIGH
+        method: Create a `src/websocket/priceSocket.ts` that connects to `/ws/prices`;
+          on message, dispatch a Redux action to update prices; implement reconnection
+          logic.
+        reason: Provides users with live market data, a core requirement of the platform.
+        text: Integrate real‑time price updates using WebSocket endpoints from `api_endpoints_used`
+          where available; fallback to polling if not provided.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use Formik + Yup for schema validation; on submit, dispatch a thunk
+          that posts to `api_endpoints_used` and handles success/error responses.
+        reason: Guarantees data integrity and improves UX by providing immediate feedback.
+        text: Design and implement a `TradeForm` component that validates input against
+          business rules (e.g., minimum order size, available balance) before calling
+          the `place_trade` endpoint.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Create `deployment-config.json` in the root; export constants; during
+          build, read this file to populate output metadata.
+        reason: Ensures output fields are derived from both parent nodes, meeting
+          the PRD’s data transformation requirement.
+        text: Generate a `DeploymentConfig` file that sets `frontend_framework` to
+          "React", sets `responsive_design_applied` to true, and lists all `api_endpoints_used`
+          from `implement_trading_api`’s `endpoint_list`.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Write test suites in `src/__tests__`; mock API responses with `msw`
+          (Mock Service Worker).
+        reason: Validates UI logic, ensures regression safety before performance testing.
+        text: Implement automated unit and integration tests for each component using
+          Jest and React Testing Library, covering at least 80% code coverage.
+      - complexity: LOW
+        impact: MEDIUM
+        method: 'Add `build` script in `package.json`: `vite build && echo "true"
+          > build_status.txt && echo $(pwd)/dist >> artifact_path.txt`; parse these
+          files in the CI pipeline.'
+        reason: Provides the required artifact path and build status for downstream
+          nodes.
+        text: Configure Vite to output the bundled assets to a `dist/` folder, record
+          the absolute path in `build_artifact_path`, and set a flag `frontend_build_status`
+          based on the success of the build.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Set up a deployment script that runs `netlify deploy --prod --dir=dist`;
+          capture the `URL` output and store in a `deployment.json` file.
+        reason: Provides a public URL for testing and QA, satisfying the output requirement.
+        text: Deploy the built bundle to a static hosting service (e.g., Netlify,
+          Vercel, or S3 static website), capture the deployment URL in `deployment_url`.
+      - complexity: LOW
+        impact: LOW
+        method: Run `node scripts/generateComponentList.js` that reads file names
+          and writes to `componentList.json`.
+        reason: Automates metadata generation for reporting purposes.
+        text: Collect `ui_components_list` by scanning the `src/components` folder
+          and extracting component names via a simple script.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Implement a TypeScript validation step using `zod` schemas; if any
+          field fails, throw an error and set status to false.
+        reason: Ensures strict adherence to the output schema before downstream processing.
+        text: Validate all output fields against the specified types, log any mismatches,
+          and set `frontend_build_status` to false if validation fails.
     prompt: Develop the frontend application using the designed UI, integrating it
       with the trading APIs to provide a seamless user experience.
   perform_security_auditing:
@@ -358,22 +1486,112 @@ nodes:
       type: int
     - description: Short textual descriptions of each identified vulnerability.
       key: vulnerability_descriptions
-      type: List[str]
+      type: str
     - description: Severity score for each vulnerability (e.g., 1-10, higher is more
         critical).
       key: risk_scores
-      type: List[int]
+      type: int
     - description: List of security compliance standards that were not met during
         the audit.
       key: compliance_gaps
-      type: List[str]
+      type: str
     - description: Whether all identified vulnerabilities and compliance gaps have
         been remediated.
       key: remediation_complete
       type: bool
-    prompt: Conduct a thorough security audit to identify vulnerabilities in the trading
+    prd:
+      bullets:
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use CI/CD pipeline hooks to export the built artifacts and Git history;
+          ensure all environment variables and secrets are captured in a secure vault
+          for review.
+        reason: A comprehensive audit requires access to all layers of the application
+          to detect hidden or indirect vulnerabilities.
+        text: Collect the latest deployment artifacts and source code repositories
+          for both the frontend and backend services.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Configure the tool with language‑specific rulesets; set severity thresholds;
+          generate a SARIF report for downstream processing.
+        reason: Static analysis provides early detection of vulnerabilities that are
+          hard to find through dynamic tests.
+        text: Run automated static analysis tools (e.g., SonarQube, Checkmarx, Fortify)
+          on the backend codebase to surface common code‑level issues such as injection
+          points, insecure deserialization, and hard‑coded credentials.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Automate a headless browser session with API authentication tokens;
+          enable session handling; export findings in JSON for parsing.
+        reason: DAST uncovers runtime vulnerabilities such as XSS, CSRF, and authentication
+          bypass that static tools may miss.
+        text: Perform a dynamic application security testing (DAST) scan using OWASP
+          ZAP or Burp Suite against the deployed staging environment, simulating authenticated
+          user actions.
+      - complexity: HIGH
+        impact: HIGH
+        method: Engage a certified ethical hacker; follow OWASP Testing Guide; document
+          each exploit with step‑by‑step proof‑of‑concept code.
+        reason: Manual testing can expose subtle issues that automated tools overlook,
+          especially in complex trading workflows.
+        text: Conduct manual penetration testing focusing on business logic flaws,
+          privilege escalation, and API rate‑limit circumvention.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Use tools like kube-hunter, Trivy, or Cloud Custodian; parse YAML
+          manifests; check for open ports and overly permissive IAM roles.
+        reason: Security extends beyond application code; misconfigurations can lead
+          to privilege escalation or data leakage.
+        text: Audit infrastructure configuration (Dockerfiles, Kubernetes manifests,
+          IAM policies, firewall rules) for misconfigurations that could expose the
+          system to unauthorized access.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Create a mapping matrix; cross‑reference each discovered issue to
+          the corresponding control; flag any unmet controls.
+        reason: Compliance gaps can trigger regulatory penalties and impact market
+          confidence.
+        text: Verify compliance with industry standards (e.g., ISO 27001, PCI DSS,
+          SOC 2) by mapping audit findings to the relevant control baselines.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Parse tool reports (JSON, SARIF) using a custom Python script; calculate
+          CVSS scores; output a CSV/JSON table.
+        reason: A standardized inventory facilitates tracking, reporting, and remediation
+          management.
+        text: Aggregate all findings into a structured vulnerability inventory, assigning
+          each vulnerability a unique identifier, description, risk score (CVSS v3.1),
+          and remediation priority.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Use a ticketing system (Jira/ServiceNow); assign fixes; perform regression
+          DAST scan; update the vulnerability inventory.
+        reason: Remediation is a critical part of the audit lifecycle; verification
+          ensures no residual risks.
+        text: Coordinate with the development and operations teams to implement remediation
+          fixes, retest, and verify that each vulnerability has been mitigated.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Template a Markdown report; auto‑populate fields from the inventory;
+          include visual risk heatmaps; export to PDF for executive sign‑off.
+        reason: Stakeholders need a clear, executive‑level overview to make informed
+          decisions about deployment.
+        text: Generate a concise audit report summarizing audit scope, methodologies,
+          findings, risk scores, compliance gaps, remediation status, and final audit
+          completion flag.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Implement a status flag in the audit tracking database; trigger flag
+          updates via CI/CD pipeline after final report generation.
+        reason: Ensures a formal closure of the audit cycle before proceeding to production.
+        text: Set `audit_completed` to true only after the audit report is signed
+          off by security lead and `remediation_complete` is true for all vulnerabilities.
+    prompt: '# Prompt
+
+
+      Conduct a thorough security audit to identify vulnerabilities in the trading
       platform. Consider penetration testing, code review, and compliance with security
-      standards.
+      standards.'
   select_data_providers:
     agent: false
     description: Select reliable data providers for the required data feeds.
@@ -398,6 +1616,73 @@ nodes:
         for the pipeline
       key: provider_selected
       type: List[bool]
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: LOW
+        method: Use a simple list comprehension to filter feed_names where the string
+          contains 'S&P 500' and store the result in a variable for later use.
+        reason: Ensures alignment between the data feeds identified earlier and the
+          providers considered for this node.
+        text: Parse the parent node output to confirm that the required feed is S&P
+          500 real‑time stock prices, and extract the feed_names list for reference
+          in subsequent provider filtering.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Aggregate providers such as Bloomberg, Refinitiv, IEX Cloud, Polygon.io,
+          Finnhub, Tradier, Alpha Vantage, and Yahoo Finance API into a list, annotating
+          each with a short note on their S&P 500 coverage.
+        reason: Creates a comprehensive pool from which the best providers can be
+          selected, reducing the risk of missing high‑quality sources.
+        text: Compile a master list of candidate data providers known to supply real‑time
+          S&P 500 price data, using industry knowledge, vendor websites, and public
+          benchmark reports.
+      - complexity: HIGH
+        impact: HIGH
+        method: For each provider, script API calls or scrape web pages to capture
+          documented latency figures and cost tables; supplement with reputable research
+          reports for accuracy percentages. Store each metric in a structured dictionary
+          keyed by provider name.
+        reason: Accurate, up‑to‑date metrics are critical for objective comparison
+          and selection.
+        text: Retrieve provider metrics—accuracy, average latency, and monthly cost—from
+          each vendor’s public documentation, API specifications, and third‑party
+          performance studies.
+      - complexity: MEDIUM
+        impact: MEDIUM
+        method: Implement a comparison loop that checks each metric against the thresholds;
+          set provider_selected[i] = True if all conditions are satisfied, else False.
+        reason: Provides a transparent, repeatable decision rule that balances performance
+          and budget constraints.
+        text: Define selection thresholds (e.g., accuracy ≥ 99.5 %, latency ≤ 100 ms,
+          cost ≤ $500/month) and evaluate each provider against these criteria, generating
+          a boolean selection flag per provider.
+      - complexity: LOW
+        impact: LOW
+        method: After building the provider metric dictionaries, sort or iterate in
+          a single pass to populate all lists, verifying length consistency with an
+          assertion.
+        reason: Maintains data integrity and simplifies downstream processing.
+        text: Align the output lists so that provider_names, provider_accuracies,
+          provider_latencies, provider_costs, and provider_selected share identical
+          ordering, ensuring that each index corresponds to the same provider.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Check the sum of provider_selected; if zero, raise a ValueError with
+          guidance to relax thresholds or add alternative providers.
+        reason: Guarantees that the ingestion pipeline has viable data sources and
+          prevents silent failures.
+        text: Validate that each output list contains at least one selected provider;
+          if none meet the criteria, flag an error or provide a fallback plan.
+      - complexity: LOW
+        impact: LOW
+        method: Use a simple dict construction and type casting (e.g., float(value),
+          bool(flag)) before returning the result.
+        reason: Matches the defined schema exactly, facilitating downstream node consumption
+          without type errors.
+        text: Package the final lists into the specified output structure, converting
+          any numerical values to floats where required and ensuring boolean flags
+          are correctly typed.
     prompt: Choose data providers that offer real-time S&P 500 stock prices. Consider
       factors like data accuracy, latency, and cost.
   select_forex_data_providers:
@@ -410,19 +1695,75 @@ nodes:
     output_structure:
     - description: Names of the selected forex data providers
       key: provider_names
-      type: List[str]
+      type: str
     - description: Accuracy percentage for each provider (0 to 100)
       key: accuracies
-      type: List[float]
+      type: float
     - description: Average latency in milliseconds for each provider
       key: latencies_ms
-      type: List[int]
+      type: int
     - description: Monthly cost in USD for each provider
       key: costs_usd
-      type: List[float]
+      type: float
     - description: Flag indicating whether the provider was chosen (true) or not (false)
       key: is_selected
-      type: List[bool]
+      type: bool
+    prd:
+      bullets:
+      - complexity: LOW
+        impact: MEDIUM
+        method: Deserialize the parent output JSON; extract 'feed_names' and 'feed_count'
+          into variables for reference.
+        reason: The selection criteria may depend on the specific forex pairs or data
+          granularity required by downstream ingestion pipelines.
+        text: Retrieve the list of required data feeds from the parent node 'identify_required_data_feeds'
+          and store it locally for context.
+      - complexity: MEDIUM
+        impact: HIGH
+        method: Perform web scraping and API calls to vendor sites (e.g., Bloomberg,
+          Reuters, OANDA, Dukascopy, Xignite, FXCM). Parse public SLAs, support documents,
+          and industry reports. Store the collected data in a structured table.
+        reason: A diverse vendor set ensures coverage of major currency pairs, low
+          latency, and regulatory compliance.
+        text: Compile a comprehensive list of potential forex data providers, gathering
+          metadata for accuracy (%), average latency (ms), monthly cost (USD), and
+          compliance certifications.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Apply unit conversion functions, round values to two decimal places,
+          and store normalized values in a temporary data structure.
+        reason: Normalization guarantees a fair comparison across providers with heterogeneous
+          data formats.
+        text: 'Normalize all collected metrics to a common scale: convert all latency
+          values to milliseconds, ensure all costs are expressed in USD, and represent
+          accuracy as a percentage.'
+      - complexity: MEDIUM
+        impact: HIGH
+        method: 'For each provider, calculate: score = (accuracy * 0.4) - (latency_norm
+          * 0.3) - (cost_norm * 0.2) + (compliance_flag * 0.1). Normalize latency
+          and cost to a 0‑1 range before weighting.'
+        reason: A quantitative score encapsulates the multi‑dimensional trade‑offs,
+          making the selection objective.
+        text: Score each provider using a weighted scoring model (accuracy 40%, latency
+          30%, cost 20%, compliance 10%) and compute a composite score.
+      - complexity: LOW
+        impact: HIGH
+        method: Sort the provider list descending by score, iterate to assign boolean
+          flags, and maintain the original ordering for output consistency.
+        reason: Selecting a small, high‑quality set ensures low latency ingestion
+          and cost control.
+        text: Rank providers by composite score, select the top N (e.g., 3) providers,
+          and set the corresponding 'is_selected' flag to true. All other providers
+          get a false flag.
+      - complexity: LOW
+        impact: MEDIUM
+        method: Map each provider record to the respective output field, cast numeric
+          types appropriately, and serialize the final JSON.
+        reason: Ensures compatibility with downstream nodes such as 'implement_forex_data_ingestion_pipeline'.
+        text: 'Assemble the final output arrays in the order required by the output
+          structure: provider_names (list of strings), accuracies (list of floats),
+          latencies_ms (list of ints), costs_usd (list of floats), and is_selected
+          (list of bools).'
     prompt: Choose reliable data providers for real-time forex market data, considering
       accuracy, latency, cost, and compliance. List provider names, accuracy, latency,
       cost, and selection flag.

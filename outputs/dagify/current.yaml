@@ -1,10 +1,62 @@
-dag_type: spec
+dag_type: stub
 description: Generated workflow from UI.
 name: build_stock_and_forex_trading_platform
 nodes:
   conduct_performance_optimization:
     agent: false
+    code_node_type: stub
     description: Conduct performance optimization for the trading platform.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ImplementUserInterfaceOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_user_interface node outputs.\"\"\"\n    frontend_build_status:\
+      \ bool = Field(..., description=\"Indicates whether the frontend build was successful\"\
+      )\n    build_artifact_path: str = Field(..., description=\"File system path\
+      \ to the generated frontend bundle\")\n    frontend_framework: str = Field(...,\
+      \ description=\"Frontend framework or library used (e.g., React, Angular, Vue)\"\
+      )\n    responsive_design_applied: bool = Field(..., description=\"Whether responsive\
+      \ design was implemented for multiple devices\")\n    ui_components_list: List[str]\
+      \ = Field(..., description=\"Names of UI components included in the application\"\
+      )\n    api_endpoints_used: List[str] = Field(..., description=\"List of backend\
+      \ API endpoints integrated into the UI\")\n    deployment_url: str = Field(...,\
+      \ description=\"URL where the frontend is deployed for testing or production\"\
+      )\n\n\nclass ImplementTradingApiOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_trading_api node outputs.\"\"\"\n    endpoint_list: List[str]\
+      \ = Field(..., description=\"Names of the trading API endpoints created.\")\n\
+      \    auth_mechanism: str = Field(..., description=\"Authentication mechanism\
+      \ used for the trading APIs.\")\n    rate_limit_per_min: int = Field(..., description=\"\
+      Maximum number of requests allowed per minute per API key.\")\n    concurrency_limit:\
+      \ int = Field(..., description=\"Maximum number of concurrent connections supported\
+      \ by the API.\")\n    is_deployed: bool = Field(..., description=\"Whether the\
+      \ API has been successfully deployed.\")\n    error_message: str = Field(...,\
+      \ description=\"Error message if deployment failed; empty string if none.\"\
+      )\n    api_docs_url: str = Field(..., description=\"URL to the generated API\
+      \ documentation.\")\n\n\nclass ConductPerformanceOptimizationOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for conduct_performance_optimization node outputs.\"\
+      \"\"\n    overall_latency_ms: int = Field(..., description=\"Average end-to-end\
+      \ latency of trading operations in milliseconds\")\n    throughput_trades_per_sec:\
+      \ int = Field(..., description=\"Maximum number of trades that can be processed\
+      \ per second\")\n    cache_hit_rate_percent: float = Field(..., description=\"\
+      Percentage of cache hits for frequently accessed market data\")\n    recommended_server_scaling:\
+      \ str = Field(..., description=\"Recommended scaling strategy (e.g., \\\"scale\
+      \ up\\\", \\\"scale out\\\", \\\"auto-scaling policy\\\")\")\n    query_optimization_summary:\
+      \ str = Field(..., description=\"Summary of index additions or query rewrites\
+      \ performed to reduce latency\")\n    performance_issues_found: str = Field(...,\
+      \ description=\"List of performance bottlenecks identified during the optimization\
+      \ process\")\n    is_optimized: bool = Field(..., description=\"Whether the\
+      \ platform meets the target latency and throughput thresholds\")\n\n\ndef conduct_performance_optimization(implement_user_interface_input:\
+      \ ImplementUserInterfaceOutput, implement_trading_api_input: ImplementTradingApiOutput,\
+      \ **kwargs) -> ConductPerformanceOptimizationOutput:\n    \"\"\"Conduct performance\
+      \ optimization for the trading platform.\n\n    Args:\n        implement_user_interface_input:\
+      \ Input from the 'implement_user_interface' node.\n        implement_trading_api_input:\
+      \ Input from the 'implement_trading_api' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        ConductPerformanceOptimizationOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ConductPerformanceOptimizationOutput(\n        overall_latency_ms=0,\n   \
+      \     throughput_trades_per_sec=0,\n        cache_hit_rate_percent=0.0,\n  \
+      \      recommended_server_scaling=\"\",\n        query_optimization_summary=\"\
+      \",\n        performance_issues_found=\"\",\n        is_optimized=False,\n \
+      \   )"
     name: conduct_performance_optimization
     nodes_depended_on:
     - implement_user_interface
@@ -160,9 +212,71 @@ nodes:
           recommend "scale out" with a 3‑node baseline.'
     prompt: Optimize the trading platform for low latency and high throughput. Consider
       caching, query optimization, and server scaling.
+    shims: []
   deploy_to_production:
     agent: false
+    code_node_type: stub
     description: Deploy the stock trading platform to production.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ConductPerformanceOptimizationOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for conduct_performance_optimization node outputs.\"\
+      \"\"\n    overall_latency_ms: int = Field(..., description=\"Average end-to-end\
+      \ latency of trading operations in milliseconds\")\n    throughput_trades_per_sec:\
+      \ int = Field(..., description=\"Maximum number of trades that can be processed\
+      \ per second\")\n    cache_hit_rate_percent: float = Field(..., description=\"\
+      Percentage of cache hits for frequently accessed market data\")\n    recommended_server_scaling:\
+      \ str = Field(..., description=\"Recommended scaling strategy (e.g., \\\"scale\
+      \ up\\\", \\\"scale out\\\", \\\"auto-scaling policy\\\")\")\n    query_optimization_summary:\
+      \ str = Field(..., description=\"Summary of index additions or query rewrites\
+      \ performed to reduce latency\")\n    performance_issues_found: str = Field(...,\
+      \ description=\"List of performance bottlenecks identified during the optimization\
+      \ process\")\n    is_optimized: bool = Field(..., description=\"Whether the\
+      \ platform meets the target latency and throughput thresholds\")\n\n\nclass\
+      \ PerformSecurityAuditingOutput(BaseModel):\n    \"\"\"Pydantic model for perform_security_auditing\
+      \ node outputs.\"\"\"\n    audit_completed: bool = Field(..., description=\"\
+      Indicates whether the entire audit process has been finished.\")\n    vulnerabilities_found:\
+      \ int = Field(..., description=\"Total count of distinct vulnerabilities identified\
+      \ during the audit.\")\n    vulnerability_descriptions: str = Field(..., description=\"\
+      Short textual descriptions of each identified vulnerability.\")\n    risk_scores:\
+      \ int = Field(..., description=\"Severity score for each vulnerability (e.g.,\
+      \ 1-10, higher is more critical).\")\n    compliance_gaps: str = Field(...,\
+      \ description=\"List of security compliance standards that were not met during\
+      \ the audit.\")\n    remediation_complete: bool = Field(..., description=\"\
+      Whether all identified vulnerabilities and compliance gaps have been remediated.\"\
+      )\n\n\nclass DeployToProductionOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for deploy_to_production node outputs.\"\"\"\n    deployment_environment:\
+      \ str = Field(..., description=\"The cloud provider or environment where the\
+      \ platform is deployed (e.g., AWS, GCP, Azure, On\\u2011premise).\")\n    deployed_version:\
+      \ str = Field(..., description=\"Semantic version of the deployed platform.\"\
+      )\n    deployment_status: str = Field(..., description=\"Result of the deployment\
+      \ operation (e.g., \\\"success\\\" or \\\"failure\\\").\")\n    deployment_timestamp:\
+      \ str = Field(..., description=\"ISO 8601 timestamp when the deployment was\
+      \ completed.\")\n    scaling_strategy: str = Field(..., description=\"Strategy\
+      \ used for scaling (e.g., \\\"auto\\u2011scaling\\\", \\\"fixed\\\", \\\"manual\\\
+      \").\")\n    number_of_nodes: int = Field(..., description=\"Number of instances\
+      \ or nodes running the platform.\")\n    monitoring_enabled: bool = Field(...,\
+      \ description=\"Whether monitoring has been enabled for the deployment.\")\n\
+      \    monitoring_tools: str = Field(..., description=\"List of monitoring tools\
+      \ or services used (e.g., Prometheus, Grafana).\")\n    backup_strategy: str\
+      \ = Field(..., description=\"Primary backup strategy (e.g., \\\"daily\\\", \\\
+      \"weekly\\\", \\\"real\\u2011time\\\").\")\n    backup_schedule: str = Field(...,\
+      \ description=\"Cron expression or schedule description for backups.\")\n  \
+      \  backup_location: str = Field(..., description=\"Location where backups are\
+      \ stored (e.g., S3 bucket, Azure Blob).\")\n    deployment_notes: str = Field(...,\
+      \ description=\"Any additional notes or remarks about the deployment.\")\n\n\
+      \ndef deploy_to_production(conduct_performance_optimization_input: ConductPerformanceOptimizationOutput,\
+      \ perform_security_auditing_input: PerformSecurityAuditingOutput, **kwargs)\
+      \ -> DeployToProductionOutput:\n    \"\"\"Deploy the stock trading platform\
+      \ to production.\n\n    Args:\n        conduct_performance_optimization_input:\
+      \ Input from the 'conduct_performance_optimization' node.\n        perform_security_auditing_input:\
+      \ Input from the 'perform_security_auditing' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DeployToProductionOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DeployToProductionOutput(\n\
+      \        deployment_environment=\"\",\n        deployed_version=\"\",\n    \
+      \    deployment_status=\"\",\n        deployment_timestamp=\"\",\n        scaling_strategy=\"\
+      \",\n        number_of_nodes=0,\n        monitoring_enabled=False,\n       \
+      \ monitoring_tools=\"\",\n        backup_strategy=\"\",\n        backup_schedule=\"\
+      \",\n        backup_location=\"\",\n        deployment_notes=\"\",\n    )"
     name: deploy_to_production
     nodes_depended_on:
     - conduct_performance_optimization
@@ -306,11 +420,42 @@ nodes:
           and future recommendations.
     prompt: Deploy the fully tested and optimized trading platform to a production
       environment. Ensure scalability, monitoring, and backup strategies are in place.
+    shims: []
   design_database_schema:
     agent: false
+    code_node_type: stub
     description: Design a relational database schema capable of ingesting and serving
       real‑time price data for the 500 largest US companies, while supporting efficient
       querying for analytics and trade execution.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyRequiredDataFeedsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_required_data_feeds node outputs.\"\"\"\n    feed_names: List[str]\
+      \ = Field(..., description=\"Names of data feeds required for real-time S&P\
+      \ 500 stock prices.\")\n    feed_count: int = Field(..., description=\"Total\
+      \ number of data feeds identified.\")\n\n\nclass DesignDatabaseSchemaOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_database_schema node outputs.\"\"\"\n \
+      \   metadata_table_name: str = Field(..., description=\"Name of the table storing\
+      \ stock metadata (e.g., company symbol, name, sector).\")\n    metadata_columns:\
+      \ str = Field(..., description=\"List of column names for the metadata table.\"\
+      )\n    price_history_table_name: str = Field(..., description=\"Name of the\
+      \ table storing real\\u2011time price history.\")\n    price_history_columns:\
+      \ str = Field(..., description=\"List of column names for the price history\
+      \ table.\")\n    primary_key: str = Field(..., description=\"Primary key column\
+      \ for the price history table (typically a composite of stock symbol and timestamp).\"\
+      )\n    supports_partitioning: bool = Field(..., description=\"Indicates whether\
+      \ the schema design includes partitioning (e.g., by date or symbol).\")\n\n\n\
+      def design_database_schema(identify_required_data_feeds_input: IdentifyRequiredDataFeedsOutput,\
+      \ **kwargs) -> DesignDatabaseSchemaOutput:\n    \"\"\"Design a relational database\
+      \ schema capable of ingesting and serving real‑time price data for the 500 largest\
+      \ US companies, while supporting efficient querying for analytics and trade\
+      \ execution.\n\n    Args:\n        identify_required_data_feeds_input: Input\
+      \ from the 'identify_required_data_feeds' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DesignDatabaseSchemaOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DesignDatabaseSchemaOutput(\n\
+      \        metadata_table_name=\"\",\n        metadata_columns=\"\",\n       \
+      \ price_history_table_name=\"\",\n        price_history_columns=\"\",\n    \
+      \    primary_key=\"\",\n        supports_partitioning=False,\n    )"
     name: design_database_schema
     nodes_depended_on:
     - identify_required_data_feeds
@@ -424,9 +569,44 @@ nodes:
           nodes that partitioning logic is active.
     prompt: Create a database schema that can efficiently store real-time S&P 500
       stock prices. Consider tables for stock metadata and price history.
+    shims: []
   design_user_interface:
     agent: false
+    code_node_type: stub
     description: Design a user interface for the stock trading platform.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ImplementTradingApiOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ implement_trading_api node outputs.\"\"\"\n    endpoint_list: List[str] =\
+      \ Field(..., description=\"Names of the trading API endpoints created.\")\n\
+      \    auth_mechanism: str = Field(..., description=\"Authentication mechanism\
+      \ used for the trading APIs.\")\n    rate_limit_per_min: int = Field(..., description=\"\
+      Maximum number of requests allowed per minute per API key.\")\n    concurrency_limit:\
+      \ int = Field(..., description=\"Maximum number of concurrent connections supported\
+      \ by the API.\")\n    is_deployed: bool = Field(..., description=\"Whether the\
+      \ API has been successfully deployed.\")\n    error_message: str = Field(...,\
+      \ description=\"Error message if deployment failed; empty string if none.\"\
+      )\n    api_docs_url: str = Field(..., description=\"URL to the generated API\
+      \ documentation.\")\n\n\nclass DesignUserInterfaceOutput(BaseModel):\n    \"\
+      \"\"Pydantic model for design_user_interface node outputs.\"\"\"\n    ui_screen_list:\
+      \ List[str] = Field(..., description=\"Names of top-level screens in the UI\
+      \ (e.g., Dashboard, Portfolio, Trade, Settings)\")\n    responsive_devices_supported:\
+      \ List[str] = Field(..., description=\"Device types for which the UI is responsive\
+      \ (e.g., mobile, tablet, desktop)\")\n    api_endpoints_integrated: List[str]\
+      \ = Field(..., description=\"Trading API endpoints that the UI will call (e.g.,\
+      \ get_stock_price, place_trade)\")\n    primary_navigation_items: List[str]\
+      \ = Field(..., description=\"Main navigation items presented in the UI (e.g.,\
+      \ Home, Watchlist, Trade, Account)\")\n    is_design_complete: bool = Field(...,\
+      \ description=\"Whether the UI design is finalized and ready for implementation\"\
+      )\n\n\ndef design_user_interface(implement_trading_api_input: ImplementTradingApiOutput,\
+      \ **kwargs) -> DesignUserInterfaceOutput:\n    \"\"\"Design a user interface\
+      \ for the stock trading platform.\n\n    Args:\n        implement_trading_api_input:\
+      \ Input from the 'implement_trading_api' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        DesignUserInterfaceOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return DesignUserInterfaceOutput(\n\
+      \        ui_screen_list=[],\n        responsive_devices_supported=[],\n    \
+      \    api_endpoints_integrated=[],\n        primary_navigation_items=[],\n  \
+      \      is_design_complete=False,\n    )"
     name: design_user_interface
     nodes_depended_on:
     - implement_trading_api
@@ -539,9 +719,42 @@ nodes:
     prompt: Create a user-friendly interface that displays real-time S&P 500 stock
       prices and allows users to perform trading operations. Consider a responsive
       design for various devices.
+    shims: []
   develop_trading_platform_backend:
     agent: false
+    code_node_type: stub
     description: Develop the backend for the stock trading platform.
+    implementation: "from pydantic import BaseModel, Field\n\n\nclass ImplementDataIngestionPipelineOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_data_ingestion_pipeline node outputs.\"\
+      \"\"\n    provider_names: str = Field(..., description=\"Names of the data providers\
+      \ used by the ingestion pipeline.\")\n    ingestion_status: bool = Field(...,\
+      \ description=\"Indicates whether the pipeline is currently running without\
+      \ critical failures.\")\n    records_ingested_per_day: int = Field(..., description=\"\
+      Average number of price records ingested each day.\")\n    average_latency_ms:\
+      \ float = Field(..., description=\"Average latency in milliseconds from data\
+      \ provider to database ingestion.\")\n    error_count: int = Field(..., description=\"\
+      Total number of ingestion errors detected during the last monitoring interval.\"\
+      )\n\n\nclass DevelopTradingPlatformBackendOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for develop_trading_platform_backend node outputs.\"\"\"\n    api_endpoints:\
+      \ str = Field(..., description=\"List of fully qualified API endpoint URLs exposed\
+      \ by the backend.\")\n    authentication_mechanism: str = Field(..., description=\"\
+      Primary authentication mechanism used (e.g., JWT, OAuth2, API Key).\")\n   \
+      \ database_schema_name: str = Field(..., description=\"Name of the database\
+      \ schema that stores stock prices and trading data.\")\n    service_version:\
+      \ str = Field(..., description=\"Semantic version identifier of the backend\
+      \ service.\")\n    is_optimized: bool = Field(..., description=\"Indicates whether\
+      \ low-latency optimizations (caching, query tuning, scaling) have been applied.\"\
+      )\n\n\ndef develop_trading_platform_backend(implement_data_ingestion_pipeline_input:\
+      \ ImplementDataIngestionPipelineOutput, **kwargs) -> DevelopTradingPlatformBackendOutput:\n\
+      \    \"\"\"Develop the backend for the stock trading platform.\n\n    Args:\n\
+      \        implement_data_ingestion_pipeline_input: Input from the 'implement_data_ingestion_pipeline'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       DevelopTradingPlatformBackendOutput: Object containing outputs for this\
+      \ node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub\
+      \ output with placeholder values\n    return DevelopTradingPlatformBackendOutput(\n\
+      \        api_endpoints=\"\",\n        authentication_mechanism=\"\",\n     \
+      \   database_schema_name=\"\",\n        service_version=\"\",\n        is_optimized=False,\n\
+      \    )"
     name: develop_trading_platform_backend
     nodes_depended_on:
     - implement_data_ingestion_pipeline
@@ -667,10 +880,26 @@ nodes:
     prompt: Create a backend API that can serve real-time S&P 500 stock prices and
       handle trading operations. Consider using a robust framework and secure authentication
       mechanisms.
+    shims: []
   identify_required_data_feeds:
     agent: false
+    code_node_type: stub
     description: Identify the data feeds required for live trading prices of S&P 500
       stocks.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyRequiredDataFeedsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_required_data_feeds node outputs.\"\"\"\n    feed_names: List[str]\
+      \ = Field(..., description=\"Names of data feeds required for real-time S&P\
+      \ 500 stock prices.\")\n    feed_count: int = Field(..., description=\"Total\
+      \ number of data feeds identified.\")\n\n\ndef identify_required_data_feeds(general_input:\
+      \ str, **kwargs) -> IdentifyRequiredDataFeedsOutput:\n    \"\"\"Identify the\
+      \ data feeds required for live trading prices of S&P 500 stocks.\n\n    Args:\n\
+      \        general_input: General input string for the root node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        IdentifyRequiredDataFeedsOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ IdentifyRequiredDataFeedsOutput(\n        feed_names=[],\n        feed_count=0,\n\
+      \    )"
     name: identify_required_data_feeds
     nodes_depended_on: []
     nodes_dependent_on: []
@@ -729,10 +958,56 @@ nodes:
         text: Populate the 'feed_names' output field with the finalized list of feed
           names, ensuring alphabetical order for consistency.
     prompt: List the specific data feeds needed for real-time S&P 500 stock prices.
+    shims: []
   implement_data_ingestion_pipeline:
     agent: false
+    code_node_type: stub
     description: Implement a data ingestion pipeline to fetch and store live S&P 500
       stock prices.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectDataProvidersOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ select_data_providers node outputs.\"\"\"\n    provider_names: List[str] =\
+      \ Field(..., description=\"List of provider names that offer real-time S&P 500\
+      \ stock prices\")\n    provider_accuracies: List[float] = Field(..., description=\"\
+      List of accuracy percentages for each provider (0 to 100)\")\n    provider_latencies:\
+      \ List[float] = Field(..., description=\"List of average latency in milliseconds\
+      \ for each provider\")\n    provider_costs: List[float] = Field(..., description=\"\
+      List of monthly cost in USD for each provider\")\n    provider_selected: List[bool]\
+      \ = Field(..., description=\"List of booleans indicating whether each provider\
+      \ was selected for the pipeline\")\n\n\nclass DesignDatabaseSchemaOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_database_schema node outputs.\"\"\"\n \
+      \   metadata_table_name: str = Field(..., description=\"Name of the table storing\
+      \ stock metadata (e.g., company symbol, name, sector).\")\n    metadata_columns:\
+      \ str = Field(..., description=\"List of column names for the metadata table.\"\
+      )\n    price_history_table_name: str = Field(..., description=\"Name of the\
+      \ table storing real\\u2011time price history.\")\n    price_history_columns:\
+      \ str = Field(..., description=\"List of column names for the price history\
+      \ table.\")\n    primary_key: str = Field(..., description=\"Primary key column\
+      \ for the price history table (typically a composite of stock symbol and timestamp).\"\
+      )\n    supports_partitioning: bool = Field(..., description=\"Indicates whether\
+      \ the schema design includes partitioning (e.g., by date or symbol).\")\n\n\n\
+      class ImplementDataIngestionPipelineOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_data_ingestion_pipeline node outputs.\"\"\"\n    provider_names:\
+      \ str = Field(..., description=\"Names of the data providers used by the ingestion\
+      \ pipeline.\")\n    ingestion_status: bool = Field(..., description=\"Indicates\
+      \ whether the pipeline is currently running without critical failures.\")\n\
+      \    records_ingested_per_day: int = Field(..., description=\"Average number\
+      \ of price records ingested each day.\")\n    average_latency_ms: float = Field(...,\
+      \ description=\"Average latency in milliseconds from data provider to database\
+      \ ingestion.\")\n    error_count: int = Field(..., description=\"Total number\
+      \ of ingestion errors detected during the last monitoring interval.\")\n\n\n\
+      def implement_data_ingestion_pipeline(select_data_providers_input: SelectDataProvidersOutput,\
+      \ design_database_schema_input: DesignDatabaseSchemaOutput, **kwargs) -> ImplementDataIngestionPipelineOutput:\n\
+      \    \"\"\"Implement a data ingestion pipeline to fetch and store live S&P 500\
+      \ stock prices.\n\n    Args:\n        select_data_providers_input: Input from\
+      \ the 'select_data_providers' node.\n        design_database_schema_input: Input\
+      \ from the 'design_database_schema' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        ImplementDataIngestionPipelineOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ImplementDataIngestionPipelineOutput(\n        provider_names=\"\",\n    \
+      \    ingestion_status=False,\n        records_ingested_per_day=0,\n        average_latency_ms=0.0,\n\
+      \        error_count=0,\n    )"
     name: implement_data_ingestion_pipeline
     nodes_depended_on:
     - select_data_providers
@@ -844,12 +1119,61 @@ nodes:
           output structure fields.
     prompt: Develop a data pipeline that fetches real-time S&P 500 stock prices from
       the selected data providers and stores them in the designed database schema.
+    shims: []
   implement_forex_data_ingestion_pipeline:
     agent: false
+    code_node_type: stub
     description: This node builds a robust, fault‑tolerant ingestion pipeline that
       pulls live forex rates from the chosen data providers, validates the data, persists
       it to the pre‑designed database schema, and records key performance metrics
       for monitoring.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass SelectForexDataProvidersOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for select_forex_data_providers node outputs.\"\"\"\n    provider_names: str\
+      \ = Field(..., description=\"Names of the selected forex data providers\")\n\
+      \    accuracies: float = Field(..., description=\"Accuracy percentage for each\
+      \ provider (0 to 100)\")\n    latencies_ms: int = Field(..., description=\"\
+      Average latency in milliseconds for each provider\")\n    costs_usd: float =\
+      \ Field(..., description=\"Monthly cost in USD for each provider\")\n    is_selected:\
+      \ bool = Field(..., description=\"Flag indicating whether the provider was chosen\
+      \ (true) or not (false)\")\n\n\nclass DesignDatabaseSchemaOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for design_database_schema node outputs.\"\"\"\n \
+      \   metadata_table_name: str = Field(..., description=\"Name of the table storing\
+      \ stock metadata (e.g., company symbol, name, sector).\")\n    metadata_columns:\
+      \ str = Field(..., description=\"List of column names for the metadata table.\"\
+      )\n    price_history_table_name: str = Field(..., description=\"Name of the\
+      \ table storing real\\u2011time price history.\")\n    price_history_columns:\
+      \ str = Field(..., description=\"List of column names for the price history\
+      \ table.\")\n    primary_key: str = Field(..., description=\"Primary key column\
+      \ for the price history table (typically a composite of stock symbol and timestamp).\"\
+      )\n    supports_partitioning: bool = Field(..., description=\"Indicates whether\
+      \ the schema design includes partitioning (e.g., by date or symbol).\")\n\n\n\
+      class ImplementForexDataIngestionPipelineOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for implement_forex_data_ingestion_pipeline node outputs.\"\"\"\n  \
+      \  provider_names: List[str] = Field(..., description=\"Names of the forex data\
+      \ providers used in the ingestion process.\")\n    records_ingested: int = Field(...,\
+      \ description=\"Total number of forex rate records ingested during the last\
+      \ execution.\")\n    errors_found: int = Field(..., description=\"Number of\
+      \ errors encountered while fetching or storing data.\")\n    ingestion_success:\
+      \ bool = Field(..., description=\"Whether the ingestion process completed successfully\
+      \ (true if no critical failures).\")\n    average_latency_ms: float = Field(...,\
+      \ description=\"Average latency in milliseconds for fetching data from all providers.\"\
+      )\n    latest_ingestion_timestamp: str = Field(..., description=\"ISO\\u20118601\
+      \ timestamp of the most recent ingestion operation.\")\n\n\ndef implement_forex_data_ingestion_pipeline(select_forex_data_providers_input:\
+      \ SelectForexDataProvidersOutput, design_database_schema_input: DesignDatabaseSchemaOutput,\
+      \ **kwargs) -> ImplementForexDataIngestionPipelineOutput:\n    \"\"\"This node\
+      \ builds a robust, fault‑tolerant ingestion pipeline that pulls live forex rates\
+      \ from the chosen data providers, validates the data, persists it to the pre‑designed\
+      \ database schema, and records key performance metrics for monitoring.\n\n \
+      \   Args:\n        select_forex_data_providers_input: Input from the 'select_forex_data_providers'\
+      \ node.\n        design_database_schema_input: Input from the 'design_database_schema'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       ImplementForexDataIngestionPipelineOutput: Object containing outputs\
+      \ for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n    # Return\
+      \ stub output with placeholder values\n    return ImplementForexDataIngestionPipelineOutput(\n\
+      \        provider_names=[],\n        records_ingested=0,\n        errors_found=0,\n\
+      \        ingestion_success=False,\n        average_latency_ms=0.0,\n       \
+      \ latest_ingestion_timestamp=\"\",\n    )"
     name: implement_forex_data_ingestion_pipeline
     nodes_depended_on:
     - select_forex_data_providers
@@ -981,9 +1305,56 @@ nodes:
     prompt: Develop a data pipeline that fetches real-time forex rates from the selected
       providers and stores them in the existing database schema. Ensure data integrity,
       handle errors, and record ingestion metrics.
+    shims: []
   implement_forex_trading_api:
     agent: false
+    code_node_type: stub
     description: Implement APIs for forex trading operations.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingPlatformBackendOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for develop_trading_platform_backend node outputs.\"\"\"\n    api_endpoints:\
+      \ str = Field(..., description=\"List of fully qualified API endpoint URLs exposed\
+      \ by the backend.\")\n    authentication_mechanism: str = Field(..., description=\"\
+      Primary authentication mechanism used (e.g., JWT, OAuth2, API Key).\")\n   \
+      \ database_schema_name: str = Field(..., description=\"Name of the database\
+      \ schema that stores stock prices and trading data.\")\n    service_version:\
+      \ str = Field(..., description=\"Semantic version identifier of the backend\
+      \ service.\")\n    is_optimized: bool = Field(..., description=\"Indicates whether\
+      \ low-latency optimizations (caching, query tuning, scaling) have been applied.\"\
+      )\n\n\nclass ImplementForexDataIngestionPipelineOutput(BaseModel):\n    \"\"\
+      \"Pydantic model for implement_forex_data_ingestion_pipeline node outputs.\"\
+      \"\"\n    provider_names: List[str] = Field(..., description=\"Names of the\
+      \ forex data providers used in the ingestion process.\")\n    records_ingested:\
+      \ int = Field(..., description=\"Total number of forex rate records ingested\
+      \ during the last execution.\")\n    errors_found: int = Field(..., description=\"\
+      Number of errors encountered while fetching or storing data.\")\n    ingestion_success:\
+      \ bool = Field(..., description=\"Whether the ingestion process completed successfully\
+      \ (true if no critical failures).\")\n    average_latency_ms: float = Field(...,\
+      \ description=\"Average latency in milliseconds for fetching data from all providers.\"\
+      )\n    latest_ingestion_timestamp: str = Field(..., description=\"ISO\\u20118601\
+      \ timestamp of the most recent ingestion operation.\")\n\n\nclass ImplementForexTradingApiOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_forex_trading_api node outputs.\"\"\"\
+      \n    api_status: bool = Field(..., description=\"Overall operational status\
+      \ of the forex trading API after deployment\")\n    place_forex_order_response:\
+      \ str = Field(..., description=\"Result message from the latest place_forex_order\
+      \ call, e.g., success confirmation or error description\")\n    get_forex_order_history_records:\
+      \ str = Field(..., description=\"List of textual summaries for each forex order\
+      \ in the user's history\")\n    manage_forex_portfolio_status: bool = Field(...,\
+      \ description=\"Success status of the most recent portfolio management action\"\
+      )\n    forex_order_count: int = Field(..., description=\"Total number of forex\
+      \ orders processed in the last reporting period\")\n\n\ndef implement_forex_trading_api(develop_trading_platform_backend_input:\
+      \ DevelopTradingPlatformBackendOutput, implement_forex_data_ingestion_pipeline_input:\
+      \ ImplementForexDataIngestionPipelineOutput, **kwargs) -> ImplementForexTradingApiOutput:\n\
+      \    \"\"\"Implement APIs for forex trading operations.\n\n    Args:\n     \
+      \   develop_trading_platform_backend_input: Input from the 'develop_trading_platform_backend'\
+      \ node.\n        implement_forex_data_ingestion_pipeline_input: Input from the\
+      \ 'implement_forex_data_ingestion_pipeline' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        ImplementForexTradingApiOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ImplementForexTradingApiOutput(\n        api_status=False,\n        place_forex_order_response=\"\
+      \",\n        get_forex_order_history_records=\"\",\n        manage_forex_portfolio_status=False,\n\
+      \        forex_order_count=0,\n    )"
     name: implement_forex_trading_api
     nodes_depended_on:
     - develop_trading_platform_backend
@@ -1161,12 +1532,49 @@ nodes:
     prompt: 'Create API endpoints for forex trading operations: place_forex_order,
       get_forex_order_history, manage_forex_portfolio. Use existing backend, secure
       authentication, rate limiting, and compliance with relevant standards.'
+    shims: []
   implement_trading_api:
     agent: false
+    code_node_type: stub
     description: Implement the trading REST/GraphQL API layer that interacts with
       the backend services, provides authenticated endpoints for trade execution,
       portfolio management, and trade history retrieval, and is ready for deployment
       to production.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DevelopTradingPlatformBackendOutput(BaseModel):\n    \"\"\"Pydantic\
+      \ model for develop_trading_platform_backend node outputs.\"\"\"\n    api_endpoints:\
+      \ str = Field(..., description=\"List of fully qualified API endpoint URLs exposed\
+      \ by the backend.\")\n    authentication_mechanism: str = Field(..., description=\"\
+      Primary authentication mechanism used (e.g., JWT, OAuth2, API Key).\")\n   \
+      \ database_schema_name: str = Field(..., description=\"Name of the database\
+      \ schema that stores stock prices and trading data.\")\n    service_version:\
+      \ str = Field(..., description=\"Semantic version identifier of the backend\
+      \ service.\")\n    is_optimized: bool = Field(..., description=\"Indicates whether\
+      \ low-latency optimizations (caching, query tuning, scaling) have been applied.\"\
+      )\n\n\nclass ImplementTradingApiOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_trading_api node outputs.\"\"\"\n    endpoint_list: List[str]\
+      \ = Field(..., description=\"Names of the trading API endpoints created.\")\n\
+      \    auth_mechanism: str = Field(..., description=\"Authentication mechanism\
+      \ used for the trading APIs.\")\n    rate_limit_per_min: int = Field(..., description=\"\
+      Maximum number of requests allowed per minute per API key.\")\n    concurrency_limit:\
+      \ int = Field(..., description=\"Maximum number of concurrent connections supported\
+      \ by the API.\")\n    is_deployed: bool = Field(..., description=\"Whether the\
+      \ API has been successfully deployed.\")\n    error_message: str = Field(...,\
+      \ description=\"Error message if deployment failed; empty string if none.\"\
+      )\n    api_docs_url: str = Field(..., description=\"URL to the generated API\
+      \ documentation.\")\n\n\ndef implement_trading_api(develop_trading_platform_backend_input:\
+      \ DevelopTradingPlatformBackendOutput, **kwargs) -> ImplementTradingApiOutput:\n\
+      \    \"\"\"Implement the trading REST/GraphQL API layer that interacts with\
+      \ the backend services, provides authenticated endpoints for trade execution,\
+      \ portfolio management, and trade history retrieval, and is ready for deployment\
+      \ to production.\n\n    Args:\n        develop_trading_platform_backend_input:\
+      \ Input from the 'develop_trading_platform_backend' node.\n        **kwargs:\
+      \ Additional keyword arguments.\n\n    Returns:\n        ImplementTradingApiOutput:\
+      \ Object containing outputs for this node.\n    \"\"\"\n    # TODO: Implement\
+      \ this function\n\n    # Return stub output with placeholder values\n    return\
+      \ ImplementTradingApiOutput(\n        endpoint_list=[],\n        auth_mechanism=\"\
+      \",\n        rate_limit_per_min=0,\n        concurrency_limit=0,\n        is_deployed=False,\n\
+      \        error_message=\"\",\n        api_docs_url=\"\",\n    )"
     name: implement_trading_api
     nodes_depended_on:
     - develop_trading_platform_backend
@@ -1313,9 +1721,58 @@ nodes:
           is true before final deployment.
     prompt: Develop APIs for placing trades, retrieving trade history, and managing
       user portfolios. Ensure the APIs are secure and scalable.
+    shims: []
   implement_user_interface:
     agent: false
+    code_node_type: stub
     description: Implement the designed user interface.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass DesignUserInterfaceOutput(BaseModel):\n    \"\"\"Pydantic model for\
+      \ design_user_interface node outputs.\"\"\"\n    ui_screen_list: List[str] =\
+      \ Field(..., description=\"Names of top-level screens in the UI (e.g., Dashboard,\
+      \ Portfolio, Trade, Settings)\")\n    responsive_devices_supported: List[str]\
+      \ = Field(..., description=\"Device types for which the UI is responsive (e.g.,\
+      \ mobile, tablet, desktop)\")\n    api_endpoints_integrated: List[str] = Field(...,\
+      \ description=\"Trading API endpoints that the UI will call (e.g., get_stock_price,\
+      \ place_trade)\")\n    primary_navigation_items: List[str] = Field(..., description=\"\
+      Main navigation items presented in the UI (e.g., Home, Watchlist, Trade, Account)\"\
+      )\n    is_design_complete: bool = Field(..., description=\"Whether the UI design\
+      \ is finalized and ready for implementation\")\n\n\nclass ImplementTradingApiOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_trading_api node outputs.\"\"\"\n  \
+      \  endpoint_list: List[str] = Field(..., description=\"Names of the trading\
+      \ API endpoints created.\")\n    auth_mechanism: str = Field(..., description=\"\
+      Authentication mechanism used for the trading APIs.\")\n    rate_limit_per_min:\
+      \ int = Field(..., description=\"Maximum number of requests allowed per minute\
+      \ per API key.\")\n    concurrency_limit: int = Field(..., description=\"Maximum\
+      \ number of concurrent connections supported by the API.\")\n    is_deployed:\
+      \ bool = Field(..., description=\"Whether the API has been successfully deployed.\"\
+      )\n    error_message: str = Field(..., description=\"Error message if deployment\
+      \ failed; empty string if none.\")\n    api_docs_url: str = Field(..., description=\"\
+      URL to the generated API documentation.\")\n\n\nclass ImplementUserInterfaceOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for implement_user_interface node outputs.\"\"\"\n\
+      \    frontend_build_status: bool = Field(..., description=\"Indicates whether\
+      \ the frontend build was successful\")\n    build_artifact_path: str = Field(...,\
+      \ description=\"File system path to the generated frontend bundle\")\n    frontend_framework:\
+      \ str = Field(..., description=\"Frontend framework or library used (e.g., React,\
+      \ Angular, Vue)\")\n    responsive_design_applied: bool = Field(..., description=\"\
+      Whether responsive design was implemented for multiple devices\")\n    ui_components_list:\
+      \ List[str] = Field(..., description=\"Names of UI components included in the\
+      \ application\")\n    api_endpoints_used: List[str] = Field(..., description=\"\
+      List of backend API endpoints integrated into the UI\")\n    deployment_url:\
+      \ str = Field(..., description=\"URL where the frontend is deployed for testing\
+      \ or production\")\n\n\ndef implement_user_interface(design_user_interface_input:\
+      \ DesignUserInterfaceOutput, implement_trading_api_input: ImplementTradingApiOutput,\
+      \ **kwargs) -> ImplementUserInterfaceOutput:\n    \"\"\"Implement the designed\
+      \ user interface.\n\n    Args:\n        design_user_interface_input: Input from\
+      \ the 'design_user_interface' node.\n        implement_trading_api_input: Input\
+      \ from the 'implement_trading_api' node.\n        **kwargs: Additional keyword\
+      \ arguments.\n\n    Returns:\n        ImplementUserInterfaceOutput: Object containing\
+      \ outputs for this node.\n    \"\"\"\n    # TODO: Implement this function\n\n\
+      \    # Return stub output with placeholder values\n    return ImplementUserInterfaceOutput(\n\
+      \        frontend_build_status=False,\n        build_artifact_path=\"\",\n \
+      \       frontend_framework=\"\",\n        responsive_design_applied=False,\n\
+      \        ui_components_list=[],\n        api_endpoints_used=[],\n        deployment_url=\"\
+      \",\n    )"
     name: implement_user_interface
     nodes_depended_on:
     - design_user_interface
@@ -1469,9 +1926,59 @@ nodes:
           and set `frontend_build_status` to false if validation fails.
     prompt: Develop the frontend application using the designed UI, integrating it
       with the trading APIs to provide a seamless user experience.
+    shims: []
   perform_security_auditing:
     agent: false
+    code_node_type: stub
     description: Perform security auditing for the trading platform.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass ImplementUserInterfaceOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_user_interface node outputs.\"\"\"\n    frontend_build_status:\
+      \ bool = Field(..., description=\"Indicates whether the frontend build was successful\"\
+      )\n    build_artifact_path: str = Field(..., description=\"File system path\
+      \ to the generated frontend bundle\")\n    frontend_framework: str = Field(...,\
+      \ description=\"Frontend framework or library used (e.g., React, Angular, Vue)\"\
+      )\n    responsive_design_applied: bool = Field(..., description=\"Whether responsive\
+      \ design was implemented for multiple devices\")\n    ui_components_list: List[str]\
+      \ = Field(..., description=\"Names of UI components included in the application\"\
+      )\n    api_endpoints_used: List[str] = Field(..., description=\"List of backend\
+      \ API endpoints integrated into the UI\")\n    deployment_url: str = Field(...,\
+      \ description=\"URL where the frontend is deployed for testing or production\"\
+      )\n\n\nclass ImplementTradingApiOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for implement_trading_api node outputs.\"\"\"\n    endpoint_list: List[str]\
+      \ = Field(..., description=\"Names of the trading API endpoints created.\")\n\
+      \    auth_mechanism: str = Field(..., description=\"Authentication mechanism\
+      \ used for the trading APIs.\")\n    rate_limit_per_min: int = Field(..., description=\"\
+      Maximum number of requests allowed per minute per API key.\")\n    concurrency_limit:\
+      \ int = Field(..., description=\"Maximum number of concurrent connections supported\
+      \ by the API.\")\n    is_deployed: bool = Field(..., description=\"Whether the\
+      \ API has been successfully deployed.\")\n    error_message: str = Field(...,\
+      \ description=\"Error message if deployment failed; empty string if none.\"\
+      )\n    api_docs_url: str = Field(..., description=\"URL to the generated API\
+      \ documentation.\")\n\n\nclass PerformSecurityAuditingOutput(BaseModel):\n \
+      \   \"\"\"Pydantic model for perform_security_auditing node outputs.\"\"\"\n\
+      \    audit_completed: bool = Field(..., description=\"Indicates whether the\
+      \ entire audit process has been finished.\")\n    vulnerabilities_found: int\
+      \ = Field(..., description=\"Total count of distinct vulnerabilities identified\
+      \ during the audit.\")\n    vulnerability_descriptions: str = Field(..., description=\"\
+      Short textual descriptions of each identified vulnerability.\")\n    risk_scores:\
+      \ int = Field(..., description=\"Severity score for each vulnerability (e.g.,\
+      \ 1-10, higher is more critical).\")\n    compliance_gaps: str = Field(...,\
+      \ description=\"List of security compliance standards that were not met during\
+      \ the audit.\")\n    remediation_complete: bool = Field(..., description=\"\
+      Whether all identified vulnerabilities and compliance gaps have been remediated.\"\
+      )\n\n\ndef perform_security_auditing(implement_user_interface_input: ImplementUserInterfaceOutput,\
+      \ implement_trading_api_input: ImplementTradingApiOutput, **kwargs) -> PerformSecurityAuditingOutput:\n\
+      \    \"\"\"Perform security auditing for the trading platform.\n\n    Args:\n\
+      \        implement_user_interface_input: Input from the 'implement_user_interface'\
+      \ node.\n        implement_trading_api_input: Input from the 'implement_trading_api'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       PerformSecurityAuditingOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return PerformSecurityAuditingOutput(\n     \
+      \   audit_completed=False,\n        vulnerabilities_found=0,\n        vulnerability_descriptions=\"\
+      \",\n        risk_scores=0,\n        compliance_gaps=\"\",\n        remediation_complete=False,\n\
+      \    )"
     name: perform_security_auditing
     nodes_depended_on:
     - implement_user_interface
@@ -1592,9 +2099,35 @@ nodes:
       Conduct a thorough security audit to identify vulnerabilities in the trading
       platform. Consider penetration testing, code review, and compliance with security
       standards.'
+    shims: []
   select_data_providers:
     agent: false
+    code_node_type: stub
     description: Select reliable data providers for the required data feeds.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyRequiredDataFeedsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_required_data_feeds node outputs.\"\"\"\n    feed_names: List[str]\
+      \ = Field(..., description=\"Names of data feeds required for real-time S&P\
+      \ 500 stock prices.\")\n    feed_count: int = Field(..., description=\"Total\
+      \ number of data feeds identified.\")\n\n\nclass SelectDataProvidersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for select_data_providers node outputs.\"\"\"\n  \
+      \  provider_names: List[str] = Field(..., description=\"List of provider names\
+      \ that offer real-time S&P 500 stock prices\")\n    provider_accuracies: List[float]\
+      \ = Field(..., description=\"List of accuracy percentages for each provider\
+      \ (0 to 100)\")\n    provider_latencies: List[float] = Field(..., description=\"\
+      List of average latency in milliseconds for each provider\")\n    provider_costs:\
+      \ List[float] = Field(..., description=\"List of monthly cost in USD for each\
+      \ provider\")\n    provider_selected: List[bool] = Field(..., description=\"\
+      List of booleans indicating whether each provider was selected for the pipeline\"\
+      )\n\n\ndef select_data_providers(identify_required_data_feeds_input: IdentifyRequiredDataFeedsOutput,\
+      \ **kwargs) -> SelectDataProvidersOutput:\n    \"\"\"Select reliable data providers\
+      \ for the required data feeds.\n\n    Args:\n        identify_required_data_feeds_input:\
+      \ Input from the 'identify_required_data_feeds' node.\n        **kwargs: Additional\
+      \ keyword arguments.\n\n    Returns:\n        SelectDataProvidersOutput: Object\
+      \ containing outputs for this node.\n    \"\"\"\n    # TODO: Implement this\
+      \ function\n\n    # Return stub output with placeholder values\n    return SelectDataProvidersOutput(\n\
+      \        provider_names=[],\n        provider_accuracies=[],\n        provider_latencies=[],\n\
+      \        provider_costs=[],\n        provider_selected=[],\n    )"
     name: select_data_providers
     nodes_depended_on:
     - identify_required_data_feeds
@@ -1685,9 +2218,34 @@ nodes:
           are correctly typed.
     prompt: Choose data providers that offer real-time S&P 500 stock prices. Consider
       factors like data accuracy, latency, and cost.
+    shims: []
   select_forex_data_providers:
     agent: false
+    code_node_type: stub
     description: Select reliable data providers for real-time forex data feeds.
+    implementation: "from pydantic import BaseModel, Field\nfrom typing import List\n\
+      \n\nclass IdentifyRequiredDataFeedsOutput(BaseModel):\n    \"\"\"Pydantic model\
+      \ for identify_required_data_feeds node outputs.\"\"\"\n    feed_names: List[str]\
+      \ = Field(..., description=\"Names of data feeds required for real-time S&P\
+      \ 500 stock prices.\")\n    feed_count: int = Field(..., description=\"Total\
+      \ number of data feeds identified.\")\n\n\nclass SelectForexDataProvidersOutput(BaseModel):\n\
+      \    \"\"\"Pydantic model for select_forex_data_providers node outputs.\"\"\"\
+      \n    provider_names: str = Field(..., description=\"Names of the selected forex\
+      \ data providers\")\n    accuracies: float = Field(..., description=\"Accuracy\
+      \ percentage for each provider (0 to 100)\")\n    latencies_ms: int = Field(...,\
+      \ description=\"Average latency in milliseconds for each provider\")\n    costs_usd:\
+      \ float = Field(..., description=\"Monthly cost in USD for each provider\")\n\
+      \    is_selected: bool = Field(..., description=\"Flag indicating whether the\
+      \ provider was chosen (true) or not (false)\")\n\n\ndef select_forex_data_providers(identify_required_data_feeds_input:\
+      \ IdentifyRequiredDataFeedsOutput, **kwargs) -> SelectForexDataProvidersOutput:\n\
+      \    \"\"\"Select reliable data providers for real-time forex data feeds.\n\n\
+      \    Args:\n        identify_required_data_feeds_input: Input from the 'identify_required_data_feeds'\
+      \ node.\n        **kwargs: Additional keyword arguments.\n\n    Returns:\n \
+      \       SelectForexDataProvidersOutput: Object containing outputs for this node.\n\
+      \    \"\"\"\n    # TODO: Implement this function\n\n    # Return stub output\
+      \ with placeholder values\n    return SelectForexDataProvidersOutput(\n    \
+      \    provider_names=\"\",\n        accuracies=0.0,\n        latencies_ms=0,\n\
+      \        costs_usd=0.0,\n        is_selected=False,\n    )"
     name: select_forex_data_providers
     nodes_depended_on:
     - identify_required_data_feeds
@@ -1767,3 +2325,4 @@ nodes:
     prompt: Choose reliable data providers for real-time forex market data, considering
       accuracy, latency, cost, and compliance. List provider names, accuracy, latency,
       cost, and selection flag.
+    shims: []
