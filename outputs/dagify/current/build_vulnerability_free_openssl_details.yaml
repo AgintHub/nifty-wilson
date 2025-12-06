@@ -1,7 +1,5 @@
-dag_type: plain_text
-description: A workflow to produce a version of OpenSSL that is free of known vulnerabilities
-  by performing source collection, static analysis, dynamic testing, fuzzing, patch
-  integration, hardening, rebuilding, verification, and documentation.
+dag_type: typed
+description: Generated workflow from UI.
 name: build_vulnerability_free_openssl
 nodes:
   apply_hardening_flags:
@@ -10,8 +8,18 @@ nodes:
     name: apply_hardening_flags
     nodes_depended_on:
     - integrate_patch
-    nodes_dependent_on:
-    - build_openssl
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of compilation flags applied to enable security hardening.
+      key: flags_applied
+      type: List[str]
+    - description: Human-readable summary of the applied hardening options.
+      key: flags_summary
+      type: str
+    - description: Indicates whether the flags were successfully integrated into the
+        build configuration.
+      key: success
+      type: bool
     prompt: Configure the OpenSSL build with security hardening options (e.g., -DOPENSSL_NO_ASM,
       -DOPENSSL_NO_EC, -fstack-protector-strong).
   build_openssl:
@@ -20,11 +28,23 @@ nodes:
     name: build_openssl
     nodes_depended_on:
     - apply_hardening_flags
-    nodes_dependent_on:
-    - verify_build_security
-    - re_run_static_analysis
-    - re_run_dynamic_tests
-    - re_run_fuzzing
+    nodes_dependent_on: []
+    output_structure:
+    - description: Filesystem path to the directory containing compiled OpenSSL binaries.
+      key: binary_artifacts_path
+      type: str
+    - description: Indicates whether the build completed without errors.
+      key: build_success
+      type: bool
+    - description: Textual log of the build process.
+      key: build_log
+      type: str
+    - description: List of names of generated binary artifacts (e.g., libssl.so, libcrypto.so).
+      key: artifact_names
+      type: List[str]
+    - description: Total time taken for the build in seconds.
+      key: build_duration_seconds
+      type: int
     prompt: Compile OpenSSL from the patched source using the hardened configuration.
       Produce binary artifacts.
   collect_current_openssl_source:
@@ -32,11 +52,25 @@ nodes:
     description: Fetch the most recent OpenSSL source code from the official repository.
     name: collect_current_openssl_source
     nodes_depended_on: []
-    nodes_dependent_on:
-    - run_static_analysis
-    - run_dynamic_tests
-    - run_fuzzing
-    - integrate_patch
+    nodes_dependent_on: []
+    output_structure:
+    - description: The URL of the OpenSSL repository that was cloned.
+      key: repository_url
+      type: str
+    - description: The absolute or relative path to the local directory where the
+        source was cloned.
+      key: clone_path
+      type: str
+    - description: The name of the latest stable release tag that was checked out.
+      key: stable_release_tag
+      type: str
+    - description: The full commit SHA of the source code that was cloned.
+      key: commit_hash
+      type: str
+    - description: True if the clone operation completed without errors, otherwise
+        False.
+      key: clone_success
+      type: bool
     prompt: Clone the latest OpenSSL source code from the official repository (e.g.,
       https://github.com/openssl/openssl) into a local directory. Ensure the repository
       is at the latest stable release tag.
@@ -46,8 +80,32 @@ nodes:
     name: document_changes
     nodes_depended_on:
     - generate_security_report
-    nodes_dependent_on:
-    - release_artifacts
+    nodes_dependent_on: []
+    output_structure:
+    - description: Lines added to the changelog reflecting applied patches and hardening
+        measures.
+      key: changelog_entries
+      type: List[str]
+    - description: Sections of the README that were updated to include new security
+        information.
+      key: readme_updates
+      type: List[str]
+    - description: Other documentation files (e.g., INSTALL, CONTRIBUTING) that were
+        modified.
+      key: documentation_changes
+      type: List[str]
+    - description: List of CVE IDs for which patches were applied.
+      key: applied_patches
+      type: List[str]
+    - description: Compilation hardening flags used in the build.
+      key: hardening_flags
+      type: List[str]
+    - description: Summary of security findings extracted from the security report.
+      key: security_findings_summary
+      type: str
+    - description: Indicates whether the documentation update process completed successfully.
+      key: document_changes_success
+      type: bool
     prompt: Update the changelog, README, and any relevant documentation to reflect
       the applied patches, hardening flags, and security findings.
   generate_security_report:
@@ -61,8 +119,37 @@ nodes:
     - re_run_static_analysis
     - re_run_dynamic_tests
     - re_run_fuzzing
-    nodes_dependent_on:
-    - document_changes
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of identified security issues, including CVE IDs and brief
+        descriptions.
+      key: identified_issues
+      type: List[str]
+    - description: List of applied patches or fixes, identified by CVE IDs or patch
+        names.
+      key: applied_patches
+      type: List[str]
+    - description: List of hardening options applied, such as compiler flags and configuration
+        settings.
+      key: hardening_measures
+      type: List[str]
+    - description: Summary of findings from static analysis, including warnings and
+        errors.
+      key: static_analysis_findings
+      type: List[str]
+    - description: Outcome of dynamic tests, e.g., 'all tests passed', '3 failures',
+        etc.
+      key: dynamic_test_results
+      type: List[str]
+    - description: Number of crashes detected during fuzz testing.
+      key: fuzzing_crashes
+      type: int
+    - description: Recommendations for future maintenance and mitigation.
+      key: overall_recommendations
+      type: str
+    - description: Overall risk rating of the build (e.g., Low, Medium, High).
+      key: risk_rating
+      type: str
     prompt: Compile a comprehensive report summarizing all identified issues, applied
       patches, hardening measures, and test results. Include recommendations for future
       maintenance.
@@ -71,8 +158,17 @@ nodes:
     description: Gather all known OpenSSL vulnerabilities from public databases.
     name: identify_known_vulnerabilities
     nodes_depended_on: []
-    nodes_dependent_on:
-    - integrate_patch
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of CVE identifiers for each identified vulnerability.
+      key: cve_ids
+      type: List[str]
+    - description: Brief textual description of each CVE.
+      key: cve_descriptions
+      type: List[str]
+    - description: Severity level of each CVE (e.g., Low, Medium, High, Critical).
+      key: severity_levels
+      type: List[str]
     prompt: Query the CVE database for all entries tagged with OpenSSL. Produce a
       list of CVE IDs, brief descriptions, and severity levels.
   integrate_patch:
@@ -81,8 +177,23 @@ nodes:
     name: integrate_patch
     nodes_depended_on:
     - identify_known_vulnerabilities
-    nodes_dependent_on:
-    - apply_hardening_flags
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of CVE IDs for which patches were successfully applied.
+      key: patched_cve_ids
+      type: List[str]
+    - description: Number of patches that compiled and were applied without errors.
+      key: patch_success_count
+      type: int
+    - description: Number of patches that failed to compile or apply.
+      key: patch_failure_count
+      type: int
+    - description: True if all patches compiled successfully, False otherwise.
+      key: overall_patch_success
+      type: bool
+    - description: Log entries capturing the outcome of each patch application attempt.
+      key: patch_log_entries
+      type: List[str]
     prompt: For each CVE identified, apply the official patch or a custom fix to the
       OpenSSL source. Verify that the patch compiles.
   re_run_dynamic_tests:
@@ -93,6 +204,28 @@ nodes:
     - build_openssl
     - setup_dynamic_testing_environment
     nodes_dependent_on: []
+    output_structure:
+    - description: Identifier of the test suite executed
+      key: test_suite_name
+      type: str
+    - description: Total number of tests run
+      key: total_tests
+      type: int
+    - description: Number of tests that passed
+      key: passed_tests
+      type: int
+    - description: Number of tests that failed
+      key: failed_tests
+      type: int
+    - description: List of failure messages or test identifiers
+      key: failure_details
+      type: List[str]
+    - description: Total duration of the test run in seconds
+      key: test_duration_seconds
+      type: float
+    - description: True if all tests passed, False otherwise
+      key: tests_passed_successfully
+      type: bool
     prompt: Execute the full suite of dynamic tests on the built binaries. Record
       outcomes.
   re_run_fuzzing:
@@ -103,6 +236,22 @@ nodes:
     - build_openssl
     - setup_fuzzing_environment
     nodes_dependent_on: []
+    output_structure:
+    - description: Number of unique crashes detected during fuzzing.
+      key: crash_count
+      type: int
+    - description: File paths or identifiers of crash reproducing inputs.
+      key: crash_examples
+      type: List[str]
+    - description: Total duration of the fuzzing run in seconds.
+      key: fuzzing_duration_seconds
+      type: int
+    - description: Whether the fuzzing run completed without critical errors.
+      key: fuzzing_success
+      type: bool
+    - description: Concatenated log output from the fuzzing tool.
+      key: fuzzing_log
+      type: str
     prompt: Run fuzzing on the built binaries for the same duration as before. Log
       any crashes.
   re_run_static_analysis:
@@ -113,6 +262,23 @@ nodes:
     - build_openssl
     - setup_static_analysis_environment
     nodes_dependent_on: []
+    output_structure:
+    - description: Number of warnings identified by the static analysis tools.
+      key: warnings_count
+      type: int
+    - description: Number of errors identified by the static analysis tools.
+      key: errors_count
+      type: int
+    - description: List of security-related findings or vulnerabilities reported.
+      key: security_findings
+      type: List[str]
+    - description: True if no critical errors or security findings were detected;
+        otherwise False.
+      key: analysis_passed
+      type: bool
+    - description: File path to the generated static analysis report document.
+      key: report_path
+      type: str
     prompt: Perform static analysis on the compiled OpenSSL binaries using the same
       tools as before. Capture any new findings.
   release_artifacts:
@@ -122,6 +288,22 @@ nodes:
     nodes_depended_on:
     - document_changes
     nodes_dependent_on: []
+    output_structure:
+    - description: File system path to the packaged release artifacts.
+      key: artifact_package_path
+      type: str
+    - description: The version control tag assigned to this release.
+      key: release_tag
+      type: str
+    - description: List of documentation files included in the release.
+      key: documentation_files
+      type: List[str]
+    - description: List of binary files included in the release.
+      key: binary_files
+      type: List[str]
+    - description: Indicates whether the packaging and tagging succeeded.
+      key: build_success
+      type: bool
     prompt: Package the compiled OpenSSL binaries, source tarball, and documentation
       into release artifacts. Tag the release in the version control system.
   run_dynamic_tests:
@@ -131,8 +313,29 @@ nodes:
     nodes_depended_on:
     - collect_current_openssl_source
     - setup_dynamic_testing_environment
-    nodes_dependent_on:
-    - run_fuzzing
+    nodes_dependent_on: []
+    output_structure:
+    - description: Total number of tests executed.
+      key: total_tests_run
+      type: int
+    - description: Number of tests that passed.
+      key: tests_passed
+      type: int
+    - description: Number of tests that failed.
+      key: tests_failed
+      type: int
+    - description: Number of crashes observed during testing.
+      key: crash_count
+      type: int
+    - description: List of identifiers or names of tests that failed.
+      key: failed_test_cases
+      type: List[str]
+    - description: List of crash log excerpts or identifiers.
+      key: crash_logs
+      type: List[str]
+    - description: Brief summary of test results.
+      key: test_summary
+      type: str
     prompt: Run the full suite of OpenSSL unit and integration tests. Record any test
       failures or crashes.
   run_fuzzing:
@@ -142,8 +345,25 @@ nodes:
     nodes_depended_on:
     - collect_current_openssl_source
     - setup_fuzzing_environment
-    nodes_dependent_on:
-    - integrate_patch
+    nodes_dependent_on: []
+    output_structure:
+    - description: Identifiers (e.g., hashes) for each crash observed during fuzzing.
+      key: crash_ids
+      type: List[str]
+    - description: Brief textual description of each crash, including affected function
+        or module.
+      key: crash_descriptions
+      type: List[str]
+    - description: Total number of unexpected behaviors (e.g., crashes, hangs, assertion
+        failures) detected.
+      key: unexpected_behavior_count
+      type: int
+    - description: True if fuzzing completed without fatal errors; otherwise False.
+      key: successful_run
+      type: bool
+    - description: Total runtime of the fuzzing session in seconds.
+      key: total_duration_seconds
+      type: int
     prompt: Execute fuzzing on OpenSSL's APIs for a predefined duration. Log any crashes
       or unexpected behavior.
   run_static_analysis:
@@ -153,10 +373,32 @@ nodes:
     nodes_depended_on:
     - collect_current_openssl_source
     - setup_static_analysis_environment
-    nodes_dependent_on:
-    - run_dynamic_tests
-    - run_fuzzing
-    - integrate_patch
+    nodes_dependent_on: []
+    output_structure:
+    - description: Total number of warnings detected by the static analysis tools.
+      key: total_warnings
+      type: int
+    - description: Total number of errors detected by the static analysis tools.
+      key: total_errors
+      type: int
+    - description: Total number of potential security issues identified.
+      key: total_security_issues
+      type: int
+    - description: List of warning messages with file names and line numbers.
+      key: warnings_list
+      type: List[str]
+    - description: List of error messages with file names and line numbers.
+      key: errors_list
+      type: List[str]
+    - description: List of security issue descriptions with file names and line numbers.
+      key: security_issues_list
+      type: List[str]
+    - description: Indicates whether the static analysis completed without fatal failures.
+      key: analysis_success
+      type: bool
+    - description: File system path to the generated static analysis report file.
+      key: analysis_report_path
+      type: str
     prompt: Execute clang-tidy and cppcheck on the OpenSSL source tree. Capture all
       warnings, errors, and potential security issues.
   setup_dynamic_testing_environment:
@@ -164,8 +406,23 @@ nodes:
     description: Prepare the environment for dynamic testing.
     name: setup_dynamic_testing_environment
     nodes_depended_on: []
-    nodes_dependent_on:
-    - run_dynamic_tests
+    nodes_dependent_on: []
+    output_structure:
+    - description: Indicates whether the environment was set up successfully.
+      key: environment_setup_success
+      type: bool
+    - description: List of package names that were installed as part of the setup.
+      key: installed_packages
+      type: List[str]
+    - description: Path to the configuration file generated for testing.
+      key: config_file_path
+      type: str
+    - description: Path to the compiled test binaries.
+      key: test_binary_path
+      type: str
+    - description: List of environment variable assignments used during testing.
+      key: environment_variables
+      type: List[str]
     prompt: Set up a build of OpenSSL with testing enabled (e.g., ./config enable-tests).
       Ensure all unit and integration tests are compiled.
   setup_fuzzing_environment:
@@ -173,8 +430,22 @@ nodes:
     description: Prepare the environment for fuzz testing.
     name: setup_fuzzing_environment
     nodes_depended_on: []
-    nodes_dependent_on:
-    - run_fuzzing
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of fuzzing frameworks configured (e.g., AFL, libFuzzer).
+      key: frameworks_configured
+      type: List[str]
+    - description: Paths to the generated initial seed files used for fuzzing.
+      key: seed_files
+      type: List[str]
+    - description: Indicates whether the fuzzing environment is fully set up and ready
+        to run tests.
+      key: environment_ready
+      type: bool
+    - description: File system path to the directory containing fuzzing configuration
+        files.
+      key: config_directory
+      type: str
     prompt: Configure a fuzzing framework such as AFL or libFuzzer for OpenSSL. Generate
       initial seeds for fuzzing.
   setup_static_analysis_environment:
@@ -182,8 +453,18 @@ nodes:
     description: Prepare the environment for static code analysis.
     name: setup_static_analysis_environment
     nodes_depended_on: []
-    nodes_dependent_on:
-    - run_static_analysis
+    nodes_dependent_on: []
+    output_structure:
+    - description: Names of static analysis tools installed in the environment.
+      key: installed_tools
+      type: List[str]
+    - description: Whether the configuration of the tools succeeded without errors.
+      key: configuration_success
+      type: bool
+    - description: Indicates if the environment is fully ready for static code analysis
+        runs.
+      key: environment_ready
+      type: bool
     prompt: Install static analysis tools such as clang-tidy and cppcheck. Configure
       them with default OpenSSL coding standards.
   verify_build_security:
@@ -192,9 +473,19 @@ nodes:
     name: verify_build_security
     nodes_depended_on:
     - build_openssl
-    nodes_dependent_on:
-    - re_run_static_analysis
-    - re_run_dynamic_tests
-    - re_run_fuzzing
+    nodes_dependent_on: []
+    output_structure:
+    - description: Name of the security scanner tool used (e.g., OPA, Snyk).
+      key: scan_tool_used
+      type: str
+    - description: Total number of vulnerabilities found by the scanner.
+      key: vulnerability_count
+      type: int
+    - description: List of CVE IDs or internal identifiers for each detected vulnerability.
+      key: vulnerability_ids
+      type: List[str]
+    - description: True if no critical vulnerabilities were found; otherwise False.
+      key: security_passed
+      type: bool
     prompt: Run security scanners (e.g., OPA, Snyk) on the compiled binaries to detect
       any remaining vulnerabilities.
