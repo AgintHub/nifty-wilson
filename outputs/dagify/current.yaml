@@ -1,7 +1,5 @@
-dag_type: plain_text
-description: A workflow for establishing Jane Street Capital as a quantitative trading
-  firm, covering strategy, technology infrastructure, regulatory compliance, talent
-  acquisition, and operational launch
+dag_type: typed
+description: Generated workflow from UI.
 name: build_jane_street
 nodes:
   build_research_capabilities:
@@ -12,6 +10,22 @@ nodes:
     - design_data_infrastructure
     - create_hiring_strategy
     nodes_dependent_on: []
+    output_structure:
+    - description: Description of the research infrastructure
+      key: research_infrastructure
+      type: str
+    - description: List of research tools used
+      key: research_tools
+      type: List[str]
+    - description: List of data analysis frameworks used
+      key: data_analysis_frameworks
+      type: List[str]
+    - description: List of strategy evaluation criteria
+      key: strategy_evaluation_criteria
+      type: List[str]
+    - description: List of research capital requirements
+      key: research_capital_requirements
+      type: List[float]
     prompt: Define the research infrastructure and processes for developing, backtesting,
       and implementing new trading strategies. Include research tools, data analysis
       frameworks, and strategy evaluation criteria.
@@ -21,6 +35,22 @@ nodes:
     name: choose_legal_structure
     nodes_depended_on: []
     nodes_dependent_on: []
+    output_structure:
+    - description: The chosen legal entity structure (LLC, Corporation, Partnership)
+      key: legal_entity
+      type: str
+    - description: Brief description of tax implications
+      key: tax_implications
+      type: str
+    - description: Brief description of liability protection
+      key: liability_protection
+      type: str
+    - description: Brief description of operational flexibility
+      key: operational_flexibility
+      type: str
+    - description: Rationale for the chosen legal structure
+      key: rationale
+      type: str
     prompt: Select the appropriate legal entity structure for Jane Street (LLC, Corporation,
       Partnership). Consider tax implications, liability protection, and operational
       flexibility. Provide rationale in 2-3 sentences.
@@ -31,6 +61,25 @@ nodes:
     nodes_depended_on:
     - create_launch_timeline
     nodes_dependent_on: []
+    output_structure:
+    - description: Summary of the business plan
+      key: executive_summary
+      type: str
+    - description: Summary of the market opportunity
+      key: market_opportunity
+      type: str
+    - description: Summary of the competitive advantage
+      key: competitive_advantage
+      type: str
+    - description: Summary of the financial projections
+      key: financial_projections
+      type: str
+    - description: Summary of the implementation roadmap
+      key: implementation_roadmap
+      type: str
+    - description: Total number of words in the business plan
+      key: total_words
+      type: int
     prompt: Compile all previous outputs into a comprehensive business plan for Jane
       Street. Include executive summary, market opportunity, competitive advantage,
       financial projections, and implementation roadmap. Keep to 500 words maximum.
@@ -42,6 +91,20 @@ nodes:
     - specify_technology_architecture
     - design_trading_strategies
     nodes_dependent_on: []
+    output_structure:
+    - description: List of role requirements for quantitative researchers, software
+        engineers, and traders
+      key: role_requirements
+      type: str
+    - description: Description of compensation structure for key roles
+      key: compensation_structure
+      type: str
+    - description: Description of recruitment approach for key roles
+      key: recruitment_approach
+      type: str
+    - description: List of target hiring numbers for key roles
+      key: target_hiring_numbers
+      type: List[int]
     prompt: Develop a hiring strategy for Jane Street focusing on quantitative researchers,
       software engineers, and traders. Define role requirements, compensation structure,
       and recruitment approach.
@@ -53,6 +116,16 @@ nodes:
     - build_research_capabilities
     - design_performance_measurement
     nodes_dependent_on: []
+    output_structure:
+    - description: The 12-month launch timeline with specific milestones
+      key: launch_timeline
+      type: str
+    - description: List of dependencies for the launch timeline
+      key: dependencies
+      type: List[str]
+    - description: List of critical paths for the launch timeline
+      key: critical_path
+      type: List[str]
     prompt: Create a 12-month launch timeline with specific milestones for technology
       deployment, regulatory approvals, team hiring, strategy testing, and live trading
       commencement. Include dependencies and critical path.
@@ -64,6 +137,16 @@ nodes:
     - identify_regulatory_requirements
     - design_risk_management_framework
     nodes_dependent_on: []
+    output_structure:
+    - description: Initial capital requirements
+      key: initial_capital_requirements
+      type: float
+    - description: Ongoing capital needs
+      key: ongoing_capital_needs
+      type: float
+    - description: Breakdown of capital requirements by category
+      key: capital_breakdown
+      type: List[str]
     prompt: Determine the initial capital requirements considering regulatory minimums,
       trading capital needs, and operational expenses. Provide breakdown by category
       and timeline.
@@ -83,6 +166,28 @@ nodes:
     nodes_depended_on:
     - specify_technology_architecture
     nodes_dependent_on: []
+    output_structure:
+    - description: Detailed description of the data infrastructure design
+      key: data_infrastructure_design
+      type: str
+    - description: List of real-time market data feeds
+      key: market_data_feeds
+      type: str
+    - description: Description of the historical data storage system
+      key: historical_data_storage
+      type: str
+    - description: List of alternative data sources considered
+      key: alternative_data_sources
+      type: str
+    - description: Description of the data processing pipelines
+      key: data_processing_pipelines
+      type: str
+    - description: Description of the research data systems
+      key: research_data_systems
+      type: str
+    - description: List of technology requirements for the data infrastructure
+      key: technology_requirements
+      type: str
     prompt: Design the data infrastructure including real-time market data feeds,
       historical data storage, alternative data sources, and data processing pipelines
       needed for quantitative research and trading.
@@ -103,6 +208,25 @@ nodes:
     nodes_depended_on:
     - design_trading_strategies
     nodes_dependent_on: []
+    output_structure:
+    - description: List of position size limits by asset type
+      key: position_size_limits
+      type: List[int]
+    - description: List of portfolio concentration metrics
+      key: portfolio_concentration_metrics
+      type: List[float]
+    - description: Value-at-Risk (VaR) limit
+      key: var_limit
+      type: float
+    - description: Drawdown limit
+      key: drawdown_limit
+      type: float
+    - description: List of pre-trade risk measures
+      key: pre_trade_risk_measures
+      type: str
+    - description: List of post-trade risk measures
+      key: post_trade_risk_measures
+      type: str
     prompt: Design a risk management framework with specific limits for position size,
       portfolio concentration, VaR, and drawdown controls. Include both pre-trade
       and post-trade risk measures.
@@ -114,6 +238,22 @@ nodes:
     - define_core_trading_philosophy
     - select_primary_markets
     nodes_dependent_on: []
+    output_structure:
+    - description: Number of trading strategies developed
+      key: trading_strategy_count
+      type: int
+    - description: List of trading strategy names
+      key: strategy_names
+      type: List[str]
+    - description: Whether market making strategies are included
+      key: market_maker_strategies
+      type: bool
+    - description: Whether statistical arbitrage strategies are included
+      key: statistical_arbitrage_strategies
+      type: bool
+    - description: Whether options trading strategies are included
+      key: options_trading_strategies
+      type: bool
     prompt: Create 4-6 specific quantitative trading strategies aligned with the core
       philosophy and suitable for the selected markets. Focus on market making, statistical
       arbitrage, and options trading approaches.
@@ -124,6 +264,22 @@ nodes:
     nodes_depended_on:
     - identify_regulatory_requirements
     nodes_dependent_on: []
+    output_structure:
+    - description: List of documents included in the compliance program
+      key: compliance_program_documents
+      type: List[str]
+    - description: List of trade surveillance policies implemented
+      key: trade_surveillance_policies
+      type: List[str]
+    - description: List of record keeping policies implemented
+      key: recordKeepingPolicies
+      type: List[str]
+    - description: List of risk reporting policies implemented
+      key: riskReportingPolicies
+      type: List[str]
+    - description: List of regulatory communications policies implemented
+      key: regulatoryCommunicationsPolicies
+      type: List[str]
     prompt: Develop a comprehensive compliance program including policies for trade
       surveillance, record keeping, risk reporting, and regulatory communications.
       Map each policy to specific regulatory requirements.
@@ -136,6 +292,25 @@ nodes:
     - identify_prime_brokerage_partners
     - develop_compliance_program
     nodes_dependent_on: []
+    output_structure:
+    - description: Description of the trade settlement process
+      key: trade_settlement_process
+      type: str
+    - description: Method used for calculating P&L
+      key: pl_calculation_method
+      type: str
+    - description: Frequency of risk monitoring
+      key: risk_monitoring_frequency
+      type: str
+    - description: Procedure for position reconciliation
+      key: position_reconciliation_procedure
+      type: str
+    - description: Schedule for regulatory reporting
+      key: regulatory_reporting_schedule
+      type: str
+    - description: List of roles and responsibilities for operational workflows
+      key: roles_and_responsibilities
+      type: str
     prompt: Create operational workflows for daily processes including trade settlement,
       P&L calculation, risk monitoring, position reconciliation, and regulatory reporting.
       Define roles and responsibilities.
@@ -158,6 +333,16 @@ nodes:
     - choose_legal_structure
     - select_primary_markets
     nodes_dependent_on: []
+    output_structure:
+    - description: List of key regulatory requirements
+      key: regulatory_requirements
+      type: List[str]
+    - description: Type of entity for the trading firm (LLC, Corporation, etc.)
+      key: entity_type
+      type: str
+    - description: List of selected primary markets
+      key: selected_markets
+      type: List[str]
     prompt: List the key regulatory requirements for operating as a proprietary trading
       firm in the selected markets. Include required registrations, capital requirements,
       and reporting obligations.
@@ -168,6 +353,23 @@ nodes:
     nodes_depended_on:
     - define_core_trading_philosophy
     nodes_dependent_on: []
+    output_structure:
+    - description: List of selected primary markets and exchanges
+      key: primary_markets
+      type: List[str]
+    - description: Rationale for selecting each primary market and exchange
+      key: market_selection_reasoning
+      type: str
+    - description: Assessment of liquidity risk in each selected market
+      key: liquidity_risk_assessment
+      type: str
+    - description: Overview of regulatory requirements and implications for each selected
+        market
+      key: regulatory_environment
+      type: str
+    - description: Analysis of competitive landscape in each selected market
+      key: competitive_landscape
+      type: str
     prompt: Based on the trading philosophy, select 3-5 primary markets and exchanges
       where Jane Street will initially operate. Consider liquidity, regulatory environment,
       and competitive landscape.
@@ -178,6 +380,19 @@ nodes:
     nodes_depended_on:
     - design_trading_strategies
     nodes_dependent_on: []
+    output_structure:
+    - description: List of low-latency trading systems used
+      key: trading_systems
+      type: List[str]
+    - description: List of data feeds used for trading
+      key: data_feeds
+      type: List[str]
+    - description: List of risk management systems used for trading
+      key: risk_management_systems
+      type: List[str]
+    - description: Description of connectivity requirements for trading
+      key: connectivity_requirements
+      type: str
     prompt: Outline the core technology architecture needed to support the trading
       strategies. Include low-latency trading systems, data feeds, risk management
       systems, and connectivity requirements.
