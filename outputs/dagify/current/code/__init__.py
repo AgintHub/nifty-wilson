@@ -1,72 +1,44 @@
-from .define_core_trading_philosophy import define_core_trading_philosophy
-from .establish_operational_workflows import establish_operational_workflows
-from .select_primary_markets import select_primary_markets
-from .build_research_capabilities import build_research_capabilities
-from .choose_legal_structure import choose_legal_structure
+from .list_service_providers import list_service_providers
+from .develop_timeline_and_milestones import develop_timeline_and_milestones
+from .estimate_setup_and_operating_costs import estimate_setup_and_operating_costs
+from .compile_pitch_deck_outline import compile_pitch_deck_outline
+from .design_compliance_program import design_compliance_program
 from .design_risk_management_framework import design_risk_management_framework
-from .define_capital_requirements import define_capital_requirements
-from .design_data_infrastructure import design_data_infrastructure
-from .identify_prime_brokerage_partners import identify_prime_brokerage_partners
-from .compile_business_plan import compile_business_plan
-from .create_hiring_strategy import create_hiring_strategy
+from .define_technology_stack import define_technology_stack
+from .clarify_fund_objectives import clarify_fund_objectives
+from .choose_investment_strategy import choose_investment_strategy
+from .outline_governance_structure import outline_governance_structure
+from .define_asset_universe import define_asset_universe
+from .choose_legal_entity_type import choose_legal_entity_type
+from .create_hiring_plan import create_hiring_plan
+from .produce_final_fund_plan_summary import produce_final_fund_plan_summary
+from .draft_operations_workflow import draft_operations_workflow
+from .select_jurisdiction import select_jurisdiction
 from .identify_regulatory_requirements import identify_regulatory_requirements
-from .design_trading_strategies import design_trading_strategies
-from .create_launch_timeline import create_launch_timeline
-from .develop_compliance_program import develop_compliance_program
-from .design_performance_measurement import design_performance_measurement
-from .specify_technology_architecture import specify_technology_architecture
-from . import _select_primary_markets
-from . import _define_core_trading_philosophy
-from . import _establish_operational_workflows
-from . import _choose_legal_structure
-from . import _build_research_capabilities
-from . import _design_data_infrastructure
-from . import _design_risk_management_framework
-from . import _define_capital_requirements
-from . import _identify_prime_brokerage_partners
-from . import _create_hiring_strategy
-from . import _compile_business_plan
-from . import _create_launch_timeline
-from . import _identify_regulatory_requirements
-from . import _design_trading_strategies
-from . import _develop_compliance_program
-from . import _design_performance_measurement
-from . import _specify_technology_architecture
+from .define_investor_profile import define_investor_profile
+from .draft_fee_structure import draft_fee_structure
+from .set_performance_and_risk_targets import set_performance_and_risk_targets
 
 
 __all__ = [
-    'define_core_trading_philosophy',
-    'establish_operational_workflows',
-    'select_primary_markets',
-    'build_research_capabilities',
-    'choose_legal_structure',
+    'list_service_providers',
+    'develop_timeline_and_milestones',
+    'estimate_setup_and_operating_costs',
+    'compile_pitch_deck_outline',
+    'design_compliance_program',
     'design_risk_management_framework',
-    'define_capital_requirements',
-    'design_data_infrastructure',
-    'identify_prime_brokerage_partners',
-    'compile_business_plan',
-    'create_hiring_strategy',
+    'define_technology_stack',
+    'clarify_fund_objectives',
+    'choose_investment_strategy',
+    'outline_governance_structure',
+    'define_asset_universe',
+    'choose_legal_entity_type',
+    'create_hiring_plan',
+    'produce_final_fund_plan_summary',
+    'draft_operations_workflow',
+    'select_jurisdiction',
     'identify_regulatory_requirements',
-    'design_trading_strategies',
-    'create_launch_timeline',
-    'develop_compliance_program',
-    'design_performance_measurement',
-    'specify_technology_architecture',
-    '_select_primary_markets',
-    '_define_core_trading_philosophy',
-    '_establish_operational_workflows',
-    '_choose_legal_structure',
-    '_build_research_capabilities',
-    '_design_data_infrastructure',
-    '_design_risk_management_framework',
-    '_define_capital_requirements',
-    '_identify_prime_brokerage_partners',
-    '_create_hiring_strategy',
-    '_compile_business_plan',
-    '_create_launch_timeline',
-    '_identify_regulatory_requirements',
-    '_design_trading_strategies',
-    '_develop_compliance_program',
-    '_design_performance_measurement',
-    '_specify_technology_architecture'
+    'define_investor_profile',
+    'draft_fee_structure',
+    'set_performance_and_risk_targets'
 ]

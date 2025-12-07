@@ -1,43 +1,34 @@
 # identify_regulatory_requirements PRD
 
 ## Description
-Map out regulatory registrations and compliance obligations
+Outline key regulatory filings and registrations.
 
 
 ## Implementation Plan
 
-### 1. Use the output from 'choose_legal_structure' to determine the type of entity for the trading firm
+### 1. Parse the parent node's output to extract the legal entity type and jurisdiction, normalizing the jurisdiction string to a canonical form (e.g., 'United States' → 'US', 'United Kingdom' → 'UK') and converting the entity type to a standard abbreviation (e.g., 'Limited Liability Company' → 'LLC').
 
 | Category | Details |
 | --- | --- |
-| **Reason** | The legal entity structure will impact the regulatory requirements for the trading firm |
-| **Impact** | MEDIUM |
-| **Complexity** | LOW |
-| **Method** | Select the 'entity_type' value from the 'choose_legal_structure' output structure |
-
-### 2. Use the output from 'select_primary_markets' to determine the selected primary markets
-
-| Category | Details |
-| --- | --- |
-| **Reason** | The selected primary markets will impact the regulatory requirements for the trading firm |
-| **Impact** | MEDIUM |
-| **Complexity** | LOW |
-| **Method** | Select the 'selected_markets' value from the 'select_primary_markets' output structure |
-
-### 3. Use regulatory research and data to map out the key regulatory requirements for the trading firm
-
-| Category | Details |
-| --- | --- |
-| **Reason** | Regulatory requirements can be complex and vary by jurisdiction |
+| **Reason** | Accurate key extraction ensures that subsequent lookup operations target the correct regulatory mapping table, preventing misspellings and case‑sensitivity errors that would otherwise lead to missing or incorrect filings. |
 | **Impact** | HIGH |
 | **Complexity** | MEDIUM |
-| **Method** | Consult with regulatory experts and conduct research to identify the key regulatory requirements |
+| **Method** | Implement a helper function that trims whitespace, converts to lowercase, and applies a predefined mapping dictionary for known jurisdiction names and entity type synonyms. Log any unknown values for audit. |
 
-### 4. Document the key regulatory requirements and their corresponding obligations
+### 2. Use a pre‑defined lookup table that maps each combination of jurisdiction and entity type to a tuple of (filing_name, governing_body). The table should cover the most common structures (LP, LLC, SICAV, partnership) and jurisdictions (US, UK, Cayman, Luxembourg, Delaware). For example, in the US an LLC or LP is required to register with the SEC via Form ADV; in the UK a UK‑based LP must register with the FCA; in Cayman a fund must register with the Cayman Islands Monetary Authority and may need to file with the Cayman Islands Securities Investment Business Licensing Authority if trading securities; in Luxembourg a SICAV must register with the CSSF.
 
 | Category | Details |
 | --- | --- |
-| **Reason** | Compliance obligations must be clearly understood and documented |
+| **Reason** | Centralizing regulatory requirements in a lookup table allows for deterministic and repeatable outputs, making the PRD easier to maintain and extend when new jurisdictions or entity types are added. |
+| **Impact** | HIGH |
+| **Complexity** | MEDIUM |
+| **Method** | Create a nested dictionary such as `REG_REQUIREMENTS[jurisdiction][entity_type] = {'filing': 'SEC Form ADV', 'body': 'SEC'}`. Populate this dictionary with at least 8–10 jurisdiction–entity combinations. Include a default fallback that returns empty lists with a warning if the combination is not found. |
+
+### 3. Generate the final output lists by iterating over the lookup result for the identified combination. Return two aligned lists: `filing_names` containing the filing titles and `governing_bodies` containing the corresponding regulatory authority names. If the lookup returns no data, emit empty lists and optionally log an error to alert the user of missing regulatory information.
+
+| Category | Details |
+| --- | --- |
+| **Reason** | Aligning the two output arrays ensures downstream nodes (e.g., design_compliance_program) can map each filing to a compliance requirement without ambiguity. |
 | **Impact** | MEDIUM |
 | **Complexity** | LOW |
-| **Method** | Create a comprehensive report outlining the key regulatory requirements and their corresponding obligations |
+| **Method** | Use a simple list comprehension: `filings = [entry['filing'] for entry in results]` and `bodies = [entry['body'] for entry in results]`. Wrap in a try/except block to capture and log any unexpected key errors. |

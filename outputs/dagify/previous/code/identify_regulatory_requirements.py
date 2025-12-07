@@ -1,3 +1,12 @@
+from ._identify_regulatory_requirements.format_markets_list import format_markets_list
+from ._identify_regulatory_requirements.conduct_regulatory_research import conduct_regulatory_research
+from ._identify_regulatory_requirements.map_regulatory_requirements import map_regulatory_requirements
+from ._identify_regulatory_requirements.document_regulatory_obligations import document_regulatory_obligations
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Use the output from 'choose_legal_structure' to determine the type of entity
 #   for the trading firm
@@ -36,8 +45,6 @@
 #           their corresponding obligations
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class ChooseLegalStructureOutput(BaseModel):
@@ -76,11 +83,35 @@ def identify_regulatory_requirements(choose_legal_structure_input: ChooseLegalSt
     Returns:
         IdentifyRegulatoryRequirementsOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Extract entity type from choose_legal_structure output
+    entity_type: str = choose_legal_structure_input.legal_entity
+    
+    # Extract selected markets from select_primary_markets output
+    selected_markets_list: List[str] = select_primary_markets_input.primary_markets
+    selected_markets: str = format_markets_list(markets=selected_markets_list)
+    
+    # Conduct regulatory research based on entity type and markets
+    regulatory_data: dict = conduct_regulatory_research(
+        entity_type=entity_type,
+        markets=selected_markets_list
+    )
+    
+    # Map regulatory requirements for the trading firm
+    mapped_requirements: dict = map_regulatory_requirements(
+        entity_type=entity_type,
+        markets=selected_markets_list,
+        regulatory_data=regulatory_data
+    )
+    
+    # Document the key regulatory requirements and obligations
+    formatted_requirements: str = document_regulatory_obligations(
+        requirements=mapped_requirements,
+        entity_type=entity_type,
+        markets=selected_markets_list
+    )
+    
     return IdentifyRegulatoryRequirementsOutput(
-        regulatory_requirements="",
-        entity_type="",
-        selected_markets="",
+        regulatory_requirements=formatted_requirements,
+        entity_type=entity_type,
+        selected_markets=selected_markets
     )

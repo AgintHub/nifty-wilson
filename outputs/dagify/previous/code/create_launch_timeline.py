@@ -1,3 +1,10 @@
+from ._create_launch_timeline.analyze_research_setup_timeline import analyze_research_setup_timeline
+from ._create_launch_timeline.analyze_operational_setup_timeline import analyze_operational_setup_timeline
+from ._create_launch_timeline.identify_resource_dependencies import identify_resource_dependencies
+from ._create_launch_timeline.create_phased_implementation_plan import create_phased_implementation_plan
+from ._create_launch_timeline.analyze_critical_path import analyze_critical_path
+from ._create_launch_timeline.format_dependencies_list import format_dependencies_list
+
 from pydantic import BaseModel, Field
 from typing import List
 
@@ -39,11 +46,48 @@ def create_launch_timeline(build_research_capabilities_input: BuildResearchCapab
     Returns:
         CreateLaunchTimelineOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Analyze research infrastructure requirements and timeline
+    research_timeline: str = analyze_research_setup_timeline(
+        infrastructure=build_research_capabilities_input.research_infrastructure,
+        tools=build_research_capabilities_input.research_tools,
+        frameworks=build_research_capabilities_input.data_analysis_frameworks
+    )
+    
+    # Analyze operational setup requirements and timeline
+    operational_timeline: str = analyze_operational_setup_timeline(
+        settlement_process=design_performance_measurement_input.trade_settlement_process,
+        pl_method=design_performance_measurement_input.pl_calculation_method,
+        risk_monitoring=design_performance_measurement_input.risk_monitoring_frequency,
+        reporting_schedule=design_performance_measurement_input.regulatory_reporting_schedule
+    )
+    
+    # Identify capital and resource dependencies
+    resource_dependencies: List[str] = identify_resource_dependencies(
+        capital_requirements=build_research_capabilities_input.research_capital_requirements,
+        roles=design_performance_measurement_input.roles_and_responsibilities
+    )
+    
+    # Create integrated 12-month timeline with milestones
+    integrated_timeline: str = create_phased_implementation_plan(
+        research_timeline=research_timeline,
+        operational_timeline=operational_timeline,
+        evaluation_criteria=build_research_capabilities_input.strategy_evaluation_criteria
+    )
+    
+    # Determine critical path and dependencies
+    critical_path_analysis: str = analyze_critical_path(
+        timeline=integrated_timeline,
+        dependencies=resource_dependencies
+    )
+    
+    # Format dependencies for output
+    formatted_dependencies: str = format_dependencies_list(
+        dependencies=resource_dependencies,
+        reconciliation_procedure=design_performance_measurement_input.position_reconciliation_procedure
+    )
+    
     return CreateLaunchTimelineOutput(
-        launch_timeline="",
-        dependencies="",
-        critical_path="",
+        launch_timeline=integrated_timeline,
+        dependencies=formatted_dependencies,
+        critical_path=critical_path_analysis
     )

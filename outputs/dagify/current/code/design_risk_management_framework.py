@@ -1,98 +1,103 @@
-from ._design_risk_management_framework.analyze_trading_strategies import analyze_trading_strategies
-from ._design_risk_management_framework.calculate_position_size_limits import calculate_position_size_limits
-from ._design_risk_management_framework.determine_concentration_metrics import determine_concentration_metrics
-from ._design_risk_management_framework.calculate_var_limits import calculate_var_limits
-from ._design_risk_management_framework.establish_drawdown_limits import establish_drawdown_limits
-from ._design_risk_management_framework.define_pre_trade_risk_measures import define_pre_trade_risk_measures
-from ._design_risk_management_framework.define_post_trade_risk_measures import define_post_trade_risk_measures
+# -- PRD --
+# 1. BULLET: Collect the numerical performance and risk targets from the parent node,
+#   specifically the annual gross return, volatility, Sharpe ratio, and
+#   maximum drawdown percentages, and store them in local variables.
+#   Reason: These metrics serve as the reference points for calibrating each risk
+#           control to the fund’s strategic objectives.
+#   Impact: HIGH
+#   Complexity: LOW
+#   Method: Parse JSON output of 'set_performance_and_risk_targets', assign values to
+#           variables: gross_return, volatility, sharpe_ratio,
+#           max_drawdown.
+# 
+# -----------------------------------------------------------------------------
+# 2. BULLET: Define a position limit rule that caps the total exposure per trade as a
+#   fixed percentage of the total AUM, calculated as 5% of the target gross
+#   return divided by the target Sharpe ratio, rounded to the nearest 0.5%.
+#   Reason: Position limits prevent over‑concentration and tie exposure to expected
+#           risk‑adjusted performance.
+#   Impact: HIGH
+#   Complexity: MEDIUM
+#   Method: Compute limit = round((gross_return / sharpe_ratio) * 0.05, 2). Ensure the
+#           result is expressed as a percentage of AUM.
+# 
+# -----------------------------------------------------------------------------
+# 3. BULLET: Set a VaR limit at the 95% confidence level equal to 1% of the portfolio
+#   value, scaled by the square root of the target volatility to reflect
+#   expected market swings.
+#   Reason: VaR limits quantify potential loss within a confidence interval and are
+#           directly linked to volatility expectations.
+#   Impact: HIGH
+#   Complexity: MEDIUM
+#   Method: VaR_limit = 0.01 * sqrt(volatility) * portfolio_value. Format as a
+#           percentage of AUM.
+# 
+# -----------------------------------------------------------------------------
+# 4. BULLET: Implement a stop‑loss rule that triggers an exit when a single trade’s
+#   unrealized loss exceeds 2% of its position size, or 1% of the total
+#   portfolio if the trade volatility exceeds the target volatility by more
+#   than 50%.
+#   Reason: Stop‑losses protect against unexpected adverse moves and adapt to
+#           trade‑specific risk.
+#   Impact: MEDIUM
+#   Complexity: MEDIUM
+#   Method: Use trade‑level volatility estimate to adjust the stop threshold; apply the
+#           higher of the two percentage triggers.
+# 
+# -----------------------------------------------------------------------------
+# 5. BULLET: Establish a liquidity threshold requiring that at least 20% of the portfolio
+#   remain in highly liquid instruments, ensuring the fund can meet liquidity
+#   demands within the maximum drawdown window.
+#   Reason: Liquidity thresholds safeguard against forced sales during stressed market
+#           conditions.
+#   Impact: MEDIUM
+#   Complexity: LOW
+#   Method: Maintain a separate liquid asset buffer; monitor daily liquidity ratio
+#           against the 20% benchmark.
+# 
+# -----------------------------------------------------------------------------
+# 6. BULLET: Compile the formulated controls into a single list of string statements, each
+#   clearly referencing the associated metric and percentage, and assign this
+#   list to the 'risk_controls' output field.
+#   Reason: The final output must adhere to the defined output structure and provide a
+#           consumable risk control summary for downstream nodes.
+#   Impact: HIGH
+#   Complexity: LOW
+#   Method: Concatenate formatted strings: e.g., "Position limit: ≤ X% of AUM", "VaR
+#           limit: 95% VaR ≤ 1% of portfolio", etc.; set risk_controls =
+#           [list of strings].
+# -- END PRD --
 
 from pydantic import BaseModel, Field
+from typing import List
 
 
-class DesignTradingStrategiesOutput(BaseModel):
-    """Pydantic model for design_trading_strategies node outputs."""
-    trading_strategy_count: int = Field(..., description="Number of trading strategies developed")
-    strategy_names: str = Field(..., description="List of trading strategy names")
-    market_maker_strategies: bool = Field(..., description="Whether market making strategies are included")
-    statistical_arbitrage_strategies: bool = Field(..., description="Whether statistical arbitrage strategies are included")
-    options_trading_strategies: bool = Field(..., description="Whether options trading strategies are included")
+class SetPerformanceAndRiskTargetsOutput(BaseModel):
+    """Pydantic model for set_performance_and_risk_targets node outputs."""
+    gross_return: float = Field(..., description="Target annual gross return expressed as a percentage (e.g., 15.0 for 15%).")
+    volatility: float = Field(..., description="Target annual volatility (standard deviation) expressed as a percentage.")
+    sharpe_ratio: float = Field(..., description="Target annual Sharpe ratio.")
+    max_drawdown: float = Field(..., description="Target maximum annual drawdown expressed as a percentage.")
 
 
 class DesignRiskManagementFrameworkOutput(BaseModel):
     """Pydantic model for design_risk_management_framework node outputs."""
-    position_size_limits: int = Field(..., description="List of position size limits by asset type")
-    portfolio_concentration_metrics: float = Field(..., description="List of portfolio concentration metrics")
-    var_limit: float = Field(..., description="Value-at-Risk (VaR) limit")
-    drawdown_limit: float = Field(..., description="Drawdown limit")
-    pre_trade_risk_measures: str = Field(..., description="List of pre-trade risk measures")
-    post_trade_risk_measures: str = Field(..., description="List of post-trade risk measures")
+    risk_controls: List[str] = Field(..., description="List of core risk control statements aligned with the target metrics.")
 
 
-def design_risk_management_framework(design_trading_strategies_input: DesignTradingStrategiesOutput, **kwargs) -> DesignRiskManagementFrameworkOutput:
-    """Establish comprehensive risk controls and limits
+def design_risk_management_framework(set_performance_and_risk_targets_input: SetPerformanceAndRiskTargetsOutput, **kwargs) -> DesignRiskManagementFrameworkOutput:
+    """Outline quantitative and qualitative risk controls.
 
     Args:
-        design_trading_strategies_input: Input from the 'design_trading_strategies' node.
+        set_performance_and_risk_targets_input: Input from the 'set_performance_and_risk_targets' node.
         **kwargs: Additional keyword arguments.
 
     Returns:
         DesignRiskManagementFrameworkOutput: Object containing outputs for this node.
     """
-    # Analyze trading strategies to determine appropriate risk controls
-    strategy_analysis: dict = analyze_trading_strategies(
-        strategy_count=design_trading_strategies_input.trading_strategy_count,
-        strategy_names=design_trading_strategies_input.strategy_names,
-        has_market_maker=design_trading_strategies_input.market_maker_strategies,
-        has_stat_arb=design_trading_strategies_input.statistical_arbitrage_strategies,
-        has_options=design_trading_strategies_input.options_trading_strategies
-    )
-    
-    # Calculate position size limits based on strategy types
-    position_limits: int = calculate_position_size_limits(
-        strategy_analysis=strategy_analysis,
-        strategy_types={
-            'market_maker': design_trading_strategies_input.market_maker_strategies,
-            'stat_arb': design_trading_strategies_input.statistical_arbitrage_strategies,
-            'options': design_trading_strategies_input.options_trading_strategies
-        }
-    )
-    
-    # Determine portfolio concentration metrics
-    concentration_metrics: float = determine_concentration_metrics(
-        strategy_count=design_trading_strategies_input.trading_strategy_count,
-        strategy_diversity=strategy_analysis
-    )
-    
-    # Set VaR limits based on strategy risk profiles
-    var_limit_value: float = calculate_var_limits(
-        strategy_analysis=strategy_analysis,
-        portfolio_metrics=concentration_metrics
-    )
-    
-    # Establish drawdown limits
-    drawdown_limit_value: float = establish_drawdown_limits(
-        strategy_types=strategy_analysis,
-        var_limit=var_limit_value
-    )
-    
-    # Define pre-trade risk measures
-    pre_trade_measures: str = define_pre_trade_risk_measures(
-        strategy_analysis=strategy_analysis,
-        position_limits=position_limits
-    )
-    
-    # Define post-trade risk measures
-    post_trade_measures: str = define_post_trade_risk_measures(
-        strategy_analysis=strategy_analysis,
-        var_limit=var_limit_value,
-        drawdown_limit=drawdown_limit_value
-    )
-    
+    # TODO: Implement this function
+
+    # Return stub output with placeholder values
     return DesignRiskManagementFrameworkOutput(
-        position_size_limits=position_limits,
-        portfolio_concentration_metrics=concentration_metrics,
-        var_limit=var_limit_value,
-        drawdown_limit=drawdown_limit_value,
-        pre_trade_risk_measures=pre_trade_measures,
-        post_trade_risk_measures=post_trade_measures,
+        risk_controls=[],
     )

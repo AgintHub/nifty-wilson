@@ -6,23 +6,26 @@ import json
 import sys
 from typing import Dict, Any, List, Callable, Coroutine, Union, Optional
 
-from code.build_research_capabilities import build_research_capabilities
-from code.choose_legal_structure import choose_legal_structure
-from code.compile_business_plan import compile_business_plan
-from code.create_hiring_strategy import create_hiring_strategy
-from code.create_launch_timeline import create_launch_timeline
-from code.define_capital_requirements import define_capital_requirements
-from code.define_core_trading_philosophy import define_core_trading_philosophy
-from code.design_data_infrastructure import design_data_infrastructure
-from code.design_performance_measurement import design_performance_measurement
+from code.choose_investment_strategy import choose_investment_strategy
+from code.choose_legal_entity_type import choose_legal_entity_type
+from code.clarify_fund_objectives import clarify_fund_objectives
+from code.compile_pitch_deck_outline import compile_pitch_deck_outline
+from code.create_hiring_plan import create_hiring_plan
+from code.define_asset_universe import define_asset_universe
+from code.define_investor_profile import define_investor_profile
+from code.define_technology_stack import define_technology_stack
+from code.design_compliance_program import design_compliance_program
 from code.design_risk_management_framework import design_risk_management_framework
-from code.design_trading_strategies import design_trading_strategies
-from code.develop_compliance_program import develop_compliance_program
-from code.establish_operational_workflows import establish_operational_workflows
-from code.identify_prime_brokerage_partners import identify_prime_brokerage_partners
+from code.develop_timeline_and_milestones import develop_timeline_and_milestones
+from code.draft_fee_structure import draft_fee_structure
+from code.draft_operations_workflow import draft_operations_workflow
+from code.estimate_setup_and_operating_costs import estimate_setup_and_operating_costs
 from code.identify_regulatory_requirements import identify_regulatory_requirements
-from code.select_primary_markets import select_primary_markets
-from code.specify_technology_architecture import specify_technology_architecture
+from code.list_service_providers import list_service_providers
+from code.outline_governance_structure import outline_governance_structure
+from code.produce_final_fund_plan_summary import produce_final_fund_plan_summary
+from code.select_jurisdiction import select_jurisdiction
+from code.set_performance_and_risk_targets import set_performance_and_risk_targets
 
 # Get async mode from environment variable or default to False
 ASYNC_MODE = os.environ.get('ASYNC_MODE', '').lower() in ('true', '1', 'yes', 'y')
@@ -44,23 +47,26 @@ def make_async(func):
 
     return async_wrapper
 
-build_research_capabilities_async = make_async(build_research_capabilities)
-choose_legal_structure_async = make_async(choose_legal_structure)
-compile_business_plan_async = make_async(compile_business_plan)
-create_hiring_strategy_async = make_async(create_hiring_strategy)
-create_launch_timeline_async = make_async(create_launch_timeline)
-define_capital_requirements_async = make_async(define_capital_requirements)
-define_core_trading_philosophy_async = make_async(define_core_trading_philosophy)
-design_data_infrastructure_async = make_async(design_data_infrastructure)
-design_performance_measurement_async = make_async(design_performance_measurement)
+choose_investment_strategy_async = make_async(choose_investment_strategy)
+choose_legal_entity_type_async = make_async(choose_legal_entity_type)
+clarify_fund_objectives_async = make_async(clarify_fund_objectives)
+compile_pitch_deck_outline_async = make_async(compile_pitch_deck_outline)
+create_hiring_plan_async = make_async(create_hiring_plan)
+define_asset_universe_async = make_async(define_asset_universe)
+define_investor_profile_async = make_async(define_investor_profile)
+define_technology_stack_async = make_async(define_technology_stack)
+design_compliance_program_async = make_async(design_compliance_program)
 design_risk_management_framework_async = make_async(design_risk_management_framework)
-design_trading_strategies_async = make_async(design_trading_strategies)
-develop_compliance_program_async = make_async(develop_compliance_program)
-establish_operational_workflows_async = make_async(establish_operational_workflows)
-identify_prime_brokerage_partners_async = make_async(identify_prime_brokerage_partners)
+develop_timeline_and_milestones_async = make_async(develop_timeline_and_milestones)
+draft_fee_structure_async = make_async(draft_fee_structure)
+draft_operations_workflow_async = make_async(draft_operations_workflow)
+estimate_setup_and_operating_costs_async = make_async(estimate_setup_and_operating_costs)
 identify_regulatory_requirements_async = make_async(identify_regulatory_requirements)
-select_primary_markets_async = make_async(select_primary_markets)
-specify_technology_architecture_async = make_async(specify_technology_architecture)
+list_service_providers_async = make_async(list_service_providers)
+outline_governance_structure_async = make_async(outline_governance_structure)
+produce_final_fund_plan_summary_async = make_async(produce_final_fund_plan_summary)
+select_jurisdiction_async = make_async(select_jurisdiction)
+set_performance_and_risk_targets_async = make_async(set_performance_and_risk_targets)
 
 async def run_workflow(user_input: str) -> Dict[str, Any]:
     """Execute the workflow by running each level in the topological sort.
@@ -74,125 +80,137 @@ async def run_workflow(user_input: str) -> Dict[str, Any]:
     # Store results for each node
     results = {}
 
-    # Level 0: choose_legal_structure, define_core_trading_philosophy
-    async def run_choose_legal_structure():
-        # Call the async version of choose_legal_structure with results from dependencies
-        return await choose_legal_structure_async(user_input)
-
-    async def run_define_core_trading_philosophy():
-        # Call the async version of define_core_trading_philosophy with results from dependencies
-        return await define_core_trading_philosophy_async(user_input)
+    # Level 0: clarify_fund_objectives
+    async def run_clarify_fund_objectives():
+        # Call the async version of clarify_fund_objectives with results from dependencies
+        return await clarify_fund_objectives_async(user_input)
 
     # Run level 0 nodes in parallel
-    level_0_results = await asyncio.gather(run_choose_legal_structure(), run_define_core_trading_philosophy())
-    results['choose_legal_structure'] = level_0_results[0]
-    results['define_core_trading_philosophy'] = level_0_results[1]
+    results['clarify_fund_objectives'] = await run_clarify_fund_objectives()
 
-    # Level 1: select_primary_markets
-    async def run_select_primary_markets():
-        # Call the async version of select_primary_markets with results from dependencies
-        return await select_primary_markets_async(results['define_core_trading_philosophy'])
+    # Level 1: define_investor_profile, select_jurisdiction, choose_investment_strategy
+    async def run_define_investor_profile():
+        # Call the async version of define_investor_profile with results from dependencies
+        return await define_investor_profile_async(results['clarify_fund_objectives'])
+
+    async def run_select_jurisdiction():
+        # Call the async version of select_jurisdiction with results from dependencies
+        return await select_jurisdiction_async(results['clarify_fund_objectives'])
+
+    async def run_choose_investment_strategy():
+        # Call the async version of choose_investment_strategy with results from dependencies
+        return await choose_investment_strategy_async(results['clarify_fund_objectives'])
 
     # Run level 1 nodes in parallel
-    results['select_primary_markets'] = await run_select_primary_markets()
+    level_1_results = await asyncio.gather(run_define_investor_profile(), run_select_jurisdiction(), run_choose_investment_strategy())
+    results['define_investor_profile'] = level_1_results[0]
+    results['select_jurisdiction'] = level_1_results[1]
+    results['choose_investment_strategy'] = level_1_results[2]
 
-    # Level 2: identify_regulatory_requirements, design_trading_strategies
-    async def run_identify_regulatory_requirements():
-        # Call the async version of identify_regulatory_requirements with results from dependencies
-        return await identify_regulatory_requirements_async(results['choose_legal_structure'], results['select_primary_markets'])
+    # Level 2: choose_legal_entity_type, set_performance_and_risk_targets, define_asset_universe
+    async def run_choose_legal_entity_type():
+        # Call the async version of choose_legal_entity_type with results from dependencies
+        return await choose_legal_entity_type_async(results['select_jurisdiction'])
 
-    async def run_design_trading_strategies():
-        # Call the async version of design_trading_strategies with results from dependencies
-        return await design_trading_strategies_async(results['define_core_trading_philosophy'], results['select_primary_markets'])
+    async def run_set_performance_and_risk_targets():
+        # Call the async version of set_performance_and_risk_targets with results from dependencies
+        return await set_performance_and_risk_targets_async(results['choose_investment_strategy'])
+
+    async def run_define_asset_universe():
+        # Call the async version of define_asset_universe with results from dependencies
+        return await define_asset_universe_async(results['choose_investment_strategy'])
 
     # Run level 2 nodes in parallel
-    level_2_results = await asyncio.gather(run_identify_regulatory_requirements(), run_design_trading_strategies())
-    results['identify_regulatory_requirements'] = level_2_results[0]
-    results['design_trading_strategies'] = level_2_results[1]
+    level_2_results = await asyncio.gather(run_choose_legal_entity_type(), run_set_performance_and_risk_targets(), run_define_asset_universe())
+    results['choose_legal_entity_type'] = level_2_results[0]
+    results['set_performance_and_risk_targets'] = level_2_results[1]
+    results['define_asset_universe'] = level_2_results[2]
 
-    # Level 3: design_risk_management_framework, specify_technology_architecture, develop_compliance_program
+    # Level 3: outline_governance_structure, identify_regulatory_requirements, design_risk_management_framework, list_service_providers
+    async def run_outline_governance_structure():
+        # Call the async version of outline_governance_structure with results from dependencies
+        return await outline_governance_structure_async(results['choose_legal_entity_type'])
+
+    async def run_identify_regulatory_requirements():
+        # Call the async version of identify_regulatory_requirements with results from dependencies
+        return await identify_regulatory_requirements_async(results['choose_legal_entity_type'])
+
     async def run_design_risk_management_framework():
         # Call the async version of design_risk_management_framework with results from dependencies
-        return await design_risk_management_framework_async(results['design_trading_strategies'])
+        return await design_risk_management_framework_async(results['set_performance_and_risk_targets'])
 
-    async def run_specify_technology_architecture():
-        # Call the async version of specify_technology_architecture with results from dependencies
-        return await specify_technology_architecture_async(results['design_trading_strategies'])
-
-    async def run_develop_compliance_program():
-        # Call the async version of develop_compliance_program with results from dependencies
-        return await develop_compliance_program_async(results['identify_regulatory_requirements'])
+    async def run_list_service_providers():
+        # Call the async version of list_service_providers with results from dependencies
+        return await list_service_providers_async(results['choose_legal_entity_type'])
 
     # Run level 3 nodes in parallel
-    level_3_results = await asyncio.gather(run_design_risk_management_framework(), run_specify_technology_architecture(), run_develop_compliance_program())
-    results['design_risk_management_framework'] = level_3_results[0]
-    results['specify_technology_architecture'] = level_3_results[1]
-    results['develop_compliance_program'] = level_3_results[2]
+    level_3_results = await asyncio.gather(run_outline_governance_structure(), run_identify_regulatory_requirements(), run_design_risk_management_framework(), run_list_service_providers())
+    results['outline_governance_structure'] = level_3_results[0]
+    results['identify_regulatory_requirements'] = level_3_results[1]
+    results['design_risk_management_framework'] = level_3_results[2]
+    results['list_service_providers'] = level_3_results[3]
 
-    # Level 4: create_hiring_strategy, design_data_infrastructure, define_capital_requirements
-    async def run_create_hiring_strategy():
-        # Call the async version of create_hiring_strategy with results from dependencies
-        return await create_hiring_strategy_async(results['specify_technology_architecture'], results['design_trading_strategies'])
+    # Level 4: estimate_setup_and_operating_costs, draft_operations_workflow, design_compliance_program
+    async def run_estimate_setup_and_operating_costs():
+        # Call the async version of estimate_setup_and_operating_costs with results from dependencies
+        return await estimate_setup_and_operating_costs_async(results['list_service_providers'])
 
-    async def run_design_data_infrastructure():
-        # Call the async version of design_data_infrastructure with results from dependencies
-        return await design_data_infrastructure_async(results['specify_technology_architecture'])
+    async def run_draft_operations_workflow():
+        # Call the async version of draft_operations_workflow with results from dependencies
+        return await draft_operations_workflow_async(results['define_asset_universe'], results['list_service_providers'], results['design_risk_management_framework'])
 
-    async def run_define_capital_requirements():
-        # Call the async version of define_capital_requirements with results from dependencies
-        return await define_capital_requirements_async(results['identify_regulatory_requirements'], results['design_risk_management_framework'])
+    async def run_design_compliance_program():
+        # Call the async version of design_compliance_program with results from dependencies
+        return await design_compliance_program_async(results['identify_regulatory_requirements'], results['design_risk_management_framework'])
 
     # Run level 4 nodes in parallel
-    level_4_results = await asyncio.gather(run_create_hiring_strategy(), run_design_data_infrastructure(), run_define_capital_requirements())
-    results['create_hiring_strategy'] = level_4_results[0]
-    results['design_data_infrastructure'] = level_4_results[1]
-    results['define_capital_requirements'] = level_4_results[2]
+    level_4_results = await asyncio.gather(run_estimate_setup_and_operating_costs(), run_draft_operations_workflow(), run_design_compliance_program())
+    results['estimate_setup_and_operating_costs'] = level_4_results[0]
+    results['draft_operations_workflow'] = level_4_results[1]
+    results['design_compliance_program'] = level_4_results[2]
 
-    # Level 5: identify_prime_brokerage_partners, build_research_capabilities
-    async def run_identify_prime_brokerage_partners():
-        # Call the async version of identify_prime_brokerage_partners with results from dependencies
-        return await identify_prime_brokerage_partners_async(results['select_primary_markets'], results['define_capital_requirements'])
+    # Level 5: define_technology_stack, create_hiring_plan, draft_fee_structure
+    async def run_define_technology_stack():
+        # Call the async version of define_technology_stack with results from dependencies
+        return await define_technology_stack_async(results['draft_operations_workflow'])
 
-    async def run_build_research_capabilities():
-        # Call the async version of build_research_capabilities with results from dependencies
-        return await build_research_capabilities_async(results['design_data_infrastructure'], results['create_hiring_strategy'])
+    async def run_create_hiring_plan():
+        # Call the async version of create_hiring_plan with results from dependencies
+        return await create_hiring_plan_async(results['draft_operations_workflow'])
+
+    async def run_draft_fee_structure():
+        # Call the async version of draft_fee_structure with results from dependencies
+        return await draft_fee_structure_async(results['set_performance_and_risk_targets'], results['estimate_setup_and_operating_costs'])
 
     # Run level 5 nodes in parallel
-    level_5_results = await asyncio.gather(run_identify_prime_brokerage_partners(), run_build_research_capabilities())
-    results['identify_prime_brokerage_partners'] = level_5_results[0]
-    results['build_research_capabilities'] = level_5_results[1]
+    level_5_results = await asyncio.gather(run_define_technology_stack(), run_create_hiring_plan(), run_draft_fee_structure())
+    results['define_technology_stack'] = level_5_results[0]
+    results['create_hiring_plan'] = level_5_results[1]
+    results['draft_fee_structure'] = level_5_results[2]
 
-    # Level 6: establish_operational_workflows
-    async def run_establish_operational_workflows():
-        # Call the async version of establish_operational_workflows with results from dependencies
-        return await establish_operational_workflows_async(results['design_risk_management_framework'], results['identify_prime_brokerage_partners'], results['develop_compliance_program'])
+    # Level 6: compile_pitch_deck_outline
+    async def run_compile_pitch_deck_outline():
+        # Call the async version of compile_pitch_deck_outline with results from dependencies
+        return await compile_pitch_deck_outline_async(results['clarify_fund_objectives'], results['define_investor_profile'], results['choose_investment_strategy'], results['set_performance_and_risk_targets'], results['draft_fee_structure'], results['design_risk_management_framework'])
 
     # Run level 6 nodes in parallel
-    results['establish_operational_workflows'] = await run_establish_operational_workflows()
+    results['compile_pitch_deck_outline'] = await run_compile_pitch_deck_outline()
 
-    # Level 7: design_performance_measurement
-    async def run_design_performance_measurement():
-        # Call the async version of design_performance_measurement with results from dependencies
-        return await design_performance_measurement_async(results['establish_operational_workflows'])
+    # Level 7: develop_timeline_and_milestones
+    async def run_develop_timeline_and_milestones():
+        # Call the async version of develop_timeline_and_milestones with results from dependencies
+        return await develop_timeline_and_milestones_async(results['draft_operations_workflow'], results['define_technology_stack'], results['create_hiring_plan'], results['compile_pitch_deck_outline'])
 
     # Run level 7 nodes in parallel
-    results['design_performance_measurement'] = await run_design_performance_measurement()
+    results['develop_timeline_and_milestones'] = await run_develop_timeline_and_milestones()
 
-    # Level 8: create_launch_timeline
-    async def run_create_launch_timeline():
-        # Call the async version of create_launch_timeline with results from dependencies
-        return await create_launch_timeline_async(results['build_research_capabilities'], results['design_performance_measurement'])
+    # Level 8: produce_final_fund_plan_summary
+    async def run_produce_final_fund_plan_summary():
+        # Call the async version of produce_final_fund_plan_summary with results from dependencies
+        return await produce_final_fund_plan_summary_async(results['design_compliance_program'], results['compile_pitch_deck_outline'], results['develop_timeline_and_milestones'])
 
     # Run level 8 nodes in parallel
-    results['create_launch_timeline'] = await run_create_launch_timeline()
-
-    # Level 9: compile_business_plan
-    async def run_compile_business_plan():
-        # Call the async version of compile_business_plan with results from dependencies
-        return await compile_business_plan_async(results['create_launch_timeline'])
-
-    # Run level 9 nodes in parallel
-    results['compile_business_plan'] = await run_compile_business_plan()
+    results['produce_final_fund_plan_summary'] = await run_produce_final_fund_plan_summary()
 
     # Return all results
     return results

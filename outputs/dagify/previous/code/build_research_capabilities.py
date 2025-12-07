@@ -1,3 +1,14 @@
+from ._build_research_capabilities.analyze_data_infrastructure_requirements import analyze_data_infrastructure_requirements
+from ._build_research_capabilities.build_research_infrastructure_description import build_research_infrastructure_description
+from ._build_research_capabilities.select_research_tools import select_research_tools
+from ._build_research_capabilities.select_data_analysis_frameworks import select_data_analysis_frameworks
+from ._build_research_capabilities.define_strategy_evaluation_criteria import define_strategy_evaluation_criteria
+from ._build_research_capabilities.calculate_research_capital_requirements import calculate_research_capital_requirements
+
+from pydantic import BaseModel, Field
+from typing import List
+
+
 # -- PRD --
 # 1. BULLET: Identify the research infrastructure requirements based on the data
 #   infrastructure design and trading strategy needs.
@@ -49,8 +60,6 @@
 #           this information to estimate the research capital requirements.
 # -- END PRD --
 
-from pydantic import BaseModel, Field
-from typing import List
 
 
 class DesignDataInfrastructureOutput(BaseModel):
@@ -92,13 +101,49 @@ def build_research_capabilities(design_data_infrastructure_input: DesignDataInfr
     Returns:
         BuildResearchCapabilitiesOutput: Object containing outputs for this node.
     """
-    # TODO: Implement this function
-
-    # Return stub output with placeholder values
+    # Identify research infrastructure requirements based on data infrastructure design
+    infrastructure_requirements: List[str] = analyze_data_infrastructure_requirements(
+        data_infrastructure_design=design_data_infrastructure_input.data_infrastructure_design,
+        technology_requirements=design_data_infrastructure_input.technology_requirements,
+        research_data_systems=design_data_infrastructure_input.research_data_systems
+    )
+    
+    # Build research infrastructure description from requirements
+    research_infrastructure_desc: str = build_research_infrastructure_description(
+        requirements=infrastructure_requirements,
+        role_requirements=create_hiring_strategy_input.role_requirements
+    )
+    
+    # Develop list of research tools and data analysis frameworks
+    selected_research_tools: List[str] = select_research_tools(
+        infrastructure_requirements=infrastructure_requirements,
+        data_processing_pipelines=design_data_infrastructure_input.data_processing_pipelines
+    )
+    
+    selected_frameworks: List[str] = select_data_analysis_frameworks(
+        infrastructure_requirements=infrastructure_requirements,
+        alternative_data_sources=design_data_infrastructure_input.alternative_data_sources
+    )
+    
+    # Define strategy evaluation criteria based on research infrastructure
+    evaluation_criteria: List[str] = define_strategy_evaluation_criteria(
+        research_infrastructure=research_infrastructure_desc,
+        research_tools=selected_research_tools,
+        data_analysis_frameworks=selected_frameworks
+    )
+    
+    # Determine research capital requirements
+    capital_requirements: List[float] = calculate_research_capital_requirements(
+        research_infrastructure=research_infrastructure_desc,
+        research_tools=selected_research_tools,
+        target_hiring_numbers=create_hiring_strategy_input.target_hiring_numbers,
+        compensation_structure=create_hiring_strategy_input.compensation_structure
+    )
+    
     return BuildResearchCapabilitiesOutput(
-        research_infrastructure="",
-        research_tools=[],
-        data_analysis_frameworks=[],
-        strategy_evaluation_criteria=[],
-        research_capital_requirements=[],
+        research_infrastructure=research_infrastructure_desc,
+        research_tools=selected_research_tools,
+        data_analysis_frameworks=selected_frameworks,
+        strategy_evaluation_criteria=evaluation_criteria,
+        research_capital_requirements=capital_requirements
     )
