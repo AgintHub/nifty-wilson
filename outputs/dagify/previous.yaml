@@ -1,88 +1,73 @@
 dag_type: plain_text
 description: Analyze the thermal conductivity of boron in a mine shaft in the winter
-  using sensor data and Springer articles in the last ten years, via DOI.
+  using sensor data via Springer article library using DOI
 name: analyze_thermal_conductivity
 nodes:
   analyze_sensor_data:
     agent: false
-    description: Analyze the collected sensor data to understand the conditions in
-      the mine shaft.
+    description: Analyze the collected sensor data to understand environmental conditions
+      in the mine shaft
     name: analyze_sensor_data
     nodes_depended_on:
-    - fetch_sensor_data
+    - collect_sensor_data
+    - extract_relevant_data_from_article
     nodes_dependent_on:
-    - integrate_data_and_literature
+    - compare_sensor_data_with_article_findings
     prompt: Analyze the sensor data to determine temperature fluctuations, humidity
-      levels, and other relevant factors in the mine shaft during winter.
-  compile_analysis_report:
+      levels, and other relevant factors in the mine shaft during winter. Use this
+      information to understand the environmental conditions.
+  collect_sensor_data:
     agent: false
-    description: Compile the findings into a comprehensive report.
-    name: compile_analysis_report
+    description: Collect sensor data from the mine shaft in winter
+    name: collect_sensor_data
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - analyze_sensor_data
+    prompt: Gather sensor data related to temperature, humidity, and other relevant
+      parameters from the mine shaft during winter. Ensure data is in a suitable format
+      for analysis.
+  compare_sensor_data_with_article_findings:
+    agent: false
+    description: Compare the analyzed sensor data with the findings from the Springer
+      article regarding thermal conductivity of boron
+    name: compare_sensor_data_with_article_findings
     nodes_depended_on:
-    - integrate_data_and_literature
+    - analyze_sensor_data
+    - extract_relevant_data_from_article
+    nodes_dependent_on:
+    - synthesize_comparison_results
+    prompt: Compare the insights gained from the sensor data analysis with the results
+      and conclusions from the article about the thermal conductivity of boron. Identify
+      any correlations or discrepancies.
+  extract_relevant_data_from_article:
+    agent: false
+    description: Extract relevant data related to thermal conductivity of boron from
+      the article retrieved using the DOI
+    name: extract_relevant_data_from_article
+    nodes_depended_on:
+    - retrieve_doi_metadata
+    nodes_dependent_on:
+    - analyze_sensor_data
+    prompt: Analyze the article retrieved using the DOI and extract data related to
+      the thermal conductivity of boron. Focus on methodologies, results, and conclusions.
+  retrieve_doi_metadata:
+    agent: false
+    description: Retrieve metadata associated with the given DOI from the Springer
+      article library
+    name: retrieve_doi_metadata
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - extract_relevant_data_from_article
+    prompt: Use the provided DOI to fetch metadata from the Springer article library.
+      Extract title, authors, publication date, and keywords.
+  synthesize_comparison_results:
+    agent: false
+    description: Synthesize the results of comparing sensor data with article findings
+      into a comprehensive analysis
+    name: synthesize_comparison_results
+    nodes_depended_on:
+    - compare_sensor_data_with_article_findings
     nodes_dependent_on: []
-    prompt: Prepare a detailed report on the thermal conductivity of boron in the
-      mine shaft during winter, incorporating both sensor data analysis and literature
-      review findings.
-  download_articles_via_doi:
-    agent: false
-    description: Download articles using the retrieved DOIs.
-    name: download_articles_via_doi
-    nodes_depended_on:
-    - retrieve_relevant_dois
-    nodes_dependent_on:
-    - extract_relevant_info_from_articles
-    prompt: Use the retrieved DOIs to download the corresponding Springer articles.
-  extract_relevant_info_from_articles:
-    agent: false
-    description: Extract relevant information from the downloaded articles related
-      to the thermal conductivity of boron.
-    name: extract_relevant_info_from_articles
-    nodes_depended_on:
-    - download_articles_via_doi
-    nodes_dependent_on:
-    - integrate_data_and_literature
-    prompt: Extract data and findings related to the thermal conductivity of boron
-      from the downloaded articles.
-  fetch_sensor_data:
-    agent: false
-    description: Fetch sensor data related to the mine shaft in winter.
-    name: fetch_sensor_data
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - analyze_sensor_data
-    prompt: Collect sensor data related to temperature, humidity, and other relevant
-      factors from the mine shaft during winter.
-  integrate_data_and_literature:
-    agent: false
-    description: Integrate the analyzed sensor data with the information extracted
-      from the articles to analyze the thermal conductivity of boron.
-    name: integrate_data_and_literature
-    nodes_depended_on:
-    - analyze_sensor_data
-    - extract_relevant_info_from_articles
-    nodes_dependent_on:
-    - compile_analysis_report
-    prompt: Combine the insights from the sensor data analysis and the literature
-      review to analyze the thermal conductivity of boron in the mine shaft during
-      winter.
-  retrieve_relevant_dois:
-    agent: false
-    description: Retrieve DOIs of relevant Springer articles from the last ten years
-      related to the thermal conductivity of boron.
-    name: retrieve_relevant_dois
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - search_springer_articles
-    prompt: Search for Springer articles from the last ten years related to the thermal
-      conductivity of boron and retrieve their DOIs.
-  search_springer_articles:
-    agent: false
-    description: Search for Springer articles related to the thermal conductivity
-      of boron in the last ten years.
-    name: search_springer_articles
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - retrieve_relevant_dois
-    prompt: Conduct a search for Springer articles from the last ten years related
-      to the thermal conductivity of boron.
+    prompt: Compile the comparison results into a detailed analysis. Discuss the implications
+      of the findings on the thermal conductivity of boron in the mine shaft during
+      winter. Highlight any significant observations or insights.
