@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: Analyze the thermal conductivity of boron in a mine shaft in the winter
-  using sensor data via Springer article library using DOI
+dag_type: typed
+description: Generated workflow from UI.
 name: analyze_thermal_conductivity
 nodes:
   analyze_sensor_data:
@@ -11,8 +10,48 @@ nodes:
     nodes_depended_on:
     - collect_sensor_data
     - extract_relevant_data_from_article
-    nodes_dependent_on:
-    - compare_sensor_data_with_article_findings
+    nodes_dependent_on: []
+    output_structure:
+    - description: Average temperature (°C) over the measurement period
+      key: avg_temperature
+      type: float
+    - description: Maximum recorded temperature (°C)
+      key: max_temperature
+      type: float
+    - description: Minimum recorded temperature (°C)
+      key: min_temperature
+      type: float
+    - description: Range of temperature (max - min) in °C
+      key: temperature_range
+      type: float
+    - description: Variance of temperature measurements
+      key: temperature_variance
+      type: float
+    - description: Overall temperature trend during the period (e.g., 'rising', 'stable',
+        'falling')
+      key: temperature_trend
+      type: str
+    - description: Average relative humidity (%)
+      key: avg_humidity
+      type: float
+    - description: Maximum recorded humidity (%)
+      key: max_humidity
+      type: float
+    - description: Minimum recorded humidity (%)
+      key: min_humidity
+      type: float
+    - description: Range of humidity (max - min) in %
+      key: humidity_range
+      type: float
+    - description: Variance of humidity measurements
+      key: humidity_variance
+      type: float
+    - description: Overall humidity trend during the period
+      key: humidity_trend
+      type: str
+    - description: Indicates whether the sensor data passed quality checks
+      key: is_data_valid
+      type: bool
     prompt: Analyze the sensor data to determine temperature fluctuations, humidity
       levels, and other relevant factors in the mine shaft during winter. Use this
       information to understand the environmental conditions.
@@ -21,8 +60,20 @@ nodes:
     description: Collect sensor data from the mine shaft in winter
     name: collect_sensor_data
     nodes_depended_on: []
-    nodes_dependent_on:
-    - analyze_sensor_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of temperature readings collected from the mine shaft
+      key: temperature_readings
+      type: List[float]
+    - description: List of humidity readings collected from the mine shaft
+      key: humidity_readings
+      type: List[float]
+    - description: List of timestamps corresponding to each data point collected
+      key: timestamp_readings
+      type: List[str]
+    - description: Indicates whether the collected data is valid for analysis
+      key: is_data_valid
+      type: bool
     prompt: Gather sensor data related to temperature, humidity, and other relevant
       parameters from the mine shaft during winter. Ensure data is in a suitable format
       for analysis.
@@ -34,8 +85,29 @@ nodes:
     nodes_depended_on:
     - analyze_sensor_data
     - extract_relevant_data_from_article
-    nodes_dependent_on:
-    - synthesize_comparison_results
+    nodes_dependent_on: []
+    output_structure:
+    - description: Correlation coefficient between sensor-derived temperature trend
+        and article's thermal conductivity trend.
+      key: correlation_coefficient
+      type: float
+    - description: Average temperature difference between sensor data and article
+        reference.
+      key: avg_temp_difference
+      type: float
+    - description: Average difference in reported thermal conductivity of boron compared
+        to sensor-derived estimate.
+      key: thermal_conductivity_difference
+      type: float
+    - description: Textual summary of key discrepancies identified.
+      key: discrepancy_summary
+      type: str
+    - description: True if overall findings are consistent; False otherwise.
+      key: findings_match
+      type: bool
+    - description: List of notable observations from comparison.
+      key: significant_observations
+      type: List[str]
     prompt: Compare the insights gained from the sensor data analysis with the results
       and conclusions from the article about the thermal conductivity of boron. Identify
       any correlations or discrepancies.
@@ -46,8 +118,31 @@ nodes:
     name: extract_relevant_data_from_article
     nodes_depended_on:
     - retrieve_doi_metadata
-    nodes_dependent_on:
-    - analyze_sensor_data
+    nodes_dependent_on: []
+    output_structure:
+    - description: Text describing the experimental or computational methodology used
+        to determine thermal conductivity.
+      key: methodology_description
+      type: str
+    - description: Measured or calculated thermal conductivity value of boron in watts
+        per meter-kelvin.
+      key: conductivity_value_wmK
+      type: float
+    - description: Temperature (in kelvin) at which the conductivity was measured
+        or calculated.
+      key: measurement_temperature
+      type: float
+    - description: Brief description of the environmental or sample conditions during
+        measurement (e.g., pressure, sample purity).
+      key: measurement_conditions
+      type: str
+    - description: List of concise findings or observations reported in the article
+        regarding boron’s thermal conductivity.
+      key: key_findings
+      type: List[str]
+    - description: Summary of the authors’ conclusions about boron’s thermal conductivity.
+      key: conclusion_summary
+      type: str
     prompt: Analyze the article retrieved using the DOI and extract data related to
       the thermal conductivity of boron. Focus on methodologies, results, and conclusions.
   retrieve_doi_metadata:
@@ -56,8 +151,20 @@ nodes:
       article library
     name: retrieve_doi_metadata
     nodes_depended_on: []
-    nodes_dependent_on:
-    - extract_relevant_data_from_article
+    nodes_dependent_on: []
+    output_structure:
+    - description: The title of the Springer article
+      key: title
+      type: str
+    - description: List of authors of the article
+      key: authors
+      type: List[str]
+    - description: Publication date of the article in ISO 8601 format (YYYY-MM-DD)
+      key: publication_date
+      type: str
+    - description: List of keywords associated with the article
+      key: keywords
+      type: List[str]
     prompt: Use the provided DOI to fetch metadata from the Springer article library.
       Extract title, authors, publication date, and keywords.
   synthesize_comparison_results:
@@ -68,6 +175,29 @@ nodes:
     nodes_depended_on:
     - compare_sensor_data_with_article_findings
     nodes_dependent_on: []
+    output_structure:
+    - description: A concise paragraph summarizing the key outcomes of the comparison.
+      key: overall_summary
+      type: str
+    - description: List of important observations identified during the comparison.
+      key: key_observations
+      type: List[str]
+    - description: A numeric value (0 to 1) indicating the strength of correlation
+        between sensor data trends and the article’s reported thermal conductivity
+        values.
+      key: correlation_score
+      type: float
+    - description: List of notable discrepancies or conflicting data points between
+        the sensor analysis and the article.
+      key: discrepancies
+      type: List[str]
+    - description: Explanation of how the comparison results affect understanding
+        of boron thermal conductivity under winter mine conditions.
+      key: implications
+      type: str
+    - description: Practical recommendations or next steps derived from the analysis.
+      key: recommendations
+      type: List[str]
     prompt: Compile the comparison results into a detailed analysis. Discuss the implications
       of the findings on the thermal conductivity of boron in the mine shaft during
       winter. Highlight any significant observations or insights.
