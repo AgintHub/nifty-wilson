@@ -1,11 +1,11 @@
 dag_type: plain_text
-description: A workflow for writing a 7-chapter fantasy novel from cover to outline
-  to each chapter, and final assembly.
-name: write_fantasy_novel
+description: Write a fantasy novel with 9 chapters, including cover, index, and a
+  final assembled document.
+name: write_fantasy_novel_with_9_chapters
 nodes:
   assemble_final_novel:
     agent: false
-    description: Compile the final novel from the written chapters, cover, and index
+    description: Compile the final novel from the written chapters, cover, and index.
     name: assemble_final_novel
     nodes_depended_on:
     - write_chapter_1
@@ -15,6 +15,8 @@ nodes:
     - write_chapter_5
     - write_chapter_6
     - write_chapter_7
+    - write_chapter_8
+    - write_chapter_9
     - create_novel_cover
     - create_novel_index
     nodes_dependent_on: []
@@ -22,16 +24,15 @@ nodes:
       index into a cohesive document.
   create_novel_cover:
     agent: false
-    description: Design a captivating cover for the novel
+    description: Design a captivating cover for the novel.
     name: create_novel_cover
     nodes_depended_on: []
-    nodes_dependent_on:
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Design a cover for a fantasy novel that captures the essence of the story.
       Include title, author name, and a relevant image.
   create_novel_index:
     agent: false
-    description: Generate an index for the novel
+    description: Generate an index for the novel.
     name: create_novel_index
     nodes_depended_on:
     - write_chapter_1
@@ -41,98 +42,96 @@ nodes:
     - write_chapter_5
     - write_chapter_6
     - write_chapter_7
-    nodes_dependent_on:
-    - assemble_final_novel
+    - write_chapter_8
+    - write_chapter_9
+    nodes_dependent_on: []
     prompt: Create an index for the novel, including key terms, characters, and locations.
   develop_novel_outline:
     agent: false
-    description: Create a detailed outline for the 7-chapter fantasy novel
+    description: Create a detailed outline for a 9‑chapter fantasy novel.
     name: develop_novel_outline
     nodes_depended_on: []
-    nodes_dependent_on:
-    - write_chapter_1
-    - write_chapter_2
-    - write_chapter_3
-    - write_chapter_4
-    - write_chapter_5
-    - write_chapter_6
-    - write_chapter_7
-    prompt: Develop a detailed outline for a 7-chapter fantasy novel, including character
+    nodes_dependent_on: []
+    prompt: Develop a detailed outline for a 9‑chapter fantasy novel, including character
       arcs, plot twists, and key events.
   write_chapter_1:
     agent: false
-    description: Write the first chapter of the novel
+    description: Write the first chapter of the novel.
     name: write_chapter_1
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the first chapter of the fantasy novel based on the provided outline.
       Focus on introducing characters and setting.
   write_chapter_2:
     agent: false
-    description: Write the second chapter of the novel
+    description: Write the second chapter of the novel.
     name: write_chapter_2
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the second chapter of the fantasy novel based on the provided outline.
       Continue developing characters and plot.
   write_chapter_3:
     agent: false
-    description: Write the third chapter of the novel
+    description: Write the third chapter of the novel.
     name: write_chapter_3
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the third chapter of the fantasy novel based on the provided outline.
       Introduce conflicts and tensions.
   write_chapter_4:
     agent: false
-    description: Write the fourth chapter of the novel
+    description: Write the fourth chapter of the novel.
     name: write_chapter_4
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the fourth chapter of the fantasy novel based on the provided outline.
       Develop plot twists and character arcs.
   write_chapter_5:
     agent: false
-    description: Write the fifth chapter of the novel
+    description: Write the fifth chapter of the novel.
     name: write_chapter_5
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the fifth chapter of the fantasy novel based on the provided outline.
       Continue plot development.
   write_chapter_6:
     agent: false
-    description: Write the sixth chapter of the novel
+    description: Write the sixth chapter of the novel.
     name: write_chapter_6
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the sixth chapter of the fantasy novel based on the provided outline.
       Build towards the climax.
   write_chapter_7:
     agent: false
-    description: Write the seventh chapter of the novel
+    description: Write the seventh chapter of the novel.
     name: write_chapter_7
     nodes_depended_on:
     - develop_novel_outline
-    nodes_dependent_on:
-    - create_novel_index
-    - assemble_final_novel
+    nodes_dependent_on: []
     prompt: Write the seventh chapter of the fantasy novel based on the provided outline.
       Conclude the story with a satisfying ending.
+  write_chapter_8:
+    agent: false
+    description: Write the eighth chapter of the novel.
+    name: write_chapter_8
+    nodes_depended_on:
+    - develop_novel_outline
+    nodes_dependent_on: []
+    prompt: Write the eighth chapter of the fantasy novel based on the provided outline.
+      Continue the narrative arc towards resolution.
+  write_chapter_9:
+    agent: false
+    description: Write the ninth chapter of the novel.
+    name: write_chapter_9
+    nodes_depended_on:
+    - develop_novel_outline
+    nodes_dependent_on: []
+    prompt: Write the ninth chapter of the fantasy novel based on the provided outline.
+      Provide a final resolution and wrap-up.
