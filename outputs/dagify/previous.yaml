@@ -1,293 +1,138 @@
-dag_type: typed
-description: Generated workflow from UI.
-name: nmeurips_conference_organization
+dag_type: plain_text
+description: A workflow for writing a 7-chapter fantasy novel from cover to outline
+  to each chapter, and final assembly.
+name: write_fantasy_novel
 nodes:
-  assemble_organizing_committee:
+  assemble_final_novel:
     agent: false
-    description: Gather a team of experts to help organize the conference
-    name: assemble_organizing_committee
+    description: Compile the final novel from the written chapters, cover, and index
+    name: assemble_final_novel
     nodes_depended_on:
-    - define_conference_objectives
+    - write_chapter_1
+    - write_chapter_2
+    - write_chapter_3
+    - write_chapter_4
+    - write_chapter_5
+    - write_chapter_6
+    - write_chapter_7
+    - create_novel_cover
+    - create_novel_index
     nodes_dependent_on: []
-    output_structure:
-    - description: Total number of committee members identified (between 8 and 10).
-      key: committee_member_count
-      type: int
-    - description: List of the names of each committee member.
-      key: committee_member_names
-      type: List[str]
-    - description: List of the affiliations (e.g., university, company, organization)
-        corresponding to each committee member.
-      key: committee_member_affiliations
-      type: List[str]
-    - description: List of brief role descriptions and responsibilities for each committee
-        member.
-      key: committee_member_roles
-      type: List[str]
-    prompt: Identify and list 8-10 potential committee members with diverse expertise
-      in AI, event planning, and marketing. Include their names, affiliations, and
-      a brief description of their roles and responsibilities.
-  coordinate_marketing_and_promotion:
+    prompt: Compile the final fantasy novel by combining the cover, chapters, and
+      index into a cohesive document.
+  create_novel_cover:
     agent: false
-    description: Develop a marketing and promotion strategy for the conference
-    name: coordinate_marketing_and_promotion
-    nodes_depended_on:
-    - define_conference_objectives
-    - create_conference_website
-    nodes_dependent_on: []
-    output_structure:
-    - description: List of 5-7 potential marketing channels
-      key: marketing_channels
-      type: List[str]
-    - description: List of brief descriptions of the content and messaging for each
-        marketing channel
-      key: content_descriptions
-      type: List[str]
-    - description: Description of the target audience for the marketing campaign
-      key: target_audience
-      type: str
-    - description: Budget allocated for the marketing and promotion campaign
-      key: promotion_budget
-      type: float
-    - description: Timeline for the marketing and promotion campaign
-      key: marketing_timeline
-      type: str
-    prompt: Create a marketing plan that leverages social media, email marketing,
-      and targeted advertising to promote the conference. Identify and list 5-7 potential
-      marketing channels and provide a brief description of the content and messaging
-      for each.
-  create_conference_website:
-    agent: false
-    description: Design and launch a website for the conference
-    name: create_conference_website
-    nodes_depended_on:
-    - define_conference_objectives
-    - select_venue_and_dates
-    nodes_dependent_on: []
-    output_structure:
-    - description: URL of the conference website
-      key: website_url
-      type: str
-    - description: List of main pages on the website (e.g. home, program, speakers,
-        registration)
-      key: main_pages
-      type: List[str]
-    - description: Brief description of the content on each main page
-      key: page_contents
-      type: List[str]
-    - description: Wireframe of the website's main pages
-      key: wireframe
-      type: str
-    - description: Whether the website is user-friendly and accessible
-      key: user_friendliness
-      type: bool
-    - description: Clear instructions for registration and submission
-      key: registration_process
-      type: str
-    prompt: Develop a website that showcases the conference program, schedule, speakers,
-      and logistics. Ensure the website is user-friendly, accessible, and provides
-      clear instructions for registration and submission. Provide a wireframe of the
-      website's main pages and a brief description of the content.
-  define_conference_objectives:
-    agent: false
-    description: Determine the primary goals and themes of the NMEURIPS conference
-    name: define_conference_objectives
+    description: Design a captivating cover for the novel
+    name: create_novel_cover
     nodes_depended_on: []
-    nodes_dependent_on: []
-    output_structure:
-    - description: A list of core objectives and themes of the NMEURIPS conference
-      key: conference_objectives
-      type: List[str]
-    prompt: Based on the conference name and location, identify the core objectives
-      and themes of NMEURIPS. Consider the target audience, AI trends, and innovative
-      ideas. Provide a concise bullet list (max 8 bullets).
-  design_conference_program:
+    nodes_dependent_on:
+    - assemble_final_novel
+    prompt: Design a cover for a fantasy novel that captures the essence of the story.
+      Include title, author name, and a relevant image.
+  create_novel_index:
     agent: false
-    description: Create a preliminary program schedule and content outline
-    name: design_conference_program
+    description: Generate an index for the novel
+    name: create_novel_index
     nodes_depended_on:
-    - develop_call_for_papers
-    nodes_dependent_on: []
-    output_structure:
-    - description: High-level outline of the conference program schedule
-      key: program_schedule_outline
-      type: str
-    - description: List of session titles for the conference program
-      key: session_titles
-      type: List[str]
-    - description: List of speaker names for the conference program
-      key: speaker_names
-      type: List[str]
-    - description: List of event types (e.g., keynote talks, paper presentations,
-        workshops, social events)
-      key: event_types
-      type: List[str]
-    - description: Whether the program schedule is well-structured and logical
-      key: is_well_structured
-      type: bool
-    prompt: Based on the call for papers and invited speaker solicitations, create
-      a preliminary program schedule, including keynote talks, paper presentations,
-      workshops, and social events. Provide a high-level outline of the content, including
-      themes, session titles, and speaker names.
-  develop_call_for_papers:
+    - write_chapter_1
+    - write_chapter_2
+    - write_chapter_3
+    - write_chapter_4
+    - write_chapter_5
+    - write_chapter_6
+    - write_chapter_7
+    nodes_dependent_on:
+    - assemble_final_novel
+    prompt: Create an index for the novel, including key terms, characters, and locations.
+  develop_novel_outline:
     agent: false
-    description: Create a call for papers and invited speaker solicitations
-    name: develop_call_for_papers
-    nodes_depended_on:
-    - define_conference_objectives
-    - assemble_organizing_committee
-    nodes_dependent_on: []
-    output_structure:
-    - description: Description of how the call for papers aligns with the conference
-        objectives
-      key: conference_objectives_alignment
-      type: str
-    - description: List of topics for the call for papers
-      key: call_for_papers_topics
-      type: List[str]
-    - description: Detailed submission guidelines
-      key: submission_guidelines
-      type: str
-    - description: List of important deadlines for submissions and notifications
-      key: deadlines
-      type: str
-    - description: List of names of potential invited speakers
-      key: invited_speakers
-      type: List[str]
-    - description: List of brief descriptions of each speaker's proposed talk
-      key: speaker_talk_descriptions
-      type: List[str]
-    prompt: Draft a call for papers that aligns with the conference objectives, including
-      topics, submission guidelines, and deadlines. Also, identify and list 5-7 potential
-      invited speakers, considering their expertise and relevance to the conference
-      themes. Provide a brief description of each speaker's proposed talk.
-  evaluate_and_refine_conference_plan:
+    description: Create a detailed outline for the 7-chapter fantasy novel
+    name: develop_novel_outline
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - write_chapter_1
+    - write_chapter_2
+    - write_chapter_3
+    - write_chapter_4
+    - write_chapter_5
+    - write_chapter_6
+    - write_chapter_7
+    prompt: Develop a detailed outline for a 7-chapter fantasy novel, including character
+      arcs, plot twists, and key events.
+  write_chapter_1:
     agent: false
-    description: Assess and refine the conference plan based on feedback and progress
-    name: evaluate_and_refine_conference_plan
+    description: Write the first chapter of the novel
+    name: write_chapter_1
     nodes_depended_on:
-    - develop_call_for_papers
-    - design_conference_program
-    - plan_conference_logistics
-    - coordinate_marketing_and_promotion
-    - manage_registration_and_tickets
-    nodes_dependent_on: []
-    output_structure:
-    - description: A brief summary of the refinements and changes made to the original
-        plan
-      key: refinement_summary
-      type: str
-    - description: List of feedback comments or suggestions received from the organizing
-        committee, speakers, and attendees
-      key: feedback_received
-      type: List[str]
-    - description: List of changes implemented in the conference plan
-      key: changes_implemented
-      type: List[str]
-    - description: Whether the conference plan has been successfully refined
-      key: is_plan_refined
-      type: bool
-    prompt: Gather feedback from the organizing committee, speakers, and attendees.
-      Refine the conference plan, making adjustments as needed to ensure a successful
-      and engaging event. Provide a brief summary of the refinements and changes made
-      to the original plan.
-  manage_registration_and_tickets:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the first chapter of the fantasy novel based on the provided outline.
+      Focus on introducing characters and setting.
+  write_chapter_2:
     agent: false
-    description: Set up registration and ticketing systems for attendees
-    name: manage_registration_and_tickets
+    description: Write the second chapter of the novel
+    name: write_chapter_2
     nodes_depended_on:
-    - select_venue_and_dates
-    - plan_conference_logistics
-    nodes_dependent_on: []
-    output_structure:
-    - description: Name of the registration and ticketing platform
-      key: registration_platform
-      type: str
-    - description: List of ticket prices for different categories
-      key: ticket_pricing
-      type: List[float]
-    - description: List of ticket categories (e.g., early bird, regular, student)
-      key: ticket_categories
-      type: List[str]
-    - description: List of registration deadlines for different ticket categories
-      key: registration_deadlines
-      type: List[str]
-    - description: Brief description of the registration process
-      key: registration_process_description
-      type: str
-    - description: Brief description of the ticketing options
-      key: ticketing_options_description
-      type: str
-    - description: Whether registration is open or closed
-      key: is_registration_open
-      type: bool
-    prompt: Choose a registration and ticketing platform that integrates with the
-      conference website and provides a smooth user experience. Define ticket pricing,
-      categories, and deadlines. Provide a brief description of the registration process
-      and ticketing options.
-  plan_conference_logistics:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the second chapter of the fantasy novel based on the provided outline.
+      Continue developing characters and plot.
+  write_chapter_3:
     agent: false
-    description: Arrange for catering, accommodations, and audio-visual equipment
-    name: plan_conference_logistics
+    description: Write the third chapter of the novel
+    name: write_chapter_3
     nodes_depended_on:
-    - select_venue_and_dates
-    nodes_dependent_on: []
-    output_structure:
-    - description: Recommended catering vendor
-      key: catering_vendor
-      type: str
-    - description: Brief description of catering vendor and services
-      key: catering_description
-      type: str
-    - description: Recommended accommodation vendor
-      key: accommodation_vendor
-      type: str
-    - description: Brief description of accommodation vendor and services
-      key: accommodation_description
-      type: str
-    - description: Recommended audio-visual equipment vendor
-      key: audio_visual_vendor
-      type: str
-    - description: Brief description of audio-visual equipment vendor and services
-      key: audio_visual_description
-      type: str
-    - description: Whether the logistics plan is within the conference budget
-      key: is_within_budget
-      type: bool
-    - description: Whether the logistics plan aligns with the conference objectives
-      key: aligns_with_objectives
-      type: bool
-    prompt: Research and recommend catering options, accommodations, and audio-visual
-      equipment providers for the conference. Ensure that all logistics align with
-      the conference objectives and budget. Provide a brief description of each recommended
-      vendor and their services.
-  select_venue_and_dates:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the third chapter of the fantasy novel based on the provided outline.
+      Introduce conflicts and tensions.
+  write_chapter_4:
     agent: false
-    description: Choose a suitable venue and dates for the conference
-    name: select_venue_and_dates
+    description: Write the fourth chapter of the novel
+    name: write_chapter_4
     nodes_depended_on:
-    - define_conference_objectives
-    nodes_dependent_on: []
-    output_structure:
-    - description: Name of the selected venue.
-      key: venue_name
-      type: str
-    - description: City where the venue is located.
-      key: venue_city
-      type: str
-    - description: Maximum number of attendees the venue can accommodate.
-      key: venue_capacity
-      type: int
-    - description: Three proposed date ranges for the conference.
-      key: proposed_date_ranges
-      type: List[str]
-    - description: Brief justification for each proposed date range.
-      key: date_range_justifications
-      type: List[str]
-    - description: Contact information for the venue.
-      key: venue_contact_info
-      type: str
-    prompt: Select a venue in San Diego that aligns with the conference objectives
-      and can accommodate the expected number of attendees. Propose three potential
-      date ranges, considering factors like weather, holidays, and conflicting events.
-      Provide a brief justification for each option.
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the fourth chapter of the fantasy novel based on the provided outline.
+      Develop plot twists and character arcs.
+  write_chapter_5:
+    agent: false
+    description: Write the fifth chapter of the novel
+    name: write_chapter_5
+    nodes_depended_on:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the fifth chapter of the fantasy novel based on the provided outline.
+      Continue plot development.
+  write_chapter_6:
+    agent: false
+    description: Write the sixth chapter of the novel
+    name: write_chapter_6
+    nodes_depended_on:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the sixth chapter of the fantasy novel based on the provided outline.
+      Build towards the climax.
+  write_chapter_7:
+    agent: false
+    description: Write the seventh chapter of the novel
+    name: write_chapter_7
+    nodes_depended_on:
+    - develop_novel_outline
+    nodes_dependent_on:
+    - create_novel_index
+    - assemble_final_novel
+    prompt: Write the seventh chapter of the fantasy novel based on the provided outline.
+      Conclude the story with a satisfying ending.
