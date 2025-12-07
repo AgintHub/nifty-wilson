@@ -1,102 +1,139 @@
 dag_type: plain_text
-description: A workflow for planning a multi-national advertising campaign for a summer
-  drink
-name: plan_multi_national_advertising_campaign
+description: A concurrent, elementally-decomposed workflow that collects winter sensor
+  data from a mine shaft, calibrates and preprocesses it, computes boron thermal conductivity,
+  performs statistical analysis, compares results to literature, visualizes findings,
+  and compiles a final report.
+name: thermal_conductivity_analysis_boron_mine_winter
 nodes:
-  analyze_competitor_advertising:
+  apply_sensor_calibration:
     agent: false
-    description: Analyze competitor advertising strategies for similar summer drinks
-    name: analyze_competitor_advertising
+    description: Adjust the cleaned sensor readings using the latest calibration coefficients
+      from list_sensor_specifications.
+    name: apply_sensor_calibration
+    nodes_depended_on:
+    - preprocess_sensor_data
+    - list_sensor_specifications
+    nodes_dependent_on: []
+    prompt: Using the calibration certificates obtained in list_sensor_specifications,
+      convert each cleaned sensor reading to its true physical value. Document the
+      calibration equation applied for each sensor and produce calibrated CSV files.
+  compare_to_literature:
+    agent: false
+    description: Contrast the observed statistical results with literature values
+      collected earlier to assess agreement or deviation.
+    name: compare_to_literature
+    nodes_depended_on:
+    - statistical_analysis
+    - fetch_literature_thermal_conductivity_values
+    nodes_dependent_on: []
+    prompt: Compare the mean and confidence interval from statistical_analysis with
+      the literature values table from fetch_literature_thermal_conductivity_values.
+      Indicate whether the observed values fall within reported ranges and discuss
+      possible reasons for differences.
+  compile_report:
+    agent: false
+    description: Assemble a comprehensive report that includes scope, methodology,
+      results, comparisons, visualizations, and conclusions.
+    name: compile_report
+    nodes_depended_on:
+    - define_analysis_scope
+    - statistical_analysis
+    - compare_to_literature
+    - generate_visualizations
+    nodes_dependent_on: []
+    prompt: 'Write a structured technical report with sections: Introduction (from
+      define_analysis_scope), Methods (data acquisition, preprocessing, calibration,
+      computation), Results (statistical_analysis), Comparison (compare_to_literature),
+      Figures (embed PNGs from generate_visualizations), Discussion, and Conclusions.
+      Keep the report ≤ 2000 words.'
+  compute_thermal_conductivity:
+    agent: false
+    description: Calculate boron thermal conductivity at each timestamp using calibrated
+      temperature and heat‑flux measurements via Fourier’s law.
+    name: compute_thermal_conductivity
+    nodes_depended_on:
+    - apply_sensor_calibration
+    nodes_dependent_on: []
+    prompt: For every time step, compute thermal conductivity k = q / (∇T) where q
+      is the calibrated heat‑flux reading and ∇T is the temperature gradient derived
+      from adjacent temperature sensors. Output a time‑series CSV of k values with
+      timestamps.
+  define_analysis_scope:
+    agent: false
+    description: State the precise analytical goal, including target temperature range,
+      location within the shaft, and the winter period of interest.
+    name: define_analysis_scope
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Research and analyze the advertising strategies used by competitors for
-      similar summer drinks, including their messaging, channels, and tactics.
-  coordinate_advertising_launch:
+    prompt: Describe the exact scope for analyzing boron thermal conductivity in the
+      mine shaft during winter. Include the shaft segment, date range (e.g., Dec‑Feb),
+      and any environmental constraints.
+  fetch_literature_thermal_conductivity_values:
     agent: false
-    description: Coordinate the launch of the advertising campaign across channels
-    name: coordinate_advertising_launch
-    nodes_depended_on:
-    - create_advertising_content
-    - plan_advertising_budget
-    nodes_dependent_on: []
-    prompt: Coordinate the launch of the advertising campaign, ensuring that all content
-      is deployed across the selected channels and that the messaging is consistent.
-  create_advertising_content:
-    agent: false
-    description: Develop high-quality advertising content for the selected channels
-    name: create_advertising_content
-    nodes_depended_on:
-    - develop_advertising_message
-    - select_advertising_channels
-    nodes_dependent_on: []
-    prompt: Create high-quality advertising content, including images, videos, or
-      copy, that aligns with the advertising message and resonates with the target
-      audience.
-  define_advertising_objectives:
-    agent: false
-    description: Establish clear objectives for the advertising campaign
-    name: define_advertising_objectives
-    nodes_depended_on:
-    - identify_target_audience
-    nodes_dependent_on: []
-    prompt: Based on the target audience, define specific, measurable objectives for
-      the advertising campaign, such as increasing brand awareness or driving sales.
-  develop_advertising_message:
-    agent: false
-    description: Create a compelling advertising message for the summer drink
-    name: develop_advertising_message
-    nodes_depended_on:
-    - identify_target_audience
-    - analyze_competitor_advertising
-    nodes_dependent_on: []
-    prompt: Develop a unique and compelling advertising message that resonates with
-      the target audience and differentiates the summer drink from competitors.
-  identify_target_audience:
-    agent: false
-    description: Determine the primary target audience for the summer drink
-    name: identify_target_audience
+    description: Collect published thermal conductivity values for boron (or boron‑containing
+      rocks) under comparable temperature and pressure conditions.
+    name: fetch_literature_thermal_conductivity_values
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Identify the demographic characteristics of the primary target audience
-      for the summer drink, including age, location, and preferences.
-  monitor_advertising_performance:
+    prompt: Search peer‑reviewed literature and reputable databases for thermal conductivity
+      of boron at temperatures typical of the winter mine shaft. Provide a table with
+      source, value (W·m⁻¹·K⁻¹), temperature, pressure, and reference link.
+  fetch_winter_sensor_data:
     agent: false
-    description: Track and analyze the performance of the advertising campaign
-    name: monitor_advertising_performance
-    nodes_depended_on:
-    - coordinate_advertising_launch
+    description: Retrieve raw data files (time‑stamped readings) from all relevant
+      sensors for the defined winter period.
+    name: fetch_winter_sensor_data
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Monitor and analyze the performance of the advertising campaign, using
-      metrics such as reach, engagement, and conversion to assess effectiveness and
-      inform future optimizations.
-  optimize_advertising_campaign:
+    prompt: Download or extract the raw sensor data for the winter period specified
+      in define_analysis_scope. Return a concise inventory of files with sensor ID,
+      start/end timestamps, and file format.
+  generate_visualizations:
     agent: false
-    description: Optimize the advertising campaign based on performance data
-    name: optimize_advertising_campaign
+    description: Create plots of conductivity over time, histogram of values, and
+      a side‑by‑side bar chart comparing measured mean to literature values.
+    name: generate_visualizations
     nodes_depended_on:
-    - monitor_advertising_performance
+    - compute_thermal_conductivity
+    - statistical_analysis
     nodes_dependent_on: []
-    prompt: Use performance data to optimize the advertising campaign, making adjustments
-      to targeting, messaging, channels, or budget allocation as needed to improve
-      effectiveness.
-  plan_advertising_budget:
+    prompt: 'Produce the following figures: (1) line plot of thermal conductivity
+      vs. time, (2) histogram of all k values with fitted normal curve, (3) bar chart
+      showing measured mean ± CI alongside literature mean ± reported uncertainty.
+      Export each as PNG and include brief captions.'
+  list_sensor_specifications:
     agent: false
-    description: Determine the advertising budget and allocate resources across channels
-    name: plan_advertising_budget
-    nodes_depended_on:
-    - define_advertising_objectives
-    - select_advertising_channels
+    description: Enumerate the types, models, calibration certificates, and measurement
+      ranges of all sensors installed in the shaft that can provide data relevant
+      to thermal conductivity.
+    name: list_sensor_specifications
+    nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Determine the total advertising budget and allocate resources across the
-      selected channels, considering factors such as cost, reach, and effectiveness.
-  select_advertising_channels:
+    prompt: List each sensor used in the mine shaft (e.g., temperature, heat flux,
+      boron concentration sensors). Provide model, manufacturer, measurement range,
+      and link to the latest calibration certificate.
+  preprocess_sensor_data:
     agent: false
-    description: Choose the most effective advertising channels for reaching the target
-      audience
-    name: select_advertising_channels
+    description: 'Clean the raw sensor data: remove duplicates, fill missing timestamps,
+      and filter records outside the winter date range.'
+    name: preprocess_sensor_data
     nodes_depended_on:
-    - identify_target_audience
-    - analyze_competitor_advertising
+    - fetch_winter_sensor_data
     nodes_dependent_on: []
-    prompt: Select the most effective advertising channels for reaching the target
-      audience, including social media, television, print, or outdoor advertising.
+    prompt: 'Take the raw files from fetch_winter_sensor_data and perform the following:
+      (1) discard any records outside the winter interval, (2) remove duplicate rows,
+      (3) flag missing values, (4) output a cleaned CSV per sensor with a uniform
+      timestamp column.'
+  statistical_analysis:
+    agent: false
+    description: Derive descriptive statistics (mean, median, standard deviation,
+      confidence intervals) for the computed conductivity series and identify any
+      outliers.
+    name: statistical_analysis
+    nodes_depended_on:
+    - compute_thermal_conductivity
+    nodes_dependent_on: []
+    prompt: Perform statistical analysis on the conductivity time series produced
+      in compute_thermal_conductivity. Provide mean, median, standard deviation, 95%
+      confidence interval, and a list of timestamps flagged as outliers (e.g., >3σ).
+      Summarize results in a markdown table.
