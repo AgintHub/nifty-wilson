@@ -1,137 +1,102 @@
 dag_type: plain_text
-description: Sequential workflow to write a 9‑chapter fantasy novel, ensuring each
-  chapter flows into the next, followed by cover, index, and assembly.
-name: write_fantasy_novel_with_9_chapters_sequential
+description: A workflow for planning a multi-national advertising campaign for a summer
+  drink
+name: plan_multi_national_advertising_campaign
 nodes:
-  assemble_final_novel:
+  analyze_competitor_advertising:
     agent: false
-    description: Compile the cover, index, and all chapters into a cohesive final
-      novel.
-    name: assemble_final_novel
-    nodes_depended_on:
-    - write_chapter_9
-    - create_novel_cover
-    - create_novel_index
-    nodes_dependent_on: []
-    prompt: Compile the final fantasy novel by combining the cover, chapters, and
-      index into a cohesive document.
-  create_novel_cover:
-    agent: false
-    description: Design a cover for the completed novel.
-    name: create_novel_cover
-    nodes_depended_on:
-    - write_chapter_9
-    nodes_dependent_on:
-    - assemble_final_novel
-    prompt: Design a cover for a fantasy novel that captures the essence of the story.
-      Include title, author name, and a relevant image.
-  create_novel_index:
-    agent: false
-    description: Generate an index covering key terms, characters, and locations.
-    name: create_novel_index
-    nodes_depended_on:
-    - write_chapter_9
-    nodes_dependent_on:
-    - assemble_final_novel
-    prompt: Create an index for the novel, including key terms, characters, and locations.
-  develop_novel_outline:
-    agent: false
-    description: Create a detailed outline for a 9‑chapter fantasy novel.
-    name: develop_novel_outline
+    description: Analyze competitor advertising strategies for similar summer drinks
+    name: analyze_competitor_advertising
     nodes_depended_on: []
-    nodes_dependent_on:
-    - write_chapter_1
-    prompt: Develop a comprehensive outline for a 9‑chapter fantasy novel, including
-      character arcs, plot twists, and key events.
-  write_chapter_1:
+    nodes_dependent_on: []
+    prompt: Research and analyze the advertising strategies used by competitors for
+      similar summer drinks, including their messaging, channels, and tactics.
+  coordinate_advertising_launch:
     agent: false
-    description: Write the first chapter, introducing characters and setting.
-    name: write_chapter_1
+    description: Coordinate the launch of the advertising campaign across channels
+    name: coordinate_advertising_launch
     nodes_depended_on:
-    - develop_novel_outline
-    nodes_dependent_on:
-    - write_chapter_2
-    prompt: Write the first chapter of the fantasy novel based on the outline. Focus
-      on introducing characters and setting.
-  write_chapter_2:
+    - create_advertising_content
+    - plan_advertising_budget
+    nodes_dependent_on: []
+    prompt: Coordinate the launch of the advertising campaign, ensuring that all content
+      is deployed across the selected channels and that the messaging is consistent.
+  create_advertising_content:
     agent: false
-    description: Write the second chapter, building on chapter 1, continuing character
-      and plot development.
-    name: write_chapter_2
+    description: Develop high-quality advertising content for the selected channels
+    name: create_advertising_content
     nodes_depended_on:
-    - write_chapter_1
-    nodes_dependent_on:
-    - write_chapter_3
-    prompt: Write the second chapter of the fantasy novel based on the outline. Continue
-      developing characters and plot from chapter 1.
-  write_chapter_3:
+    - develop_advertising_message
+    - select_advertising_channels
+    nodes_dependent_on: []
+    prompt: Create high-quality advertising content, including images, videos, or
+      copy, that aligns with the advertising message and resonates with the target
+      audience.
+  define_advertising_objectives:
     agent: false
-    description: Write the third chapter, introducing conflicts and tensions.
-    name: write_chapter_3
+    description: Establish clear objectives for the advertising campaign
+    name: define_advertising_objectives
     nodes_depended_on:
-    - write_chapter_2
-    nodes_dependent_on:
-    - write_chapter_4
-    prompt: Write the third chapter of the fantasy novel based on the outline. Introduce
-      conflicts and tensions following chapter 2.
-  write_chapter_4:
+    - identify_target_audience
+    nodes_dependent_on: []
+    prompt: Based on the target audience, define specific, measurable objectives for
+      the advertising campaign, such as increasing brand awareness or driving sales.
+  develop_advertising_message:
     agent: false
-    description: Write the fourth chapter, developing plot twists and character arcs.
-    name: write_chapter_4
+    description: Create a compelling advertising message for the summer drink
+    name: develop_advertising_message
     nodes_depended_on:
-    - write_chapter_3
-    nodes_dependent_on:
-    - write_chapter_5
-    prompt: Write the fourth chapter of the fantasy novel based on the outline. Develop
-      plot twists and deepen character arcs from chapter 3.
-  write_chapter_5:
+    - identify_target_audience
+    - analyze_competitor_advertising
+    nodes_dependent_on: []
+    prompt: Develop a unique and compelling advertising message that resonates with
+      the target audience and differentiates the summer drink from competitors.
+  identify_target_audience:
     agent: false
-    description: Write the fifth chapter, continuing plot development.
-    name: write_chapter_5
-    nodes_depended_on:
-    - write_chapter_4
-    nodes_dependent_on:
-    - write_chapter_6
-    prompt: Write the fifth chapter of the fantasy novel based on the outline. Continue
-      the plot development from chapter 4.
-  write_chapter_6:
+    description: Determine the primary target audience for the summer drink
+    name: identify_target_audience
+    nodes_depended_on: []
+    nodes_dependent_on: []
+    prompt: Identify the demographic characteristics of the primary target audience
+      for the summer drink, including age, location, and preferences.
+  monitor_advertising_performance:
     agent: false
-    description: Write the sixth chapter, building toward the climax.
-    name: write_chapter_6
+    description: Track and analyze the performance of the advertising campaign
+    name: monitor_advertising_performance
     nodes_depended_on:
-    - write_chapter_5
-    nodes_dependent_on:
-    - write_chapter_7
-    prompt: Write the sixth chapter of the fantasy novel based on the outline. Build
-      toward the climax following chapter 5.
-  write_chapter_7:
+    - coordinate_advertising_launch
+    nodes_dependent_on: []
+    prompt: Monitor and analyze the performance of the advertising campaign, using
+      metrics such as reach, engagement, and conversion to assess effectiveness and
+      inform future optimizations.
+  optimize_advertising_campaign:
     agent: false
-    description: Write the seventh chapter, leading toward the climax.
-    name: write_chapter_7
+    description: Optimize the advertising campaign based on performance data
+    name: optimize_advertising_campaign
     nodes_depended_on:
-    - write_chapter_6
-    nodes_dependent_on:
-    - write_chapter_8
-    prompt: Write the seventh chapter of the fantasy novel based on the outline. Continue
-      the build-up to the climax from chapter 6.
-  write_chapter_8:
+    - monitor_advertising_performance
+    nodes_dependent_on: []
+    prompt: Use performance data to optimize the advertising campaign, making adjustments
+      to targeting, messaging, channels, or budget allocation as needed to improve
+      effectiveness.
+  plan_advertising_budget:
     agent: false
-    description: Write the eighth chapter, continuing the narrative arc toward resolution.
-    name: write_chapter_8
+    description: Determine the advertising budget and allocate resources across channels
+    name: plan_advertising_budget
     nodes_depended_on:
-    - write_chapter_7
-    nodes_dependent_on:
-    - write_chapter_9
-    prompt: Write the eighth chapter of the fantasy novel based on the outline. Continue
-      the narrative arc toward resolution from chapter 7.
-  write_chapter_9:
+    - define_advertising_objectives
+    - select_advertising_channels
+    nodes_dependent_on: []
+    prompt: Determine the total advertising budget and allocate resources across the
+      selected channels, considering factors such as cost, reach, and effectiveness.
+  select_advertising_channels:
     agent: false
-    description: Write the ninth chapter, providing final resolution and wrap‑up.
-    name: write_chapter_9
+    description: Choose the most effective advertising channels for reaching the target
+      audience
+    name: select_advertising_channels
     nodes_depended_on:
-    - write_chapter_8
-    nodes_dependent_on:
-    - create_novel_cover
-    - create_novel_index
-    prompt: Write the ninth chapter of the fantasy novel based on the outline. Provide
-      a final resolution and wrap‑up following chapter 8.
+    - identify_target_audience
+    - analyze_competitor_advertising
+    nodes_dependent_on: []
+    prompt: Select the most effective advertising channels for reaching the target
+      audience, including social media, television, print, or outdoor advertising.
