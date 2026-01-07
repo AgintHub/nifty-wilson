@@ -1,9 +1,7 @@
 dag_type: plain_text
-description: Transform each of the five transformer blocks into a full self-attention
-  block sequence with layer normalization, projections, attention heads, residual
-  connections, and final normalization. All blocks share the same operational flow
-  but operate sequentially.
-name: parallel_self_attention_heads_with_repeating_blocks
+description: Transforms input tokens through parallel self-attention mechanisms with
+  global block dependencies, applying softmax as the final operation
+name: parallel_self_attention_heads_with_global_block_connections_softmax_at_end
 nodes:
   attention_head_1_score_block1:
     agent: false
@@ -105,6 +103,14 @@ nodes:
     nodes_dependent_on:
     - softmax_weighted_sum_head_2_block5
     prompt: Compute head2 attention scores using dot products
+  final_softmax:
+    agent: false
+    description: Apply softmax to final projection output
+    name: final_softmax
+    nodes_depended_on:
+    - lm_head_projection
+    nodes_dependent_on: []
+    prompt: Apply softmax activation to vocabulary space projections
   k_projection_block1:
     agent: false
     description: Generate key projection vectors for block1
@@ -227,6 +233,7 @@ nodes:
     description: Normalize input for third transformer block
     name: layernorm_pre_normalization_block3
     nodes_depended_on:
+    - layernorm_post_normalization_block1
     - layernorm_post_normalization_block2
     nodes_dependent_on:
     - q_projection_block3
@@ -238,6 +245,8 @@ nodes:
     description: Normalize input for fourth transformer block
     name: layernorm_pre_normalization_block4
     nodes_depended_on:
+    - layernorm_post_normalization_block1
+    - layernorm_post_normalization_block2
     - layernorm_post_normalization_block3
     nodes_dependent_on:
     - q_projection_block4
@@ -249,6 +258,9 @@ nodes:
     description: Normalize input for fifth transformer block
     name: layernorm_pre_normalization_block5
     nodes_depended_on:
+    - layernorm_post_normalization_block1
+    - layernorm_post_normalization_block2
+    - layernorm_post_normalization_block3
     - layernorm_post_normalization_block4
     nodes_dependent_on:
     - q_projection_block5
@@ -262,7 +274,8 @@ nodes:
     nodes_depended_on:
     - layernorm_post_normalization_block5
     - token_positional_info
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - final_softmax
     prompt: Project final normalized vectors to vocabulary space
   multi_head_attention_block1:
     agent: false
