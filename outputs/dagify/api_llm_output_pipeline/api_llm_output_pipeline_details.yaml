@@ -1,6 +1,5 @@
 dag_type: plain_text
-description: Sequential execution of API contextual data retrieval, LLM inference,
-  and output preparation
+description: Generated workflow from UI with validation steps removed.
 name: api_llm_output_pipeline
 nodes:
   api_call_for_context_data:
@@ -10,62 +9,18 @@ nodes:
     nodes_depended_on:
     - process_input
     nodes_dependent_on:
-    - validate_and_combine_inferences
+    - combine_inferences
     prompt: '1. Extract context requirements from enriched prompt
+
 
       2. Execute API call for contextual data
 
-      3. Validate API response format
 
-      4. Output contextual data for secondary use'
-  execute_primary_llm_inference:
+      3. Output contextual data for secondary use'
+  combine_inferences:
     agent: false
-    description: Generate primary LLM response based on enriched prompt
-    name: execute_primary_llm_inference
-    nodes_depended_on:
-    - process_input
-    nodes_dependent_on:
-    - validate_and_combine_inferences
-    prompt: '1. Analyze enriched prompt content
-
-      2. Execute primary LLM inference
-
-      3. Validate inference structure
-
-      4. Output raw primary inference result'
-  prepare_and_deliver_output:
-    agent: false
-    description: Format and transmit final analysis
-    name: prepare_and_deliver_output
-    nodes_depended_on:
-    - validate_and_combine_inferences
-    nodes_dependent_on: []
-    prompt: '1. Structure final output components
-
-      2. Apply standard formatting rules
-
-      3. Include necessary metadata
-
-      4. Deliver to designated endpoint'
-  process_input:
-    agent: false
-    description: Validate, enrich, and prepare prompt for LLM processing
-    name: process_input
-    nodes_depended_on: []
-    nodes_dependent_on:
-    - api_call_for_context_data
-    - execute_primary_llm_inference
-    prompt: '1. Validate prompt format and content
-
-      2. Enrich with contextual metadata
-
-      3. Extract relevant parameters
-
-      4. Prepare for LLM ingestion'
-  validate_and_combine_inferences:
-    agent: false
-    description: Cross-validate results and create unified output
-    name: validate_and_combine_inferences
+    description: Merge primary inference with contextual data into unified analysis
+    name: combine_inferences
     nodes_depended_on:
     - api_call_for_context_data
     - execute_primary_llm_inference
@@ -73,8 +28,55 @@ nodes:
     - prepare_and_deliver_output
     prompt: '1. Align primary inference with contextual data
 
-      2. Cross-validate results for consistency
 
-      3. Combine validated components into unified analysis
+      2. Combine components into unified analysis
 
-      4. Output structured combined results'
+
+      3. Output structured combined results'
+  execute_primary_llm_inference:
+    agent: false
+    description: Generate primary LLM response based on enriched prompt
+    name: execute_primary_llm_inference
+    nodes_depended_on:
+    - process_input
+    nodes_dependent_on:
+    - combine_inferences
+    prompt: '1. Analyze enriched prompt content
+
+
+      2. Execute primary LLM inference
+
+
+      3. Output raw primary inference result'
+  prepare_and_deliver_output:
+    agent: false
+    description: Format and transmit final analysis
+    name: prepare_and_deliver_output
+    nodes_depended_on:
+    - combine_inferences
+    nodes_dependent_on: []
+    prompt: '1. Structure final output components
+
+
+      2. Apply standard formatting rules
+
+
+      3. Include necessary metadata
+
+
+      4. Deliver to designated endpoint'
+  process_input:
+    agent: false
+    description: Enrich and prepare prompt for LLM processing
+    name: process_input
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - api_call_for_context_data
+    - execute_primary_llm_inference
+    prompt: '1. Enrich with contextual metadata
+
+
+      2. Extract relevant parameters
+
+
+      3. Prepare for LLM ingestion'
