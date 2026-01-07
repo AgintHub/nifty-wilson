@@ -1,6 +1,6 @@
 dag_type: plain_text
-description: Transformer attention with parallel heads and residual connection integration
-name: parallel_self_attention_heads_with_residual
+description: Generated workflow with added final normalization layer
+name: parallel_self_attention_heads_with_residual_and_final_normalization
 nodes:
   attention_head_1_score:
     agent: false
@@ -40,6 +40,16 @@ nodes:
     prompt: "For each token:\n\n  - Compute linear projection from `layernorm` for\
       \ keys\n\n  - Add new field `k_proj` with resulting vector\n\n  Preserve other\
       \ fields. Output updated JSON array."
+  layernorm_post_normalization:
+    agent: false
+    description: Apply final layer normalization to residual output
+    name: layernorm_post_normalization
+    nodes_depended_on:
+    - residual_connection
+    nodes_dependent_on: []
+    prompt: "For each token in the input JSON array:\n\n  - Apply layer normalization\
+      \ to `residual_output`\n\n  - Add new field `final_layernorm` with normalized\
+      \ value\n\n  - Preserve all existing fields"
   layernorm_pre_normalization:
     agent: false
     description: Apply layer normalization across blocks 1-5
@@ -48,8 +58,8 @@ nodes:
     - token_positional_info
     - transformer_block_5
     nodes_dependent_on:
-    - q_projection
     - k_projection
+    - q_projection
     - v_projection
     - residual_connection
     prompt: "For each token in the JSON array from prior blocks:\n\n  For fields `block1`\
@@ -90,7 +100,8 @@ nodes:
     nodes_depended_on:
     - multi_head_attention
     - layernorm_pre_normalization
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - layernorm_post_normalization
     prompt: "For each token in the input JSON array:\n\n  - Retrieve both `layernorm`\
       \ value from normalized input\n\n  - Retrieve `block6` value from attention\
       \ output\n\n  - Add values together and store in new field `residual_output`\n\
