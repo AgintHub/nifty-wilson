@@ -1,7 +1,6 @@
 dag_type: plain_text
-description: Workflow with linear projections decomposed into parallel Q/K/V steps,
-  then joined for attention scoring
-name: parallel_self_attention_heads_split_projections
+description: Generated workflow with added final normalization layer
+name: parallel_self_attention_heads_with_residual_and_final_normalization
 nodes:
   attention_head_1_score:
     agent: false
@@ -13,9 +12,9 @@ nodes:
     nodes_dependent_on:
     - softmax_weighted_sum_head_1
     prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj` and `k_proj` for head 1\n  \n  - Scale scores by sqrt(dimension\
-      \ of projections)\n  \n  - Add new field `attn_scores_head_1` with attention\
-      \ score matrix\n  \n  Preserve all existing fields."
+      \ between `q_proj` and `k_proj` for head 1\n\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n\n  - Add new field `attn_scores_head_1` with attention score\
+      \ matrix\n\n  Preserve all existing fields."
   attention_head_2_score:
     agent: false
     description: Calculate attention scores for head 2
@@ -26,9 +25,9 @@ nodes:
     nodes_dependent_on:
     - softmax_weighted_sum_head_2
     prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj` and `k_proj` for head 2\n  \n  - Scale scores by sqrt(dimension\
-      \ of projections)\n  \n  - Add new field `attn_scores_head_2` with attention\
-      \ score matrix\n  \n  Preserve all existing fields."
+      \ between `q_proj` and `k_proj` for head 2\n\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n\n  - Add new field `attn_scores_head_2` with attention score\
+      \ matrix\n\n  Preserve all existing fields."
   k_projection:
     agent: false
     description: Compute key vector projection
@@ -39,8 +38,18 @@ nodes:
     - attention_head_1_score
     - attention_head_2_score
     prompt: "For each token:\n\n  - Compute linear projection from `layernorm` for\
-      \ keys\n  \n  - Add new field `k_proj` with resulting vector\n  \n  Preserve\
-      \ other fields. Output updated JSON array."
+      \ keys\n\n  - Add new field `k_proj` with resulting vector\n\n  Preserve other\
+      \ fields. Output updated JSON array."
+  layernorm_post_normalization:
+    agent: false
+    description: Apply final layer normalization to residual output
+    name: layernorm_post_normalization
+    nodes_depended_on:
+    - residual_connection
+    nodes_dependent_on: []
+    prompt: "For each token in the input JSON array:\n\n  - Apply layer normalization\
+      \ to `residual_output`\n\n  - Add new field `final_layernorm` with normalized\
+      \ value\n\n  - Preserve all existing fields"
   layernorm_pre_normalization:
     agent: false
     description: Apply layer normalization across blocks 1-5
@@ -49,14 +58,15 @@ nodes:
     - token_positional_info
     - transformer_block_5
     nodes_dependent_on:
-    - q_projection
     - k_projection
+    - q_projection
     - v_projection
+    - residual_connection
     prompt: "For each token in the JSON array from prior blocks:\n\n  For fields `block1`\
       \ to `block5`:\n\n  - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
-      \ 0 otherwise\n  \n  - Normalize numeric values across fields using layer normalization\n\
-      \  \n  - Add new field `layernorm` with normalized value\n  \n  Output updated\
-      \ JSON array."
+      \ 0 otherwise\n\n  - Normalize numeric values across fields using layer normalization\n\
+      \n  - Add new field `layernorm` with normalized value\n\n  Output updated JSON\
+      \ array."
   multi_head_attention:
     agent: false
     description: Combine outputs from multiple attention heads
@@ -64,12 +74,13 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1
     - softmax_weighted_sum_head_2
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - residual_connection
     prompt: "For each token in the input JSON array:\n\n  - Concatenate `weighted_vals_head_1`\
-      \ and `weighted_vals_head_2`\n  \n  - Apply final linear projection on the concatenated\
-      \ result\n  \n  - Add new field `block6` with attention-aggregated numeric value\n\
-      \  \n  - Output final JSON array with `block6` indicating 1.0 for prioritized\
-      \ tokens or 0.5 for others."
+      \ and `weighted_vals_head_2`\n\n  - Apply final linear projection on the concatenated\
+      \ result\n\n  - Add new field `block6` with attention-aggregated numeric value\n\
+      \n  - Output final JSON array with `block6` indicating 1.0 for prioritized tokens\
+      \ or 0.5 for others."
   q_projection:
     agent: false
     description: Compute query vector projection
@@ -80,8 +91,21 @@ nodes:
     - attention_head_1_score
     - attention_head_2_score
     prompt: "For each token:\n\n  - Compute linear projection from `layernorm` for\
-      \ queries\n  \n  - Add new field `q_proj` with resulting vector\n  \n  Preserve\
+      \ queries\n\n  - Add new field `q_proj` with resulting vector\n\n  Preserve\
       \ other fields. Output updated JSON array."
+  residual_connection:
+    agent: false
+    description: Combine attention output with original normalized input
+    name: residual_connection
+    nodes_depended_on:
+    - multi_head_attention
+    - layernorm_pre_normalization
+    nodes_dependent_on:
+    - layernorm_post_normalization
+    prompt: "For each token in the input JSON array:\n\n  - Retrieve both `layernorm`\
+      \ value from normalized input\n\n  - Retrieve `block6` value from attention\
+      \ output\n\n  - Add values together and store in new field `residual_output`\n\
+      \n  - Preserve all existing fields with their original values"
   softmax_weighted_sum_head_1:
     agent: false
     description: Apply softmax to head 1 attention scores and multiply with values
@@ -92,9 +116,9 @@ nodes:
     nodes_dependent_on:
     - multi_head_attention
     prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_1`\
-      \ dimension\n  \n  - Multiply resulting weights with `v_proj` vectors for head\
-      \ 1\n  \n  - Add new field `weighted_vals_head_1` with resulting vectors\n \
-      \ \n  Preserve all fields."
+      \ dimension\n\n  - Multiply resulting weights with `v_proj` vectors for head\
+      \ 1\n\n  - Add new field `weighted_vals_head_1` with resulting vectors\n\n \
+      \ Preserve all fields."
   softmax_weighted_sum_head_2:
     agent: false
     description: Apply softmax to head 2 attention scores and multiply with values
@@ -105,9 +129,9 @@ nodes:
     nodes_dependent_on:
     - multi_head_attention
     prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_2`\
-      \ dimension\n  \n  - Multiply resulting weights with `v_proj` vectors for head\
-      \ 2\n  \n  - Add new field `weighted_vals_head_2` with resulting vectors\n \
-      \ \n  Preserve all fields."
+      \ dimension\n\n  - Multiply resulting weights with `v_proj` vectors for head\
+      \ 2\n\n  - Add new field `weighted_vals_head_2` with resulting vectors\n\n \
+      \ Preserve all fields."
   token_positional_info:
     agent: false
     description: Generate token objects with positional information
@@ -198,5 +222,5 @@ nodes:
     - softmax_weighted_sum_head_1
     - softmax_weighted_sum_head_2
     prompt: "For each token:\n\n  - Compute linear projection from `layernorm` for\
-      \ values\n  \n  - Add new field `v_proj` with resulting vector\n  \n  Preserve\
-      \ other fields. Output updated JSON array."
+      \ values\n\n  - Add new field `v_proj` with resulting vector\n\n  Preserve other\
+      \ fields. Output updated JSON array."
