@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Transformer processing pipeline with parallelizable steps explicitly
-  split to enable concurrent execution.
-name: parallelized_transformer_processing
+description: Modified workflow with feed-forward network (FFN) layers split into parallel
+  processing paths while maintaining sequential structure for context preservation.
+name: parallelized_transformer_processing_with_parallel_ffn
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -25,29 +25,51 @@ nodes:
     - k_projection
     - v_projection
     nodes_dependent_on:
-    - feed_forward_linear1
+    - feed_forward_parallel_branch_1
+    - feed_forward_parallel_branch_2
     prompt: Compute scaled dot-product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear1:
-    agent: false
-    description: First linear transformation in feed-forward network
-    name: feed_forward_linear1
-    nodes_depended_on:
-    - compute_self_attention
-    nodes_dependent_on:
-    - feed_forward_linear2
-    prompt: Apply first linear transformation to attention context vectors with ReLU
-      activation.
   feed_forward_linear2:
     agent: false
     description: Final linear transformation in feed-forward network
     name: feed_forward_linear2
     nodes_depended_on:
-    - feed_forward_linear1
+    - feed_forward_parallel_merge
     nodes_dependent_on:
     - output_logits
     prompt: Apply second linear transformation to produce output tensor for subsequent
       processing.
+  feed_forward_parallel_branch_1:
+    agent: false
+    description: First parallel linear transformation in feed-forward network
+    name: feed_forward_parallel_branch_1
+    nodes_depended_on:
+    - compute_self_attention
+    nodes_dependent_on:
+    - feed_forward_parallel_merge
+    prompt: Apply first linear transformation to attention context vectors with ReLU
+      activation.
+  feed_forward_parallel_branch_2:
+    agent: false
+    description: Second parallel linear transformation in feed-forward network
+    name: feed_forward_parallel_branch_2
+    nodes_depended_on:
+    - compute_self_attention
+    nodes_dependent_on:
+    - feed_forward_parallel_merge
+    prompt: Apply first linear transformation to attention context vectors with ReLU
+      activation using alternate parameterization.
+  feed_forward_parallel_merge:
+    agent: false
+    description: Combine parallel feed-forward network branches
+    name: feed_forward_parallel_merge
+    nodes_depended_on:
+    - feed_forward_parallel_branch_1
+    - feed_forward_parallel_branch_2
+    nodes_dependent_on:
+    - feed_forward_linear2
+    prompt: Numerically sum the output tensors from parallel FFN branches to produce
+      combined context representations.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
