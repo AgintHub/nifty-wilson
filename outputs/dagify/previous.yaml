@@ -1,62 +1,27 @@
 dag_type: plain_text
-description: A workflow to add a node for tokenization
-name: add_tokenization_node
+description: Performs all tokenization activities—requirements definition, algorithm
+  selection, configuration, testing, validation, and integration—in a single step.
+name: tokenization_process
 nodes:
-  configure_tokenization_node:
+  tokenization_process:
     agent: false
-    description: Configure the tokenization node with the chosen algorithm and settings
-    name: configure_tokenization_node
-    nodes_depended_on:
-    - define_tokenization_requirements
-    - select_tokenization_algorithm
-    nodes_dependent_on:
-    - test_tokenization_node
-    prompt: Using the selected algorithm and defined requirements, configure the tokenization
-      node with the necessary settings and parameters.
-  define_tokenization_requirements:
-    agent: false
-    description: Identify the specific requirements for tokenization
-    name: define_tokenization_requirements
+    description: Executes the complete tokenization workflow in one atomic action.
+    name: tokenization_process
     nodes_depended_on: []
-    nodes_dependent_on:
-    - configure_tokenization_node
-    prompt: Determine the requirements for tokenization, including the type of tokenizer
-      and any specific settings or configurations needed.
-  integrate_tokenization_node:
-    agent: false
-    description: Integrate the tokenization node into the larger workflow
-    name: integrate_tokenization_node
-    nodes_depended_on:
-    - validate_tokenization_output
     nodes_dependent_on: []
-    prompt: Integrate the configured and tested tokenization node into the larger
-      workflow, ensuring it interacts correctly with other nodes.
-  select_tokenization_algorithm:
-    agent: false
-    description: Choose the appropriate tokenization algorithm
-    name: select_tokenization_algorithm
-    nodes_depended_on:
-    - define_tokenization_requirements
-    nodes_dependent_on:
-    - configure_tokenization_node
-    prompt: Based on the defined requirements, select a suitable tokenization algorithm,
-      such as wordpiece or sentencepiece tokenization.
-  test_tokenization_node:
-    agent: false
-    description: Test the configured tokenization node
-    name: test_tokenization_node
-    nodes_depended_on:
-    - configure_tokenization_node
-    nodes_dependent_on:
-    - validate_tokenization_output
-    prompt: Test the tokenization node with sample input data to ensure it produces
-      the expected output.
-  validate_tokenization_output:
-    agent: false
-    description: Validate the output of the tokenization node
-    name: validate_tokenization_output
-    nodes_depended_on:
-    - test_tokenization_node
-    nodes_dependent_on: []
-    prompt: Verify that the output of the tokenization node meets the requirements
-      and is correctly formatted.
+    prompt: '1. Define the tokenization requirements, including tokenizer type and
+      any special settings.
+
+      2. Choose a suitable tokenization algorithm (e.g., wordpiece, sentencepiece)
+      based on those requirements.
+
+      3. Configure the tokenization node with the chosen algorithm and parameters.
+
+      4. Test the configured node using sample input data.
+
+      5. Validate that the output meets the defined requirements and is properly formatted.
+
+      6. Integrate the finalized tokenization node into the larger workflow, ensuring
+      correct interactions with other nodes.
+
+      Return a concise report of each sub‑step and the final integrated node details.'
