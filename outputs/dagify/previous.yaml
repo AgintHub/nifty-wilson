@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Transformer processing workflow with an additional third feed‑forward
-  network inserted after the second parallel merge.
-name: parallelized_transformer_processing_with_added_third_ffn
+description: Transformer processing workflow where the final feed‑forward merge step
+  is split into two sequential operations.
+name: parallelized_transformer_processing_with_split_third_merge
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -24,16 +24,26 @@ nodes:
     nodes_dependent_on: []
     prompt: Compute scaled dot‑product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear2_parallel_merge:
+  feed_forward_linear2_parallel_merge_step1:
     agent: false
-    description: Combine split‑parallel final feed‑forward network branches
-    name: feed_forward_linear2_parallel_merge
+    description: Intermediate merge of split‑parallel final linear transformations
+      (first stage)
+    name: feed_forward_linear2_parallel_merge_step1
     nodes_depended_on:
     - feed_forward_split_linear2_branch_1
     - feed_forward_split_linear2_branch_2
     nodes_dependent_on: []
     prompt: Concatenate the outputs of split‑parallel final linear transformations
       into combined output tensor.
+  feed_forward_linear2_parallel_merge_step2:
+    agent: false
+    description: Finalize merged tensor before the third feed‑forward layer
+    name: feed_forward_linear2_parallel_merge_step2
+    nodes_depended_on:
+    - feed_forward_linear2_parallel_merge_step1
+    nodes_dependent_on: []
+    prompt: Pass the intermediate merged tensor forward as the final merged representation
+      for the next feed‑forward stage.
   feed_forward_parallel_branch_1:
     agent: false
     description: First parallel linear transformation in feed‑forward network
@@ -132,7 +142,7 @@ nodes:
     description: Third feed‑forward network applied after the second parallel merge
     name: third_feed_forward
     nodes_depended_on:
-    - feed_forward_linear2_parallel_merge
+    - feed_forward_linear2_parallel_merge_step2
     nodes_dependent_on: []
     prompt: Apply a final linear transformation to the merged tensor to produce refined
       representations before logits generation.
