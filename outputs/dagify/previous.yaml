@@ -1,7 +1,8 @@
 dag_type: plain_text
-description: Generates tokenizer configuration, token positional info, and sequentially
-  transforms the token data through five transformer blocks, each adding its own flag.
-name: tokenizer_with_positioning_and_transformers_workflow
+description: Workflow enhancing the transformer blocks such that each transformer's
+  output connects directly to all subsequent transformer blocks in addition to maintaining
+  existing connections.
+name: tokenizer_with_transformers_updated_direct_connections
 nodes:
   token_positional_info:
     agent: false
@@ -10,32 +11,25 @@ nodes:
     name: token_positional_info
     nodes_depended_on:
     - tokenizer_customization
-    nodes_dependent_on:
-    - transformer_block_1
-    - transformer_block_2
-    - transformer_block_3
-    - transformer_block_4
-    - transformer_block_5
+    nodes_dependent_on: []
     prompt: "Using the tokenizer configuration code produced by the previous step,\
       \ apply the tokenizer to the following example prompt and example output:\n\n\
-      \n  **Example Prompt:** \"Hello world!\"\n\n  **Example Output:** \"Hello world\"\
-      \n\n  Tokenize both the prompt and the output, and for each token provide its\
-      \ start and end character positions (0-indexed) in the original string. Return\
-      \ a JSON array of objects with fields:\n\n  - `token` (the token string)\n \
-      \ - `start` (start index in the source string)\n  - `end` (end index, exclusive)\n\
-      \  - `context` (either \"prompt\" or \"output\" to indicate which string the\
-      \ token came from).\n\n  Only output the JSON array.\n\n  Example output format:\n\
-      \n  ```json\n\n  [{\n  \\  \"token\": \"Hello\",\n  \\  \"start\": 0,\n  \\\
-      \  \"end\": 5,\n  \\  \"context\": \"prompt\"\n  }, {\n  \\  \"token\": \"world\"\
-      ,\n  \\  \"start\": 6,\n  \\  \"end\": 11,\n  \\  \"context\": \"prompt\"\n\
-      \  }, ...]\n  ```"
+      **Example Prompt:** \"Hello world!\"\n\n**Example Output:** \"Hello world\"\n\
+      \nTokenize both the prompt and the output, and for each token provide its start\
+      \ and end character positions (0-indexed) in the original string. Return a JSON\
+      \ array of objects with fields:\n\n- `token` (the token string)\n- `start` (start\
+      \ index in the source string)\n- `end` (end index, exclusive)\n- `context` (either\
+      \ \"prompt\" or \"output\" to indicate which string the token came from).\n\n\
+      Only output the JSON array.\n\nExample output format:\n\n```json\n[{\n  \"token\"\
+      : \"Hello\",\n  \"start\": 0,\n  \"end\": 5,\n  \"context\": \"prompt\"\n},\
+      \ {\n  \"token\": \"world\",\n  \"start\": 6,\n  \"end\": 11,\n  \"context\"\
+      : \"prompt\"\n}, ...]\n```"
   tokenizer_customization:
     agent: false
     description: Generates the final tokenizer configuration code or regex pattern.
     name: tokenizer_customization
     nodes_depended_on: []
-    nodes_dependent_on:
-    - token_positional_info
+    nodes_dependent_on: []
     prompt: You are tasked with customizing an existing tokenizer so that it only
       recognizes single alphabetic letters (a–z, case‑insensitive) or full English
       words (sequences of letters). Provide the exact configuration steps or code
@@ -48,8 +42,7 @@ nodes:
     name: transformer_block_1
     nodes_depended_on:
     - token_positional_info
-    nodes_dependent_on:
-    - transformer_block_2
+    nodes_dependent_on: []
     prompt: Given the input JSON array of token objects, add a new field `block1`
       with the value `processed` to each token. Output the modified JSON array.
   transformer_block_2:
@@ -59,8 +52,7 @@ nodes:
     nodes_depended_on:
     - token_positional_info
     - transformer_block_1
-    nodes_dependent_on:
-    - transformer_block_3
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block2` set to `true` for
       each token. Output the modified JSON array.
   transformer_block_3:
@@ -69,9 +61,9 @@ nodes:
     name: transformer_block_3
     nodes_depended_on:
     - token_positional_info
+    - transformer_block_1
     - transformer_block_2
-    nodes_dependent_on:
-    - transformer_block_4
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block3` with the value `validated`.
       Output the modified JSON array.
   transformer_block_4:
@@ -80,9 +72,10 @@ nodes:
     name: transformer_block_4
     nodes_depended_on:
     - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
     - transformer_block_3
-    nodes_dependent_on:
-    - transformer_block_5
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block4` set to `finalized`.
       Output the modified JSON array.
   transformer_block_5:
@@ -91,6 +84,9 @@ nodes:
     name: transformer_block_5
     nodes_depended_on:
     - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
+    - transformer_block_3
     - transformer_block_4
     nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block5` with the value `complete`.
