@@ -1,88 +1,36 @@
 dag_type: plain_text
-description: A workflow that processes a user prompt through a language model to generate
-  a response, with detailed decomposition and maximal concurrency.
-name: prompt_to_llm_response
+description: Minimal workflow to validate a prompt, execute LLM inference, and process/validate
+  the response.
+name: minimal_prompt_to_response
 nodes:
-  decode_llm_output:
+  process_and_validate_response:
     agent: false
-    description: Convert raw LLM token IDs back to human-readable text.
-    name: decode_llm_output
+    description: Decode LLM output, post-process it, validate safety/coherence, and
+      format for delivery.
+    name: process_and_validate_response
     nodes_depended_on:
     - run_llm_inference
-    nodes_dependent_on:
-    - post_process_response
-    - validate_response
-    prompt: Decode the raw LLM output tokens into UTF-8 text. Preserve tokenization
-      boundaries.
-  enrich_prompt:
-    agent: false
-    description: Enhance the prompt with contextual metadata (e.g., current date/time,
-      user history).
-    name: enrich_prompt
-    nodes_depended_on:
-    - validate_prompt
-    nodes_dependent_on:
-    - tokenize_prompt
-    prompt: Enrich the validated prompt by adding contextual metadata such as current
-      year, timezone, and placeholder user history.
-  format_final_response:
-    agent: false
-    description: Prepare the validated and post-processed response for delivery.
-    name: format_final_response
-    nodes_depended_on:
-    - post_process_response
-    - validate_response
     nodes_dependent_on: []
-    prompt: 'Format the final response with standard output markers (e.g., ''Answer:
-      '') and append validation status.'
-  post_process_response:
-    agent: false
-    description: Apply basic formatting and error correction to the LLM output.
-    name: post_process_response
-    nodes_depended_on:
-    - decode_llm_output
-    nodes_dependent_on:
-    - format_final_response
-    prompt: Post-process the decoded LLM response by correcting trivial errors and
-      applying consistent formatting (e.g., paragraph spacing).
+    prompt: Decode raw tokens to text, correct formatting/trivial errors, validate
+      response for safety/coherence, and prepare final output with status markers.
   run_llm_inference:
     agent: false
-    description: Execute the language model on the tokenized prompt.
+    description: Execute the language model on the processed prompt to generate raw
+      output.
     name: run_llm_inference
     nodes_depended_on:
-    - tokenize_prompt
+    - validate_and_enrich_prompt
     nodes_dependent_on:
-    - decode_llm_output
-    prompt: 'Run the language model inference on the tokenized input and output the
-      raw token IDs. Use settings: temperature=0.7, max_tokens=1000.'
-  tokenize_prompt:
+    - process_and_validate_response
+    prompt: 'Run LLM inference on the validated/enriched prompt using settings: temperature=0.7,
+      max_tokens=1000. Output raw token IDs.'
+  validate_and_enrich_prompt:
     agent: false
-    description: Convert the enriched prompt into tokenized input for the LLM.
-    name: tokenize_prompt
-    nodes_depended_on:
-    - enrich_prompt
-    nodes_dependent_on:
-    - run_llm_inference
-    prompt: Tokenize the enriched prompt using the standard LLM vocabulary. Output
-      the tokens as a list.
-  validate_prompt:
-    agent: false
-    description: Check if the input prompt is valid (non-empty, properly formatted,
-      and semantically coherent).
-    name: validate_prompt
+    description: Check if the input prompt is valid and enrich it with contextual
+      metadata.
+    name: validate_and_enrich_prompt
     nodes_depended_on: []
     nodes_dependent_on:
-    - enrich_prompt
-    prompt: 'Validate the provided prompt for correctness and completeness. Output
-      ''Valid'' if acceptable or ''Invalid: [reason]'' if not.'
-  validate_response:
-    agent: false
-    description: Ensure the LLM response meets quality requirements (e.g., no malicious
-      content, coherence).
-    name: validate_response
-    nodes_depended_on:
-    - decode_llm_output
-    nodes_dependent_on:
-    - format_final_response
-    prompt: 'Validate the LLM response for content safety and coherence. Output ''Approved''
-      or ''Rejected: [reason]''.'
+    - run_llm_inference
+    prompt: Validate the prompt for correctness and completeness. If valid, enrich
+      it with contextual metadata such as current date/time and user history.
