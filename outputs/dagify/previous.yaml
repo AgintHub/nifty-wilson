@@ -1,88 +1,48 @@
 dag_type: plain_text
-description: A workflow for processing prompts through an LLM in parallel stages,
-  ensuring validation, contextual enrichment, and concurrent execution paths while
-  maintaining strict dependency constraints.
-name: llm_prompt_processing_pipeline
+description: Directly process input, generate combined LLM inferences, and deliver
+  final output in three optimized stages
+name: condensed_inference_pipeline
 nodes:
-  combine_inference_results:
+  generate_and_combine_inferences:
     agent: false
-    description: Integrate LLM outputs into unified response
-    name: combine_inference_results
+    description: Execute and integrate LLM responses with validation
+    name: generate_and_combine_inferences
     nodes_depended_on:
-    - validate_inference_results
-    nodes_dependent_on: []
-    prompt: Merge validated primary response and contextual insights into a single,
-      coherent final answer. Ensure seamless integration of all supporting evidence.
-  deliver_final_output:
+    - process_input
+    nodes_dependent_on:
+    - prepare_and_deliver_output
+    prompt: '1. Execute primary LLM inference on enriched prompt
+
+      2. Retrieve contextual data and execute secondary inference
+
+      3. Validate results for consistency
+
+      4. Combine outputs into unified analysis'
+  prepare_and_deliver_output:
     agent: false
-    description: Transmit completed response to destination
-    name: deliver_final_output
+    description: Format and transmit final response
+    name: prepare_and_deliver_output
     nodes_depended_on:
-    - format_final_output
+    - generate_and_combine_inferences
     nodes_dependent_on: []
-    prompt: Present the fully prepared response in the required delivery format, including
-      any necessary output transformation or transmission protocols.
-  enrich_prompt_data:
+    prompt: '1. Structure final output components
+
+      2. Apply standard formatting rules
+
+      3. Include necessary metadata
+
+      4. Deliver to designated endpoint'
+  process_input:
     agent: false
-    description: Add contextual elements to enhance LLM input
-    name: enrich_prompt_data
-    nodes_depended_on:
-    - validate_prompt
-    nodes_dependent_on: []
-    prompt: Enhance the validated prompt with supplementary information including
-      relevant parameters, historical context, and structured metadata without altering
-      core meaning.
-  execute_contextual_inference:
-    agent: false
-    description: Run LLM inference on retrieved data
-    name: execute_contextual_inference
-    nodes_depended_on:
-    - retrieve_contextual_data
-    nodes_dependent_on: []
-    prompt: Process the retrieved contextual data through the LLM to derive supporting
-      insights. Generate a focused analysis that directly addresses the prompted question.
-  execute_primary_inference:
-    agent: false
-    description: Run LLM inference on enriched prompt
-    name: execute_primary_inference
-    nodes_depended_on:
-    - enrich_prompt_data
-    nodes_dependent_on: []
-    prompt: Process the enriched prompt through the LLM to generate a primary response.
-      Focus solely on transforming the enriched input into a coherent answer.
-  format_final_output:
-    agent: false
-    description: Prepare final response for delivery
-    name: format_final_output
-    nodes_depended_on:
-    - combine_inference_results
-    nodes_dependent_on: []
-    prompt: Apply standardized formatting, structure the response into clear sections,
-      and include appropriate metadata for presentation to the end user.
-  retrieve_contextual_data:
-    agent: false
-    description: Acquire external information related to the prompt
-    name: retrieve_contextual_data
-    nodes_depended_on:
-    - validate_prompt
-    nodes_dependent_on: []
-    prompt: Identify and extract relevant external data sources, documents, or reference
-      material that directly pertain to the validated prompt's subject matter.
-  validate_inference_results:
-    agent: false
-    description: Assess quality of LLM outputs
-    name: validate_inference_results
-    nodes_depended_on:
-    - execute_primary_inference
-    - execute_contextual_inference
-    nodes_dependent_on: []
-    prompt: Verify accuracy, coherence, and relevance of both primary and contextual
-      LLM outputs. Flag any inconsistencies or missing elements.
-  validate_prompt:
-    agent: false
-    description: Verify the prompt conforms to required format and standards
-    name: validate_prompt
+    description: Validate, enrich, and prepare prompt for LLM processing
+    name: process_input
     nodes_depended_on: []
-    nodes_dependent_on: []
-    prompt: Evaluate the prompt for completeness, coherence, and compliance with established
-      guidelines. Identify any missing components or formatting issues.
+    nodes_dependent_on:
+    - generate_and_combine_inferences
+    prompt: '1. Validate prompt format and content
+
+      2. Enrich with contextual metadata
+
+      3. Extract relevant parameters
+
+      4. Prepare for LLM ingestion'
