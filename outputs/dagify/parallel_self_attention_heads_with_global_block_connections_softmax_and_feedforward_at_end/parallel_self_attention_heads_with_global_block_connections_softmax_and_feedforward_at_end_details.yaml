@@ -1,6 +1,5 @@
-dag_type: plain_text
-description: Modified workflow with feedforward neural networks added after each transformer
-  block's post-normalization layer
+dag_type: typed
+description: Generated workflow from UI.
 name: parallel_self_attention_heads_with_global_block_connections_softmax_and_feedforward_at_end
 nodes:
   attention_head_1_score_block1:
@@ -11,6 +10,10 @@ nodes:
     - q_projection_block1
     - k_projection_block1
     nodes_dependent_on: []
+    output_structure:
+    - description: Attention scores for each token computed via dot product
+      key: attention_scores
+      type: List[float]
     prompt: Compute head1 attention scores using dot products
   attention_head_1_score_block2:
     agent: false
@@ -20,6 +23,10 @@ nodes:
     - q_projection_block2
     - k_projection_block2
     nodes_dependent_on: []
+    output_structure:
+    - description: Attention scores for head 1 in block 2
+      key: attention_scores
+      type: List[float]
     prompt: Compute head1 attention scores using dot products
   attention_head_1_score_block3:
     agent: false
@@ -29,6 +36,16 @@ nodes:
     - q_projection_block3
     - k_projection_block3
     nodes_dependent_on: []
+    output_structure:
+    - description: List of query vector scores for head1
+      key: query_vector_scores
+      type: List[float]
+    - description: List of key vector scores for head1
+      key: key_vector_scores
+      type: List[float]
+    - description: List of attention scores for head1
+      key: attention_scores
+      type: List[float]
     prompt: Compute head1 attention scores using dot products
   attention_head_1_score_block4:
     agent: false
@@ -38,6 +55,10 @@ nodes:
     - q_projection_block4
     - k_projection_block4
     nodes_dependent_on: []
+    output_structure:
+    - description: List of attention scores for head1 in block4
+      key: attention_scores
+      type: List[float]
     prompt: Compute head1 attention scores using dot products
   attention_head_1_score_block5:
     agent: false
@@ -47,6 +68,15 @@ nodes:
     - q_projection_block5
     - k_projection_block5
     nodes_dependent_on: []
+    output_structure:
+    - description: Computed attention scores for head1 in block5, representing similarity
+        metrics between query and key vectors
+      key: attention_scores
+      type: List[float]
+    - description: Optional metadata or debug information about the attention scores
+        (e.g., max score, position info)
+      key: attention_score_details
+      type: List[str]
     prompt: Compute head1 attention scores using dot products
   attention_head_2_score_block1:
     agent: false
@@ -56,6 +86,19 @@ nodes:
     - q_projection_block1
     - k_projection_block1
     nodes_dependent_on: []
+    output_structure:
+    - description: The query vector used for attention scoring
+      key: query_vector
+      type: List[float]
+    - description: The key vector used for attention scoring
+      key: key_vector
+      type: List[float]
+    - description: The attention scores computed for each head
+      key: attention_scores
+      type: List[float]
+    - description: The index of the attention head used for scoring
+      key: head_index
+      type: int
     prompt: Compute head2 attention scores using dot products
   attention_head_2_score_block2:
     agent: false
@@ -65,6 +108,11 @@ nodes:
     - q_projection_block2
     - k_projection_block2
     nodes_dependent_on: []
+    output_structure:
+    - description: The computed attention scores for head2 in block2, representing
+        similarity weights between query and key projections for each token pair.
+      key: attention_scores
+      type: List[float]
     prompt: Compute head2 attention scores using dot products
   attention_head_2_score_block3:
     agent: false
@@ -74,6 +122,13 @@ nodes:
     - q_projection_block3
     - k_projection_block3
     nodes_dependent_on: []
+    output_structure:
+    - description: List of computed attention score values for head2 in block3
+      key: attention_scores
+      type: List[float]
+    - description: 2D matrix representing attention scores across query and key positions
+      key: attention_scores_matrix
+      type: List[float]
     prompt: Compute head2 attention scores using dot products
   attention_head_2_score_block4:
     agent: false
@@ -83,6 +138,10 @@ nodes:
     - q_projection_block4
     - k_projection_block4
     nodes_dependent_on: []
+    output_structure:
+    - description: Attention scores for each token position for head2 in block4
+      key: attention_scores
+      type: List[float]
     prompt: Compute head2 attention scores using dot products
   attention_head_2_score_block5:
     agent: false
@@ -99,8 +158,11 @@ nodes:
     name: feedforward_network_block1
     nodes_depended_on:
     - layernorm_post_normalization_block1
-    nodes_dependent_on:
-    - layernorm_pre_normalization_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of input vectors for the feedforward network
+      key: input_vectors
+      type: List[float]
     prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block2:
     agent: false
@@ -108,17 +170,23 @@ nodes:
     name: feedforward_network_block2
     nodes_depended_on:
     - layernorm_post_normalization_block2
-    nodes_dependent_on:
-    - layernorm_pre_normalization_block3
+    nodes_dependent_on: []
     prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block3:
     agent: false
-    description: Apply feedforward neural network transformation in block3
+    description: Apply feedforward neural network transformation to normalized vectors
     name: feedforward_network_block3
     nodes_depended_on:
     - layernorm_post_normalization_block3
-    nodes_dependent_on:
-    - layernorm_pre_normalization_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: The resulting vectors after applying the feedforward neural network
+        in block3
+      key: feedforward_output_block3
+      type: List[float]
+    - description: Boolean mask indicating active elements post-activation in block3
+      key: activation_mask_block3
+      type: List[bool]
     prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block4:
     agent: false
@@ -126,8 +194,16 @@ nodes:
     name: feedforward_network_block4
     nodes_depended_on:
     - layernorm_post_normalization_block4
-    nodes_dependent_on:
-    - layernorm_pre_normalization_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: The transformed vector after applying the feedforward neural network
+        in block4
+      key: feedforward_output_vector
+      type: List[float]
+    - description: A flag indicating whether the feedforward transformation was activated
+        successfully
+      key: feedforward_activation_flag
+      type: bool
     prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block5:
     agent: false
@@ -135,8 +211,15 @@ nodes:
     name: feedforward_network_block5
     nodes_depended_on:
     - layernorm_post_normalization_block5
-    nodes_dependent_on:
-    - lm_head_projection
+    nodes_dependent_on: []
+    output_structure:
+    - description: The resulting vectors after applying the feedforward neural network
+        transformation in block5
+      key: feedforward_output
+      type: List[float]
+    - description: Flag indicating if the transformation was successfully applied
+      key: transformation_applied
+      type: bool
     prompt: Apply feedforward neural network transformation to normalized vectors
   final_softmax:
     agent: false
@@ -153,6 +236,11 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block1
     nodes_dependent_on: []
+    output_structure:
+    - description: A list of normalized and projected key vectors for attention calculations
+        in block1
+      key: key_projection_vectors
+      type: List[float]
     prompt: Create key projections from normalized inputs
   k_projection_block2:
     agent: false
@@ -161,6 +249,11 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block2
     nodes_dependent_on: []
+    output_structure:
+    - description: A list of numerical values representing the key projection vectors
+        for block2
+      key: key_projection_vectors
+      type: List[float]
     prompt: Create key projections from normalized inputs
   k_projection_block3:
     agent: false
@@ -169,6 +262,11 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block3
     nodes_dependent_on: []
+    output_structure:
+    - description: A list of floating point numbers representing the key projection
+        vectors for block3
+      key: key_projection_vectors
+      type: List[float]
     prompt: Create key projections from normalized inputs
   k_projection_block4:
     agent: false
@@ -177,6 +275,13 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block4
     nodes_dependent_on: []
+    output_structure:
+    - description: Input tensor after normalization
+      key: normalized_input_tensor
+      type: List[float]
+    - description: Projections of input tensor
+      key: key_projection_vectors
+      type: List[float]
     prompt: Create key projections from normalized inputs
   k_projection_block5:
     agent: false
@@ -185,6 +290,10 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block5
     nodes_dependent_on: []
+    output_structure:
+    - description: List of key projection vector elements for block5
+      key: key_projection_vectors
+      type: List[float]
     prompt: Create key projections from normalized inputs
   layernorm_post_normalization_block1:
     agent: false
@@ -192,8 +301,21 @@ nodes:
     name: layernorm_post_normalization_block1
     nodes_depended_on:
     - residual_connection_block1
-    nodes_dependent_on:
-    - feedforward_network_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: The normalized feature vectors after applying layer normalization
+      key: normalized_output
+      type: List[float]
+    - description: Mean values used during normalization for each feature dimension
+      key: normalization_mean
+      type: List[float]
+    - description: Scale (gain) values used during normalization for each feature
+        dimension
+      key: normalization_scale
+      type: List[float]
+    - description: Original residual input vectors before normalization
+      key: residual_input
+      type: List[float]
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block2:
     agent: false
@@ -201,8 +323,20 @@ nodes:
     name: layernorm_post_normalization_block2
     nodes_depended_on:
     - residual_connection_block2
-    nodes_dependent_on:
-    - feedforward_network_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: Normalized output vector of the block2
+      key: normalized_vector
+      type: List[float]
+    - description: Scaling factors applied during normalization
+      key: normalization_scale
+      type: List[float]
+    - description: Mean values used during normalization
+      key: normalization_mean
+      type: List[float]
+    - description: Status message indicating success or error
+      key: status
+      type: str
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block3:
     agent: false
@@ -210,8 +344,17 @@ nodes:
     name: layernorm_post_normalization_block3
     nodes_depended_on:
     - residual_connection_block3
-    nodes_dependent_on:
-    - feedforward_network_block3
+    nodes_dependent_on: []
+    output_structure:
+    - description: Normalized vector outputs after final normalization in block3
+      key: normalized_vectors
+      type: List[float]
+    - description: Scale parameter used during normalization
+      key: normalization_scale
+      type: float
+    - description: Mean parameter used during normalization
+      key: normalization_mean
+      type: float
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block4:
     agent: false
@@ -219,8 +362,7 @@ nodes:
     name: layernorm_post_normalization_block4
     nodes_depended_on:
     - residual_connection_block4
-    nodes_dependent_on:
-    - feedforward_network_block4
+    nodes_dependent_on: []
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block5:
     agent: false
@@ -228,9 +370,14 @@ nodes:
     name: layernorm_post_normalization_block5
     nodes_depended_on:
     - residual_connection_block5
-    nodes_dependent_on:
-    - feedforward_network_block5
-    - lm_head_projection
+    nodes_dependent_on: []
+    output_structure:
+    - description: The normalized output vector for block5 after residual connection
+      key: normalized_vector
+      type: List[float]
+    - description: Indicates if normalization was successfully completed
+      key: normalization_status
+      type: bool
     prompt: Normalize residual connection outputs
   layernorm_pre_normalization_block1:
     agent: false
@@ -238,10 +385,14 @@ nodes:
     name: layernorm_pre_normalization_block1
     nodes_depended_on:
     - token_positional_info
-    nodes_dependent_on:
-    - q_projection_block1
-    - k_projection_block1
-    - v_projection_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of mean values for each token
+      key: mean_values
+      type: List[float]
+    - description: List of scale values for each token
+      key: scale_values
+      type: List[float]
     prompt: Normalize input for first block using mean/scale per token
   layernorm_pre_normalization_block2:
     agent: false
@@ -249,10 +400,11 @@ nodes:
     name: layernorm_pre_normalization_block2
     nodes_depended_on:
     - feedforward_network_block1
-    nodes_dependent_on:
-    - q_projection_block2
-    - k_projection_block2
-    - v_projection_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: Normalized input vector
+      key: normalized_input
+      type: List[float]
     prompt: Normalize input for second block using mean/scale per token
   layernorm_pre_normalization_block3:
     agent: false
@@ -261,11 +413,18 @@ nodes:
     nodes_depended_on:
     - feedforward_network_block1
     - feedforward_network_block2
-    nodes_dependent_on:
-    - q_projection_block3
-    - k_projection_block3
-    - v_projection_block3
-    prompt: Normalize input for third block using mean/scale per token
+    nodes_dependent_on: []
+    output_structure:
+    - description: Normalized vector values for each token in the input sequence
+      key: normalized_input
+      type: List[float]
+    - description: Mean values used for normalization per token
+      key: normalization_mean
+      type: List[float]
+    - description: Scale values used for normalization per token
+      key: normalization_scale
+      type: List[float]
+    prompt: Normalize input for third transformer block using mean/scale per token
   layernorm_pre_normalization_block4:
     agent: false
     description: Normalize input for fourth transformer block
@@ -274,10 +433,14 @@ nodes:
     - feedforward_network_block1
     - feedforward_network_block2
     - feedforward_network_block3
-    nodes_dependent_on:
-    - q_projection_block4
-    - k_projection_block4
-    - v_projection_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: Normalized token representations for the fourth block
+      key: normalized_input
+      type: List[str]
+    - description: Parameters used for normalization, such as mean and scale per token
+      key: normalization_parameters
+      type: List[float]
     prompt: Normalize input for fourth block using mean/scale per token
   layernorm_pre_normalization_block5:
     agent: false
@@ -288,10 +451,16 @@ nodes:
     - feedforward_network_block2
     - feedforward_network_block3
     - feedforward_network_block4
-    nodes_dependent_on:
-    - q_projection_block5
-    - k_projection_block5
-    - v_projection_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of normalized token representations after applying mean and
+        scale adjustments
+      key: normalized_input
+      type: List[str]
+    - description: List of normalization parameter identifiers (e.g., mean/scale per
+        token)
+      key: normalization_parameters
+      type: List[str]
     prompt: Normalize input for fifth block using mean/scale per token
   lm_head_projection:
     agent: false
@@ -300,8 +469,18 @@ nodes:
     nodes_depended_on:
     - feedforward_network_block5
     - token_positional_info
-    nodes_dependent_on:
-    - final_softmax
+    nodes_dependent_on: []
+    output_structure:
+    - description: A list of floating-point numbers representing the final projected
+        vectors in vocabulary space
+      key: final_output_vectors
+      type: List[float]
+    - description: Number of tokens in the input sequence
+      key: sequence_length
+      type: int
+    - description: Dimension size of each output vector
+      key: vector_dimension
+      type: int
     prompt: Project final normalized vectors to vocabulary space
   multi_head_attention_block1:
     agent: false
@@ -310,8 +489,14 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1_block1
     - softmax_weighted_sum_head_2_block1
-    nodes_dependent_on:
-    - residual_connection_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of value vectors for head1
+      key: head1_value
+      type: List[float]
+    - description: List of value vectors for head2
+      key: head2_value
+      type: List[float]
     prompt: Concatenate attention head results for final output
   multi_head_attention_block2:
     agent: false
@@ -320,8 +505,11 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1_block2
     - softmax_weighted_sum_head_2_block2
-    nodes_dependent_on:
-    - residual_connection_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: Concatenated attention outputs from heads in block2
+      key: attention_output_block2
+      type: List[float]
     prompt: Concatenate attention head results for final output
   multi_head_attention_block3:
     agent: false
@@ -330,8 +518,11 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1_block3
     - softmax_weighted_sum_head_2_block3
-    nodes_dependent_on:
-    - residual_connection_block3
+    nodes_dependent_on: []
+    output_structure:
+    - description: Concatenated output vectors from attention heads in block3
+      key: attention_heads_output
+      type: List[float]
     prompt: Concatenate attention head results for final output
   multi_head_attention_block4:
     agent: false
@@ -340,8 +531,15 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1_block4
     - softmax_weighted_sum_head_2_block4
-    nodes_dependent_on:
-    - residual_connection_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: Concatenated vector of attention results from head1 and head2 in
+        block4
+      key: attention_output_block4
+      type: List[float]
+    - description: Sum of attention head outputs for further processing
+      key: attention_heads_sum
+      type: List[float]
     prompt: Concatenate attention head results for final output
   multi_head_attention_block5:
     agent: false
@@ -350,17 +548,24 @@ nodes:
     nodes_depended_on:
     - softmax_weighted_sum_head_1_block5
     - softmax_weighted_sum_head_2_block5
-    nodes_dependent_on:
-    - residual_connection_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: Concatenated attention heads for final output
+      key: concatenated_attention_heads
+      type: List[float]
     prompt: Concatenate attention head results for final output
   q_projection_block1:
     agent: false
-    description: Generate query projection vectors for block1
+    description: Generate query projection vectors for block1.
     name: q_projection_block1
     nodes_depended_on:
     - layernorm_pre_normalization_block1
     nodes_dependent_on: []
-    prompt: Create query projections from normalized inputs
+    output_structure:
+    - description: Query projection vector for block1
+      key: query_projection_vector
+      type: List[float]
+    prompt: Create query projections from normalized inputs.
   q_projection_block2:
     agent: false
     description: Generate query projection vectors for block2
@@ -368,6 +573,10 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block2
     nodes_dependent_on: []
+    output_structure:
+    - description: List of vector outputs after query projection
+      key: query_projection_vectors
+      type: List[float]
     prompt: Create query projections from normalized inputs
   q_projection_block3:
     agent: false
@@ -376,6 +585,11 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block3
     nodes_dependent_on: []
+    output_structure:
+    - description: A list of numeric values representing the query projection vectors
+        for each token in the input sequence.
+      key: query_vectors
+      type: List[float]
     prompt: Create query projections from normalized inputs
   q_projection_block4:
     agent: false
@@ -384,6 +598,10 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block4
     nodes_dependent_on: []
+    output_structure:
+    - description: List of query projection vectors produced for block4
+      key: query_projection_vectors
+      type: List[float]
     prompt: Create query projections from normalized inputs
   q_projection_block5:
     agent: false
@@ -392,6 +610,10 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block5
     nodes_dependent_on: []
+    output_structure:
+    - description: List of query projection vector values for block5
+      key: query_projection_vectors
+      type: List[float]
     prompt: Create query projections from normalized inputs
   residual_connection_block1:
     agent: false
@@ -400,8 +622,15 @@ nodes:
     nodes_depended_on:
     - multi_head_attention_block1
     - layernorm_pre_normalization_block1
-    nodes_dependent_on:
-    - layernorm_post_normalization_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: The resulting tensor after adding the attention output back to
+        the normalized input, represented as a string identifier or tokenized form.
+      key: residual_output_block1
+      type: str
+    - description: Status message indicating success or failure of residual addition.
+      key: residual_status
+      type: str
     prompt: Combine attention output with original normalized inputs
   residual_connection_block2:
     agent: false
@@ -410,8 +639,15 @@ nodes:
     nodes_depended_on:
     - multi_head_attention_block2
     - layernorm_pre_normalization_block2
-    nodes_dependent_on:
-    - layernorm_post_normalization_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: Combined output after adding residual in block2, as a processed
+        text or identifier
+      key: residual_connection_output
+      type: str
+    - description: Status message indicating success or details of the operation
+      key: status
+      type: str
     prompt: Combine attention output with original normalized inputs
   residual_connection_block3:
     agent: false
@@ -420,8 +656,17 @@ nodes:
     nodes_depended_on:
     - multi_head_attention_block3
     - layernorm_pre_normalization_block3
-    nodes_dependent_on:
-    - layernorm_post_normalization_block3
+    nodes_dependent_on: []
+    output_structure:
+    - description: The combined output after residual addition in block3
+      key: residual_output_block3
+      type: str
+    - description: The attention output from block3 before residual addition
+      key: attention_output_block3
+      type: str
+    - description: Normalized input for block3
+      key: normalized_input_block3
+      type: str
     prompt: Combine attention output with original normalized inputs
   residual_connection_block4:
     agent: false
@@ -430,8 +675,11 @@ nodes:
     nodes_depended_on:
     - multi_head_attention_block4
     - layernorm_pre_normalization_block4
-    nodes_dependent_on:
-    - layernorm_post_normalization_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: The combined output string after residual addition in block4
+      key: residual_output_block4
+      type: str
     prompt: Combine attention output with original normalized inputs
   residual_connection_block5:
     agent: false
@@ -440,8 +688,14 @@ nodes:
     nodes_depended_on:
     - multi_head_attention_block5
     - layernorm_pre_normalization_block5
-    nodes_dependent_on:
-    - layernorm_post_normalization_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: The combined output after adding residual connection for block5
+      key: residual_output_block5
+      type: str
+    - description: Indicates whether the residual connection output is valid
+      key: residual_output_valid
+      type: bool
     prompt: Combine attention output with original normalized inputs
   softmax_weighted_sum_head_1_block1:
     agent: false
@@ -450,8 +704,15 @@ nodes:
     nodes_depended_on:
     - attention_head_1_score_block1
     - v_projection_block1
-    nodes_dependent_on:
-    - multi_head_attention_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: The list of weighted value vectors for head1 in block1 after applying
+        attention weights
+      key: weighted_value_vectors_head1
+      type: List[float]
+    - description: The attention score vector computed for head1 in block1
+      key: attention_scores_head1
+      type: List[float]
     prompt: Create weighted value vectors for head1
   softmax_weighted_sum_head_1_block2:
     agent: false
@@ -460,8 +721,11 @@ nodes:
     nodes_depended_on:
     - attention_head_1_score_block2
     - v_projection_block2
-    nodes_dependent_on:
-    - multi_head_attention_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of weighted value vectors for head1
+      key: weighted_value_vectors
+      type: List[float]
     prompt: Create weighted value vectors for head1
   softmax_weighted_sum_head_1_block3:
     agent: false
@@ -470,8 +734,15 @@ nodes:
     nodes_depended_on:
     - attention_head_1_score_block3
     - v_projection_block3
-    nodes_dependent_on:
-    - multi_head_attention_block3
+    nodes_dependent_on: []
+    output_structure:
+    - description: Softmax weights computed from attention scores for head1 in block3
+      key: softmax_weights_head1_block3
+      type: List[float]
+    - description: Weighted sum of value projection vectors for head1 in block3, resulting
+        in the context vector
+      key: weighted_value_vectors_head1_block3
+      type: List[float]
     prompt: Create weighted value vectors for head1
   softmax_weighted_sum_head_1_block4:
     agent: false
@@ -480,8 +751,18 @@ nodes:
     nodes_depended_on:
     - attention_head_1_score_block4
     - v_projection_block4
-    nodes_dependent_on:
-    - multi_head_attention_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: Weighted sum of value projection vectors for head1 in block4 after
+        softmax weighting
+      key: weighted_value_vectors_head1_block4
+      type: List[float]
+    - description: Softmax weights applied to head1 attention scores in block4
+      key: softmax_weights_head1_block4
+      type: List[float]
+    - description: Raw attention scores for head1 in block4 before softmax
+      key: attention_scores_head1_block4
+      type: List[float]
     prompt: Create weighted value vectors for head1
   softmax_weighted_sum_head_1_block5:
     agent: false
@@ -490,8 +771,18 @@ nodes:
     nodes_depended_on:
     - attention_head_1_score_block5
     - v_projection_block5
-    nodes_dependent_on:
-    - multi_head_attention_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: The weighted sum of value projections for head1 in block5 after
+        applying softmax weights
+      key: weighted_value_vectors_head1_block5
+      type: List[float]
+    - description: Attention scores for head1 in block5 computed via dot products
+      key: attention_scores_head1_block5
+      type: List[float]
+    - description: The value projection vectors for head1 in block5
+      key: value_projections_head1_block5
+      type: List[float]
     prompt: Create weighted value vectors for head1
   softmax_weighted_sum_head_2_block1:
     agent: false
@@ -500,8 +791,17 @@ nodes:
     nodes_depended_on:
     - attention_head_2_score_block1
     - v_projection_block1
-    nodes_dependent_on:
-    - multi_head_attention_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: The weighted value vectors for head2 after applying softmax weights
+      key: weighted_value_vectors_head2
+      type: List[float]
+    - description: The attention scores computed for head2 in block1
+      key: attention_scores_head2
+      type: List[float]
+    - description: The softmax weights applied to the value projections for head2
+      key: softmax_weights_head2
+      type: List[float]
     prompt: Create weighted value vectors for head2
   softmax_weighted_sum_head_2_block2:
     agent: false
@@ -510,8 +810,12 @@ nodes:
     nodes_depended_on:
     - attention_head_2_score_block2
     - v_projection_block2
-    nodes_dependent_on:
-    - multi_head_attention_block2
+    nodes_dependent_on: []
+    output_structure:
+    - description: The result of applying softmax weights to head2's value projections,
+        representing the weighted value vectors for attention calculation.
+      key: ' weighted_value_vectors'
+      type: List[float]
     prompt: Create weighted value vectors for head2
   softmax_weighted_sum_head_2_block3:
     agent: false
@@ -520,9 +824,18 @@ nodes:
     nodes_depended_on:
     - attention_head_2_score_block3
     - v_projection_block3
-    nodes_dependent_on:
-    - multi_head_attention_block3
-    prompt: Create weighted value vectors for head2
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of weighted value vectors for head2 in block3, representing
+        the final attention output for this head.
+      key: weighted_value_vectors_head2_block3
+      type: List[float]
+    - description: Attention score weights applied to value projections for head2
+        in block3.
+      key: attention_scores_head2_block3
+      type: List[float]
+    prompt: Create weighted value vectors for head2 in block3 using softmax attention
+      scores and value projections.
   softmax_weighted_sum_head_2_block4:
     agent: false
     description: Apply softmax weights to head2 value projections in block4
@@ -530,8 +843,14 @@ nodes:
     nodes_depended_on:
     - attention_head_2_score_block4
     - v_projection_block4
-    nodes_dependent_on:
-    - multi_head_attention_block4
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of weighted value vectors for head2 in block4
+      key: weighted_value_vectors_head2_block4
+      type: List[float]
+    - description: Normalized softmax attention weights for head2 in block4
+      key: attention_weights_head2_block4
+      type: List[float]
     prompt: Create weighted value vectors for head2
   softmax_weighted_sum_head_2_block5:
     agent: false
@@ -540,8 +859,16 @@ nodes:
     nodes_depended_on:
     - attention_head_2_score_block5
     - v_projection_block5
-    nodes_dependent_on:
-    - multi_head_attention_block5
+    nodes_dependent_on: []
+    output_structure:
+    - description: The list of weighted value vectors for head2 in block5, corresponding
+        to each token position
+      key: weighted_value_vectors_head2
+      type: List[float]
+    - description: The softmaxed attention weights for head2 in block5, representing
+        attention distribution over tokens
+      key: attention_weights_head2
+      type: List[float]
     prompt: Create weighted value vectors for head2
   token_positional_info:
     agent: false
@@ -549,16 +876,34 @@ nodes:
     name: token_positional_info
     nodes_depended_on:
     - tokenizer_customization
-    nodes_dependent_on:
-    - layernorm_pre_normalization_block1
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of start indices for each token
+      key: token_positions
+      type: List[int]
+    - description: List of end indices for each token
+      key: end_positions
+      type: List[int]
+    - description: Total number of tokens identified
+      key: total_tokens
+      type: int
     prompt: Tokenize messages and annotate with position metadata
   tokenizer_customization:
     agent: false
     description: Define tokenizer to recognize single letters or words in token stream
     name: tokenizer_customization
     nodes_depended_on: []
-    nodes_dependent_on:
-    - token_positional_info
+    nodes_dependent_on: []
+    output_structure:
+    - description: List of tokenizer rule definitions as strings
+      key: tokenizer_rules
+      type: List[str]
+    - description: List of patterns used to recognize individual letters or words
+      key: recognition_patterns
+      type: List[str]
+    - description: Serialized tokenizer configuration or description
+      key: tokenizer_specification
+      type: str
     prompt: Generate tokenizer configuration code for basic letter/word distinctions
   v_projection_block1:
     agent: false
@@ -567,6 +912,11 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block1
     nodes_dependent_on: []
+    output_structure:
+    - description: The list of float values representing the value projection vectors
+        for block1.
+      key: value_projection_vectors
+      type: List[float]
     prompt: Create value projections from normalized inputs
   v_projection_block2:
     agent: false
@@ -575,6 +925,21 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block2
     nodes_dependent_on: []
+    output_structure:
+    - description: Normalized value projection vectors for block2, representing the
+        feature vectors for each token in the sequence.
+      key: value_projections
+      type: List[float]
+    - description: Dimensionality of each value projection vector.
+      key: projection_dimensions
+      type: int
+    - description: Number of tokens in the input sequence.
+      key: token_count
+      type: int
+    - description: Flag indicating whether the projection vectors have been computed
+        successfully.
+      key: projection_completeness
+      type: bool
     prompt: Create value projections from normalized inputs
   v_projection_block3:
     agent: false
@@ -583,6 +948,16 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block3
     nodes_dependent_on: []
+    output_structure:
+    - description: List of normalized value projection vectors for the tokens in block3
+      key: value_projection_vectors
+      type: List[float]
+    - description: Dimensionality of each projection vector
+      key: projection_dimensions
+      type: int
+    - description: Number of tokens processed in block3
+      key: token_count
+      type: int
     prompt: Create value projections from normalized inputs
   v_projection_block4:
     agent: false
@@ -591,6 +966,13 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block4
     nodes_dependent_on: []
+    output_structure:
+    - description: List of value projection vectors for each token position in block4
+      key: value_projections
+      type: List[float]
+    - description: Dimensionality of each value projection vector
+      key: projection_dim
+      type: int
     prompt: Create value projections from normalized inputs
   v_projection_block5:
     agent: false
@@ -599,4 +981,8 @@ nodes:
     nodes_depended_on:
     - layernorm_pre_normalization_block5
     nodes_dependent_on: []
+    output_structure:
+    - description: Normalized value projection vectors for block5 tokens
+      key: value_projection_vectors
+      type: List[float]
     prompt: Create value projections from normalized inputs

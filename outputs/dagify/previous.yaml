@@ -1,135 +1,195 @@
 dag_type: plain_text
-description: 'Implements the core GPT‑3 transformer architecture: embed tokens, add
-  positional encodings, apply stacked self‑attention and feed‑forward blocks with
-  residual connections and layer normalizations, then generate output logits and post‑process
-  the response.'
-name: gpt3_architecture
+description: A detailed GPT‑3.5 style decoder‑only transformer execution flow, expressed
+  as elemental steps with explicit dependencies.
+name: gpt_3_5_transformer_workflow
 nodes:
-  add_position_vectors_to_embeddings:
+  add_norm_attention_l1:
     agent: false
-    description: Add positional encodings to token embeddings element‑wise.
-    name: add_position_vectors_to_embeddings
+    description: Add residual connection and layer‑norm after attention in layer 1.
+    name: add_norm_attention_l1
+    nodes_depended_on:
+    - compute_attention_l1
+    - add_position_vectors
+    nodes_dependent_on: []
+    prompt: Add the attention output to the original position‑aware embeddings and
+      apply layer normalization.
+  add_norm_attention_l2:
+    agent: false
+    description: Add residual connection and layer‑norm after attention in layer 2.
+    name: add_norm_attention_l2
+    nodes_depended_on:
+    - compute_attention_l2
+    - add_norm_ff_l1
+    nodes_dependent_on: []
+    prompt: Add the attention output to the layer 1 output (residual) and apply layer
+      normalization.
+  add_norm_ff_l1:
+    agent: false
+    description: Add residual connection and layer‑norm after the feed‑forward network
+      in layer 1.
+    name: add_norm_ff_l1
+    nodes_depended_on:
+    - ff_linear2_l1
+    - add_norm_attention_l1
+    nodes_dependent_on: []
+    prompt: Add the FFN output to the layer 1 attention residual and apply layer normalization.
+  add_norm_ff_l2:
+    agent: false
+    description: Add residual connection and layer‑norm after the feed‑forward network
+      in layer 2.
+    name: add_norm_ff_l2
+    nodes_depended_on:
+    - ff_linear2_l2
+    - add_norm_attention_l2
+    nodes_dependent_on: []
+    prompt: Add the FFN output to the layer 2 attention residual and apply layer normalization
+      to produce the final transformer output.
+  add_position_vectors:
+    agent: false
+    description: Add positional encodings to token embeddings to obtain position‑aware
+      embeddings.
+    name: add_position_vectors
     nodes_depended_on:
     - token_embedding
     - generate_position_vectors
     nodes_dependent_on: []
-    prompt: Numerically sum the token embedding vectors with the positional encoding
-      vectors element‑wise.
-  add_residual_norm_1:
+    prompt: Element‑wise sum the token embeddings and positional encoding vectors.
+  compute_attention_l1:
     agent: false
-    description: Add the attention output to its input (residual) and apply layer‑norm.
-    name: add_residual_norm_1
+    description: Perform scaled dot‑product attention for layer 1.
+    name: compute_attention_l1
     nodes_depended_on:
-    - add_position_vectors_to_embeddings
-    - attention_output_projection
+    - q_proj_l1
+    - k_proj_l1
+    - v_proj_l1
     nodes_dependent_on: []
-    prompt: Sum the attention output with the original embeddings and normalize the
-      result.
-  add_residual_norm_2:
+    prompt: Compute attention weights from Q and K, apply softmax, and weight V to
+      obtain the attention output.
+  compute_attention_l2:
     agent: false
-    description: Add the feed‑forward output to its input (residual) and apply layer‑norm.
-    name: add_residual_norm_2
+    description: Perform scaled dot‑product attention for layer 2.
+    name: compute_attention_l2
     nodes_depended_on:
-    - add_residual_norm_1
-    - feed_forward_linear2
+    - q_proj_l2
+    - k_proj_l2
+    - v_proj_l2
     nodes_dependent_on: []
-    prompt: Sum the feed‑forward output with its residual input and normalize the
-      result.
-  attention_output_projection:
+    prompt: Compute attention weights from Q and K, apply softmax, and weight V to
+      obtain the attention output for layer 2.
+  ff_activation_l1:
     agent: false
-    description: Project the attention output back to the model dimension.
-    name: attention_output_projection
+    description: Apply ReLU activation to the first FFN linear output in layer 1.
+    name: ff_activation_l1
     nodes_depended_on:
-    - compute_self_attention
+    - ff_linear1_l1
     nodes_dependent_on: []
-    prompt: Apply the output projection matrix to the attention context vectors.
-  compute_self_attention:
+    prompt: Apply ReLU element‑wise to the FFN linear1 result.
+  ff_activation_l2:
     agent: false
-    description: Compute scaled dot‑product attention using Q, K, and V to obtain
-      the attention context.
-    name: compute_self_attention
+    description: Apply ReLU activation to the first FFN linear output in layer 2.
+    name: ff_activation_l2
     nodes_depended_on:
-    - q_projection
-    - k_projection
-    - v_projection
+    - ff_linear1_l2
     nodes_dependent_on: []
-    prompt: Perform scaled dot‑product attention and produce attention context vectors.
-  feed_forward_activation:
+    prompt: Apply ReLU element‑wise to the FFN linear1 result of layer 2.
+  ff_linear1_l1:
     agent: false
-    description: Apply the GELU activation function.
-    name: feed_forward_activation
+    description: First linear transformation of the feed‑forward network in layer 1.
+    name: ff_linear1_l1
     nodes_depended_on:
-    - feed_forward_linear1
+    - add_norm_attention_l1
     nodes_dependent_on: []
-    prompt: Apply GELU activation to the output of the first linear layer.
-  feed_forward_linear1:
+    prompt: Apply the first linear projection of the FFN to the normalized attention
+      output.
+  ff_linear1_l2:
     agent: false
-    description: First linear transformation of the feed‑forward network.
-    name: feed_forward_linear1
+    description: First linear transformation of the feed‑forward network in layer 2.
+    name: ff_linear1_l2
     nodes_depended_on:
-    - add_residual_norm_1
+    - add_norm_attention_l2
     nodes_dependent_on: []
-    prompt: Apply the first linear transformation to the residual‑norm output.
-  feed_forward_linear2:
+    prompt: Apply the first linear projection of the FFN to the normalized attention
+      output of layer 2.
+  ff_linear2_l1:
     agent: false
-    description: Second linear transformation of the feed‑forward network.
-    name: feed_forward_linear2
+    description: Second linear transformation of the feed‑forward network in layer 1.
+    name: ff_linear2_l1
     nodes_depended_on:
-    - feed_forward_activation
+    - ff_activation_l1
     nodes_dependent_on: []
-    prompt: Apply the second linear transformation to the activated tensor.
-  final_layer_norm:
+    prompt: Apply the second linear projection of the FFN to the activated tensor.
+  ff_linear2_l2:
     agent: false
-    description: Apply a final layer‑norm before projecting to logits.
-    name: final_layer_norm
+    description: Second linear transformation of the feed‑forward network in layer 2.
+    name: ff_linear2_l2
     nodes_depended_on:
-    - add_residual_norm_2
+    - ff_activation_l2
     nodes_dependent_on: []
-    prompt: Normalize the final transformer block output.
+    prompt: Apply the second linear projection of the FFN to the activated tensor
+      of layer 2.
   generate_position_vectors:
     agent: false
-    description: Create a sinusoidal positional‑encoding matrix matching the token‑embedding
-      dimensions.
+    description: Create a sinusoidal positional encoding matrix matching the token
+      embedding dimensions.
     name: generate_position_vectors
     nodes_depended_on:
     - token_embedding
     nodes_dependent_on: []
     prompt: Generate sinusoidal positional encodings for each token position.
-  k_projection:
+  k_proj_l1:
     agent: false
-    description: Project the position‑augmented embeddings to key vectors.
-    name: k_projection
+    description: Project position‑aware embeddings to key vectors for layer 1.
+    name: k_proj_l1
     nodes_depended_on:
-    - add_position_vectors_to_embeddings
+    - add_position_vectors
     nodes_dependent_on: []
-    prompt: Multiply embeddings by the learned key projection matrix to produce K
+    prompt: Multiply the embeddings by the layer 1 key weight matrix to produce K
       vectors.
+  k_proj_l2:
+    agent: false
+    description: Project layer 1 output to key vectors for layer 2.
+    name: k_proj_l2
+    nodes_depended_on:
+    - add_norm_ff_l1
+    nodes_dependent_on: []
+    prompt: Multiply the layer 1 output by the layer 2 key weight matrix to produce
+      K vectors.
   output_logits:
     agent: false
-    description: Project the final hidden states to vocabulary logits.
+    description: Project the final transformer output to raw token prediction logits.
     name: output_logits
     nodes_depended_on:
-    - final_layer_norm
+    - add_norm_ff_l2
     nodes_dependent_on: []
-    prompt: Convert final hidden representations to raw token prediction scores (logits)
-      via output projection.
+    prompt: Convert the final hidden state tensor into a vector of logits over the
+      vocabulary via a linear projection.
   process_and_validate_response:
     agent: false
-    description: Convert logits to text tokens, enforce safety constraints, and format
-      the final response.
+    description: Convert logits to text, enforce safety constraints, and format the
+      final response.
     name: process_and_validate_response
     nodes_depended_on:
     - output_logits
     nodes_dependent_on: []
-    prompt: Decode logits into tokens, validate safety/integrity, and format the response.
-  q_projection:
+    prompt: Decode the logits into tokens, filter for safety/consistency, and assemble
+      the final output string.
+  q_proj_l1:
     agent: false
-    description: Project the position‑augmented embeddings to query vectors.
-    name: q_projection
+    description: Project position‑aware embeddings to query vectors for layer 1.
+    name: q_proj_l1
     nodes_depended_on:
-    - add_position_vectors_to_embeddings
+    - add_position_vectors
     nodes_dependent_on: []
-    prompt: Multiply embeddings by the learned query projection matrix to produce
+    prompt: Multiply the embeddings by the layer 1 query weight matrix to produce
+      Q vectors.
+  q_proj_l2:
+    agent: false
+    description: Project layer 1 output to query vectors for layer 2.
+    name: q_proj_l2
+    nodes_depended_on:
+    - add_norm_ff_l1
+    nodes_dependent_on: []
+    prompt: Multiply the layer 1 output by the layer 2 query weight matrix to produce
       Q vectors.
   token_embedding:
     agent: false
@@ -139,15 +199,24 @@ nodes:
     nodes_depended_on:
     - validate_and_enrich_prompt
     nodes_dependent_on: []
-    prompt: Convert input tokens to position‑agnostic dense vector embeddings.
-  v_projection:
+    prompt: Convert the enriched prompt tokens into a tensor of token embeddings.
+  v_proj_l1:
     agent: false
-    description: Project the position‑augmented embeddings to value vectors.
-    name: v_projection
+    description: Project position‑aware embeddings to value vectors for layer 1.
+    name: v_proj_l1
     nodes_depended_on:
-    - add_position_vectors_to_embeddings
+    - add_position_vectors
     nodes_dependent_on: []
-    prompt: Multiply embeddings by the learned value projection matrix to produce
+    prompt: Multiply the embeddings by the layer 1 value weight matrix to produce
+      V vectors.
+  v_proj_l2:
+    agent: false
+    description: Project layer 1 output to value vectors for layer 2.
+    name: v_proj_l2
+    nodes_depended_on:
+    - add_norm_ff_l1
+    nodes_dependent_on: []
+    prompt: Multiply the layer 1 output by the layer 2 value weight matrix to produce
       V vectors.
   validate_and_enrich_prompt:
     agent: false
@@ -157,4 +226,4 @@ nodes:
     nodes_depended_on: []
     nodes_dependent_on: []
     prompt: Verify the prompt for correctness and completeness. If valid, add contextual
-      metadata such as current date/time and user history.
+      metadata (current date/time, user history).
