@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Modified workflow with feed-forward network (FFN) layers split into parallel
-  processing paths while maintaining sequential structure for context preservation.
-name: parallelized_transformer_processing_with_parallel_ffn
+description: Transformer processing with parallel feed-forward networks and split
+  second feed-forward layer for increased concurrency
+name: parallelized_transformer_processing_with_parallel_ffn_and_split_ffn2
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -29,16 +29,17 @@ nodes:
     - feed_forward_parallel_branch_2
     prompt: Compute scaled dot-product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear2:
+  feed_forward_linear2_parallel_merge:
     agent: false
-    description: Final linear transformation in feed-forward network
-    name: feed_forward_linear2
+    description: Combine split-parallel final feed-forward network branches
+    name: feed_forward_linear2_parallel_merge
     nodes_depended_on:
-    - feed_forward_parallel_merge
+    - feed_forward_split_linear2_branch_1
+    - feed_forward_split_linear2_branch_2
     nodes_dependent_on:
     - output_logits
-    prompt: Apply second linear transformation to produce output tensor for subsequent
-      processing.
+    prompt: Concatenate the outputs of split-parallel final linear transformations
+      into combined output tensor.
   feed_forward_parallel_branch_1:
     agent: false
     description: First parallel linear transformation in feed-forward network
@@ -67,9 +68,32 @@ nodes:
     - feed_forward_parallel_branch_1
     - feed_forward_parallel_branch_2
     nodes_dependent_on:
-    - feed_forward_linear2
+    - feed_forward_split_linear2_branch_1
+    - feed_forward_split_linear2_branch_2
     prompt: Numerically sum the output tensors from parallel FFN branches to produce
       combined context representations.
+  feed_forward_split_linear2_branch_1:
+    agent: false
+    description: Split-parallel final linear transformation part 1 in feed-forward
+      network
+    name: feed_forward_split_linear2_branch_1
+    nodes_depended_on:
+    - feed_forward_parallel_merge
+    nodes_dependent_on:
+    - feed_forward_linear2_parallel_merge
+    prompt: Apply second linear transformation to portion of merged tensor to produce
+      output tensor for subsequent processing.
+  feed_forward_split_linear2_branch_2:
+    agent: false
+    description: Split-parallel final linear transformation part 2 in feed-forward
+      network
+    name: feed_forward_split_linear2_branch_2
+    nodes_depended_on:
+    - feed_forward_parallel_merge
+    nodes_dependent_on:
+    - feed_forward_linear2_parallel_merge
+    prompt: Apply second linear transformation to alternate portion of merged tensor
+      to produce output tensor for subsequent processing.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
@@ -95,7 +119,7 @@ nodes:
     description: Generate raw token prediction logits
     name: output_logits
     nodes_depended_on:
-    - feed_forward_linear2
+    - feed_forward_linear2_parallel_merge
     nodes_dependent_on:
     - process_and_validate_response
     prompt: Convert decoder output to vector of raw token prediction scores (logits)
@@ -126,7 +150,7 @@ nodes:
     nodes_depended_on:
     - validate_and_enrich_prompt
     nodes_dependent_on:
-    - generate_position_vectors
+    - add_position_vectors_to_embeddings
     prompt: Map input tokens to dense vectors using the model's learned embedding
       matrix. Output a tensor of token embeddings.
   v_projection:
