@@ -1,6 +1,7 @@
 dag_type: plain_text
-description: Generated workflow from UI.
-name: parallelized_transformer_processing_with_split_third_ffn
+description: Transformer pipeline with the original stages plus nine additional sequential
+  feed‑forward (FFN) layers after the third feed‑forward merge.
+name: parallelized_transformer_processing_with_extended_ffn
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -81,6 +82,248 @@ nodes:
     nodes_dependent_on: []
     prompt: Apply second linear transformation to alternate portion of merged tensor
       to produce output tensor for subsequent processing.
+  ff_layer1_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 1
+    name: ff_layer1_branch_1
+    nodes_depended_on:
+    - parallel_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the input tensor.
+  ff_layer1_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 1
+    name: ff_layer1_branch_2
+    nodes_depended_on:
+    - parallel_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the input
+      tensor.
+  ff_layer1_merge:
+    agent: false
+    description: Merge outputs of FFN layer 1 parallel branches
+    name: ff_layer1_merge
+    nodes_depended_on:
+    - ff_layer1_branch_1
+    - ff_layer1_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 1 output.
+  ff_layer2_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 2
+    name: ff_layer2_branch_1
+    nodes_depended_on:
+    - ff_layer1_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer2_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 2
+    name: ff_layer2_branch_2
+    nodes_depended_on:
+    - ff_layer1_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer2_merge:
+    agent: false
+    description: Merge outputs of FFN layer 2 parallel branches
+    name: ff_layer2_merge
+    nodes_depended_on:
+    - ff_layer2_branch_1
+    - ff_layer2_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 2 output.
+  ff_layer3_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 3
+    name: ff_layer3_branch_1
+    nodes_depended_on:
+    - ff_layer2_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer3_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 3
+    name: ff_layer3_branch_2
+    nodes_depended_on:
+    - ff_layer2_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer3_merge:
+    agent: false
+    description: Merge outputs of FFN layer 3 parallel branches
+    name: ff_layer3_merge
+    nodes_depended_on:
+    - ff_layer3_branch_1
+    - ff_layer3_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 3 output.
+  ff_layer4_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 4
+    name: ff_layer4_branch_1
+    nodes_depended_on:
+    - ff_layer3_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer4_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 4
+    name: ff_layer4_branch_2
+    nodes_depended_on:
+    - ff_layer3_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer4_merge:
+    agent: false
+    description: Merge outputs of FFN layer 4 parallel branches
+    name: ff_layer4_merge
+    nodes_depended_on:
+    - ff_layer4_branch_1
+    - ff_layer4_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 4 output.
+  ff_layer5_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 5
+    name: ff_layer5_branch_1
+    nodes_depended_on:
+    - ff_layer4_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer5_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 5
+    name: ff_layer5_branch_2
+    nodes_depended_on:
+    - ff_layer4_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer5_merge:
+    agent: false
+    description: Merge outputs of FFN layer 5 parallel branches
+    name: ff_layer5_merge
+    nodes_depended_on:
+    - ff_layer5_branch_1
+    - ff_layer5_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 5 output.
+  ff_layer6_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 6
+    name: ff_layer6_branch_1
+    nodes_depended_on:
+    - ff_layer5_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer6_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 6
+    name: ff_layer6_branch_2
+    nodes_depended_on:
+    - ff_layer5_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer6_merge:
+    agent: false
+    description: Merge outputs of FFN layer 6 parallel branches
+    name: ff_layer6_merge
+    nodes_depended_on:
+    - ff_layer6_branch_1
+    - ff_layer6_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 6 output.
+  ff_layer7_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 7
+    name: ff_layer7_branch_1
+    nodes_depended_on:
+    - ff_layer6_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer7_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 7
+    name: ff_layer7_branch_2
+    nodes_depended_on:
+    - ff_layer6_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer7_merge:
+    agent: false
+    description: Merge outputs of FFN layer 7 parallel branches
+    name: ff_layer7_merge
+    nodes_depended_on:
+    - ff_layer7_branch_1
+    - ff_layer7_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 7 output.
+  ff_layer8_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 8
+    name: ff_layer8_branch_1
+    nodes_depended_on:
+    - ff_layer7_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer8_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 8
+    name: ff_layer8_branch_2
+    nodes_depended_on:
+    - ff_layer7_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer8_merge:
+    agent: false
+    description: Merge outputs of FFN layer 8 parallel branches
+    name: ff_layer8_merge
+    nodes_depended_on:
+    - ff_layer8_branch_1
+    - ff_layer8_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the layer 8 output.
+  ff_layer9_branch_1:
+    agent: false
+    description: First parallel branch of added FFN layer 9
+    name: ff_layer9_branch_1
+    nodes_depended_on:
+    - ff_layer8_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation with ReLU activation to the preceding layer
+      output.
+  ff_layer9_branch_2:
+    agent: false
+    description: Second parallel branch of added FFN layer 9
+    name: ff_layer9_branch_2
+    nodes_depended_on:
+    - ff_layer8_merge
+    nodes_dependent_on: []
+    prompt: Apply an alternate linear transformation with ReLU activation to the preceding
+      layer output.
+  ff_layer9_merge:
+    agent: false
+    description: Merge outputs of FFN layer 9 parallel branches (final added FFN layer)
+    name: ff_layer9_merge
+    nodes_depended_on:
+    - ff_layer9_branch_1
+    - ff_layer9_branch_2
+    nodes_dependent_on: []
+    prompt: Sum the two branch tensors to produce the final added FFN output.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
@@ -104,7 +347,7 @@ nodes:
     description: Generate raw token prediction logits
     name: output_logits
     nodes_depended_on:
-    - parallel_merge
+    - ff_layer9_merge
     nodes_dependent_on: []
     prompt: Convert decoder output to vector of raw token prediction scores (logits)
       through output projection.
