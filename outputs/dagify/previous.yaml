@@ -1,98 +1,135 @@
 dag_type: plain_text
-description: Revised workflow integrating self-attention correctly after transformer
-  blocks with proper layer normalization sequence.
-name: tokenizer_with_attention_after_transformer_blocks
+description: Workflow applies layer normalization first followed by self-attention
+  processing
+name: layer_norm_then_self_attention
 nodes:
   layernorm_pre_normalization:
     agent: false
-    description: Normalize attention-aware fields using layer normalization
+    description: Apply layer normalization across blocks 1-5
     name: layernorm_pre_normalization
-    nodes_depended_on:
-    - self_attention_processing
-    nodes_dependent_on: []
-    prompt: '1. Map ''block1-block6'' string values to numeric scores (1=processed/true/validated/finalized/complete,
-      0.5=attention-aggregated, 0=other)
-
-      2. Apply layer normalization across mapped values
-
-      3. Preserve all existing fields'
-  self_attention_processing:
-    agent: false
-    description: Compute attention patterns between tokens post-transformer processing
-    name: self_attention_processing
     nodes_depended_on:
     - token_positional_info
     - transformer_block_5
     nodes_dependent_on:
+    - self_attention_processing
+    prompt: 'For each token in the JSON array from prior blocks:
+
+
+      For fields `block1` to `block5`:
+
+
+      - Map string values to numeric: 1 for processed/true/validated/finalized/complete,
+      0 otherwise
+
+
+      - Normalize numeric values across fields using layer normalization
+
+
+      - Add new field `layernorm` with normalized value
+
+
+      Output updated JSON array.'
+  self_attention_processing:
+    agent: false
+    description: Compute self-attention weights using positional information and updated
+      representations
+    name: self_attention_processing
+    nodes_depended_on:
     - layernorm_pre_normalization
-    prompt: '1. Create positional embeddings from start/end indices
+    nodes_dependent_on: []
+    prompt: 'For each token in the input JSON array:
 
-      2. Calculate attention coefficients between all tokens
 
-      3. Include ''block6'' attention-aggregated values in response matrix'
+      1. Use `start` and `end` fields from token_positional_info to calculate positional
+      embedding
+
+
+      2. Compute self-attention scores between each pair of tokens based on positional
+      proximity
+
+
+      3. Add new field `attn_weights` with attention weights matrix for the token
+
+
+      4. Add new field `block6` with attention-aggregated numeric value (treat as
+      1.0 for prioritized tokens or 0.5 for others)
+
+
+      Preserve all existing fields. Output updated JSON array.'
   token_positional_info:
     agent: false
-    description: Generate token positional data including context labels for prompt/output.
+    description: Generate token objects with positional information for both prompt
+      and output
     name: token_positional_info
     nodes_depended_on:
     - tokenizer_customization
     nodes_dependent_on:
     - transformer_block_1
-    - self_attention_processing
-    prompt: Using tokenization rules, apply tokenizer to 'Hello world!' and 'Hello
-      world', outputting positional JSON array
+    - layernorm_pre_normalization
+    prompt: Using the tokenizer configuration code, apply tokenizer to 'Hello world!'
+      and 'Hello world'. For each token, provide start and end character positions.
+      Return JSON array with 'token', 'start', 'end', and 'context' ("prompt" or "output").
   tokenizer_customization:
     agent: false
-    description: Customize tokenizer to recognize single alphabetic letters (a-z,
-      case-insensitive) or full English words.
+    description: Produce final tokenizer configuration code for single letters/words
     name: tokenizer_customization
     nodes_depended_on: []
     nodes_dependent_on:
     - token_positional_info
-    prompt: Customize tokenizer to recognize only single alphabetic letters (a-z,
-      case-insensitive) or full English words. Provide final configuration code/regex.
+    prompt: Customize tokenizer to recognize single alphabetic letters (a-z, case-insensitive)
+      or full English words. Provide final configuration code/regex.
   transformer_block_1:
     agent: false
-    description: Initialize token processing flags during first transformer layer
+    description: Add transformer block 1 completion status flag
     name: transformer_block_1
     nodes_depended_on:
     - token_positional_info
     nodes_dependent_on:
     - transformer_block_2
-    prompt: 'Add ''block1: processed'' flag to each token in JSON array'
+    prompt: Add 'block1' field set to 'processed' to each token in JSON array.
   transformer_block_2:
     agent: false
-    description: Mark completion status in second transformer layer
+    description: Add transformer block 2 true processing status flag
     name: transformer_block_2
     nodes_depended_on:
+    - token_positional_info
     - transformer_block_1
     nodes_dependent_on:
     - transformer_block_3
-    prompt: 'Add ''block2: true'' flag to each token in JSON array'
+    prompt: Add 'block2' field set to 'true' to each token in JSON array.
   transformer_block_3:
     agent: false
-    description: Annotate with validation status in third transformer layer
+    description: Add transformer block 3 validation status flag
     name: transformer_block_3
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
     - transformer_block_2
     nodes_dependent_on:
     - transformer_block_4
-    prompt: 'Add ''block3: validated'' flag to each token in JSON array'
+    prompt: Add 'block3' field set to 'validated' to each token in JSON array.
   transformer_block_4:
     agent: false
-    description: Apply finalization marker in fourth transformer layer
+    description: Add transformer block 4 finalization status flag
     name: transformer_block_4
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
     - transformer_block_3
     nodes_dependent_on:
     - transformer_block_5
-    prompt: 'Add ''block4: finalized'' flag to each token in JSON array'
+    prompt: Add 'block4' field set to 'finalized' to each token in JSON array.
   transformer_block_5:
     agent: false
-    description: Signal completion in final transformer processing stage
+    description: Add transformer block 5 completion status flag
     name: transformer_block_5
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
+    - transformer_block_3
     - transformer_block_4
     nodes_dependent_on:
-    - self_attention_processing
-    prompt: 'Add ''block5: complete'' flag to each token in JSON array'
+    - layernorm_pre_normalization
+    prompt: Add 'block5' field set to 'complete' to each token in JSON array.
