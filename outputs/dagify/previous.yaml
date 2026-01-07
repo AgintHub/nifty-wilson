@@ -1,411 +1,300 @@
 dag_type: plain_text
-description: Corrected transformer workflow with pre/post normalization layers repeated
-  in each transformer block
-name: parallel_self_attention_heads_with_residual_lm_projection_fixed
+description: Transformed workflow with 5 sequential transformer blocks, each containing
+  pre-normalization, multi-head attention, residual connection, and post-normalization
+  layers.
+name: parallel_self_attention_heads_with_residual_lm_projection
 nodes:
   attention_head_1_score_1:
     agent: false
     description: Calculate attention scores for head 1 in block 1
     name: attention_head_1_score_1
     nodes_depended_on:
-    - q_proj_1
-    - k_proj_1
+    - q_projection_1
+    - k_projection_1
     nodes_dependent_on:
     - softmax_weighted_sum_head_1_1
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_1` and `k_proj_1`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_1_block1` with attention score matrix\n\
-      \  - Preserve all existing fields."
+    prompt: "For each pair of tokens in the input JSON array:\n  - Compute dot product\
+      \ between `q_proj_1` and `k_proj_1` for head 1\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n  - Add new field `attn_scores_head_1_1` with attention score\
+      \ matrix\n  - Preserve all existing fields."
   attention_head_1_score_2:
     agent: false
     description: Calculate attention scores for head 1 in block 2
     name: attention_head_1_score_2
     nodes_depended_on:
-    - q_proj_2
-    - k_proj_2
+    - q_projection_2
+    - k_projection_2
     nodes_dependent_on:
     - softmax_weighted_sum_head_1_2
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_2` and `k_proj_2`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_1_block2` with attention score matrix\n\
-      \  - Preserve all existing fields."
-  attention_head_1_score_3:
-    agent: false
-    description: Calculate attention scores for head 1 in block 3
-    name: attention_head_1_score_3
-    nodes_depended_on:
-    - q_proj_3
-    - k_proj_3
-    nodes_dependent_on:
-    - softmax_weighted_sum_head_1_3
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_3` and `k_proj_3`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_1_block3` with attention score matrix\n\
-      \  - Preserve all existing fields."
+    prompt: "For each pair of tokens in the input JSON array:\n  - Compute dot product\
+      \ between `q_proj_2` and `k_proj_2` for head 1\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n  - Add new field `attn_scores_head_1_2` with attention score\
+      \ matrix\n  - Preserve all existing fields."
   attention_head_2_score_1:
     agent: false
     description: Calculate attention scores for head 2 in block 1
     name: attention_head_2_score_1
     nodes_depended_on:
-    - q_proj_1
-    - k_proj_1
+    - q_projection_1
+    - k_projection_1
     nodes_dependent_on:
     - softmax_weighted_sum_head_2_1
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_1` and `k_proj_1`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_2_block1` with attention score matrix\n\
-      \  - Preserve all existing fields."
+    prompt: "For each pair of tokens in the input JSON array:\n  - Compute dot product\
+      \ between `q_proj_1` and `k_proj_1` for head 2\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n  - Add new field `attn_scores_head_2_1` with attention score\
+      \ matrix\n  - Preserve all existing fields."
   attention_head_2_score_2:
     agent: false
     description: Calculate attention scores for head 2 in block 2
     name: attention_head_2_score_2
     nodes_depended_on:
-    - q_proj_2
-    - k_proj_2
+    - q_projection_2
+    - k_projection_2
     nodes_dependent_on:
     - softmax_weighted_sum_head_2_2
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_2` and `k_proj_2`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_2_block2` with attention score matrix\n\
-      \  - Preserve all existing fields."
-  attention_head_2_score_3:
-    agent: false
-    description: Calculate attention scores for head 2 in block 3
-    name: attention_head_2_score_3
-    nodes_depended_on:
-    - q_proj_3
-    - k_proj_3
-    nodes_dependent_on:
-    - softmax_weighted_sum_head_2_3
-    prompt: "For each pair of tokens in the input JSON array:\n\n  - Compute dot product\
-      \ between `q_proj_3` and `k_proj_3`\n  - Scale scores by sqrt(dimension of projections)\n\
-      \  - Add new field `attn_scores_head_2_block3` with attention score matrix\n\
-      \  - Preserve all existing fields."
-  k_proj_1:
+    prompt: "For each pair of tokens in the input JSON array:\n  - Compute dot product\
+      \ between `q_proj_2` and `k_proj_2` for head 2\n  - Scale scores by sqrt(dimension\
+      \ of projections)\n  - Add new field `attn_scores_head_2_2` with attention score\
+      \ matrix\n  - Preserve all existing fields."
+  k_projection_1:
     agent: false
     description: Compute key vector projection for block 1
-    name: k_proj_1
+    name: k_projection_1
     nodes_depended_on:
-    - pre_layer_norm_1
+    - layernorm_pre_normalization_1
     nodes_dependent_on:
     - attention_head_1_score_1
-    - attention_head_2_score_1
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_1` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_1` for\
       \ keys\n  - Add new field `k_proj_1` with resulting vector\n  - Preserve other\
       \ fields. Output updated JSON array."
-  k_proj_2:
+  k_projection_2:
     agent: false
     description: Compute key vector projection for block 2
-    name: k_proj_2
+    name: k_projection_2
     nodes_depended_on:
-    - pre_layer_norm_2
+    - layernorm_pre_normalization_2
     nodes_dependent_on:
     - attention_head_1_score_2
-    - attention_head_2_score_2
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_2` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_2` for\
       \ keys\n  - Add new field `k_proj_2` with resulting vector\n  - Preserve other\
       \ fields. Output updated JSON array."
-  k_proj_3:
+  layernorm_post_normalization_1:
     agent: false
-    description: Compute key vector projection for block 3
-    name: k_proj_3
+    description: Apply final layer normalization to residual output for block 1
+    name: layernorm_post_normalization_1
     nodes_depended_on:
-    - pre_layer_norm_3
+    - residual_connection_1
     nodes_dependent_on:
-    - attention_head_1_score_3
-    - attention_head_2_score_3
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_3` for\
-      \ keys\n  - Add new field `k_proj_3` with resulting vector\n  - Preserve other\
+    - transformer_block_2
+    prompt: "For each token in the input JSON array:\n  - Apply layer normalization\
+      \ to `residual_output_1`\n  - Add new field `final_layernorm_1` with normalized\
+      \ value\n  - Preserve all existing fields"
+  layernorm_post_normalization_2:
+    agent: false
+    description: Apply final layer normalization to residual output for block 2
+    name: layernorm_post_normalization_2
+    nodes_depended_on:
+    - residual_connection_2
+    nodes_dependent_on:
+    - transformer_block_3
+    prompt: "For each token in the input JSON array:\n  - Apply layer normalization\
+      \ to `residual_output_2`\n  - Add new field `final_layernorm_2` with normalized\
+      \ value\n  - Preserve all existing fields"
+  layernorm_pre_normalization_1:
+    agent: false
+    description: Apply layer normalization for block 1
+    name: layernorm_pre_normalization_1
+    nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
+    nodes_dependent_on:
+    - q_projection_1
+    - k_projection_1
+    - v_projection_1
+    prompt: "For each token in the JSON array from prior blocks:\n\n  For field `block1`:\n\
+      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
+      \ 0 otherwise\n    - Normalize numeric value using layer normalization\n   \
+      \ - Add new field `layernorm_1` with normalized value\n\n  Preserve all existing\
+      \ fields. Output updated JSON array."
+  layernorm_pre_normalization_2:
+    agent: false
+    description: Apply layer normalization for block 2
+    name: layernorm_pre_normalization_2
+    nodes_depended_on:
+    - token_positional_info
+    - transformer_block_2
+    nodes_dependent_on:
+    - q_projection_2
+    - k_projection_2
+    - v_projection_2
+    prompt: "For each token in the JSON array from prior blocks:\n\n  For field `block2`:\n\
+      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
+      \ 0 otherwise\n    - Normalize numeric value using layer normalization\n   \
+      \ - Add new field `layernorm_2` with normalized value\n\n  Preserve all existing\
+      \ fields. Output updated JSON array."
+  layernorm_pre_normalization_3:
+    agent: false
+    description: Apply layer normalization for block 3
+    name: layernorm_pre_normalization_3
+    nodes_depended_on:
+    - token_positional_info
+    - transformer_block_3
+    nodes_dependent_on:
+    - q_projection_3
+    - k_projection_3
+    - v_projection_3
+    prompt: "For each token in the JSON array from prior blocks:\n\n  For field `block3`:\n\
+      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
+      \ 0 otherwise\n    - Normalize numeric value using layer normalization\n   \
+      \ - Add new field `layernorm_3` with normalized value\n\n  Preserve all existing\
       \ fields. Output updated JSON array."
   multi_head_attention_1:
     agent: false
-    description: Combine outputs from multiple attention heads in block 1
+    description: Combine outputs from multiple attention heads for block 1
     name: multi_head_attention_1
     nodes_depended_on:
     - softmax_weighted_sum_head_1_1
     - softmax_weighted_sum_head_2_1
     nodes_dependent_on:
     - residual_connection_1
-    prompt: "For each token in the input JSON array:\n\n  - Concatenate `weighted_vals_head_1_block1`\
-      \ and `weighted_vals_head_2_block1`\n  - Apply final linear projection on the\
-      \ concatenated result\n  - Add new field `block6_1` with attention-aggregated\
-      \ numeric value\n  - Output final JSON array with `block6_1` indicating 1.0\
-      \ for prioritized tokens or 0.5 for others."
+    prompt: "For each token in the input JSON array:\n  - Concatenate `weighted_vals_head_1_1`\
+      \ and `weighted_vals_head_2_1`\n  - Apply final linear projection on the concatenated\
+      \ result\n  - Add new field `block_head_1` with attention-aggregated numeric\
+      \ value\n  - Output final JSON array with `block_head_1` indicating 1.0 for\
+      \ prioritized tokens or 0.5 for others."
   multi_head_attention_2:
     agent: false
-    description: Combine outputs from multiple attention heads in block 2
+    description: Combine outputs from multiple attention heads for block 2
     name: multi_head_attention_2
     nodes_depended_on:
     - softmax_weighted_sum_head_1_2
     - softmax_weighted_sum_head_2_2
     nodes_dependent_on:
     - residual_connection_2
-    prompt: "For each token in the input JSON array:\n\n  - Concatenate `weighted_vals_head_1_block2`\
-      \ and `weighted_vals_head_2_block2`\n  - Apply final linear projection on the\
-      \ concatenated result\n  - Add new field `block6_2` with attention-aggregated\
-      \ numeric value\n  - Output final JSON array with `block6_2` indicating 1.0\
-      \ for prioritized tokens or 0.5 for others."
-  multi_head_attention_3:
-    agent: false
-    description: Combine outputs from multiple attention heads in block 3
-    name: multi_head_attention_3
-    nodes_depended_on:
-    - softmax_weighted_sum_head_1_3
-    - softmax_weighted_sum_head_2_3
-    nodes_dependent_on:
-    - residual_connection_3
-    prompt: "For each token in the input JSON array:\n\n  - Concatenate `weighted_vals_head_1_block3`\
-      \ and `weighted_vals_head_2_block3`\n  - Apply final linear projection on the\
-      \ concatenated result\n  - Add new field `block6_3` with attention-aggregated\
-      \ numeric value\n  - Output final JSON array with `block6_3` indicating 1.0\
-      \ for prioritized tokens or 0.5 for others."
-  post_layer_norm_1:
-    agent: false
-    description: Apply final layer normalization to residual output in block 1
-    name: post_layer_norm_1
-    nodes_depended_on:
-    - residual_connection_1
-    nodes_dependent_on:
-    - transformer_block_2
-    prompt: "For each token in the input JSON array:\n\n  - Apply layer normalization\
-      \ to `residual_output_1`\n  - Add new field `final_layernorm_1` with normalized\
-      \ value\n  - Preserve all existing fields"
-  post_layer_norm_2:
-    agent: false
-    description: Apply final layer normalization to residual output in block 2
-    name: post_layer_norm_2
-    nodes_depended_on:
-    - residual_connection_2
-    nodes_dependent_on:
-    - transformer_block_3
-    prompt: "For each token in the input JSON array:\n\n  - Apply layer normalization\
-      \ to `residual_output_2`\n  - Add new field `final_layernorm_2` with normalized\
-      \ value\n  - Preserve all existing fields"
-  post_layer_norm_3:
-    agent: false
-    description: Apply final layer normalization to residual output in block 3
-    name: post_layer_norm_3
-    nodes_depended_on:
-    - residual_connection_3
-    nodes_dependent_on:
-    - transformer_block_4
-    prompt: "For each token in the input JSON array:\n\n  - Apply layer normalization\
-      \ to `residual_output_3`\n  - Add new field `final_layernorm_3` with normalized\
-      \ value\n  - Preserve all existing fields"
-  pre_layer_norm_1:
-    agent: false
-    description: Apply layer normalization for block 1
-    name: pre_layer_norm_1
-    nodes_depended_on:
-    - transformer_block_1
-    - token_positional_info
-    nodes_dependent_on:
-    - q_proj_1
-    - k_proj_1
-    - v_proj_1
-    prompt: "For each token in the JSON array from prior blocks:\n\n  For fields `block1`:\n\
-      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
-      \ 0 otherwise\n    - Normalize numeric values across fields using layer normalization\n\
-      \    - Add new field `layernorm_1` with normalized value\n\n  Output updated\
-      \ JSON array."
-  pre_layer_norm_2:
-    agent: false
-    description: Apply layer normalization for block 2
-    name: pre_layer_norm_2
-    nodes_depended_on:
-    - transformer_block_2
-    - post_layer_norm_1
-    nodes_dependent_on:
-    - q_proj_2
-    - k_proj_2
-    - v_proj_2
-    prompt: "For each token in the JSON array from prior blocks:\n\n  For fields `block2`:\n\
-      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
-      \ 0 otherwise\n    - Normalize numeric values across fields using layer normalization\n\
-      \    - Add new field `layernorm_2` with normalized value\n\n  Output updated\
-      \ JSON array."
-  pre_layer_norm_3:
-    agent: false
-    description: Apply layer normalization for block 3
-    name: pre_layer_norm_3
-    nodes_depended_on:
-    - transformer_block_3
-    - post_layer_norm_2
-    nodes_dependent_on:
-    - q_proj_3
-    - k_proj_3
-    - v_proj_3
-    prompt: "For each token in the JSON array from prior blocks:\n\n  For fields `block3`:\n\
-      \    - Map string values to numeric: 1 for processed/true/validated/finalized/complete,\
-      \ 0 otherwise\n    - Normalize numeric values across fields using layer normalization\n\
-      \    - Add new field `layernorm_3` with normalized value\n\n  Output updated\
-      \ JSON array."
-  q_proj_1:
+    prompt: "For each token in the input JSON array:\n  - Concatenate `weighted_vals_head_1_2`\
+      \ and `weighted_vals_head_2_2`\n  - Apply final linear projection on the concatenated\
+      \ result\n  - Add new field `block_head_2` with attention-aggregated numeric\
+      \ value\n  - Output final JSON array with `block_head_2` indicating 1.0 for\
+      \ prioritized tokens or 0.5 for others."
+  q_projection_1:
     agent: false
     description: Compute query vector projection for block 1
-    name: q_proj_1
+    name: q_projection_1
     nodes_depended_on:
-    - pre_layer_norm_1
+    - layernorm_pre_normalization_1
     nodes_dependent_on:
     - attention_head_1_score_1
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_1` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_1` for\
       \ queries\n  - Add new field `q_proj_1` with resulting vector\n  - Preserve\
       \ other fields. Output updated JSON array."
-  q_proj_2:
+  q_projection_2:
     agent: false
     description: Compute query vector projection for block 2
-    name: q_proj_2
+    name: q_projection_2
     nodes_depended_on:
-    - pre_layer_norm_2
+    - layernorm_pre_normalization_2
     nodes_dependent_on:
     - attention_head_1_score_2
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_2` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_2` for\
       \ queries\n  - Add new field `q_proj_2` with resulting vector\n  - Preserve\
-      \ other fields. Output updated JSON array."
-  q_proj_3:
-    agent: false
-    description: Compute query vector projection for block 3
-    name: q_proj_3
-    nodes_depended_on:
-    - pre_layer_norm_3
-    nodes_dependent_on:
-    - attention_head_1_score_3
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_3` for\
-      \ queries\n  - Add new field `q_proj_3` with resulting vector\n  - Preserve\
       \ other fields. Output updated JSON array."
   residual_connection_1:
     agent: false
-    description: Combine attention output with original normalized input in block
+    description: Combine attention output with original normalized input for block
       1
     name: residual_connection_1
     nodes_depended_on:
     - multi_head_attention_1
-    - pre_layer_norm_1
+    - layernorm_pre_normalization_1
     nodes_dependent_on:
-    - post_layer_norm_1
-    prompt: "For each token in the input JSON array:\n\n  - Retrieve both `layernorm_1`\
-      \ value from normalized input\n  - Retrieve `block6_1` value from attention\
+    - layernorm_post_normalization_1
+    prompt: "For each token in the input JSON array:\n  - Retrieve both `layernorm_1`\
+      \ value from normalized input\n  - Retrieve `block_head_1` value from attention\
       \ output\n  - Add values together and store in new field `residual_output_1`\n\
       \  - Preserve all existing fields with their original values"
   residual_connection_2:
     agent: false
-    description: Combine attention output with original normalized input in block
+    description: Combine attention output with original normalized input for block
       2
     name: residual_connection_2
     nodes_depended_on:
     - multi_head_attention_2
-    - pre_layer_norm_2
+    - layernorm_pre_normalization_2
     nodes_dependent_on:
-    - post_layer_norm_2
-    prompt: "For each token in the input JSON array:\n\n  - Retrieve both `layernorm_2`\
-      \ value from normalized input\n  - Retrieve `block6_2` value from attention\
+    - layernorm_post_normalization_2
+    prompt: "For each token in the input JSON array:\n  - Retrieve both `layernorm_2`\
+      \ value from normalized input\n  - Retrieve `block_head_2` value from attention\
       \ output\n  - Add values together and store in new field `residual_output_2`\n\
-      \  - Preserve all existing fields with their original values"
-  residual_connection_3:
-    agent: false
-    description: Combine attention output with original normalized input in block
-      3
-    name: residual_connection_3
-    nodes_depended_on:
-    - multi_head_attention_3
-    - pre_layer_norm_3
-    nodes_dependent_on:
-    - post_layer_norm_3
-    prompt: "For each token in the input JSON array:\n\n  - Retrieve both `layernorm_3`\
-      \ value from normalized input\n  - Retrieve `block6_3` value from attention\
-      \ output\n  - Add values together and store in new field `residual_output_3`\n\
       \  - Preserve all existing fields with their original values"
   softmax_weighted_sum_head_1_1:
     agent: false
     description: Apply softmax to head 1 attention scores and multiply with values
-      in block 1
+      for block 1
     name: softmax_weighted_sum_head_1_1
     nodes_depended_on:
     - attention_head_1_score_1
-    - v_proj_1
+    - v_projection_1
     nodes_dependent_on:
     - multi_head_attention_1
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_1_block1`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_1` vectors\n  - Add\
-      \ new field `weighted_vals_head_1_block1` with resulting vectors\n  - Preserve\
-      \ all fields."
+    prompt: "For each token in the input JSON array:\n  - Apply softmax to `attn_scores_head_1_1`\
+      \ dimension\n  - Multiply resulting weights with `v_proj_1` vectors for head\
+      \ 1\n  - Add new field `weighted_vals_head_1_1` with resulting vectors\n  -\
+      \ Preserve all fields."
   softmax_weighted_sum_head_1_2:
     agent: false
     description: Apply softmax to head 1 attention scores and multiply with values
-      in block 2
+      for block 2
     name: softmax_weighted_sum_head_1_2
     nodes_depended_on:
     - attention_head_1_score_2
-    - v_proj_2
+    - v_projection_2
     nodes_dependent_on:
     - multi_head_attention_2
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_1_block2`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_2` vectors\n  - Add\
-      \ new field `weighted_vals_head_1_block2` with resulting vectors\n  - Preserve\
-      \ all fields."
-  softmax_weighted_sum_head_1_3:
-    agent: false
-    description: Apply softmax to head 1 attention scores and multiply with values
-      in block 3
-    name: softmax_weighted_sum_head_1_3
-    nodes_depended_on:
-    - attention_head_1_score_3
-    - v_proj_3
-    nodes_dependent_on:
-    - multi_head_attention_3
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_1_block3`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_3` vectors\n  - Add\
-      \ new field `weighted_vals_head_1_block3` with resulting vectors\n  - Preserve\
-      \ all fields."
+    prompt: "For each token in the input JSON array:\n  - Apply softmax to `attn_scores_head_1_2`\
+      \ dimension\n  - Multiply resulting weights with `v_proj_2` vectors for head\
+      \ 1\n  - Add new field `weighted_vals_head_1_2` with resulting vectors\n  -\
+      \ Preserve all fields."
   softmax_weighted_sum_head_2_1:
     agent: false
     description: Apply softmax to head 2 attention scores and multiply with values
-      in block 1
+      for block 1
     name: softmax_weighted_sum_head_2_1
     nodes_depended_on:
     - attention_head_2_score_1
-    - v_proj_1
+    - v_projection_1
     nodes_dependent_on:
     - multi_head_attention_1
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_2_block1`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_1` vectors\n  - Add\
-      \ new field `weighted_vals_head_2_block1` with resulting vectors\n  - Preserve\
-      \ all fields."
+    prompt: "For each token in the input JSON array:\n  - Apply softmax to `attn_scores_head_2_1`\
+      \ dimension\n  - Multiply resulting weights with `v_proj_1` vectors for head\
+      \ 2\n  - Add new field `weighted_vals_head_2_1` with resulting vectors\n  -\
+      \ Preserve all fields."
   softmax_weighted_sum_head_2_2:
     agent: false
     description: Apply softmax to head 2 attention scores and multiply with values
-      in block 2
+      for block 2
     name: softmax_weighted_sum_head_2_2
     nodes_depended_on:
     - attention_head_2_score_2
-    - v_proj_2
+    - v_projection_2
     nodes_dependent_on:
     - multi_head_attention_2
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_2_block2`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_2` vectors\n  - Add\
-      \ new field `weighted_vals_head_2_block2` with resulting vectors\n  - Preserve\
-      \ all fields."
-  softmax_weighted_sum_head_2_3:
-    agent: false
-    description: Apply softmax to head 2 attention scores and multiply with values
-      in block 3
-    name: softmax_weighted_sum_head_2_3
-    nodes_depended_on:
-    - attention_head_2_score_3
-    - v_proj_3
-    nodes_dependent_on:
-    - multi_head_attention_3
-    prompt: "For each token in the input JSON array:\n\n  - Apply softmax to `attn_scores_head_2_block3`\
-      \ dimension\n  - Multiply resulting weights with `v_proj_3` vectors\n  - Add\
-      \ new field `weighted_vals_head_2_block3` with resulting vectors\n  - Preserve\
-      \ all fields."
+    prompt: "For each token in the input JSON array:\n  - Apply softmax to `attn_scores_head_2_2`\
+      \ dimension\n  - Multiply resulting weights with `v_proj_2` vectors for head\
+      \ 2\n  - Add new field `weighted_vals_head_2_2` with resulting vectors\n  -\
+      \ Preserve all fields."
   token_positional_info:
     agent: false
     description: Generate token objects with positional information
     name: token_positional_info
-    nodes_depended_on: []
+    nodes_depended_on:
+    - tokenizer_customization
     nodes_dependent_on:
     - transformer_block_1
+    - layernorm_pre_normalization_1
+    - layernorm_pre_normalization_2
+    - layernorm_pre_normalization_3
+    - layernorm_pre_normalization_4
+    - layernorm_pre_normalization_5
     prompt: Using the tokenizer configuration code, apply tokenizer to 'Hello world!'
       and 'Hello world'. For each token, provide start and end character positions.
       Return JSON array with 'token', 'start', 'end', and 'context' ("prompt" or "output").
@@ -425,7 +314,7 @@ nodes:
     nodes_depended_on:
     - token_positional_info
     nodes_dependent_on:
-    - pre_layer_norm_1
+    - layernorm_pre_normalization_1
     prompt: Add 'block1' field set to 'processed' to each token in JSON array.
   transformer_block_2:
     agent: false
@@ -435,7 +324,7 @@ nodes:
     - token_positional_info
     - transformer_block_1
     nodes_dependent_on:
-    - pre_layer_norm_2
+    - layernorm_pre_normalization_2
     prompt: Add 'block2' field set to 'true' to each token in JSON array.
   transformer_block_3:
     agent: false
@@ -446,41 +335,27 @@ nodes:
     - transformer_block_1
     - transformer_block_2
     nodes_dependent_on:
-    - pre_layer_norm_3
+    - layernorm_pre_normalization_3
     prompt: Add 'block3' field set to 'validated' to each token in JSON array.
-  v_proj_1:
+  v_projection_1:
     agent: false
     description: Compute value vector projection for block 1
-    name: v_proj_1
+    name: v_projection_1
     nodes_depended_on:
-    - pre_layer_norm_1
+    - layernorm_pre_normalization_1
     nodes_dependent_on:
     - softmax_weighted_sum_head_1_1
-    - softmax_weighted_sum_head_2_1
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_1` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_1` for\
       \ values\n  - Add new field `v_proj_1` with resulting vector\n  - Preserve other\
       \ fields. Output updated JSON array."
-  v_proj_2:
+  v_projection_2:
     agent: false
     description: Compute value vector projection for block 2
-    name: v_proj_2
+    name: v_projection_2
     nodes_depended_on:
-    - pre_layer_norm_2
+    - layernorm_pre_normalization_2
     nodes_dependent_on:
     - softmax_weighted_sum_head_1_2
-    - softmax_weighted_sum_head_2_2
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_2` for\
+    prompt: "For each token:\n  - Compute linear projection from `layernorm_2` for\
       \ values\n  - Add new field `v_proj_2` with resulting vector\n  - Preserve other\
-      \ fields. Output updated JSON array."
-  v_proj_3:
-    agent: false
-    description: Compute value vector projection for block 3
-    name: v_proj_3
-    nodes_depended_on:
-    - pre_layer_norm_3
-    nodes_dependent_on:
-    - softmax_weighted_sum_head_1_3
-    - softmax_weighted_sum_head_2_3
-    prompt: "For each token:\n\n  - Compute linear projection from `layernorm_3` for\
-      \ values\n  - Add new field `v_proj_3` with resulting vector\n  - Preserve other\
       \ fields. Output updated JSON array."
