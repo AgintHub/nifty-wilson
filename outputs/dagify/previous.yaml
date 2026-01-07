@@ -1,6 +1,8 @@
 dag_type: plain_text
-description: Generated workflow from UI.
-name: tokenizer_with_positioning_and_transformers_workflow
+description: This workflow tokenizes an example prompt and output, annotates token
+  positions, then sequentially applies five transformer blocks, each adding a specific
+  flag to the token data.
+name: tokenization_with_sequential_transformers_workflow
 nodes:
   token_positional_info:
     agent: false
@@ -11,10 +13,6 @@ nodes:
     - tokenizer_customization
     nodes_dependent_on:
     - transformer_block_1
-    - transformer_block_2
-    - transformer_block_3
-    - transformer_block_4
-    - transformer_block_5
     prompt: "Using the tokenizer configuration code produced by the previous step,\
       \ apply the tokenizer to the following example prompt and example output:\n\n\
       **Example Prompt:** \"Hello world!\"\n\n**Example Output:** \"Hello world\"\n\
@@ -55,7 +53,6 @@ nodes:
     description: Adds a processed flag from transformer block 2.
     name: transformer_block_2
     nodes_depended_on:
-    - token_positional_info
     - transformer_block_1
     nodes_dependent_on:
     - transformer_block_3
@@ -66,7 +63,6 @@ nodes:
     description: Adds a validated flag from transformer block 3.
     name: transformer_block_3
     nodes_depended_on:
-    - token_positional_info
     - transformer_block_2
     nodes_dependent_on:
     - transformer_block_4
@@ -77,7 +73,6 @@ nodes:
     description: Adds a finalized flag from transformer block 4.
     name: transformer_block_4
     nodes_depended_on:
-    - token_positional_info
     - transformer_block_3
     nodes_dependent_on:
     - transformer_block_5
@@ -88,7 +83,6 @@ nodes:
     description: Adds a complete flag from transformer block 5.
     name: transformer_block_5
     nodes_depended_on:
-    - token_positional_info
     - transformer_block_4
     nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block5` with the value `complete`.

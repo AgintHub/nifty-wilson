@@ -1,5 +1,6 @@
 dag_type: plain_text
-description: Generated workflow from UI.
+description: Generates tokenizer configuration, token positional info, and sequentially
+  transforms the token data through five transformer blocks, each adding its own flag.
 name: tokenizer_with_positioning_and_transformers_workflow
 nodes:
   token_positional_info:
@@ -17,16 +18,17 @@ nodes:
     - transformer_block_5
     prompt: "Using the tokenizer configuration code produced by the previous step,\
       \ apply the tokenizer to the following example prompt and example output:\n\n\
-      **Example Prompt:** \"Hello world!\"\n\n**Example Output:** \"Hello world\"\n\
-      \nTokenize both the prompt and the output, and for each token provide its start\
-      \ and end character positions (0-indexed) in the original string. Return a JSON\
-      \ array of objects with fields:\n\n- `token` (the token string)\n- `start` (start\
-      \ index in the source string)\n- `end` (end index, exclusive)\n- `context` (either\
-      \ \"prompt\" or \"output\" to indicate which string the token came from).\n\n\
-      Only output the JSON array.\n\nExample output format:\n\n```json\n[{\n  \"token\"\
-      : \"Hello\",\n  \"start\": 0,\n  \"end\": 5,\n  \"context\": \"prompt\"\n},\
-      \ {\n  \"token\": \"world\",\n  \"start\": 6,\n  \"end\": 11,\n  \"context\"\
-      : \"prompt\"\n}, ...]\n```"
+      \n  **Example Prompt:** \"Hello world!\"\n\n  **Example Output:** \"Hello world\"\
+      \n\n  Tokenize both the prompt and the output, and for each token provide its\
+      \ start and end character positions (0-indexed) in the original string. Return\
+      \ a JSON array of objects with fields:\n\n  - `token` (the token string)\n \
+      \ - `start` (start index in the source string)\n  - `end` (end index, exclusive)\n\
+      \  - `context` (either \"prompt\" or \"output\" to indicate which string the\
+      \ token came from).\n\n  Only output the JSON array.\n\n  Example output format:\n\
+      \n  ```json\n\n  [{\n  \\  \"token\": \"Hello\",\n  \\  \"start\": 0,\n  \\\
+      \  \"end\": 5,\n  \\  \"context\": \"prompt\"\n  }, {\n  \\  \"token\": \"world\"\
+      ,\n  \\  \"start\": 6,\n  \\  \"end\": 11,\n  \\  \"context\": \"prompt\"\n\
+      \  }, ...]\n  ```"
   tokenizer_customization:
     agent: false
     description: Generates the final tokenizer configuration code or regex pattern.
