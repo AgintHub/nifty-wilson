@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Transformer processing workflow where the final linear merge step is
-  split into two parallel sub‑steps.
-name: parallelized_transformer_processing_with_split_third_merge
+description: Transformer processing pipeline where the third feed‑forward network
+  is split into two parallel steps before being merged for logit generation.
+name: parallelized_transformer_processing_with_split_third_ffn
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -24,24 +24,16 @@ nodes:
     nodes_dependent_on: []
     prompt: Compute scaled dot‑product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear2_parallel_merge_part_1:
+  feed_forward_linear2_parallel_merge:
     agent: false
-    description: Partial merge of first split‑linear2 branch
-    name: feed_forward_linear2_parallel_merge_part_1
+    description: Combine split‑parallel final feed‑forward network branches
+    name: feed_forward_linear2_parallel_merge
     nodes_depended_on:
     - feed_forward_split_linear2_branch_1
-    nodes_dependent_on: []
-    prompt: Prepare the output of feed_forward_split_linear2_branch_1 for the final
-      merge (e.g., identity or partial concatenation).
-  feed_forward_linear2_parallel_merge_part_2:
-    agent: false
-    description: Partial merge of second split‑linear2 branch
-    name: feed_forward_linear2_parallel_merge_part_2
-    nodes_depended_on:
     - feed_forward_split_linear2_branch_2
     nodes_dependent_on: []
-    prompt: Prepare the output of feed_forward_split_linear2_branch_2 for the final
-      merge (e.g., identity or partial concatenation).
+    prompt: Concatenate the outputs of split‑parallel final linear transformations
+      into combined output tensor.
   feed_forward_parallel_branch_1:
     agent: false
     description: First parallel linear transformation in feed‑forward network
@@ -137,14 +129,32 @@ nodes:
       to produce Q vectors.
   third_feed_forward:
     agent: false
-    description: Third feed‑forward network applied after the second parallel merge
+    description: Merge outputs of the third feed‑forward parallel branches
     name: third_feed_forward
     nodes_depended_on:
-    - feed_forward_linear2_parallel_merge_part_1
-    - feed_forward_linear2_parallel_merge_part_2
+    - third_feed_forward_branch_1
+    - third_feed_forward_branch_2
     nodes_dependent_on: []
-    prompt: Apply a final linear transformation to the merged tensor to produce refined
-      representations before logits generation.
+    prompt: Combine the tensors from the two third‑feed‑forward branches by summing
+      them to produce the final representation before logits generation.
+  third_feed_forward_branch_1:
+    agent: false
+    description: First parallel branch of the third feed‑forward network
+    name: third_feed_forward_branch_1
+    nodes_depended_on:
+    - feed_forward_linear2_parallel_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation to the merged tensor (branch 1) to produce
+      refined representations.
+  third_feed_forward_branch_2:
+    agent: false
+    description: Second parallel branch of the third feed‑forward network
+    name: third_feed_forward_branch_2
+    nodes_depended_on:
+    - feed_forward_linear2_parallel_merge
+    nodes_dependent_on: []
+    prompt: Apply a linear transformation to the merged tensor (branch 2) using an
+      alternate parameter set to produce refined representations.
   token_embedding:
     agent: false
     description: Convert input tokens to position‑agnostic dense vector embeddings
