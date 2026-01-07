@@ -1,27 +1,18 @@
 dag_type: plain_text
-description: Performs all tokenization activities—requirements definition, algorithm
-  selection, configuration, testing, validation, and integration—in a single step.
-name: tokenization_process
+description: Configures a tokenizer to recognize only single letters or full English
+  words.
+name: tokenizer_customization_workflow
 nodes:
-  tokenization_process:
+  tokenizer_customization:
     agent: false
-    description: Executes the complete tokenization workflow in one atomic action.
-    name: tokenization_process
+    description: Customizes the tokenizer to recognize only single letters or full
+      English words.
+    name: tokenizer_customization
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: '1. Define the tokenization requirements, including tokenizer type and
-      any special settings.
-
-      2. Choose a suitable tokenization algorithm (e.g., wordpiece, sentencepiece)
-      based on those requirements.
-
-      3. Configure the tokenization node with the chosen algorithm and parameters.
-
-      4. Test the configured node using sample input data.
-
-      5. Validate that the output meets the defined requirements and is properly formatted.
-
-      6. Integrate the finalized tokenization node into the larger workflow, ensuring
-      correct interactions with other nodes.
-
-      Return a concise report of each sub‑step and the final integrated node details.'
+    prompt: You are tasked with customizing an existing tokenizer so that it only
+      recognizes single alphabetic letters (a–z, case‑insensitive) or full English
+      words (sequences of letters). Provide the exact configuration steps or code
+      snippet required to enforce this rule. Assume the tokenizer is implemented in
+      Python and uses a simple regex‑based split. Output only the final configuration
+      code or regex pattern that achieves this behavior.
