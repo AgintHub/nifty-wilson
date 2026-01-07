@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Transformer-based processing with an added RNN of equivalent scale running
-  in parallel
-name: parallelized_transformer_rnn_processing
+description: Modified workflow with feed-forward network (FFN) layers split into parallel
+  processing paths while maintaining sequential structure for context preservation.
+name: parallelized_transformer_processing_with_parallel_ffn
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -25,29 +25,51 @@ nodes:
     - k_projection
     - v_projection
     nodes_dependent_on:
-    - feed_forward_linear1
+    - feed_forward_parallel_branch_1
+    - feed_forward_parallel_branch_2
     prompt: Compute scaled dot-product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear1:
-    agent: false
-    description: First linear transformation in feed-forward network
-    name: feed_forward_linear1
-    nodes_depended_on:
-    - compute_self_attention
-    nodes_dependent_on:
-    - feed_forward_linear2
-    prompt: Apply first linear transformation to attention context vectors with ReLU
-      activation.
   feed_forward_linear2:
     agent: false
     description: Final linear transformation in feed-forward network
     name: feed_forward_linear2
     nodes_depended_on:
-    - feed_forward_linear1
+    - feed_forward_parallel_merge
     nodes_dependent_on:
-    - merge_transformer_rnn_output
+    - output_logits
     prompt: Apply second linear transformation to produce output tensor for subsequent
       processing.
+  feed_forward_parallel_branch_1:
+    agent: false
+    description: First parallel linear transformation in feed-forward network
+    name: feed_forward_parallel_branch_1
+    nodes_depended_on:
+    - compute_self_attention
+    nodes_dependent_on:
+    - feed_forward_parallel_merge
+    prompt: Apply first linear transformation to attention context vectors with ReLU
+      activation.
+  feed_forward_parallel_branch_2:
+    agent: false
+    description: Second parallel linear transformation in feed-forward network
+    name: feed_forward_parallel_branch_2
+    nodes_depended_on:
+    - compute_self_attention
+    nodes_dependent_on:
+    - feed_forward_parallel_merge
+    prompt: Apply first linear transformation to attention context vectors with ReLU
+      activation using alternate parameterization.
+  feed_forward_parallel_merge:
+    agent: false
+    description: Combine parallel feed-forward network branches
+    name: feed_forward_parallel_merge
+    nodes_depended_on:
+    - feed_forward_parallel_branch_1
+    - feed_forward_parallel_branch_2
+    nodes_dependent_on:
+    - feed_forward_linear2
+    prompt: Numerically sum the output tensors from parallel FFN branches to produce
+      combined context representations.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
@@ -68,26 +90,15 @@ nodes:
     - compute_self_attention
     prompt: Multiply position-encoded embeddings by the learned key projection matrix
       to produce K vectors.
-  merge_transformer_rnn_output:
-    agent: false
-    description: Combine outputs from transformer and RNN processing paths
-    name: merge_transformer_rnn_output
-    nodes_depended_on:
-    - feed_forward_linear2
-    - rnn_feed_forward_linear2
-    nodes_dependent_on:
-    - output_logits
-    prompt: Concatenate and normalize the final output tensors from both transformer
-      and RNN processing paths.
   output_logits:
     agent: false
     description: Generate raw token prediction logits
     name: output_logits
     nodes_depended_on:
-    - merge_transformer_rnn_output
+    - feed_forward_linear2
     nodes_dependent_on:
     - process_and_validate_response
-    prompt: Convert merged model output to vector of raw token prediction scores (logits)
+    prompt: Convert decoder output to vector of raw token prediction scores (logits)
       through output projection.
   process_and_validate_response:
     agent: false
@@ -108,34 +119,6 @@ nodes:
     - compute_self_attention
     prompt: Multiply position-encoded embeddings by the learned query projection matrix
       to produce Q vectors.
-  rnn_encoder:
-    agent: false
-    description: Process token embeddings through a recurrent neural network
-    name: rnn_encoder
-    nodes_depended_on:
-    - token_embedding
-    nodes_dependent_on:
-    - rnn_feed_forward_linear1
-    prompt: Apply recurrent transformations equivalent in dimensionality to the transformer
-      components, maintaining sequential dependencies in the token embeddings.
-  rnn_feed_forward_linear1:
-    agent: false
-    description: First linear transformation for RNN output
-    name: rnn_feed_forward_linear1
-    nodes_depended_on:
-    - rnn_encoder
-    nodes_dependent_on:
-    - rnn_feed_forward_linear2
-    prompt: Apply first linear transformation to RNN output with ReLU activation.
-  rnn_feed_forward_linear2:
-    agent: false
-    description: Final linear transformation for RNN output
-    name: rnn_feed_forward_linear2
-    nodes_depended_on:
-    - rnn_feed_forward_linear1
-    nodes_dependent_on:
-    - merge_transformer_rnn_output
-    prompt: Apply second linear transformation to RNN processing path output tensor.
   token_embedding:
     agent: false
     description: Convert input tokens to position-agnostic dense vector embeddings
@@ -144,7 +127,6 @@ nodes:
     - validate_and_enrich_prompt
     nodes_dependent_on:
     - generate_position_vectors
-    - rnn_encoder
     prompt: Map input tokens to dense vectors using the model's learned embedding
       matrix. Output a tensor of token embeddings.
   v_projection:
