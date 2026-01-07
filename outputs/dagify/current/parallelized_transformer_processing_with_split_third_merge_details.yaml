@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Generated workflow from UI with additional third feed-forward network
-  after the second parallel merge.
-name: parallelized_transformer_processing_with_parallel_ffn_and_split_ffn2_and_third_ffn
+description: Transformer processing workflow where the final feed‑forward merge step
+  is split into two sequential operations.
+name: parallelized_transformer_processing_with_split_third_merge
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -10,12 +10,9 @@ nodes:
     nodes_depended_on:
     - token_embedding
     - generate_position_vectors
-    nodes_dependent_on:
-    - q_projection
-    - k_projection
-    - v_projection
+    nodes_dependent_on: []
     prompt: Numerically sum the token embedding vectors with the positional encoding
-      vectors element-wise.
+      vectors element‑wise.
   compute_self_attention:
     agent: false
     description: Calculate attention weights and context vectors
@@ -24,97 +21,84 @@ nodes:
     - q_projection
     - k_projection
     - v_projection
-    nodes_dependent_on:
-    - feed_forward_parallel_branch_1
-    - feed_forward_parallel_branch_2
-    prompt: Compute scaled dot-product attention using Q, K, and V vectors to produce
+    nodes_dependent_on: []
+    prompt: Compute scaled dot‑product attention using Q, K, and V vectors to produce
       attention context vectors.
-  feed_forward_linear2_parallel_merge:
+  feed_forward_linear2_parallel_merge_step1:
     agent: false
-    description: Combine split-parallel final feed-forward network branches
-    name: feed_forward_linear2_parallel_merge
+    description: Intermediate merge of split‑parallel final linear transformations
+      (first stage)
+    name: feed_forward_linear2_parallel_merge_step1
     nodes_depended_on:
     - feed_forward_split_linear2_branch_1
     - feed_forward_split_linear2_branch_2
-    - feed_forward_split_linear2_branch_3
-    nodes_dependent_on:
-    - output_logits
-    prompt: Concatenate the outputs of split-parallel final linear transformations
+    nodes_dependent_on: []
+    prompt: Concatenate the outputs of split‑parallel final linear transformations
       into combined output tensor.
+  feed_forward_linear2_parallel_merge_step2:
+    agent: false
+    description: Finalize merged tensor before the third feed‑forward layer
+    name: feed_forward_linear2_parallel_merge_step2
+    nodes_depended_on:
+    - feed_forward_linear2_parallel_merge_step1
+    nodes_dependent_on: []
+    prompt: Pass the intermediate merged tensor forward as the final merged representation
+      for the next feed‑forward stage.
   feed_forward_parallel_branch_1:
     agent: false
-    description: First parallel linear transformation in feed-forward network
+    description: First parallel linear transformation in feed‑forward network
     name: feed_forward_parallel_branch_1
     nodes_depended_on:
     - compute_self_attention
-    nodes_dependent_on:
-    - feed_forward_parallel_merge
+    nodes_dependent_on: []
     prompt: Apply first linear transformation to attention context vectors with ReLU
       activation.
   feed_forward_parallel_branch_2:
     agent: false
-    description: Second parallel linear transformation in feed-forward network
+    description: Second parallel linear transformation in feed‑forward network
     name: feed_forward_parallel_branch_2
     nodes_depended_on:
     - compute_self_attention
-    nodes_dependent_on:
-    - feed_forward_parallel_merge
+    nodes_dependent_on: []
     prompt: Apply first linear transformation to attention context vectors with ReLU
       activation using alternate parameterization.
   feed_forward_parallel_merge:
     agent: false
-    description: Combine parallel feed-forward network branches
+    description: Combine parallel feed‑forward network branches
     name: feed_forward_parallel_merge
     nodes_depended_on:
     - feed_forward_parallel_branch_1
     - feed_forward_parallel_branch_2
-    nodes_dependent_on:
-    - feed_forward_split_linear2_branch_1
-    - feed_forward_split_linear2_branch_2
-    - feed_forward_split_linear2_branch_3
+    nodes_dependent_on: []
     prompt: Numerically sum the output tensors from parallel FFN branches to produce
       combined context representations.
   feed_forward_split_linear2_branch_1:
     agent: false
-    description: Split-parallel final linear transformation part 1 in feed-forward
+    description: Split‑parallel final linear transformation part 1 in feed‑forward
       network
     name: feed_forward_split_linear2_branch_1
     nodes_depended_on:
     - feed_forward_parallel_merge
-    nodes_dependent_on:
-    - feed_forward_linear2_parallel_merge
+    nodes_dependent_on: []
     prompt: Apply second linear transformation to portion of merged tensor to produce
       output tensor for subsequent processing.
   feed_forward_split_linear2_branch_2:
     agent: false
-    description: Split-parallel final linear transformation part 2 in feed-forward
+    description: Split‑parallel final linear transformation part 2 in feed‑forward
       network
     name: feed_forward_split_linear2_branch_2
     nodes_depended_on:
     - feed_forward_parallel_merge
-    nodes_dependent_on:
-    - feed_forward_linear2_parallel_merge
+    nodes_dependent_on: []
     prompt: Apply second linear transformation to alternate portion of merged tensor
       to produce output tensor for subsequent processing.
-  feed_forward_split_linear2_branch_3:
-    agent: false
-    description: Split-parallel final linear transformation part 3 in feed-forward
-      network
-    name: feed_forward_split_linear2_branch_3
-    nodes_depended_on:
-    - feed_forward_parallel_merge
-    nodes_dependent_on:
-    - feed_forward_linear2_parallel_merge
-    prompt: Apply second linear transformation to third portion of merged tensor to
-      produce output tensor for subsequent processing.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
     name: generate_position_vectors
     nodes_depended_on:
     - token_embedding
-    nodes_dependent_on:
-    - add_position_vectors_to_embeddings
+    nodes_dependent_on: []
     prompt: Create a matrix of sinusoidal positional encodings with dimensions matching
       the token embeddings.
   k_projection:
@@ -123,23 +107,21 @@ nodes:
     name: k_projection
     nodes_depended_on:
     - add_position_vectors_to_embeddings
-    nodes_dependent_on:
-    - compute_self_attention
-    prompt: Multiply position-encoded embeddings by the learned key projection matrix
+    nodes_dependent_on: []
+    prompt: Multiply position‑encoded embeddings by the learned key projection matrix
       to produce K vectors.
   output_logits:
     agent: false
     description: Generate raw token prediction logits
     name: output_logits
     nodes_depended_on:
-    - feed_forward_linear2_parallel_merge
-    nodes_dependent_on:
-    - process_and_validate_response
+    - third_feed_forward
+    nodes_dependent_on: []
     prompt: Convert decoder output to vector of raw token prediction scores (logits)
       through output projection.
   process_and_validate_response:
     agent: false
-    description: Post-process and validate the final model output
+    description: Post‑process and validate the final model output
     name: process_and_validate_response
     nodes_depended_on:
     - output_logits
@@ -152,19 +134,25 @@ nodes:
     name: q_projection
     nodes_depended_on:
     - add_position_vectors_to_embeddings
-    nodes_dependent_on:
-    - compute_self_attention
-    prompt: Multiply position-encoded embeddings by the learned query projection matrix
+    nodes_dependent_on: []
+    prompt: Multiply position‑encoded embeddings by the learned query projection matrix
       to produce Q vectors.
+  third_feed_forward:
+    agent: false
+    description: Third feed‑forward network applied after the second parallel merge
+    name: third_feed_forward
+    nodes_depended_on:
+    - feed_forward_linear2_parallel_merge_step2
+    nodes_dependent_on: []
+    prompt: Apply a final linear transformation to the merged tensor to produce refined
+      representations before logits generation.
   token_embedding:
     agent: false
-    description: Convert input tokens to position-agnostic dense vector embeddings
+    description: Convert input tokens to position‑agnostic dense vector embeddings
     name: token_embedding
     nodes_depended_on:
     - validate_and_enrich_prompt
-    nodes_dependent_on:
-    - add_position_vectors_to_embeddings
-    - generate_position_vectors
+    nodes_dependent_on: []
     prompt: Map input tokens to dense vectors using the model's learned embedding
       matrix. Output a tensor of token embeddings.
   v_projection:
@@ -173,16 +161,14 @@ nodes:
     name: v_projection
     nodes_depended_on:
     - add_position_vectors_to_embeddings
-    nodes_dependent_on:
-    - compute_self_attention
-    prompt: Multiply position-encoded embeddings by the learned value projection matrix
+    nodes_dependent_on: []
+    prompt: Multiply position‑encoded embeddings by the learned value projection matrix
       to produce V vectors.
   validate_and_enrich_prompt:
     agent: false
     description: Validate and enrich the input prompt with contextual metadata
     name: validate_and_enrich_prompt
     nodes_depended_on: []
-    nodes_dependent_on:
-    - token_embedding
+    nodes_dependent_on: []
     prompt: Verify the prompt for correctness and completeness. If valid, add contextual
       metadata such as current date/time and user history.
