@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Generate token positional information, run five transformer blocks, and
-  apply a per‑token layer normalization after block 5.
-name: tokenizer_with_transformers_updated_direct_connections_with_layernorm
+description: Workflow that tokenizes text, applies transformer blocks with a self‑attention
+  layer, then normalizes output.
+name: tokenizer_with_transformers_self_attention_layernorm
 nodes:
   layernorm_pre_normalization:
     agent: false
@@ -15,6 +15,18 @@ nodes:
       `block1` to `block5` (treat boolean or string values as numeric 1 for true/processed/validated/finalized/complete
       and 0 otherwise). Add a new field `layernorm` to each token containing the normalized
       value. Output the updated JSON array.
+  self_attention_block:
+    agent: false
+    description: Apply a self‑attention layer after block 4, adding an attention score
+      field.
+    name: self_attention_block
+    nodes_depended_on:
+    - transformer_block_4
+    nodes_dependent_on:
+    - transformer_block_5
+    prompt: Given the input JSON array of token objects from transformer_block_4,
+      add a new field `self_attention` with a dummy attention score of 0.5 for each
+      token. Output the modified JSON array.
   token_positional_info:
     agent: false
     description: Generate token objects with positional information for both prompt
@@ -102,6 +114,7 @@ nodes:
     - transformer_block_2
     - transformer_block_3
     nodes_dependent_on:
+    - self_attention_block
     - transformer_block_5
     prompt: Given the input JSON array, add a new field `block4` set to `finalized`.
       Output the modified JSON array.
@@ -114,7 +127,7 @@ nodes:
     - transformer_block_1
     - transformer_block_2
     - transformer_block_3
-    - transformer_block_4
+    - self_attention_block
     nodes_dependent_on:
     - layernorm_pre_normalization
     prompt: Given the input JSON array, add a new field `block5` with the value `complete`.
