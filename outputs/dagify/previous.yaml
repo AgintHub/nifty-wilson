@@ -1,82 +1,88 @@
 dag_type: plain_text
-description: Generated workflow from UI with validation steps removed.
-name: api_llm_output_pipeline
+description: A workflow that processes a user prompt through a language model to generate
+  a response, with detailed decomposition and maximal concurrency.
+name: prompt_to_llm_response
 nodes:
-  api_call_for_context_data:
+  decode_llm_output:
     agent: false
-    description: Retrieve contextual data for secondary inference
-    name: api_call_for_context_data
+    description: Convert raw LLM token IDs back to human-readable text.
+    name: decode_llm_output
     nodes_depended_on:
-    - process_input
+    - run_llm_inference
     nodes_dependent_on:
-    - combine_inferences
-    prompt: '1. Extract context requirements from enriched prompt
-
-
-      2. Execute API call for contextual data
-
-
-      3. Output contextual data for secondary use'
-  combine_inferences:
+    - post_process_response
+    - validate_response
+    prompt: Decode the raw LLM output tokens into UTF-8 text. Preserve tokenization
+      boundaries.
+  enrich_prompt:
     agent: false
-    description: Merge primary inference with contextual data into unified analysis
-    name: combine_inferences
+    description: Enhance the prompt with contextual metadata (e.g., current date/time,
+      user history).
+    name: enrich_prompt
     nodes_depended_on:
-    - api_call_for_context_data
-    - execute_primary_llm_inference
+    - validate_prompt
     nodes_dependent_on:
-    - prepare_and_deliver_output
-    prompt: '1. Align primary inference with contextual data
-
-
-      2. Combine components into unified analysis
-
-
-      3. Output structured combined results'
-  execute_primary_llm_inference:
+    - tokenize_prompt
+    prompt: Enrich the validated prompt by adding contextual metadata such as current
+      year, timezone, and placeholder user history.
+  format_final_response:
     agent: false
-    description: Generate primary LLM response based on enriched prompt
-    name: execute_primary_llm_inference
+    description: Prepare the validated and post-processed response for delivery.
+    name: format_final_response
     nodes_depended_on:
-    - process_input
-    nodes_dependent_on:
-    - combine_inferences
-    prompt: '1. Analyze enriched prompt content
-
-
-      2. Execute primary LLM inference
-
-
-      3. Output raw primary inference result'
-  prepare_and_deliver_output:
-    agent: false
-    description: Format and transmit final analysis
-    name: prepare_and_deliver_output
-    nodes_depended_on:
-    - combine_inferences
+    - post_process_response
+    - validate_response
     nodes_dependent_on: []
-    prompt: '1. Structure final output components
-
-
-      2. Apply standard formatting rules
-
-
-      3. Include necessary metadata
-
-
-      4. Deliver to designated endpoint'
-  process_input:
+    prompt: 'Format the final response with standard output markers (e.g., ''Answer:
+      '') and append validation status.'
+  post_process_response:
     agent: false
-    description: Enrich and prepare prompt for LLM processing
-    name: process_input
+    description: Apply basic formatting and error correction to the LLM output.
+    name: post_process_response
+    nodes_depended_on:
+    - decode_llm_output
+    nodes_dependent_on:
+    - format_final_response
+    prompt: Post-process the decoded LLM response by correcting trivial errors and
+      applying consistent formatting (e.g., paragraph spacing).
+  run_llm_inference:
+    agent: false
+    description: Execute the language model on the tokenized prompt.
+    name: run_llm_inference
+    nodes_depended_on:
+    - tokenize_prompt
+    nodes_dependent_on:
+    - decode_llm_output
+    prompt: 'Run the language model inference on the tokenized input and output the
+      raw token IDs. Use settings: temperature=0.7, max_tokens=1000.'
+  tokenize_prompt:
+    agent: false
+    description: Convert the enriched prompt into tokenized input for the LLM.
+    name: tokenize_prompt
+    nodes_depended_on:
+    - enrich_prompt
+    nodes_dependent_on:
+    - run_llm_inference
+    prompt: Tokenize the enriched prompt using the standard LLM vocabulary. Output
+      the tokens as a list.
+  validate_prompt:
+    agent: false
+    description: Check if the input prompt is valid (non-empty, properly formatted,
+      and semantically coherent).
+    name: validate_prompt
     nodes_depended_on: []
     nodes_dependent_on:
-    - api_call_for_context_data
-    - execute_primary_llm_inference
-    prompt: '1. Enrich with contextual metadata
-
-
-      2. Extract relevant parameters
-
-
-      3. Prepare for LLM ingestion'
+    - enrich_prompt
+    prompt: 'Validate the provided prompt for correctness and completeness. Output
+      ''Valid'' if acceptable or ''Invalid: [reason]'' if not.'
+  validate_response:
+    agent: false
+    description: Ensure the LLM response meets quality requirements (e.g., no malicious
+      content, coherence).
+    name: validate_response
+    nodes_depended_on:
+    - decode_llm_output
+    nodes_dependent_on:
+    - format_final_response
+    prompt: 'Validate the LLM response for content safety and coherence. Output ''Approved''
+      or ''Rejected: [reason]''.'
