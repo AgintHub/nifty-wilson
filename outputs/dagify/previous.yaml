@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Modified transformer workflow where each block's output connects to all
-  subsequent blocks directly while retaining sequential dependencies
-name: parallel_self_attention_heads_with_global_block_connections
+description: Transforms input tokens through parallel self-attention mechanisms with
+  global block dependencies, applying softmax as the final operation
+name: parallel_self_attention_heads_with_global_block_connections_softmax_at_end
 nodes:
   attention_head_1_score_block1:
     agent: false
@@ -103,6 +103,14 @@ nodes:
     nodes_dependent_on:
     - softmax_weighted_sum_head_2_block5
     prompt: Compute head2 attention scores using dot products
+  final_softmax:
+    agent: false
+    description: Apply softmax to final projection output
+    name: final_softmax
+    nodes_depended_on:
+    - lm_head_projection
+    nodes_dependent_on: []
+    prompt: Apply softmax activation to vocabulary space projections
   k_projection_block1:
     agent: false
     description: Generate key projection vectors for block1
@@ -161,9 +169,6 @@ nodes:
     - residual_connection_block1
     nodes_dependent_on:
     - layernorm_pre_normalization_block2
-    - layernorm_pre_normalization_block3
-    - layernorm_pre_normalization_block4
-    - layernorm_pre_normalization_block5
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block2:
     agent: false
@@ -173,8 +178,6 @@ nodes:
     - residual_connection_block2
     nodes_dependent_on:
     - layernorm_pre_normalization_block3
-    - layernorm_pre_normalization_block4
-    - layernorm_pre_normalization_block5
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block3:
     agent: false
@@ -184,7 +187,6 @@ nodes:
     - residual_connection_block3
     nodes_dependent_on:
     - layernorm_pre_normalization_block4
-    - layernorm_pre_normalization_block5
     prompt: Normalize residual connection outputs
   layernorm_post_normalization_block4:
     agent: false
@@ -211,8 +213,8 @@ nodes:
     nodes_depended_on:
     - token_positional_info
     nodes_dependent_on:
-    - k_projection_block1
     - q_projection_block1
+    - k_projection_block1
     - v_projection_block1
     prompt: Normalize input for first block using mean/scale per token
   layernorm_pre_normalization_block2:
@@ -222,8 +224,8 @@ nodes:
     nodes_depended_on:
     - layernorm_post_normalization_block1
     nodes_dependent_on:
-    - k_projection_block2
     - q_projection_block2
+    - k_projection_block2
     - v_projection_block2
     prompt: Normalize input for second block using mean/scale per token
   layernorm_pre_normalization_block3:
@@ -234,8 +236,8 @@ nodes:
     - layernorm_post_normalization_block1
     - layernorm_post_normalization_block2
     nodes_dependent_on:
-    - k_projection_block3
     - q_projection_block3
+    - k_projection_block3
     - v_projection_block3
     prompt: Normalize input for third block using mean/scale per token
   layernorm_pre_normalization_block4:
@@ -247,8 +249,8 @@ nodes:
     - layernorm_post_normalization_block2
     - layernorm_post_normalization_block3
     nodes_dependent_on:
-    - k_projection_block4
     - q_projection_block4
+    - k_projection_block4
     - v_projection_block4
     prompt: Normalize input for fourth block using mean/scale per token
   layernorm_pre_normalization_block5:
@@ -261,8 +263,8 @@ nodes:
     - layernorm_post_normalization_block3
     - layernorm_post_normalization_block4
     nodes_dependent_on:
-    - k_projection_block5
     - q_projection_block5
+    - k_projection_block5
     - v_projection_block5
     prompt: Normalize input for fifth block using mean/scale per token
   lm_head_projection:
@@ -272,7 +274,8 @@ nodes:
     nodes_depended_on:
     - layernorm_post_normalization_block5
     - token_positional_info
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - final_softmax
     prompt: Project final normalized vectors to vocabulary space
   multi_head_attention_block1:
     agent: false
@@ -532,11 +535,6 @@ nodes:
     - tokenizer_customization
     nodes_dependent_on:
     - layernorm_pre_normalization_block1
-    - layernorm_pre_normalization_block2
-    - layernorm_pre_normalization_block3
-    - layernorm_pre_normalization_block4
-    - layernorm_pre_normalization_block5
-    - lm_head_projection
     prompt: Tokenize messages and annotate with position metadata
   tokenizer_customization:
     agent: false
