@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Generated workflow with three parallel feed-forward network branches
-  before split-parallel final linear transformations
-name: parallelized_transformer_processing_with_triple_ffn_and_split_ffn2
+description: Generated workflow from UI with additional third feed-forward network
+  after the second parallel merge.
+name: parallelized_transformer_processing_with_parallel_ffn_and_split_ffn2_and_third_ffn
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -10,7 +10,10 @@ nodes:
     nodes_depended_on:
     - token_embedding
     - generate_position_vectors
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - q_projection
+    - k_projection
+    - v_projection
     prompt: Numerically sum the token embedding vectors with the positional encoding
       vectors element-wise.
   compute_self_attention:
@@ -21,7 +24,9 @@ nodes:
     - q_projection
     - k_projection
     - v_projection
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - feed_forward_parallel_branch_1
+    - feed_forward_parallel_branch_2
     prompt: Compute scaled dot-product attention using Q, K, and V vectors to produce
       attention context vectors.
   feed_forward_linear2_parallel_merge:
@@ -31,7 +36,9 @@ nodes:
     nodes_depended_on:
     - feed_forward_split_linear2_branch_1
     - feed_forward_split_linear2_branch_2
-    nodes_dependent_on: []
+    - feed_forward_split_linear2_branch_3
+    nodes_dependent_on:
+    - output_logits
     prompt: Concatenate the outputs of split-parallel final linear transformations
       into combined output tensor.
   feed_forward_parallel_branch_1:
@@ -54,16 +61,6 @@ nodes:
     - feed_forward_parallel_merge
     prompt: Apply first linear transformation to attention context vectors with ReLU
       activation using alternate parameterization.
-  feed_forward_parallel_branch_3:
-    agent: false
-    description: Third parallel linear transformation in feed-forward network
-    name: feed_forward_parallel_branch_3
-    nodes_depended_on:
-    - compute_self_attention
-    nodes_dependent_on:
-    - feed_forward_parallel_merge
-    prompt: Apply first linear transformation to attention context vectors with ReLU
-      activation using secondary alternate parameterization.
   feed_forward_parallel_merge:
     agent: false
     description: Combine parallel feed-forward network branches
@@ -71,10 +68,10 @@ nodes:
     nodes_depended_on:
     - feed_forward_parallel_branch_1
     - feed_forward_parallel_branch_2
-    - feed_forward_parallel_branch_3
     nodes_dependent_on:
     - feed_forward_split_linear2_branch_1
     - feed_forward_split_linear2_branch_2
+    - feed_forward_split_linear2_branch_3
     prompt: Numerically sum the output tensors from parallel FFN branches to produce
       combined context representations.
   feed_forward_split_linear2_branch_1:
@@ -99,6 +96,17 @@ nodes:
     - feed_forward_linear2_parallel_merge
     prompt: Apply second linear transformation to alternate portion of merged tensor
       to produce output tensor for subsequent processing.
+  feed_forward_split_linear2_branch_3:
+    agent: false
+    description: Split-parallel final linear transformation part 3 in feed-forward
+      network
+    name: feed_forward_split_linear2_branch_3
+    nodes_depended_on:
+    - feed_forward_parallel_merge
+    nodes_dependent_on:
+    - feed_forward_linear2_parallel_merge
+    prompt: Apply second linear transformation to third portion of merged tensor to
+      produce output tensor for subsequent processing.
   generate_position_vectors:
     agent: false
     description: Generate sinusoidal positional encoding matrix
