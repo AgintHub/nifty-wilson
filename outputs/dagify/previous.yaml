@@ -1,104 +1,602 @@
 dag_type: plain_text
-description: Transformer blocks with attention heads, layer normalization, and feedforward
-  networks in residual connections
-name: parallel_self_attention_heads_with_feedforward_blocks
+description: Modified workflow with feedforward neural networks added after each transformer
+  block's post-normalization layer
+name: parallel_self_attention_heads_with_global_block_connections_softmax_and_feedforward_at_end
 nodes:
+  attention_head_1_score_block1:
+    agent: false
+    description: Calculate attention scores for head1 in block1
+    name: attention_head_1_score_block1
+    nodes_depended_on:
+    - q_projection_block1
+    - k_projection_block1
+    nodes_dependent_on: []
+    prompt: Compute head1 attention scores using dot products
+  attention_head_1_score_block2:
+    agent: false
+    description: Calculate attention scores for head1 in block2
+    name: attention_head_1_score_block2
+    nodes_depended_on:
+    - q_projection_block2
+    - k_projection_block2
+    nodes_dependent_on: []
+    prompt: Compute head1 attention scores using dot products
+  attention_head_1_score_block3:
+    agent: false
+    description: Calculate attention scores for head1 in block3
+    name: attention_head_1_score_block3
+    nodes_depended_on:
+    - q_projection_block3
+    - k_projection_block3
+    nodes_dependent_on: []
+    prompt: Compute head1 attention scores using dot products
+  attention_head_1_score_block4:
+    agent: false
+    description: Calculate attention scores for head1 in block4
+    name: attention_head_1_score_block4
+    nodes_depended_on:
+    - q_projection_block4
+    - k_projection_block4
+    nodes_dependent_on: []
+    prompt: Compute head1 attention scores using dot products
+  attention_head_1_score_block5:
+    agent: false
+    description: Calculate attention scores for head1 in block5
+    name: attention_head_1_score_block5
+    nodes_depended_on:
+    - q_projection_block5
+    - k_projection_block5
+    nodes_dependent_on: []
+    prompt: Compute head1 attention scores using dot products
+  attention_head_2_score_block1:
+    agent: false
+    description: Calculate attention scores for head2 in block1
+    name: attention_head_2_score_block1
+    nodes_depended_on:
+    - q_projection_block1
+    - k_projection_block1
+    nodes_dependent_on: []
+    prompt: Compute head2 attention scores using dot products
+  attention_head_2_score_block2:
+    agent: false
+    description: Calculate attention scores for head2 in block2
+    name: attention_head_2_score_block2
+    nodes_depended_on:
+    - q_projection_block2
+    - k_projection_block2
+    nodes_dependent_on: []
+    prompt: Compute head2 attention scores using dot products
+  attention_head_2_score_block3:
+    agent: false
+    description: Calculate attention scores for head2 in block3
+    name: attention_head_2_score_block3
+    nodes_depended_on:
+    - q_projection_block3
+    - k_projection_block3
+    nodes_dependent_on: []
+    prompt: Compute head2 attention scores using dot products
+  attention_head_2_score_block4:
+    agent: false
+    description: Calculate attention scores for head2 in block4
+    name: attention_head_2_score_block4
+    nodes_depended_on:
+    - q_projection_block4
+    - k_projection_block4
+    nodes_dependent_on: []
+    prompt: Compute head2 attention scores using dot products
+  attention_head_2_score_block5:
+    agent: false
+    description: Calculate attention scores for head2 in block5
+    name: attention_head_2_score_block5
+    nodes_depended_on:
+    - q_projection_block5
+    - k_projection_block5
+    nodes_dependent_on: []
+    prompt: Compute head2 attention scores using dot products
   feedforward_network_block1:
     agent: false
-    description: Apply feedforward neural network transformation for block1
+    description: Apply feedforward neural network transformation in block1
     name: feedforward_network_block1
-    nodes_depended_on: []
+    nodes_depended_on:
+    - layernorm_post_normalization_block1
     nodes_dependent_on:
-    - residual_connection_feedforward_block1
-    prompt: Implement feedforward network using two linear projections with GeLU activation
-      in between
+    - layernorm_pre_normalization_block2
+    prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block2:
     agent: false
-    description: Apply feedforward neural network transformation for block2
+    description: Apply feedforward neural network transformation in block2
     name: feedforward_network_block2
-    nodes_depended_on: []
+    nodes_depended_on:
+    - layernorm_post_normalization_block2
     nodes_dependent_on:
-    - residual_connection_feedforward_block2
-    prompt: Implement feedforward network using two linear projections with GeLU activation
-      in between
+    - layernorm_pre_normalization_block3
+    prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block3:
     agent: false
-    description: Apply feedforward neural network transformation for block3
+    description: Apply feedforward neural network transformation in block3
     name: feedforward_network_block3
-    nodes_depended_on: []
+    nodes_depended_on:
+    - layernorm_post_normalization_block3
     nodes_dependent_on:
-    - residual_connection_feedforward_block3
-    prompt: Implement feedforward network using two linear projections with GeLU activation
-      in between
+    - layernorm_pre_normalization_block4
+    prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block4:
     agent: false
-    description: Apply feedforward neural network transformation for block4
+    description: Apply feedforward neural network transformation in block4
     name: feedforward_network_block4
-    nodes_depended_on: []
+    nodes_depended_on:
+    - layernorm_post_normalization_block4
     nodes_dependent_on:
-    - residual_connection_feedforward_block4
-    prompt: Implement feedforward network using two linear projections with GeLU activation
-      in between
+    - layernorm_pre_normalization_block5
+    prompt: Apply feedforward neural network transformation to normalized vectors
   feedforward_network_block5:
     agent: false
-    description: Apply feedforward neural network transformation for block5
+    description: Apply feedforward neural network transformation in block5
     name: feedforward_network_block5
-    nodes_depended_on: []
+    nodes_depended_on:
+    - layernorm_post_normalization_block5
     nodes_dependent_on:
-    - residual_connection_feedforward_block5
-    prompt: Implement feedforward network using two linear projections with GeLU activation
-      in between
+    - lm_head_projection
+    prompt: Apply feedforward neural network transformation to normalized vectors
+  final_softmax:
+    agent: false
+    description: Apply softmax to final projection output
+    name: final_softmax
+    nodes_depended_on:
+    - lm_head_projection
+    nodes_dependent_on: []
+    prompt: Apply softmax activation to vocabulary space projections
+  k_projection_block1:
+    agent: false
+    description: Generate key projection vectors for block1
+    name: k_projection_block1
+    nodes_depended_on:
+    - layernorm_pre_normalization_block1
+    nodes_dependent_on: []
+    prompt: Create key projections from normalized inputs
+  k_projection_block2:
+    agent: false
+    description: Generate key projection vectors for block2
+    name: k_projection_block2
+    nodes_depended_on:
+    - layernorm_pre_normalization_block2
+    nodes_dependent_on: []
+    prompt: Create key projections from normalized inputs
+  k_projection_block3:
+    agent: false
+    description: Generate key projection vectors for block3
+    name: k_projection_block3
+    nodes_depended_on:
+    - layernorm_pre_normalization_block3
+    nodes_dependent_on: []
+    prompt: Create key projections from normalized inputs
+  k_projection_block4:
+    agent: false
+    description: Generate key projection vectors for block4
+    name: k_projection_block4
+    nodes_depended_on:
+    - layernorm_pre_normalization_block4
+    nodes_dependent_on: []
+    prompt: Create key projections from normalized inputs
+  k_projection_block5:
+    agent: false
+    description: Generate key projection vectors for block5
+    name: k_projection_block5
+    nodes_depended_on:
+    - layernorm_pre_normalization_block5
+    nodes_dependent_on: []
+    prompt: Create key projections from normalized inputs
+  layernorm_post_normalization_block1:
+    agent: false
+    description: Final normalization for block1
+    name: layernorm_post_normalization_block1
+    nodes_depended_on:
+    - residual_connection_block1
+    nodes_dependent_on:
+    - feedforward_network_block1
+    prompt: Normalize residual connection outputs
+  layernorm_post_normalization_block2:
+    agent: false
+    description: Final normalization for block2
+    name: layernorm_post_normalization_block2
+    nodes_depended_on:
+    - residual_connection_block2
+    nodes_dependent_on:
+    - feedforward_network_block2
+    prompt: Normalize residual connection outputs
+  layernorm_post_normalization_block3:
+    agent: false
+    description: Final normalization for block3
+    name: layernorm_post_normalization_block3
+    nodes_depended_on:
+    - residual_connection_block3
+    nodes_dependent_on:
+    - feedforward_network_block3
+    prompt: Normalize residual connection outputs
+  layernorm_post_normalization_block4:
+    agent: false
+    description: Final normalization for block4
+    name: layernorm_post_normalization_block4
+    nodes_depended_on:
+    - residual_connection_block4
+    nodes_dependent_on:
+    - feedforward_network_block4
+    prompt: Normalize residual connection outputs
+  layernorm_post_normalization_block5:
+    agent: false
+    description: Final normalization for block5
+    name: layernorm_post_normalization_block5
+    nodes_depended_on:
+    - residual_connection_block5
+    nodes_dependent_on:
+    - feedforward_network_block5
+    - lm_head_projection
+    prompt: Normalize residual connection outputs
+  layernorm_pre_normalization_block1:
+    agent: false
+    description: Normalize input for first transformer block
+    name: layernorm_pre_normalization_block1
+    nodes_depended_on:
+    - token_positional_info
+    nodes_dependent_on:
+    - q_projection_block1
+    - k_projection_block1
+    - v_projection_block1
+    prompt: Normalize input for first block using mean/scale per token
+  layernorm_pre_normalization_block2:
+    agent: false
+    description: Normalize input for second transformer block
+    name: layernorm_pre_normalization_block2
+    nodes_depended_on:
+    - feedforward_network_block1
+    nodes_dependent_on:
+    - q_projection_block2
+    - k_projection_block2
+    - v_projection_block2
+    prompt: Normalize input for second block using mean/scale per token
+  layernorm_pre_normalization_block3:
+    agent: false
+    description: Normalize input for third transformer block
+    name: layernorm_pre_normalization_block3
+    nodes_depended_on:
+    - feedforward_network_block1
+    - feedforward_network_block2
+    nodes_dependent_on:
+    - q_projection_block3
+    - k_projection_block3
+    - v_projection_block3
+    prompt: Normalize input for third block using mean/scale per token
+  layernorm_pre_normalization_block4:
+    agent: false
+    description: Normalize input for fourth transformer block
+    name: layernorm_pre_normalization_block4
+    nodes_depended_on:
+    - feedforward_network_block1
+    - feedforward_network_block2
+    - feedforward_network_block3
+    nodes_dependent_on:
+    - q_projection_block4
+    - k_projection_block4
+    - v_projection_block4
+    prompt: Normalize input for fourth block using mean/scale per token
+  layernorm_pre_normalization_block5:
+    agent: false
+    description: Normalize input for fifth transformer block
+    name: layernorm_pre_normalization_block5
+    nodes_depended_on:
+    - feedforward_network_block1
+    - feedforward_network_block2
+    - feedforward_network_block3
+    - feedforward_network_block4
+    nodes_dependent_on:
+    - q_projection_block5
+    - k_projection_block5
+    - v_projection_block5
+    prompt: Normalize input for fifth block using mean/scale per token
   lm_head_projection:
     agent: false
     description: Generate final language modeling output vectors
     name: lm_head_projection
     nodes_depended_on:
-    - residual_connection_feedforward_block5
+    - feedforward_network_block5
+    - token_positional_info
     nodes_dependent_on:
     - final_softmax
     prompt: Project final normalized vectors to vocabulary space
-  residual_connection_feedforward_block1:
+  multi_head_attention_block1:
     agent: false
-    description: Combine feedforward output with normalized value in block1
-    name: residual_connection_feedforward_block1
+    description: Aggregate attention heads for block1
+    name: multi_head_attention_block1
     nodes_depended_on:
-    - feedforward_network_block1
+    - softmax_weighted_sum_head_1_block1
+    - softmax_weighted_sum_head_2_block1
     nodes_dependent_on:
+    - residual_connection_block1
+    prompt: Concatenate attention head results for final output
+  multi_head_attention_block2:
+    agent: false
+    description: Aggregate attention heads for block2
+    name: multi_head_attention_block2
+    nodes_depended_on:
+    - softmax_weighted_sum_head_1_block2
+    - softmax_weighted_sum_head_2_block2
+    nodes_dependent_on:
+    - residual_connection_block2
+    prompt: Concatenate attention head results for final output
+  multi_head_attention_block3:
+    agent: false
+    description: Aggregate attention heads for block3
+    name: multi_head_attention_block3
+    nodes_depended_on:
+    - softmax_weighted_sum_head_1_block3
+    - softmax_weighted_sum_head_2_block3
+    nodes_dependent_on:
+    - residual_connection_block3
+    prompt: Concatenate attention head results for final output
+  multi_head_attention_block4:
+    agent: false
+    description: Aggregate attention heads for block4
+    name: multi_head_attention_block4
+    nodes_depended_on:
+    - softmax_weighted_sum_head_1_block4
+    - softmax_weighted_sum_head_2_block4
+    nodes_dependent_on:
+    - residual_connection_block4
+    prompt: Concatenate attention head results for final output
+  multi_head_attention_block5:
+    agent: false
+    description: Aggregate attention heads for block5
+    name: multi_head_attention_block5
+    nodes_depended_on:
+    - softmax_weighted_sum_head_1_block5
+    - softmax_weighted_sum_head_2_block5
+    nodes_dependent_on:
+    - residual_connection_block5
+    prompt: Concatenate attention head results for final output
+  q_projection_block1:
+    agent: false
+    description: Generate query projection vectors for block1
+    name: q_projection_block1
+    nodes_depended_on:
+    - layernorm_pre_normalization_block1
+    nodes_dependent_on: []
+    prompt: Create query projections from normalized inputs
+  q_projection_block2:
+    agent: false
+    description: Generate query projection vectors for block2
+    name: q_projection_block2
+    nodes_depended_on:
     - layernorm_pre_normalization_block2
-    prompt: Add feedforward results to normalized residual values from attention block
-  residual_connection_feedforward_block2:
+    nodes_dependent_on: []
+    prompt: Create query projections from normalized inputs
+  q_projection_block3:
     agent: false
-    description: Combine feedforward output with normalized value in block2
-    name: residual_connection_feedforward_block2
+    description: Generate query projection vectors for block3
+    name: q_projection_block3
     nodes_depended_on:
-    - feedforward_network_block2
-    nodes_dependent_on:
     - layernorm_pre_normalization_block3
-    prompt: Add feedforward results to normalized residual values from attention block
-  residual_connection_feedforward_block3:
+    nodes_dependent_on: []
+    prompt: Create query projections from normalized inputs
+  q_projection_block4:
     agent: false
-    description: Combine feedforward output with normalized value in block3
-    name: residual_connection_feedforward_block3
+    description: Generate query projection vectors for block4
+    name: q_projection_block4
     nodes_depended_on:
-    - feedforward_network_block3
-    nodes_dependent_on:
     - layernorm_pre_normalization_block4
-    prompt: Add feedforward results to normalized residual values from attention block
-  residual_connection_feedforward_block4:
+    nodes_dependent_on: []
+    prompt: Create query projections from normalized inputs
+  q_projection_block5:
     agent: false
-    description: Combine feedforward output with normalized value in block4
-    name: residual_connection_feedforward_block4
+    description: Generate query projection vectors for block5
+    name: q_projection_block5
     nodes_depended_on:
-    - feedforward_network_block4
-    nodes_dependent_on:
     - layernorm_pre_normalization_block5
-    prompt: Add feedforward results to normalized residual values from attention block
-  residual_connection_feedforward_block5:
+    nodes_dependent_on: []
+    prompt: Create query projections from normalized inputs
+  residual_connection_block1:
     agent: false
-    description: Combine feedforward output with normalized value in block5
-    name: residual_connection_feedforward_block5
+    description: Add residual connection in block1
+    name: residual_connection_block1
     nodes_depended_on:
-    - feedforward_network_block5
+    - multi_head_attention_block1
+    - layernorm_pre_normalization_block1
     nodes_dependent_on:
-    - lm_head_projection
-    prompt: Add feedforward results to normalized residual values from attention block
+    - layernorm_post_normalization_block1
+    prompt: Combine attention output with original normalized inputs
+  residual_connection_block2:
+    agent: false
+    description: Add residual connection in block2
+    name: residual_connection_block2
+    nodes_depended_on:
+    - multi_head_attention_block2
+    - layernorm_pre_normalization_block2
+    nodes_dependent_on:
+    - layernorm_post_normalization_block2
+    prompt: Combine attention output with original normalized inputs
+  residual_connection_block3:
+    agent: false
+    description: Add residual connection in block3
+    name: residual_connection_block3
+    nodes_depended_on:
+    - multi_head_attention_block3
+    - layernorm_pre_normalization_block3
+    nodes_dependent_on:
+    - layernorm_post_normalization_block3
+    prompt: Combine attention output with original normalized inputs
+  residual_connection_block4:
+    agent: false
+    description: Add residual connection in block4
+    name: residual_connection_block4
+    nodes_depended_on:
+    - multi_head_attention_block4
+    - layernorm_pre_normalization_block4
+    nodes_dependent_on:
+    - layernorm_post_normalization_block4
+    prompt: Combine attention output with original normalized inputs
+  residual_connection_block5:
+    agent: false
+    description: Add residual connection in block5
+    name: residual_connection_block5
+    nodes_depended_on:
+    - multi_head_attention_block5
+    - layernorm_pre_normalization_block5
+    nodes_dependent_on:
+    - layernorm_post_normalization_block5
+    prompt: Combine attention output with original normalized inputs
+  softmax_weighted_sum_head_1_block1:
+    agent: false
+    description: Apply softmax weights to head1 value projections in block1
+    name: softmax_weighted_sum_head_1_block1
+    nodes_depended_on:
+    - attention_head_1_score_block1
+    - v_projection_block1
+    nodes_dependent_on:
+    - multi_head_attention_block1
+    prompt: Create weighted value vectors for head1
+  softmax_weighted_sum_head_1_block2:
+    agent: false
+    description: Apply softmax weights to head1 value projections in block2
+    name: softmax_weighted_sum_head_1_block2
+    nodes_depended_on:
+    - attention_head_1_score_block2
+    - v_projection_block2
+    nodes_dependent_on:
+    - multi_head_attention_block2
+    prompt: Create weighted value vectors for head1
+  softmax_weighted_sum_head_1_block3:
+    agent: false
+    description: Apply softmax weights to head1 value projections in block3
+    name: softmax_weighted_sum_head_1_block3
+    nodes_depended_on:
+    - attention_head_1_score_block3
+    - v_projection_block3
+    nodes_dependent_on:
+    - multi_head_attention_block3
+    prompt: Create weighted value vectors for head1
+  softmax_weighted_sum_head_1_block4:
+    agent: false
+    description: Apply softmax weights to head1 value projections in block4
+    name: softmax_weighted_sum_head_1_block4
+    nodes_depended_on:
+    - attention_head_1_score_block4
+    - v_projection_block4
+    nodes_dependent_on:
+    - multi_head_attention_block4
+    prompt: Create weighted value vectors for head1
+  softmax_weighted_sum_head_1_block5:
+    agent: false
+    description: Apply softmax weights to head1 value projections in block5
+    name: softmax_weighted_sum_head_1_block5
+    nodes_depended_on:
+    - attention_head_1_score_block5
+    - v_projection_block5
+    nodes_dependent_on:
+    - multi_head_attention_block5
+    prompt: Create weighted value vectors for head1
+  softmax_weighted_sum_head_2_block1:
+    agent: false
+    description: Apply softmax weights to head2 value projections in block1
+    name: softmax_weighted_sum_head_2_block1
+    nodes_depended_on:
+    - attention_head_2_score_block1
+    - v_projection_block1
+    nodes_dependent_on:
+    - multi_head_attention_block1
+    prompt: Create weighted value vectors for head2
+  softmax_weighted_sum_head_2_block2:
+    agent: false
+    description: Apply softmax weights to head2 value projections in block2
+    name: softmax_weighted_sum_head_2_block2
+    nodes_depended_on:
+    - attention_head_2_score_block2
+    - v_projection_block2
+    nodes_dependent_on:
+    - multi_head_attention_block2
+    prompt: Create weighted value vectors for head2
+  softmax_weighted_sum_head_2_block3:
+    agent: false
+    description: Apply softmax weights to head2 value projections in block3
+    name: softmax_weighted_sum_head_2_block3
+    nodes_depended_on:
+    - attention_head_2_score_block3
+    - v_projection_block3
+    nodes_dependent_on:
+    - multi_head_attention_block3
+    prompt: Create weighted value vectors for head2
+  softmax_weighted_sum_head_2_block4:
+    agent: false
+    description: Apply softmax weights to head2 value projections in block4
+    name: softmax_weighted_sum_head_2_block4
+    nodes_depended_on:
+    - attention_head_2_score_block4
+    - v_projection_block4
+    nodes_dependent_on:
+    - multi_head_attention_block4
+    prompt: Create weighted value vectors for head2
+  softmax_weighted_sum_head_2_block5:
+    agent: false
+    description: Apply softmax weights to head2 value projections in block5
+    name: softmax_weighted_sum_head_2_block5
+    nodes_depended_on:
+    - attention_head_2_score_block5
+    - v_projection_block5
+    nodes_dependent_on:
+    - multi_head_attention_block5
+    prompt: Create weighted value vectors for head2
+  token_positional_info:
+    agent: false
+    description: Create base token positions with start/end indices
+    name: token_positional_info
+    nodes_depended_on:
+    - tokenizer_customization
+    nodes_dependent_on:
+    - layernorm_pre_normalization_block1
+    prompt: Tokenize messages and annotate with position metadata
+  tokenizer_customization:
+    agent: false
+    description: Define tokenizer to recognize single letters or words in token stream
+    name: tokenizer_customization
+    nodes_depended_on: []
+    nodes_dependent_on:
+    - token_positional_info
+    prompt: Generate tokenizer configuration code for basic letter/word distinctions
+  v_projection_block1:
+    agent: false
+    description: Generate value projection vectors for block1
+    name: v_projection_block1
+    nodes_depended_on:
+    - layernorm_pre_normalization_block1
+    nodes_dependent_on: []
+    prompt: Create value projections from normalized inputs
+  v_projection_block2:
+    agent: false
+    description: Generate value projection vectors for block2
+    name: v_projection_block2
+    nodes_depended_on:
+    - layernorm_pre_normalization_block2
+    nodes_dependent_on: []
+    prompt: Create value projections from normalized inputs
+  v_projection_block3:
+    agent: false
+    description: Generate value projection vectors for block3
+    name: v_projection_block3
+    nodes_depended_on:
+    - layernorm_pre_normalization_block3
+    nodes_dependent_on: []
+    prompt: Create value projections from normalized inputs
+  v_projection_block4:
+    agent: false
+    description: Generate value projection vectors for block4
+    name: v_projection_block4
+    nodes_depended_on:
+    - layernorm_pre_normalization_block4
+    nodes_dependent_on: []
+    prompt: Create value projections from normalized inputs
+  v_projection_block5:
+    agent: false
+    description: Generate value projection vectors for block5
+    name: v_projection_block5
+    nodes_depended_on:
+    - layernorm_pre_normalization_block5
+    nodes_dependent_on: []
+    prompt: Create value projections from normalized inputs
