@@ -1,6 +1,5 @@
 dag_type: plain_text
-description: Transformer processing pipeline where the third feed‑forward network
-  is split into two parallel steps before being merged for logit generation.
+description: Generated workflow from UI.
 name: parallelized_transformer_processing_with_split_third_ffn
 nodes:
   add_position_vectors_to_embeddings:
@@ -105,10 +104,20 @@ nodes:
     description: Generate raw token prediction logits
     name: output_logits
     nodes_depended_on:
-    - third_feed_forward
+    - parallel_merge
     nodes_dependent_on: []
     prompt: Convert decoder output to vector of raw token prediction scores (logits)
       through output projection.
+  parallel_merge:
+    agent: false
+    description: Merge outputs of the third feed‑forward parallel branches
+    name: parallel_merge
+    nodes_depended_on:
+    - third_feed_forward_branch_1
+    - third_feed_forward_branch_2
+    nodes_dependent_on: []
+    prompt: Combine the tensors from the two third‑feed‑forward branches by summing
+      them to produce the final representation before logits generation.
   process_and_validate_response:
     agent: false
     description: Post‑process and validate the final model output
@@ -127,16 +136,6 @@ nodes:
     nodes_dependent_on: []
     prompt: Multiply position‑encoded embeddings by the learned query projection matrix
       to produce Q vectors.
-  third_feed_forward:
-    agent: false
-    description: Merge outputs of the third feed‑forward parallel branches
-    name: third_feed_forward
-    nodes_depended_on:
-    - third_feed_forward_branch_1
-    - third_feed_forward_branch_2
-    nodes_dependent_on: []
-    prompt: Combine the tensors from the two third‑feed‑forward branches by summing
-      them to produce the final representation before logits generation.
   third_feed_forward_branch_1:
     agent: false
     description: First parallel branch of the third feed‑forward network
