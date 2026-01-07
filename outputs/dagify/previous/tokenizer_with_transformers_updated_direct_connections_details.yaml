@@ -1,17 +1,22 @@
 dag_type: plain_text
-description: Workflow enhancing the transformer blocks such that each transformer's
-  output connects directly to all subsequent transformer blocks in addition to maintaining
-  existing connections.
+description: Generate token positional information, customize tokenizer, and sequentially
+  enrich the token data through five transformer blocks while ensuring token positional
+  info is fed into every transformer.
 name: tokenizer_with_transformers_updated_direct_connections
 nodes:
   token_positional_info:
     agent: false
-    description: Generates positional information for each token in the prompt and
-      output.
+    description: Generate a JSON array of token objects with positional information
+      for both prompt and output.
     name: token_positional_info
     nodes_depended_on:
     - tokenizer_customization
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - transformer_block_1
+    - transformer_block_2
+    - transformer_block_3
+    - transformer_block_4
+    - transformer_block_5
     prompt: "Using the tokenizer configuration code produced by the previous step,\
       \ apply the tokenizer to the following example prompt and example output:\n\n\
       **Example Prompt:** \"Hello world!\"\n\n**Example Output:** \"Hello world\"\n\
@@ -26,10 +31,11 @@ nodes:
       : \"prompt\"\n}, ...]\n```"
   tokenizer_customization:
     agent: false
-    description: Generates the final tokenizer configuration code or regex pattern.
+    description: Produce the final tokenizer configuration code or regex pattern.
     name: tokenizer_customization
     nodes_depended_on: []
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - token_positional_info
     prompt: You are tasked with customizing an existing tokenizer so that it only
       recognizes single alphabetic letters (a–z, case‑insensitive) or full English
       words (sequences of letters). Provide the exact configuration steps or code
@@ -38,49 +44,59 @@ nodes:
       code or regex pattern that achieves this behavior.
   transformer_block_1:
     agent: false
-    description: Adds a processed flag from transformer block 1.
+    description: Add a processed flag from transformer block 1.
     name: transformer_block_1
     nodes_depended_on:
     - token_positional_info
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - transformer_block_2
+    - transformer_block_3
+    - transformer_block_4
+    - transformer_block_5
     prompt: Given the input JSON array of token objects, add a new field `block1`
       with the value `processed` to each token. Output the modified JSON array.
   transformer_block_2:
     agent: false
-    description: Adds a processed flag from transformer block 2.
+    description: Add a processed flag from transformer block 2.
     name: transformer_block_2
     nodes_depended_on:
     - token_positional_info
     - transformer_block_1
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - transformer_block_3
+    - transformer_block_4
+    - transformer_block_5
     prompt: Given the input JSON array, add a new field `block2` set to `true` for
       each token. Output the modified JSON array.
   transformer_block_3:
     agent: false
-    description: Adds a validated flag from transformer block 3.
+    description: Add a validated flag from transformer block 3.
     name: transformer_block_3
     nodes_depended_on:
     - token_positional_info
     - transformer_block_1
     - transformer_block_2
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - transformer_block_4
+    - transformer_block_5
     prompt: Given the input JSON array, add a new field `block3` with the value `validated`.
       Output the modified JSON array.
   transformer_block_4:
     agent: false
-    description: Adds a finalized flag from transformer block 4.
+    description: Add a finalized flag from transformer block 4.
     name: transformer_block_4
     nodes_depended_on:
     - token_positional_info
     - transformer_block_1
     - transformer_block_2
     - transformer_block_3
-    nodes_dependent_on: []
+    nodes_dependent_on:
+    - transformer_block_5
     prompt: Given the input JSON array, add a new field `block4` set to `finalized`.
       Output the modified JSON array.
   transformer_block_5:
     agent: false
-    description: Adds a complete flag from transformer block 5.
+    description: Add a complete flag from transformer block 5.
     name: transformer_block_5
     nodes_depended_on:
     - token_positional_info
