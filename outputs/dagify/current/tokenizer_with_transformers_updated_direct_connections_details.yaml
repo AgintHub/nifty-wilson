@@ -1,8 +1,8 @@
 dag_type: plain_text
-description: This workflow tokenizes an example prompt and output, annotates token
-  positions, then sequentially applies five transformer blocks, each adding a specific
-  flag to the token data.
-name: tokenization_with_sequential_transformers_workflow
+description: Workflow enhancing the transformer blocks such that each transformer's
+  output connects directly to all subsequent transformer blocks in addition to maintaining
+  existing connections.
+name: tokenizer_with_transformers_updated_direct_connections
 nodes:
   token_positional_info:
     agent: false
@@ -11,8 +11,7 @@ nodes:
     name: token_positional_info
     nodes_depended_on:
     - tokenizer_customization
-    nodes_dependent_on:
-    - transformer_block_1
+    nodes_dependent_on: []
     prompt: "Using the tokenizer configuration code produced by the previous step,\
       \ apply the tokenizer to the following example prompt and example output:\n\n\
       **Example Prompt:** \"Hello world!\"\n\n**Example Output:** \"Hello world\"\n\
@@ -30,8 +29,7 @@ nodes:
     description: Generates the final tokenizer configuration code or regex pattern.
     name: tokenizer_customization
     nodes_depended_on: []
-    nodes_dependent_on:
-    - token_positional_info
+    nodes_dependent_on: []
     prompt: You are tasked with customizing an existing tokenizer so that it only
       recognizes single alphabetic letters (a–z, case‑insensitive) or full English
       words (sequences of letters). Provide the exact configuration steps or code
@@ -44,8 +42,7 @@ nodes:
     name: transformer_block_1
     nodes_depended_on:
     - token_positional_info
-    nodes_dependent_on:
-    - transformer_block_2
+    nodes_dependent_on: []
     prompt: Given the input JSON array of token objects, add a new field `block1`
       with the value `processed` to each token. Output the modified JSON array.
   transformer_block_2:
@@ -53,9 +50,9 @@ nodes:
     description: Adds a processed flag from transformer block 2.
     name: transformer_block_2
     nodes_depended_on:
+    - token_positional_info
     - transformer_block_1
-    nodes_dependent_on:
-    - transformer_block_3
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block2` set to `true` for
       each token. Output the modified JSON array.
   transformer_block_3:
@@ -63,9 +60,10 @@ nodes:
     description: Adds a validated flag from transformer block 3.
     name: transformer_block_3
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
     - transformer_block_2
-    nodes_dependent_on:
-    - transformer_block_4
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block3` with the value `validated`.
       Output the modified JSON array.
   transformer_block_4:
@@ -73,9 +71,11 @@ nodes:
     description: Adds a finalized flag from transformer block 4.
     name: transformer_block_4
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
     - transformer_block_3
-    nodes_dependent_on:
-    - transformer_block_5
+    nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block4` set to `finalized`.
       Output the modified JSON array.
   transformer_block_5:
@@ -83,6 +83,10 @@ nodes:
     description: Adds a complete flag from transformer block 5.
     name: transformer_block_5
     nodes_depended_on:
+    - token_positional_info
+    - transformer_block_1
+    - transformer_block_2
+    - transformer_block_3
     - transformer_block_4
     nodes_dependent_on: []
     prompt: Given the input JSON array, add a new field `block5` with the value `complete`.
