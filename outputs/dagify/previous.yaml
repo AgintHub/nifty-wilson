@@ -1,7 +1,7 @@
 dag_type: plain_text
-description: Transformer pipeline with the original stages plus nine additional sequential
-  feed‑forward (FFN) layers after the third feed‑forward merge.
-name: parallelized_transformer_processing_with_extended_ffn
+description: Workflow for parallelized transformer processing extended with nodes
+  representing each major GPT‑3 feature and advancement.
+name: gpt3_feature_enhanced_parallel_transformer_workflow
 nodes:
   add_position_vectors_to_embeddings:
     agent: false
@@ -13,6 +13,22 @@ nodes:
     nodes_dependent_on: []
     prompt: Numerically sum the token embedding vectors with the positional encoding
       vectors element‑wise.
+  api_endpoint:
+    agent: false
+    description: Provides an API for external text generation requests
+    name: api_endpoint
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Expose a callable API endpoint that returns generated text.
+  autoregressive_language_modeling:
+    agent: false
+    description: Trains using autoregressive next‑token prediction
+    name: autoregressive_language_modeling
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Specify the autoregressive objective used during training.
   compute_self_attention:
     agent: false
     description: Calculate attention weights and context vectors
@@ -24,6 +40,15 @@ nodes:
     nodes_dependent_on: []
     prompt: Compute scaled dot‑product attention using Q, K, and V vectors to produce
       attention context vectors.
+  dense_transformer_decoder:
+    agent: false
+    description: GPT‑3 uses a decoder‑only Transformer architecture
+    name: dense_transformer_decoder
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Define the decoder‑only Transformer architecture with stacked self‑attention
+      layers.
   feed_forward_linear2_parallel_merge:
     agent: false
     description: Combine split‑parallel final feed‑forward network branches
@@ -82,6 +107,14 @@ nodes:
     nodes_dependent_on: []
     prompt: Apply second linear transformation to alternate portion of merged tensor
       to produce output tensor for subsequent processing.
+  few_shot_prompting:
+    agent: false
+    description: Supports few‑shot learning via in‑context examples
+    name: few_shot_prompting
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Explain how few‑shot prompting is performed with example inputs.
   ff_layer1_branch_1:
     agent: false
     description: First parallel branch of added FFN layer 1
@@ -342,6 +375,22 @@ nodes:
     nodes_dependent_on: []
     prompt: Multiply position‑encoded embeddings by the learned key projection matrix
       to produce K vectors.
+  large_scale_parameters:
+    agent: false
+    description: GPT‑3 employs 175 B parameters for large‑scale capacity
+    name: large_scale_parameters
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Document the model size and scaling details for GPT‑3.
+  layer_normalization:
+    agent: false
+    description: Applies layer‑norm after each sub‑layer
+    name: layer_normalization
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Implement layer‑norm steps within each Transformer block.
   output_logits:
     agent: false
     description: Generate raw token prediction logits
@@ -379,6 +428,22 @@ nodes:
     nodes_dependent_on: []
     prompt: Multiply position‑encoded embeddings by the learned query projection matrix
       to produce Q vectors.
+  rotary_positional_encoding:
+    agent: false
+    description: Uses learned positional embeddings (rotary) for token order
+    name: rotary_positional_encoding
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Define the learned positional encoding method used in GPT‑3.
+  sampling_strategies:
+    agent: false
+    description: Supports top‑p nucleus sampling and temperature control
+    name: sampling_strategies
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Outline the sampling strategies for text generation.
   third_feed_forward_branch_1:
     agent: false
     description: First parallel branch of the third feed‑forward network
@@ -403,9 +468,27 @@ nodes:
     name: token_embedding
     nodes_depended_on:
     - validate_and_enrich_prompt
+    - dense_transformer_decoder
+    - large_scale_parameters
+    - few_shot_prompting
+    - zero_shot_capability
+    - autoregressive_language_modeling
+    - layer_normalization
+    - rotary_positional_encoding
+    - sampling_strategies
+    - training_on_internet_corpus
+    - api_endpoint
     nodes_dependent_on: []
     prompt: Map input tokens to dense vectors using the model's learned embedding
       matrix. Output a tensor of token embeddings.
+  training_on_internet_corpus:
+    agent: false
+    description: Trained on a massive, diverse internet text dataset
+    name: training_on_internet_corpus
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Summarize the composition of the training data corpus.
   v_projection:
     agent: false
     description: Compute value projection vectors for attention
@@ -423,3 +506,11 @@ nodes:
     nodes_dependent_on: []
     prompt: Verify the prompt for correctness and completeness. If valid, add contextual
       metadata such as current date/time and user history.
+  zero_shot_capability:
+    agent: false
+    description: Can perform tasks without any explicit examples (zero‑shot)
+    name: zero_shot_capability
+    nodes_depended_on:
+    - validate_and_enrich_prompt
+    nodes_dependent_on: []
+    prompt: Describe the zero‑shot capability of GPT‑3.
