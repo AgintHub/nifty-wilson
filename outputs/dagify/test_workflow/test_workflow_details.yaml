@@ -1,27 +1,51 @@
 dag_type: plain_text
-description: A simple workflow to test the system
+description: A workflow designed to achieve the objective 'test'
 name: test_workflow
 nodes:
-  generate_test_report:
+  compile_test_report:
     agent: false
-    description: Generate a report based on the test results
-    name: generate_test_report
+    description: Summarize the test process and results into a comprehensive report.
+    name: compile_test_report
     nodes_depended_on:
-    - validate_test_result
+    - evaluate_test_results
     nodes_dependent_on: []
-    prompt: Create a summary report of the test outcome.
-  initial_test_step:
+    prompt: Compile a detailed report of the test, including the protocol, execution,
+      results, and evaluation. Highlight any findings or insights gained.
+  design_test_protocol:
     agent: false
-    description: Perform an initial test operation
-    name: initial_test_step
+    description: Create a protocol or plan for executing the test based on the interpreted
+      objective.
+    name: design_test_protocol
+    nodes_depended_on:
+    - interpret_test_objective
+    nodes_dependent_on: []
+    prompt: Based on the understanding of the test objective, design a detailed protocol
+      for the test. Include steps, conditions, and expected outcomes.
+  evaluate_test_results:
+    agent: false
+    description: Assess the outcomes of the test to determine if the objective was
+      met.
+    name: evaluate_test_results
+    nodes_depended_on:
+    - execute_test_protocol
+    nodes_dependent_on: []
+    prompt: Analyze the results of the test execution. Compare the outcomes with the
+      expected results. Determine if the test objective was achieved.
+  execute_test_protocol:
+    agent: false
+    description: Carry out the test according to the designed protocol.
+    name: execute_test_protocol
+    nodes_depended_on:
+    - design_test_protocol
+    nodes_dependent_on: []
+    prompt: Execute the test as per the designed protocol. Ensure all steps are followed,
+      and conditions are met. Record the outcomes.
+  interpret_test_objective:
+    agent: false
+    description: Understand the objective 'test' and determine its specific requirements
+      or context.
+    name: interpret_test_objective
     nodes_depended_on: []
     nodes_dependent_on: []
-    prompt: Execute a basic test to verify system functionality.
-  validate_test_result:
-    agent: false
-    description: Validate the result of the initial test
-    name: validate_test_result
-    nodes_depended_on:
-    - initial_test_step
-    nodes_dependent_on: []
-    prompt: Check if the initial test step completed successfully.
+    prompt: Analyze the given objective 'test'. Determine if it requires specific
+      actions, conditions, or outcomes. Clarify any ambiguity related to the task.
